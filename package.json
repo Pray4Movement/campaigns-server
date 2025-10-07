@@ -1,0 +1,47 @@
+{
+  "name": "nuxt-app",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "dev:mail": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "mailhog:start": "echo 'ℹ Using shared MailHog from sale/nuxtui project at http://localhost:8025'",
+    "mailhog:stop": "echo 'ℹ MailHog is shared with sale/nuxtui project - use that project to stop it'",
+    "mailhog:logs": "docker logs nuxtui-mailhog",
+    "mailhog:open": "open http://localhost:8025"
+  },
+  "dependencies": {
+    "@editorjs/checklist": "^1.6.0",
+    "@editorjs/code": "^2.9.3",
+    "@editorjs/delimiter": "^1.4.2",
+    "@editorjs/editorjs": "^2.31.0",
+    "@editorjs/embed": "^2.7.6",
+    "@editorjs/header": "^2.8.8",
+    "@editorjs/image": "^2.10.3",
+    "@editorjs/link": "^2.6.2",
+    "@editorjs/list": "^2.0.8",
+    "@editorjs/quote": "^2.7.6",
+    "@editorjs/table": "^2.4.5",
+    "@editorjs/warning": "^1.4.1",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.2.0",
+    "formidable": "^3.5.4",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.6",
+    "nuxt": "^4.1.0",
+    "uuid": "^12.0.0",
+    "vue": "^3.5.20",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^7.0.1",
+    "@types/uuid": "^10.0.0"
+  }
+}
