@@ -139,8 +139,8 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background-color: #8b5cf6;
-  color: white;
+  background-color: var(--text);
+  color: var(--bg);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
@@ -216,8 +216,8 @@ onMounted(() => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--shadow);
 }
 
 @media (max-width: 768px) {

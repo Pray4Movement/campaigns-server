@@ -125,7 +125,7 @@ async function logout() {
 
 .nav-link.router-link-active {
   background-color: var(--color-background);
-  border-right: 3px solid var(--color-primary, #42b883);
+  border-right: 3px solid var(--text);
 }
 
 .sidebar-footer {

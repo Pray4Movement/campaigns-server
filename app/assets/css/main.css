@@ -19,7 +19,7 @@
   --color-border: #dee2e6;
   --color-text: #212529;
   --color-text-muted: #6c757d;
-  --color-primary: #42b883;
+  --color-primary: #000000;
 }
 
 [data-theme="dark"] {
@@ -42,7 +42,7 @@
   --color-border: #404040;
   --color-text: #f8f9fa;
   --color-text-muted: #adb5bd;
-  --color-primary: #42b883;
+  --color-primary: #ffffff;
 }
 
 /* Global Styles */

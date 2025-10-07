@@ -149,8 +149,8 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background-color: #8b5cf6;
-  color: white;
+  background-color: var(--text);
+  color: var(--bg);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
@@ -182,9 +182,9 @@ onMounted(() => {
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
-  border: none;
+  background-color: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--border);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -201,7 +201,7 @@ onMounted(() => {
 }
 
 .error {
-  color: #dc3545;
+  color: var(--text-muted);
 }
 
 .empty-state {
@@ -229,7 +229,7 @@ onMounted(() => {
 }
 
 .content-card:hover {
-  border-color: #8b5cf6;
+  border-color: var(--text-muted);
 }
 
 .content-header {

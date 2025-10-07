@@ -24,8 +24,20 @@ export default defineEventHandler((event) => {
   const content = prayerContentService.getCampaignPrayerContent(campaignId, options)
   const count = prayerContentService.getContentCount(campaignId)
 
+  // Parse content_json for each item if it's a string
+  const parsedContent = content.map(item => {
+    if (typeof item.content_json === 'string') {
+      try {
+        item.content_json = JSON.parse(item.content_json)
+      } catch (e) {
+        console.error('Failed to parse content_json:', e)
+      }
+    }
+    return item
+  })
+
   return {
-    content,
+    content: parsedContent,
     count,
     total: count
   }

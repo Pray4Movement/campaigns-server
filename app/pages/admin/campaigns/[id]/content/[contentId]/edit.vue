@@ -115,7 +115,7 @@ async function saveContent() {
   try {
     saving.value = true
 
-    await $fetch(`/api/admin/campaigns/${campaignId.value}/content/${contentId.value}`, {
+    const updatedContent = await $fetch(`/api/admin/campaigns/${campaignId.value}/content/${contentId.value}`, {
       method: 'PUT',
       body: {
         title: form.value.title,
@@ -124,8 +124,18 @@ async function saveContent() {
       }
     })
 
-    // Navigate back to content list
-    router.push(`/admin/campaigns/${campaignId.value}/content`)
+    // Update local content reference
+    content.value = updatedContent as any
+
+    // Show success feedback (optional - could use a toast notification instead)
+    const button = document.querySelector('.btn-primary') as HTMLButtonElement
+    if (button) {
+      const originalText = button.textContent
+      button.textContent = 'Saved ✓'
+      setTimeout(() => {
+        button.textContent = originalText
+      }, 2000)
+    }
   } catch (err: any) {
     alert(err.data?.statusMessage || 'Failed to update content')
   } finally {
@@ -176,7 +186,7 @@ onMounted(() => {
 }
 
 .error-state {
-  color: #dc3545;
+  color: var(--text-muted);
 }
 
 .editor-header {
@@ -204,8 +214,8 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background-color: #8b5cf6;
-  color: white;
+  background-color: var(--text);
+  color: var(--bg);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
@@ -224,9 +234,9 @@ onMounted(() => {
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
-  border: none;
+  background-color: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--border);
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
@@ -296,8 +306,8 @@ onMounted(() => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--shadow);
 }
 
 @media (max-width: 768px) {

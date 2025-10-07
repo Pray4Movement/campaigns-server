@@ -173,10 +173,10 @@ watch(() => props.modelValue, async (newValue) => {
 @import url('https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editor.css');
 
 .prayer-fuel-editor {
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   overflow: hidden;
-  background: white;
+  background: var(--bg);
 }
 
 .editor-container {
@@ -196,21 +196,21 @@ watch(() => props.modelValue, async (newValue) => {
 }
 
 .ce-toolbar__plus {
-  color: #8b5cf6;
+  color: var(--text);
 }
 
 .ce-toolbar__plus:hover {
-  background-color: rgba(139, 92, 246, 0.1);
+  background-color: var(--bg-hover);
 }
 
 .ce-inline-toolbar {
-  background: white;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px -1px var(--shadow);
 }
 
 .ce-inline-tool:hover {
-  background-color: rgba(139, 92, 246, 0.1);
+  background-color: var(--bg-hover);
 }
 
 /* Block styles */
@@ -220,49 +220,49 @@ watch(() => props.modelValue, async (newValue) => {
 
 .ce-header {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .cdx-block {
   font-size: 1rem;
   line-height: 1.6;
-  color: #374151;
+  color: var(--text);
 }
 
 /* Quote block for scripture */
 .cdx-quote {
-  border-left: 3px solid #8b5cf6;
+  border-left: 3px solid var(--text-muted);
   padding-left: 1.5rem;
   font-style: italic;
 }
 
 .cdx-quote__text {
-  color: #4b5563;
+  color: var(--text-muted);
   font-size: 1.125rem;
   line-height: 1.75;
 }
 
 .cdx-quote__caption {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }
 
 /* Warning block for prayer prompts */
 .cdx-warning {
-  background: rgba(139, 92, 246, 0.05);
-  border-left: 3px solid #8b5cf6;
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--text-muted);
   padding: 1rem;
   border-radius: 4px;
 }
 
 .cdx-warning__title {
-  color: #8b5cf6;
+  color: var(--text);
   font-weight: 600;
 }
 
 .cdx-warning__message {
-  color: #374151;
+  color: var(--text);
   margin-top: 0.5rem;
 }
 
@@ -285,7 +285,7 @@ watch(() => props.modelValue, async (newValue) => {
 
 .cdx-checklist__item-checkbox {
   margin-right: 0.75rem;
-  accent-color: #8b5cf6;
+  accent-color: var(--text);
 }
 
 /* Image block */
@@ -300,10 +300,10 @@ watch(() => props.modelValue, async (newValue) => {
 
 .cdx-input.image-tool__caption {
   border: none;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
   padding: 0.75rem 0;
   text-align: center;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -320,7 +320,7 @@ watch(() => props.modelValue, async (newValue) => {
 }
 
 .tc-table__cell {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   padding: 0.75rem;
 }
 
@@ -335,18 +335,18 @@ watch(() => props.modelValue, async (newValue) => {
 .ce-delimiter::before {
   content: '***';
   font-size: 1.5rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 /* Code block */
 .ce-code__textarea {
-  background: #1f2937;
-  color: #f9fafb;
+  background: var(--bg-secondary);
+  color: var(--text);
   padding: 1rem;
   border-radius: 6px;
   font-family: 'Courier New', monospace;
   font-size: 0.875rem;
-  border: none;
+  border: 1px solid var(--border);
   min-height: 100px;
 }
 </style>

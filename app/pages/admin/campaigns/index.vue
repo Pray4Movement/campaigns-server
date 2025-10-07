@@ -246,8 +246,8 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background-color: var(--color-primary, #42b883);
-  color: white;
+  background-color: var(--text);
+  color: var(--bg);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -279,9 +279,9 @@ onMounted(() => {
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
-  border: none;
+  background-color: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--border);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -298,7 +298,7 @@ onMounted(() => {
 }
 
 .error {
-  color: #dc3545;
+  color: var(--text-muted);
 }
 
 .empty-state {
@@ -345,13 +345,14 @@ onMounted(() => {
 }
 
 .status-badge.active {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: var(--text);
+  color: var(--bg);
 }
 
 .status-badge.inactive {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
 }
 
 .campaign-description {
@@ -457,7 +458,7 @@ onMounted(() => {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--color-primary, #42b883);
+  border-color: var(--text);
 }
 
 .form-group small {

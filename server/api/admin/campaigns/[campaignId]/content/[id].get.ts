@@ -22,5 +22,14 @@ export default defineEventHandler((event) => {
     })
   }
 
+  // Parse content_json if it's a string
+  if (typeof content.content_json === 'string') {
+    try {
+      content.content_json = JSON.parse(content.content_json)
+    } catch (e) {
+      console.error('Failed to parse content_json:', e)
+    }
+  }
+
   return content
 })
