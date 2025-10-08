@@ -3,8 +3,7 @@
     <div class="page-header">
       <div>
         <NuxtLink to="/admin/campaigns" class="back-link">← Back to Campaigns</NuxtLink>
-        <h1 v-if="campaign">{{ campaign.title }} - Prayer Content</h1>
-        <h1 v-else>Prayer Content</h1>
+        <p v-if="campaign" class="campaign-name">{{ campaign.title }}</p>
         <p v-if="campaign" class="default-language">
           Default Language: {{ getLanguageName(campaign.default_language) }} {{ getLanguageFlag(campaign.default_language) }}
         </p>
@@ -206,8 +205,10 @@ onMounted(() => {
   color: var(--color-text);
 }
 
-.page-header h1 {
-  margin: 0 0 0.25rem;
+.campaign-name {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
 }
 
 .default-language {

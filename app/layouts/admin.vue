@@ -38,14 +38,6 @@
     </nav>
 
     <div class="main-wrapper">
-      <header class="header">
-        <div class="header-content">
-          <h2 class="page-title">
-            <slot name="title">Admin Dashboard</slot>
-          </h2>
-        </div>
-      </header>
-
       <main class="main-content">
         <slot />
       </main>
@@ -167,22 +159,6 @@ async function logout() {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.header {
-  background-color: var(--color-background);
-  border-bottom: 1px solid var(--color-border);
-  padding: 1.5rem 2rem;
-}
-
-.header-content {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.75rem;
 }
 
 .main-content {

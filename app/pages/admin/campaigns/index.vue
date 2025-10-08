@@ -21,30 +21,46 @@
       </button>
     </div>
 
-    <div v-else class="campaigns-grid">
-      <div v-for="campaign in campaigns" :key="campaign.id" class="campaign-card">
-        <div class="campaign-header">
-          <h3>{{ campaign.title }}</h3>
-          <span class="status-badge" :class="campaign.status">
-            {{ campaign.status }}
-          </span>
-        </div>
-
-        <p class="campaign-description">{{ campaign.description || 'No description' }}</p>
-
-        <div class="campaign-meta">
-          <span class="slug">/{{ campaign.slug }}</span>
-          <span class="date">Created {{ formatDate(campaign.created_at) }}</span>
-        </div>
-
-        <div class="campaign-actions">
-          <button @click="navigateToContent(campaign.id)" class="btn-secondary">
-            Manage Content
-          </button>
-          <button @click="editCampaign(campaign)" class="btn-secondary">Edit</button>
-          <button @click="deleteCampaign(campaign)" class="btn-danger">Delete</button>
-        </div>
-      </div>
+    <div v-else class="campaigns-table-container">
+      <table class="campaigns-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Slug</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="campaign in campaigns" :key="campaign.id">
+            <td class="title-cell">{{ campaign.title }}</td>
+            <td class="slug-cell">
+              <a :href="`/${campaign.slug}`" target="_blank" rel="noopener noreferrer">/{{ campaign.slug }}</a>
+            </td>
+            <td>
+              <span class="status-badge" :class="campaign.status">
+                {{ campaign.status }}
+              </span>
+            </td>
+            <td class="date-cell">{{ formatDate(campaign.created_at) }}</td>
+            <td class="actions-cell">
+              <button @click="navigateToContent(campaign.id)" class="btn-action" title="Manage Content">
+                Content
+              </button>
+              <button @click="navigateToSubscribers(campaign.id)" class="btn-action" title="Subscribers">
+                Subscribers
+              </button>
+              <button @click="editCampaign(campaign)" class="btn-action" title="Edit">
+                Edit
+              </button>
+              <button @click="deleteCampaign(campaign)" class="btn-action btn-delete" title="Delete">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Create/Edit Modal -->
@@ -173,6 +189,10 @@ async function loadCampaigns() {
 
 function navigateToContent(campaignId: number) {
   navigateTo(`/admin/campaigns/${campaignId}/content`)
+}
+
+function navigateToSubscribers(campaignId: number) {
+  navigateTo(`/admin/campaigns/${campaignId}/subscribers`)
 }
 
 function editCampaign(campaign: Campaign) {
@@ -336,34 +356,79 @@ onMounted(() => {
   color: var(--color-text-muted);
 }
 
-.campaigns-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-}
-
-.campaign-card {
-  background-color: var(--color-background-soft);
+.campaigns-table-container {
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 1.5rem;
+  overflow: hidden;
 }
 
-.campaign-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+.campaigns-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.campaign-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
+.campaigns-table thead {
+  background-color: var(--color-background-soft);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.campaigns-table th {
+  text-align: left;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.campaigns-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.2s;
+}
+
+.campaigns-table tbody tr:hover {
+  background-color: var(--color-background-soft);
+}
+
+.campaigns-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.campaigns-table td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.title-cell {
+  font-weight: 500;
+}
+
+.slug-cell {
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.slug-cell a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.slug-cell a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.date-cell {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -375,36 +440,36 @@ onMounted(() => {
 }
 
 .status-badge.inactive {
-  background-color: var(--bg-secondary);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-}
-
-.campaign-description {
-  margin: 0 0 1rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-.campaign-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-
-.slug {
-  font-family: monospace;
   background-color: var(--color-background);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
 }
 
-.campaign-actions {
-  display: flex;
-  gap: 0.5rem;
+.actions-cell {
+  white-space: nowrap;
+}
+
+.btn-action {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--text);
+  text-decoration: underline;
+  transition: opacity 0.2s;
+}
+
+.btn-action:hover {
+  opacity: 0.7;
+}
+
+.btn-action.btn-delete {
+  color: var(--color-text-muted);
+}
+
+.btn-action.btn-delete:hover {
+  color: var(--text);
 }
 
 .modal-overlay {

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>Admin Dashboard</h1>
     <p>Welcome to the Prayer Tools admin panel.</p>
 
     <div class="dashboard-grid">
