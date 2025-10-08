@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
-import { requireAuth } from '../../utils/auth'
+import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Require authentication

@@ -1,4 +1,4 @@
-import { getDatabase } from '../../../database/db'
+import { getDatabase } from '#server/database/db'
 
 export default defineEventHandler(async (event) => {
   // TODO: Add authentication check

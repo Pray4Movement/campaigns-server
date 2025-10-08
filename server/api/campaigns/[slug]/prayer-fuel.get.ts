@@ -1,5 +1,5 @@
-import { campaignService } from '../../../database/campaigns'
-import { prayerContentService } from '../../../database/prayer-content'
+import { campaignService } from '#server/database/campaigns'
+import { prayerContentService } from '#server/database/prayer-content'
 
 export default defineEventHandler((event) => {
   const slug = getRouterParam(event, 'slug')

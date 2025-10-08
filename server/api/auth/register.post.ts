@@ -1,5 +1,5 @@
-import { userService } from '../../database/users'
-import { sendVerificationEmail } from '../../utils/email'
+import { userService } from '#server/database/users'
+import { sendVerificationEmail } from '#server/utils/email'
 
 export default defineEventHandler(async (event) => {
   try {

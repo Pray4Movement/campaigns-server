@@ -1,5 +1,5 @@
-import { campaignService } from '../../../database/campaigns'
-import { requireAuth } from '../../../utils/auth'
+import { campaignService } from '#server/database/campaigns'
+import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Require authentication

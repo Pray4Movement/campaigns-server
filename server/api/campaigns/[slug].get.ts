@@ -1,4 +1,4 @@
-import { campaignService } from '../../database/campaigns'
+import { campaignService } from '#server/database/campaigns'
 
 export default defineEventHandler((event) => {
   const slug = getRouterParam(event, 'slug')

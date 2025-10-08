@@ -1,5 +1,5 @@
-import { campaignService } from '../../../database/campaigns'
-import { reminderSignupService } from '../../../database/reminder-signups'
+import { campaignService } from '#server/database/campaigns'
+import { reminderSignupService } from '#server/database/reminder-signups'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')

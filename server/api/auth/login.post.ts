@@ -1,5 +1,5 @@
-import { userService } from '../../database/users'
-import { generateToken, setAuthCookie } from '../../utils/auth'
+import { userService } from '#server/database/users'
+import { generateToken, setAuthCookie } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {

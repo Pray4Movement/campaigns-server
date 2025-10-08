@@ -1,5 +1,5 @@
-import { prayerContentService } from '../../../../../database/prayer-content'
-import { requireAuth } from '../../../../../utils/auth'
+import { prayerContentService } from '#server/database/prayer-content'
+import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler((event) => {
   requireAuth(event)

@@ -1,4 +1,4 @@
-import { clearAuthCookie } from '../../utils/auth'
+import { clearAuthCookie } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Clear the auth cookie using the secure utility
