@@ -23,5 +23,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  return campaign
+  return {
+    campaign
+  }
 })

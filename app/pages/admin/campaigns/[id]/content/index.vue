@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <NuxtLink to="/admin/campaigns" class="back-link">← Back to Campaigns</NuxtLink>
-        <p v-if="campaign" class="campaign-name">{{ campaign.title }}</p>
+        <h1 v-if="campaign" class="campaign-name">{{ campaign.title }}</h1>
         <p v-if="campaign" class="default-language">
           Default Language: {{ getLanguageName(campaign.default_language) }} {{ getLanguageFlag(campaign.default_language) }}
         </p>
@@ -112,7 +112,8 @@ const error = ref('')
 
 async function loadCampaign() {
   try {
-    campaign.value = await $fetch(`/api/admin/campaigns/${campaignId.value}`)
+    const response = await $fetch<{ campaign: Campaign }>(`/api/admin/campaigns/${campaignId.value}`)
+    campaign.value = response.campaign
   } catch (err) {
     console.error('Failed to load campaign:', err)
   }
@@ -207,8 +208,6 @@ onMounted(() => {
 
 .campaign-name {
   margin: 0 0 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
 }
 
 .default-language {

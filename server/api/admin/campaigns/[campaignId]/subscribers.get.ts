@@ -2,7 +2,7 @@ import { getDatabase } from '../../../../database/db'
 
 export default defineEventHandler(async (event) => {
   // TODO: Add authentication check
-  const campaignId = getRouterParam(event, 'id')
+  const campaignId = getRouterParam(event, 'campaignId')
 
   if (!campaignId) {
     throw createError({
