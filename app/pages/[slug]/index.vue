@@ -2,13 +2,13 @@
   <div class="campaign-landing">
     <div v-if="pending" class="loading">
       <div class="spinner"></div>
-      <p>Loading campaign...</p>
+      <p>{{ $t('campaign.loading') }}</p>
     </div>
 
     <div v-else-if="error" class="error-container">
-      <h2>Campaign Not Found</h2>
-      <p>The campaign you're looking for doesn't exist or is not available.</p>
-      <NuxtLink to="/" class="btn-primary">Go Home</NuxtLink>
+      <h2>{{ $t('campaign.notFound.title') }}</h2>
+      <p>{{ $t('campaign.notFound.message') }}</p>
+      <NuxtLink to="/" class="btn-primary">{{ $t('campaign.notFound.goHome') }}</NuxtLink>
     </div>
 
     <div v-else-if="campaign" class="campaign-content">
@@ -23,57 +23,57 @@
       <section class="signup-section">
         <div class="container">
           <div class="card">
-            <h2>Join the Prayer Movement</h2>
+            <h2>{{ $t('campaign.signup.title') }}</h2>
             <p class="section-description">
-              Commit to praying daily and receive helpful reminders via email, WhatsApp, or mobile app.
+              {{ $t('campaign.signup.description') }}
             </p>
 
             <form @submit.prevent="handleSignup" class="signup-form">
               <!-- Name Field -->
               <div class="form-group">
-                <label for="name">Name</label>
+                <label for="name">{{ $t('campaign.signup.form.name.label') }}</label>
                 <input
                   id="name"
                   v-model="signupForm.name"
                   type="text"
                   required
-                  placeholder="Your name"
+                  :placeholder="$t('campaign.signup.form.name.placeholder')"
                   class="form-input"
                 />
               </div>
 
               <!-- Delivery Method -->
               <div class="form-group">
-                <label for="delivery_method">How would you like to receive your daily prayer prompts?</label>
+                <label for="delivery_method">{{ $t('campaign.signup.form.deliveryMethod.label') }}</label>
                 <select
                   id="delivery_method"
                   v-model="signupForm.delivery_method"
                   required
                   class="form-select"
                 >
-                  <option value="">Select a method...</option>
-                  <option value="email">Email</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="app">Mobile App</option>
+                  <option value="">{{ $t('campaign.signup.form.deliveryMethod.placeholder') }}</option>
+                  <option value="email">{{ $t('campaign.signup.form.deliveryMethod.email') }}</option>
+                  <option value="whatsapp">{{ $t('campaign.signup.form.deliveryMethod.whatsapp') }}</option>
+                  <option value="app">{{ $t('campaign.signup.form.deliveryMethod.app') }}</option>
                 </select>
               </div>
 
               <!-- Email Field (conditional) -->
               <div v-if="signupForm.delivery_method === 'email'" class="form-group">
-                <label for="email">Email Address</label>
+                <label for="email">{{ $t('campaign.signup.form.email.label') }}</label>
                 <input
                   id="email"
                   v-model="signupForm.email"
                   type="email"
                   required
-                  placeholder="your@email.com"
+                  :placeholder="$t('campaign.signup.form.email.placeholder')"
                   class="form-input"
                 />
               </div>
 
               <!-- Phone Field (conditional) -->
               <div v-if="signupForm.delivery_method === 'whatsapp'" class="form-group">
-                <label for="phone">Phone Number</label>
+                <label for="phone">{{ $t('campaign.signup.form.phone.label') }}</label>
                 <input
                   ref="phoneInput"
                   id="phone"
@@ -81,30 +81,30 @@
                   required
                   class="form-input"
                 />
-                <small class="form-hint">Select your country and enter your phone number</small>
+                <small class="form-hint">{{ $t('campaign.signup.form.phone.hint') }}</small>
               </div>
 
               <!-- Frequency -->
               <div class="form-group">
-                <label for="frequency">Prayer Frequency</label>
+                <label for="frequency">{{ $t('campaign.signup.form.frequency.label') }}</label>
                 <select
                   id="frequency"
                   v-model="signupForm.frequency"
                   required
                   class="form-select"
                 >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="custom">Custom</option>
+                  <option value="daily">{{ $t('campaign.signup.form.frequency.daily') }}</option>
+                  <option value="weekly">{{ $t('campaign.signup.form.frequency.weekly') }}</option>
+                  <option value="custom">{{ $t('campaign.signup.form.frequency.custom') }}</option>
                 </select>
               </div>
 
               <!-- Days of Week (for weekly frequency) -->
               <div v-if="signupForm.frequency === 'weekly'" class="form-group">
-                <label>Select Days</label>
+                <label>{{ $t('campaign.signup.form.daysOfWeek.label') }}</label>
                 <div class="days-grid">
                   <label
-                    v-for="day in daysOfWeek"
+                    v-for="day in translatedDaysOfWeek"
                     :key="day.value"
                     class="day-checkbox"
                   >
@@ -118,13 +118,13 @@
                   </label>
                 </div>
                 <small v-if="signupForm.days_of_week.length === 0" class="form-hint error-hint">
-                  Please select at least one day
+                  {{ $t('campaign.signup.form.daysOfWeek.error') }}
                 </small>
               </div>
 
               <!-- Time Picker -->
               <div class="form-group">
-                <label for="reminder_time">Preferred Time</label>
+                <label for="reminder_time">{{ $t('campaign.signup.form.time.label') }}</label>
                 <input
                   id="reminder_time"
                   v-model="signupForm.reminder_time"
@@ -132,7 +132,7 @@
                   required
                   class="form-input"
                 />
-                <small class="form-hint">Your local time</small>
+                <small class="form-hint">{{ $t('campaign.signup.form.time.hint') }}</small>
               </div>
 
               <!-- Submit Button -->
@@ -141,12 +141,12 @@
                 class="btn-grey btn-large btn-submit"
                 :disabled="submitting"
               >
-                {{ submitting ? 'Joining...' : 'Commit to Prayer' }}
+                {{ submitting ? $t('campaign.signup.form.submitting') : $t('campaign.signup.form.submit') }}
               </button>
 
               <!-- Success/Error Messages -->
               <div v-if="signupSuccess" class="message message-success">
-                ✓ Welcome! You've joined the prayer movement. You'll receive your first prayer prompt soon.
+                {{ $t('campaign.signup.success') }}
               </div>
               <div v-if="signupError" class="message message-error">
                 {{ signupError }}
@@ -160,13 +160,13 @@
       <section class="prayer-fuel-section">
         <div class="container">
           <div class="card">
-            <h2>Today's Prayer</h2>
-            <p class="section-description">Access today's prayer content and prompts</p>
+            <h2>{{ $t('campaign.prayerFuel.title') }}</h2>
+            <p class="section-description">{{ $t('campaign.prayerFuel.description') }}</p>
             <NuxtLink
-              :to="`/${campaign.slug}/prayer-fuel`"
+              :to="localePath(`/${campaign.slug}/prayer-fuel`)"
               class="btn-grey btn-large"
             >
-              View Prayer Fuel
+              {{ $t('campaign.prayerFuel.button') }}
             </NuxtLink>
           </div>
         </div>
@@ -176,22 +176,22 @@
       <section class="app-links-section">
         <div class="container">
           <div class="card">
-            <h2>Get the Mobile App</h2>
+            <h2>{{ $t('campaign.mobileApp.title') }}</h2>
             <p class="section-description">
-              Download our mobile app for a better prayer experience
+              {{ $t('campaign.mobileApp.description') }}
             </p>
 
             <div class="app-buttons">
-              <a href="#" class="btn-outline" aria-label="Download on App Store">
+              <a href="#" class="btn-outline" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
                 <div class="app-button-content">
-                  <span class="app-button-label">Download on</span>
-                  <span class="app-button-store">App Store</span>
+                  <span class="app-button-label">{{ $t('campaign.mobileApp.appStore.label') }}</span>
+                  <span class="app-button-store">{{ $t('campaign.mobileApp.appStore.store') }}</span>
                 </div>
               </a>
-              <a href="#" class="btn-outline" aria-label="Get it on Google Play">
+              <a href="#" class="btn-outline" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
                 <div class="app-button-content">
-                  <span class="app-button-label">Get it on</span>
-                  <span class="app-button-store">Google Play</span>
+                  <span class="app-button-label">{{ $t('campaign.mobileApp.googlePlay.label') }}</span>
+                  <span class="app-button-store">{{ $t('campaign.mobileApp.googlePlay.store') }}</span>
                 </div>
               </a>
             </div>
@@ -213,13 +213,15 @@ definePageMeta({
 
 const route = useRoute()
 const slug = route.params.slug as string
+const { t } = useI18n()
+const localePath = useLocalePath()
 
 // Fetch campaign data
 const { data, pending, error } = await useFetch(`/api/campaigns/${slug}`)
 const campaign = computed(() => data.value?.campaign)
 
 // Campaign title management
-const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+const { setCampaignTitle } = useCampaign()
 
 // Set campaign title when campaign is loaded
 watch(campaign, (newCampaign) => {
@@ -232,16 +234,16 @@ watch(campaign, (newCampaign) => {
 const phoneInput = ref<HTMLInputElement | null>(null)
 let iti: Iti | null = null
 
-// Days of week for weekly frequency
-const daysOfWeek = [
-  { value: 0, label: 'Sun' },
-  { value: 1, label: 'Mon' },
-  { value: 2, label: 'Tue' },
-  { value: 3, label: 'Wed' },
-  { value: 4, label: 'Thu' },
-  { value: 5, label: 'Fri' },
-  { value: 6, label: 'Sat' }
-]
+// Days of week for weekly frequency (translated)
+const translatedDaysOfWeek = computed(() => [
+  { value: 0, label: t('campaign.signup.form.daysOfWeek.days.sun') },
+  { value: 1, label: t('campaign.signup.form.daysOfWeek.days.mon') },
+  { value: 2, label: t('campaign.signup.form.daysOfWeek.days.tue') },
+  { value: 3, label: t('campaign.signup.form.daysOfWeek.days.wed') },
+  { value: 4, label: t('campaign.signup.form.daysOfWeek.days.thu') },
+  { value: 5, label: t('campaign.signup.form.daysOfWeek.days.fri') },
+  { value: 6, label: t('campaign.signup.form.daysOfWeek.days.sat') }
+])
 
 // Signup form state
 const signupForm = ref({
@@ -262,7 +264,7 @@ const signupError = ref('')
 async function handleSignup() {
   // Validate weekly frequency has at least one day selected
   if (signupForm.value.frequency === 'weekly' && signupForm.value.days_of_week.length === 0) {
-    signupError.value = 'Please select at least one day for weekly reminders'
+    signupError.value = t('campaign.signup.form.daysOfWeek.error')
     return
   }
 
@@ -270,7 +272,7 @@ async function handleSignup() {
   let phoneNumber = signupForm.value.phone
   if (signupForm.value.delivery_method === 'whatsapp' && iti) {
     if (!iti.isValidNumber()) {
-      signupError.value = 'Please enter a valid phone number'
+      signupError.value = t('campaign.signup.errors.invalidPhone')
       return
     }
     phoneNumber = iti.getNumber()
@@ -314,7 +316,7 @@ async function handleSignup() {
       signupSuccess.value = false
     }, 5000)
   } catch (err: any) {
-    signupError.value = err.data?.statusMessage || err.message || 'Failed to sign up. Please try again.'
+    signupError.value = err.data?.statusMessage || err.message || t('campaign.signup.errors.failed')
   } finally {
     submitting.value = false
   }
@@ -356,12 +358,11 @@ onUnmounted(() => {
     iti.destroy()
     iti = null
   }
-  resetCampaignTitle()
 })
 
 // Set page title
 useHead(() => ({
-  title: campaign.value ? `${campaign.value.title} - Prayer Tools` : 'Campaign - Prayer Tools'
+  title: campaign.value ? `${campaign.value.title} - ${t('app.title')}` : `${t('campaign.pageTitle')} - ${t('app.title')}`
 }))
 </script>
 

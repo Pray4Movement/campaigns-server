@@ -2,21 +2,21 @@
   <div class="prayer-fuel-page">
     <div v-if="pending" class="loading">
       <div class="spinner"></div>
-      <p>Loading today's prayer...</p>
+      <p>{{ $t('prayerFuel.loading') }}</p>
     </div>
 
     <div v-else-if="error" class="error-container">
-      <h2>Unable to Load Prayer</h2>
+      <h2>{{ $t('prayerFuel.error.title') }}</h2>
       <p>{{ error }}</p>
-      <NuxtLink :to="`/${slug}`" class="btn-primary">Back to Campaign</NuxtLink>
+      <NuxtLink :to="localePath(`/${slug}`)" class="btn-primary">{{ $t('prayerFuel.error.backToCampaign') }}</NuxtLink>
     </div>
 
     <div v-else-if="data" class="prayer-fuel-content">
       <!-- Campaign Header -->
       <header class="prayer-header">
         <div class="container">
-          <NuxtLink :to="`/${slug}`" class="back-link">← Back to {{ data.campaign.title }}</NuxtLink>
-          <h1 class="page-title">Today's Prayer</h1>
+          <NuxtLink :to="localePath(`/${slug}`)" class="back-link">← {{ $t('prayerFuel.backTo', { campaign: data.campaign.title }) }}</NuxtLink>
+          <h1 class="page-title">{{ $t('prayerFuel.title') }}</h1>
           <p class="prayer-date">{{ formatDate(data.date) }}</p>
         </div>
       </header>
@@ -31,8 +31,8 @@
 
           <div v-else class="no-content">
             <div class="no-content-icon">📖</div>
-            <h2>No Prayer Content Today</h2>
-            <p>{{ data.message || 'Check back tomorrow for new prayer content.' }}</p>
+            <h2>{{ $t('prayerFuel.noContent.title') }}</h2>
+            <p>{{ data.message || $t('prayerFuel.noContent.message') }}</p>
           </div>
         </div>
       </main>
@@ -45,10 +45,10 @@
             :disabled="prayedMarked || submitting"
             class="btn-prayed"
           >
-            {{ prayedMarked ? '✓ Prayer Recorded' : submitting ? 'Recording...' : 'I Prayed' }}
+            {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.iPrayed') }}
           </button>
           <p v-if="prayedMarked" class="prayed-message">
-            Thank you for praying! Your prayer has been recorded.
+            {{ $t('prayerFuel.thankYou') }}
           </p>
         </div>
       </footer>
@@ -56,12 +56,12 @@
       <!-- Past Prayer Fuel -->
       <section v-if="pastContent && pastContent.content.length > 0" class="past-prayers">
         <div class="container">
-          <h2 class="past-prayers-title">Past Prayer Fuel</h2>
+          <h2 class="past-prayers-title">{{ $t('prayerFuel.pastPrayers.title') }}</h2>
           <div class="past-prayers-list">
             <NuxtLink
               v-for="item in pastContent.content"
               :key="item.id"
-              :to="`/${slug}/prayer-fuel/${item.content_date}`"
+              :to="localePath(`/${slug}/prayer-fuel/${item.content_date}`)"
               class="past-prayer-item"
             >
               <span class="past-prayer-date">{{ formatPastDate(item.content_date) }}</span>
@@ -81,9 +81,12 @@ definePageMeta({
   layout: 'default'
 })
 
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
+const { setCampaignTitle } = useCampaign()
 
 // Get tracking ID from URL if present (from email/WhatsApp links)
 const trackingId = route.query.uid as string | undefined
@@ -95,8 +98,7 @@ const pageOpenTime = ref(Date.now())
 const currentDate = new Date().toISOString()
 
 // Get language preference from global language selector or query param
-const { currentLanguage } = useLanguage()
-const selectedLanguage = ref((route.query.language as string) || currentLanguage.value || '')
+const selectedLanguage = ref((route.query.language as string) || locale.value || '')
 
 // Fetch prayer content
 const { data, pending, error: fetchError, refresh } = await useFetch(`/api/campaigns/${slug}/prayer-fuel`, {
@@ -108,15 +110,20 @@ const { data, pending, error: fetchError, refresh } = await useFetch(`/api/campa
 
 const error = computed(() => fetchError.value?.message || null)
 
-// Set selected language after data loads
+// Set selected language and campaign title after data loads
 watch(data, (newData) => {
-  if (newData && !selectedLanguage.value) {
-    selectedLanguage.value = newData.language
+  if (newData) {
+    if (!selectedLanguage.value) {
+      selectedLanguage.value = newData.language
+    }
+    if (newData.campaign?.title) {
+      setCampaignTitle(newData.campaign.title)
+    }
   }
 }, { immediate: true })
 
 // Watch global language changes
-watch(currentLanguage, async (newLang) => {
+watch(locale, async (newLang) => {
   if (newLang && newLang !== selectedLanguage.value) {
     selectedLanguage.value = newLang
     await refresh()
@@ -137,7 +144,7 @@ const submitting = ref(false)
 // Format date for display
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(selectedLanguage.value || 'en', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -148,7 +155,7 @@ function formatDate(dateString: string) {
 // Format past date (shorter format)
 function formatPastDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(selectedLanguage.value || 'en', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
@@ -178,7 +185,7 @@ async function markAsPrayed() {
     prayedMarked.value = true
   } catch (err: any) {
     console.error('Failed to record prayer:', err)
-    alert('Failed to record prayer. Please try again.')
+    alert(t('prayerFuel.error.recordFailed'))
   } finally {
     submitting.value = false
   }
@@ -188,7 +195,7 @@ async function markAsPrayed() {
 useHead(() => ({
   title: data.value?.content
     ? `${data.value.content.title} - ${data.value.campaign.title}`
-    : `Prayer Fuel - ${data.value?.campaign.title || 'Loading...'}`
+    : `${t('prayerFuel.pageTitle')} - ${data.value?.campaign.title || t('common.loading')}`
 }))
 
 // Update page open time when component mounts

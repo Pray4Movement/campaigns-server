@@ -7,6 +7,26 @@ export default defineNuxtConfig({
   ssr: false,
   css: ['~/assets/css/main.css'],
 
+  modules: ['@nuxtjs/i18n'],
+
+  i18n: {
+    locales: [
+      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'es', name: 'Español', file: 'es.json' },
+      { code: 'fr', name: 'Français', file: 'fr.json' }
+    ],
+    defaultLocale: 'en',
+    lazy: true,
+    langDir: 'locales',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'preferred_language',
+      redirectOn: 'root',
+      alwaysRedirect: true
+    }
+  },
+
   alias: {
     '#server': fileURLToPath(new URL('./server', import.meta.url))
   },

@@ -2,7 +2,7 @@
   <div class="admin-layout">
     <nav class="sidebar">
       <div class="sidebar-header">
-        <h1 class="logo">Prayer Tools Admin</h1>
+        <h1 class="logo">Prayer.Tools Admin</h1>
       </div>
 
       <ul class="nav-menu">

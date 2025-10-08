@@ -5,15 +5,15 @@
         <div class="header-content">
           <h1 class="logo">{{ campaignTitle }}</h1>
           <div class="language-selector">
-            <label for="global-language-select" class="sr-only">Select Language</label>
+            <label for="global-language-select" class="sr-only">{{ $t('language') }}</label>
             <select
               id="global-language-select"
               v-model="selectedLanguage"
               @change="onLanguageChange"
               class="language-select"
             >
-              <option v-for="lang in LANGUAGES" :key="lang.code" :value="lang.code">
-                {{ lang.flag }} {{ lang.name }}
+              <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
+                {{ getLanguageFlag(lang.code) }} {{ lang.name }}
               </option>
             </select>
           </div>
@@ -27,28 +27,32 @@
 
     <footer class="footer">
       <div class="container">
-        <p>&copy; {{ currentYear }} Prayer Tools. All rights reserved.</p>
+        <p>&copy; {{ currentYear }} Prayer.Tools {{ $t('footer.allRightsReserved') }}</p>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { LANGUAGES } from '~/utils/languages'
+import { getLanguageFlag } from '~/utils/languages'
 
 const currentYear = new Date().getFullYear()
-const { currentLanguage, changeLanguage } = useLanguage()
+const { locale, setLocale, locales } = useI18n()
+const switchLocalePath = useSwitchLocalePath()
+const router = useRouter()
 const { campaignTitle } = useCampaign()
 
-const selectedLanguage = ref(currentLanguage.value)
+const selectedLanguage = ref(locale.value)
+const availableLocales = computed(() => locales.value)
 
-// Watch for route changes to update selected language
-watch(currentLanguage, (newLang) => {
+// Watch for locale changes to update selected language
+watch(locale, (newLang) => {
   selectedLanguage.value = newLang
 })
 
 async function onLanguageChange() {
-  await changeLanguage(selectedLanguage.value)
+  const newPath = switchLocalePath(selectedLanguage.value)
+  await router.push(newPath)
 }
 </script>
 

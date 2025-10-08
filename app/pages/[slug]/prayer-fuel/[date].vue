@@ -2,21 +2,21 @@
   <div class="prayer-fuel-page">
     <div v-if="pending" class="loading">
       <div class="spinner"></div>
-      <p>Loading prayer...</p>
+      <p>{{ $t('prayerFuel.loading') }}</p>
     </div>
 
     <div v-else-if="error" class="error-container">
-      <h2>Unable to Load Prayer</h2>
+      <h2>{{ $t('prayerFuel.error.title') }}</h2>
       <p>{{ error }}</p>
-      <NuxtLink :to="`/${slug}/prayer-fuel`" class="btn-primary">Back to Today's Prayer</NuxtLink>
+      <NuxtLink :to="localePath(`/${slug}/prayer-fuel`)" class="btn-primary">{{ $t('prayerFuel.backToToday') }}</NuxtLink>
     </div>
 
     <div v-else-if="data" class="prayer-fuel-content">
       <!-- Campaign Header -->
       <header class="prayer-header">
         <div class="container">
-          <NuxtLink :to="`/${slug}/prayer-fuel`" class="back-link">← Back to Today's Prayer</NuxtLink>
-          <h1 class="page-title">Prayer Fuel</h1>
+          <NuxtLink :to="localePath(`/${slug}/prayer-fuel`)" class="back-link">← {{ $t('prayerFuel.backToToday') }}</NuxtLink>
+          <h1 class="page-title">{{ $t('prayerFuel.pageTitle') }}</h1>
           <p class="prayer-date">{{ formatDate(data.date) }}</p>
         </div>
       </header>
@@ -31,8 +31,8 @@
 
           <div v-else class="no-content">
             <div class="no-content-icon">📖</div>
-            <h2>No Prayer Content</h2>
-            <p>{{ data.message || 'No prayer content available for this date.' }}</p>
+            <h2>{{ $t('prayerFuel.dateView.noContent.title') }}</h2>
+            <p>{{ data.message || $t('prayerFuel.dateView.noContent.message') }}</p>
           </div>
         </div>
       </main>
@@ -41,19 +41,19 @@
 </template>
 
 <script setup lang="ts">
-import { getLanguageName, getLanguageFlag } from '~/utils/languages'
-
 definePageMeta({
   layout: 'default'
 })
 
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const route = useRoute()
 const slug = route.params.slug as string
 const dateParam = route.params.date as string
+const { setCampaignTitle } = useCampaign()
 
-// Get language preference from global language selector
-const { currentLanguage } = useLanguage()
-const selectedLanguage = ref(currentLanguage.value || '')
+// Get language preference from global language selector or query param
+const selectedLanguage = ref((route.query.language as string) || locale.value || '')
 
 // Fetch prayer content for specific date
 const { data, pending, error: fetchError, refresh } = await useFetch(`/api/campaigns/${slug}/prayer-fuel`, {
@@ -65,8 +65,20 @@ const { data, pending, error: fetchError, refresh } = await useFetch(`/api/campa
 
 const error = computed(() => fetchError.value?.message || null)
 
+// Set selected language and campaign title after data loads
+watch(data, (newData) => {
+  if (newData) {
+    if (!selectedLanguage.value) {
+      selectedLanguage.value = newData.language
+    }
+    if (newData.campaign?.title) {
+      setCampaignTitle(newData.campaign.title)
+    }
+  }
+}, { immediate: true })
+
 // Watch global language changes
-watch(currentLanguage, async (newLang) => {
+watch(locale, async (newLang) => {
   if (newLang && newLang !== selectedLanguage.value) {
     selectedLanguage.value = newLang
     await refresh()
@@ -76,7 +88,7 @@ watch(currentLanguage, async (newLang) => {
 // Format date for display
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(selectedLanguage.value || 'en', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -88,7 +100,7 @@ function formatDate(dateString: string) {
 useHead(() => ({
   title: data.value?.content
     ? `${data.value.content.title} - ${data.value.campaign.title}`
-    : `Prayer Fuel - ${data.value?.campaign.title || 'Loading...'}`
+    : `${t('prayerFuel.pageTitle')} - ${data.value?.campaign.title || t('common.loading')}`
 }))
 </script>
 

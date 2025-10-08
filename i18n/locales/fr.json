@@ -1,0 +1,155 @@
+{
+  "welcome": "Bienvenue",
+  "hello": "Bonjour",
+  "language": "Langue",
+  "app": {
+    "title": "Prayer.Tools"
+  },
+  "theme": {
+    "toggle": "Changer de thème",
+    "light": "Mode clair",
+    "dark": "Mode sombre"
+  },
+  "login": {
+    "title": "Connexion Administrateur",
+    "email": "E-mail",
+    "emailPlaceholder": "Entrez votre e-mail",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours...",
+    "error": {
+      "failed": "Échec de la connexion. Veuillez vérifier vos identifiants.",
+      "googleAuthFailed": "L'authentification Google a échoué. Veuillez réessayer.",
+      "emailNotVerified": "Votre e-mail Google n'est pas vérifié."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "Tous droits réservés"
+  },
+  "campaign": {
+    "pageTitle": "Campagne",
+    "loading": "Chargement de la campagne...",
+    "notFound": {
+      "title": "Campagne Introuvable",
+      "message": "La campagne que vous recherchez n'existe pas ou n'est pas disponible.",
+      "goHome": "Accueil"
+    },
+    "signup": {
+      "title": "Rejoignez le Mouvement de Prière",
+      "description": "Engagez-vous à prier quotidiennement et recevez des rappels utiles par e-mail, WhatsApp ou application mobile.",
+      "success": "✓ Bienvenue ! Vous avez rejoint le mouvement de prière. Vous recevrez bientôt votre première invitation à la prière.",
+      "form": {
+        "name": {
+          "label": "Nom",
+          "placeholder": "Votre nom"
+        },
+        "deliveryMethod": {
+          "label": "Comment souhaitez-vous recevoir vos invitations quotidiennes à la prière ?",
+          "placeholder": "Sélectionnez une méthode...",
+          "email": "E-mail",
+          "whatsapp": "WhatsApp",
+          "app": "Application Mobile"
+        },
+        "email": {
+          "label": "Adresse E-mail",
+          "placeholder": "votre{'@'}email.com"
+        },
+        "phone": {
+          "label": "Numéro de Téléphone",
+          "hint": "Sélectionnez votre pays et entrez votre numéro de téléphone"
+        },
+        "frequency": {
+          "label": "Fréquence de Prière",
+          "daily": "Quotidien",
+          "weekly": "Hebdomadaire",
+          "custom": "Personnalisé"
+        },
+        "daysOfWeek": {
+          "label": "Sélectionner les Jours",
+          "error": "Veuillez sélectionner au moins un jour",
+          "days": {
+            "sun": "Dim",
+            "mon": "Lun",
+            "tue": "Mar",
+            "wed": "Mer",
+            "thu": "Jeu",
+            "fri": "Ven",
+            "sat": "Sam"
+          }
+        },
+        "time": {
+          "label": "Heure Préférée",
+          "hint": "Votre heure locale"
+        },
+        "submit": "S'engager à Prier",
+        "submitting": "Inscription en cours..."
+      },
+      "errors": {
+        "invalidPhone": "Veuillez entrer un numéro de téléphone valide",
+        "failed": "Échec de l'inscription. Veuillez réessayer."
+      }
+    },
+    "prayerFuel": {
+      "title": "Prière du Jour",
+      "description": "Accédez au contenu et aux invitations de prière d'aujourd'hui",
+      "button": "Voir la Prière du Jour"
+    },
+    "mobileApp": {
+      "title": "Téléchargez l'Application Mobile",
+      "description": "Téléchargez notre application mobile pour une meilleure expérience de prière",
+      "appStore": {
+        "label": "Télécharger sur",
+        "store": "App Store",
+        "ariaLabel": "Télécharger sur l'App Store"
+      },
+      "googlePlay": {
+        "label": "Disponible sur",
+        "store": "Google Play",
+        "ariaLabel": "Disponible sur Google Play"
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Contenu de Prière",
+    "title": "Prière du Jour",
+    "loading": "Chargement de la prière du jour...",
+    "backTo": "Retour à {campaign}",
+    "backToToday": "Retour à la Prière d'Aujourd'hui",
+    "error": {
+      "title": "Impossible de Charger la Prière",
+      "backToCampaign": "Retour à la Campagne",
+      "recordFailed": "Échec de l'enregistrement de la prière. Veuillez réessayer."
+    },
+    "noContent": {
+      "title": "Pas de Contenu de Prière Aujourd'hui",
+      "message": "Revenez demain pour un nouveau contenu de prière."
+    },
+    "dateView": {
+      "noContent": {
+        "title": "Pas de Contenu de Prière",
+        "message": "Aucun contenu de prière disponible pour cette date."
+      }
+    },
+    "button": {
+      "iPrayed": "J'ai Prié",
+      "recording": "Enregistrement...",
+      "recorded": "✓ Prière Enregistrée"
+    },
+    "thankYou": "Merci d'avoir prié ! Votre prière a été enregistrée.",
+    "pastPrayers": {
+      "title": "Prières Passées"
+    }
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "loading": "Chargement..."
+  }
+}

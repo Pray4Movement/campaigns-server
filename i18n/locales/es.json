@@ -1,0 +1,155 @@
+{
+  "welcome": "Bienvenido",
+  "hello": "Hola",
+  "language": "Idioma",
+  "app": {
+    "title": "Prayer.Tools"
+  },
+  "theme": {
+    "toggle": "Cambiar Tema",
+    "light": "Modo Claro",
+    "dark": "Modo Oscuro"
+  },
+  "login": {
+    "title": "Inicio de Sesión de Administrador",
+    "email": "Correo Electrónico",
+    "emailPlaceholder": "Ingrese su correo electrónico",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Ingrese su contraseña",
+    "signIn": "Iniciar Sesión",
+    "signingIn": "Iniciando sesión...",
+    "error": {
+      "failed": "Error de inicio de sesión. Por favor verifique sus credenciales.",
+      "googleAuthFailed": "Autenticación de Google falló. Por favor intente de nuevo.",
+      "emailNotVerified": "Su correo electrónico de Google no está verificado."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "Todos los derechos reservados"
+  },
+  "campaign": {
+    "pageTitle": "Campaña",
+    "loading": "Cargando campaña...",
+    "notFound": {
+      "title": "Campaña No Encontrada",
+      "message": "La campaña que busca no existe o no está disponible.",
+      "goHome": "Ir al Inicio"
+    },
+    "signup": {
+      "title": "Únase al Movimiento de Oración",
+      "description": "Comprométase a orar diariamente y reciba recordatorios útiles por correo electrónico, WhatsApp o aplicación móvil.",
+      "success": "✓ ¡Bienvenido! Se ha unido al movimiento de oración. Recibirá su primera invitación a orar pronto.",
+      "form": {
+        "name": {
+          "label": "Nombre",
+          "placeholder": "Su nombre"
+        },
+        "deliveryMethod": {
+          "label": "¿Cómo le gustaría recibir sus invitaciones diarias a la oración?",
+          "placeholder": "Seleccione un método...",
+          "email": "Correo Electrónico",
+          "whatsapp": "WhatsApp",
+          "app": "Aplicación Móvil"
+        },
+        "email": {
+          "label": "Dirección de Correo Electrónico",
+          "placeholder": "su{'@'}email.com"
+        },
+        "phone": {
+          "label": "Número de Teléfono",
+          "hint": "Seleccione su país e ingrese su número de teléfono"
+        },
+        "frequency": {
+          "label": "Frecuencia de Oración",
+          "daily": "Diario",
+          "weekly": "Semanal",
+          "custom": "Personalizado"
+        },
+        "daysOfWeek": {
+          "label": "Seleccionar Días",
+          "error": "Por favor seleccione al menos un día",
+          "days": {
+            "sun": "Dom",
+            "mon": "Lun",
+            "tue": "Mar",
+            "wed": "Mié",
+            "thu": "Jue",
+            "fri": "Vie",
+            "sat": "Sáb"
+          }
+        },
+        "time": {
+          "label": "Hora Preferida",
+          "hint": "Su hora local"
+        },
+        "submit": "Comprometerse a Orar",
+        "submitting": "Uniéndose..."
+      },
+      "errors": {
+        "invalidPhone": "Por favor ingrese un número de teléfono válido",
+        "failed": "Error al registrarse. Por favor intente de nuevo."
+      }
+    },
+    "prayerFuel": {
+      "title": "Oración de Hoy",
+      "description": "Acceda al contenido y las invitaciones de oración de hoy",
+      "button": "Ver Oración del Día"
+    },
+    "mobileApp": {
+      "title": "Descargue la Aplicación Móvil",
+      "description": "Descargue nuestra aplicación móvil para una mejor experiencia de oración",
+      "appStore": {
+        "label": "Descargar en",
+        "store": "App Store",
+        "ariaLabel": "Descargar en App Store"
+      },
+      "googlePlay": {
+        "label": "Disponible en",
+        "store": "Google Play",
+        "ariaLabel": "Disponible en Google Play"
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Contenido de Oración",
+    "title": "Oración de Hoy",
+    "loading": "Cargando la oración de hoy...",
+    "backTo": "Volver a {campaign}",
+    "backToToday": "Volver a la Oración de Hoy",
+    "error": {
+      "title": "No se Pudo Cargar la Oración",
+      "backToCampaign": "Volver a la Campaña",
+      "recordFailed": "Error al registrar la oración. Por favor intente de nuevo."
+    },
+    "noContent": {
+      "title": "No Hay Contenido de Oración Hoy",
+      "message": "Vuelva mañana para nuevo contenido de oración."
+    },
+    "dateView": {
+      "noContent": {
+        "title": "Sin Contenido de Oración",
+        "message": "No hay contenido de oración disponible para esta fecha."
+      }
+    },
+    "button": {
+      "iPrayed": "He Orado",
+      "recording": "Registrando...",
+      "recorded": "✓ Oración Registrada"
+    },
+    "thankYou": "¡Gracias por orar! Su oración ha sido registrada.",
+    "pastPrayers": {
+      "title": "Oraciones Pasadas"
+    }
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "loading": "Cargando..."
+  }
+}

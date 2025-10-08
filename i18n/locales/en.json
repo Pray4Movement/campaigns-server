@@ -1,0 +1,155 @@
+{
+  "welcome": "Welcome",
+  "hello": "Hello",
+  "language": "Language",
+  "app": {
+    "title": "Prayer.Tools"
+  },
+  "theme": {
+    "toggle": "Toggle Theme",
+    "light": "Light Mode",
+    "dark": "Dark Mode"
+  },
+  "login": {
+    "title": "Admin Login",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "error": {
+      "failed": "Login failed. Please check your credentials.",
+      "googleAuthFailed": "Google authentication failed. Please try again.",
+      "emailNotVerified": "Your Google email is not verified."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "All rights reserved"
+  },
+  "campaign": {
+    "pageTitle": "Campaign",
+    "loading": "Loading campaign...",
+    "notFound": {
+      "title": "Campaign Not Found",
+      "message": "The campaign you're looking for doesn't exist or is not available.",
+      "goHome": "Go Home"
+    },
+    "signup": {
+      "title": "Join the Prayer Movement",
+      "description": "Commit to praying daily and receive helpful reminders via email, WhatsApp, or mobile app.",
+      "success": "✓ Welcome! You've joined the prayer movement. You'll receive your first prayer prompt soon.",
+      "form": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Your name"
+        },
+        "deliveryMethod": {
+          "label": "How would you like to receive your daily prayer prompts?",
+          "placeholder": "Select a method...",
+          "email": "Email",
+          "whatsapp": "WhatsApp",
+          "app": "Mobile App"
+        },
+        "email": {
+          "label": "Email Address",
+          "placeholder": "your{'@'}email.com"
+        },
+        "phone": {
+          "label": "Phone Number",
+          "hint": "Select your country and enter your phone number"
+        },
+        "frequency": {
+          "label": "Prayer Frequency",
+          "daily": "Daily",
+          "weekly": "Weekly",
+          "custom": "Custom"
+        },
+        "daysOfWeek": {
+          "label": "Select Days",
+          "error": "Please select at least one day",
+          "days": {
+            "sun": "Sun",
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat"
+          }
+        },
+        "time": {
+          "label": "Preferred Time",
+          "hint": "Your local time"
+        },
+        "submit": "Commit to Prayer",
+        "submitting": "Joining..."
+      },
+      "errors": {
+        "invalidPhone": "Please enter a valid phone number",
+        "failed": "Failed to sign up. Please try again."
+      }
+    },
+    "prayerFuel": {
+      "title": "Today's Prayer",
+      "description": "Access today's prayer content and prompts",
+      "button": "View Prayer Fuel"
+    },
+    "mobileApp": {
+      "title": "Get the Mobile App",
+      "description": "Download our mobile app for a better prayer experience",
+      "appStore": {
+        "label": "Download on",
+        "store": "App Store",
+        "ariaLabel": "Download on App Store"
+      },
+      "googlePlay": {
+        "label": "Get it on",
+        "store": "Google Play",
+        "ariaLabel": "Get it on Google Play"
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Prayer Fuel",
+    "title": "Today's Prayer",
+    "loading": "Loading today's prayer...",
+    "backTo": "Back to {campaign}",
+    "backToToday": "Back to Today's Prayer",
+    "error": {
+      "title": "Unable to Load Prayer",
+      "backToCampaign": "Back to Campaign",
+      "recordFailed": "Failed to record prayer. Please try again."
+    },
+    "noContent": {
+      "title": "No Prayer Content Today",
+      "message": "Check back tomorrow for new prayer content."
+    },
+    "dateView": {
+      "noContent": {
+        "title": "No Prayer Content",
+        "message": "No prayer content available for this date."
+      }
+    },
+    "button": {
+      "iPrayed": "I Prayed",
+      "recording": "Recording...",
+      "recorded": "✓ Prayer Recorded"
+    },
+    "thankYou": "Thank you for praying! Your prayer has been recorded.",
+    "pastPrayers": {
+      "title": "Past Prayer Fuel"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "loading": "Loading..."
+  }
+}

@@ -2,7 +2,7 @@
   <div class="loading-container">
     <div class="loading-spinner">
       <div class="spinner"></div>
-      <p>Loading...</p>
+      <p>{{ $t('common.loading') }}</p>
     </div>
   </div>
 </template>

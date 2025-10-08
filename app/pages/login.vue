@@ -1,8 +1,8 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h1>Prayer Tools</h1>
-      <p class="subtitle">Admin Login</p>
+      <h1>{{ $t('app.title') }}</h1>
+      <p class="subtitle">{{ $t('login.title') }}</p>
 
       <div v-if="error" class="error-message">
         {{ error }}
@@ -10,29 +10,29 @@
 
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email">{{ $t('login.email') }}</label>
           <input
             id="email"
             v-model="email"
             type="email"
             required
-            placeholder="Enter your email"
+            :placeholder="$t('login.emailPlaceholder')"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">{{ $t('login.password') }}</label>
           <input
             id="password"
             v-model="password"
             type="password"
             required
-            placeholder="Enter your password"
+            :placeholder="$t('login.passwordPlaceholder')"
           />
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+          {{ loading ? $t('login.signingIn') : $t('login.signIn') }}
         </button>
       </form>
     </div>
@@ -44,6 +44,7 @@ definePageMeta({
   layout: 'default'
 })
 
+const { t } = useI18n()
 const email = ref('')
 const password = ref('')
 const error = ref('')
@@ -65,7 +66,7 @@ async function handleLogin() {
     // Redirect to admin dashboard
     navigateTo('/admin')
   } catch (err: any) {
-    error.value = err.data?.message || 'Login failed. Please check your credentials.'
+    error.value = err.data?.message || t('login.error.failed')
   } finally {
     loading.value = false
   }
@@ -77,9 +78,9 @@ onMounted(() => {
   const urlError = urlParams.get('error')
 
   if (urlError === 'google_auth_failed') {
-    error.value = 'Google authentication failed. Please try again.'
+    error.value = t('login.error.googleAuthFailed')
   } else if (urlError === 'email_not_verified') {
-    error.value = 'Your Google email is not verified.'
+    error.value = t('login.error.emailNotVerified')
   }
 })
 </script>
