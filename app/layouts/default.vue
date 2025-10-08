@@ -3,7 +3,7 @@
     <header class="header">
       <div class="container">
         <div class="header-content">
-          <h1 class="logo">Prayer Tools</h1>
+          <h1 class="logo">{{ campaignTitle }}</h1>
           <div class="language-selector">
             <label for="global-language-select" class="sr-only">Select Language</label>
             <select
@@ -38,6 +38,7 @@ import { LANGUAGES } from '~/utils/languages'
 
 const currentYear = new Date().getFullYear()
 const { currentLanguage, changeLanguage } = useLanguage()
+const { campaignTitle } = useCampaign()
 
 const selectedLanguage = ref(currentLanguage.value)
 

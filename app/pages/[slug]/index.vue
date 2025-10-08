@@ -15,24 +15,7 @@
       <!-- Hero Section -->
       <section class="hero">
         <div class="container">
-          <h1 class="campaign-title">{{ campaign.title }}</h1>
           <p class="campaign-description">{{ campaign.description }}</p>
-        </div>
-      </section>
-
-      <!-- Prayer Fuel Link Section -->
-      <section class="prayer-fuel-section">
-        <div class="container">
-          <div class="card">
-            <h2>Today's Prayer</h2>
-            <p>Access today's prayer content and prompts</p>
-            <NuxtLink
-              :to="`/${campaign.slug}/prayer-fuel`"
-              class="btn-grey btn-large"
-            >
-              View Prayer Fuel
-            </NuxtLink>
-          </div>
         </div>
       </section>
 
@@ -173,6 +156,22 @@
         </div>
       </section>
 
+      <!-- Prayer Fuel Link Section -->
+      <section class="prayer-fuel-section">
+        <div class="container">
+          <div class="card">
+            <h2>Today's Prayer</h2>
+            <p class="section-description">Access today's prayer content and prompts</p>
+            <NuxtLink
+              :to="`/${campaign.slug}/prayer-fuel`"
+              class="btn-grey btn-large"
+            >
+              View Prayer Fuel
+            </NuxtLink>
+          </div>
+        </div>
+      </section>
+
       <!-- Mobile App Links Section -->
       <section class="app-links-section">
         <div class="container">
@@ -218,6 +217,16 @@ const slug = route.params.slug as string
 // Fetch campaign data
 const { data, pending, error } = await useFetch(`/api/campaigns/${slug}`)
 const campaign = computed(() => data.value?.campaign)
+
+// Campaign title management
+const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+
+// Set campaign title when campaign is loaded
+watch(campaign, (newCampaign) => {
+  if (newCampaign?.title) {
+    setCampaignTitle(newCampaign.title)
+  }
+}, { immediate: true })
 
 // Phone input ref and intl-tel-input instance
 const phoneInput = ref<HTMLInputElement | null>(null)
@@ -347,6 +356,7 @@ onUnmounted(() => {
     iti.destroy()
     iti = null
   }
+  resetCampaignTitle()
 })
 
 // Set page title
@@ -404,20 +414,12 @@ useHead(() => ({
 
 /* Hero Section */
 .hero {
-  padding: 3rem 0 2rem;
+  padding: 2rem 0 1rem;
   text-align: center;
-  border-bottom: 1px solid var(--border);
-}
-
-.campaign-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  line-height: 1.2;
 }
 
 .campaign-description {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   color: var(--text-muted, #666);
   max-width: 600px;
   margin: 0 auto;
@@ -697,10 +699,6 @@ section {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .campaign-title {
-    font-size: 2rem;
-  }
-
   .campaign-description {
     font-size: 1rem;
   }
