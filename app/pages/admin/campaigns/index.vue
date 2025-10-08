@@ -38,9 +38,9 @@
         </div>
 
         <div class="campaign-actions">
-          <NuxtLink :to="`/admin/campaigns/${campaign.id}/content`" class="btn-secondary">
+          <button @click="navigateToContent(campaign.id)" class="btn-secondary">
             Manage Content
-          </NuxtLink>
+          </button>
           <button @click="editCampaign(campaign)" class="btn-secondary">Edit</button>
           <button @click="deleteCampaign(campaign)" class="btn-danger">Delete</button>
         </div>
@@ -96,6 +96,23 @@
             </select>
           </div>
 
+          <div class="form-group">
+            <label for="default_language">Default Language</label>
+            <select id="default_language" v-model="form.default_language">
+              <option value="en">English</option>
+              <option value="es">Spanish (Español)</option>
+              <option value="fr">French (Français)</option>
+              <option value="pt">Portuguese (Português)</option>
+              <option value="de">German (Deutsch)</option>
+              <option value="it">Italian (Italiano)</option>
+              <option value="zh">Chinese (中文)</option>
+              <option value="ar">Arabic (العربية)</option>
+              <option value="ru">Russian (Русский)</option>
+              <option value="hi">Hindi (हिन्दी)</option>
+            </select>
+            <small>Primary language for this campaign</small>
+          </div>
+
           <div class="modal-footer">
             <button type="button" @click="closeModal" class="btn-secondary">Cancel</button>
             <button type="submit" class="btn-primary" :disabled="saving">
@@ -120,6 +137,7 @@ interface Campaign {
   title: string
   description: string
   status: 'active' | 'inactive'
+  default_language: string
   created_at: string
   updated_at: string
 }
@@ -135,7 +153,8 @@ const form = ref({
   title: '',
   slug: '',
   description: '',
-  status: 'active' as 'active' | 'inactive'
+  status: 'active' as 'active' | 'inactive',
+  default_language: 'en'
 })
 
 async function loadCampaigns() {
@@ -152,13 +171,18 @@ async function loadCampaigns() {
   }
 }
 
+function navigateToContent(campaignId: number) {
+  navigateTo(`/admin/campaigns/${campaignId}/content`)
+}
+
 function editCampaign(campaign: Campaign) {
   editingCampaign.value = campaign
   form.value = {
     title: campaign.title,
     slug: campaign.slug,
     description: campaign.description,
-    status: campaign.status
+    status: campaign.status,
+    default_language: campaign.default_language
   }
 }
 
@@ -211,7 +235,8 @@ function closeModal() {
     title: '',
     slug: '',
     description: '',
-    status: 'active'
+    status: 'active',
+    default_language: 'en'
   }
 }
 

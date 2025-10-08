@@ -2,21 +2,21 @@
   <div class="prayer-fuel-page">
     <div v-if="pending" class="loading">
       <div class="spinner"></div>
-      <p>Loading today's prayer...</p>
+      <p>Loading prayer...</p>
     </div>
 
     <div v-else-if="error" class="error-container">
       <h2>Unable to Load Prayer</h2>
       <p>{{ error }}</p>
-      <NuxtLink :to="`/${slug}`" class="btn-primary">Back to Campaign</NuxtLink>
+      <NuxtLink :to="`/${slug}/prayer-fuel`" class="btn-primary">Back to Today's Prayer</NuxtLink>
     </div>
 
     <div v-else-if="data" class="prayer-fuel-content">
       <!-- Campaign Header -->
       <header class="prayer-header">
         <div class="container">
-          <NuxtLink :to="`/${slug}`" class="back-link">← Back to {{ data.campaign.title }}</NuxtLink>
-          <h1 class="page-title">Today's Prayer</h1>
+          <NuxtLink :to="`/${slug}/prayer-fuel`" class="back-link">← Back to Today's Prayer</NuxtLink>
+          <h1 class="page-title">Prayer Fuel</h1>
           <p class="prayer-date">{{ formatDate(data.date) }}</p>
         </div>
       </header>
@@ -31,60 +31,47 @@
 
           <div v-else class="no-content">
             <div class="no-content-icon">📖</div>
-            <h2>No Prayer Content Today</h2>
-            <p>{{ data.message || 'Check back tomorrow for new prayer content.' }}</p>
+            <h2>No Prayer Content</h2>
+            <p>{{ data.message || 'No prayer content available for this date.' }}</p>
           </div>
         </div>
       </main>
-
-      <!-- I Prayed Button (only show if content exists) -->
-      <footer v-if="data.content" class="prayer-footer">
-        <div class="container">
-          <button
-            @click="markAsPrayed"
-            :disabled="prayedMarked || submitting"
-            class="btn-prayed"
-          >
-            {{ prayedMarked ? '✓ Prayer Recorded' : submitting ? 'Recording...' : 'I Prayed' }}
-          </button>
-          <p v-if="prayedMarked" class="prayed-message">
-            Thank you for praying! Your prayer has been recorded.
-          </p>
-        </div>
-      </footer>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { getLanguageName, getLanguageFlag } from '~/utils/languages'
+
 definePageMeta({
   layout: 'default'
 })
 
 const route = useRoute()
 const slug = route.params.slug as string
+const dateParam = route.params.date as string
 
-// Get tracking ID from URL if present (from email/WhatsApp links)
-const trackingId = route.query.uid as string | undefined
+// Get language preference from global language selector
+const { currentLanguage } = useLanguage()
+const selectedLanguage = ref(currentLanguage.value || '')
 
-// Track page open time for duration calculation
-const pageOpenTime = ref(Date.now())
-
-// Get current date in user's timezone
-const currentDate = new Date().toISOString()
-
-// Fetch prayer content
-const { data, pending, error: fetchError } = await useFetch(`/api/campaigns/${slug}/prayer-fuel`, {
-  query: {
-    userDate: currentDate
-  }
+// Fetch prayer content for specific date
+const { data, pending, error: fetchError, refresh } = await useFetch(`/api/campaigns/${slug}/prayer-fuel`, {
+  query: computed(() => ({
+    userDate: dateParam,
+    language: selectedLanguage.value || undefined
+  }))
 })
 
 const error = computed(() => fetchError.value?.message || null)
 
-// Prayer tracking state
-const prayedMarked = ref(false)
-const submitting = ref(false)
+// Watch global language changes
+watch(currentLanguage, async (newLang) => {
+  if (newLang && newLang !== selectedLanguage.value) {
+    selectedLanguage.value = newLang
+    await refresh()
+  }
+})
 
 // Format date for display
 function formatDate(dateString: string) {
@@ -97,46 +84,12 @@ function formatDate(dateString: string) {
   })
 }
 
-// Mark as prayed
-async function markAsPrayed() {
-  if (prayedMarked.value || submitting.value) return
-
-  submitting.value = true
-
-  try {
-    // Calculate duration (time spent on page)
-    const duration = Math.floor((Date.now() - pageOpenTime.value) / 1000) // in seconds
-    const timestamp = new Date().toISOString()
-
-    await $fetch(`/api/campaigns/${slug}/prayed`, {
-      method: 'POST',
-      body: {
-        userId: trackingId || null,
-        duration,
-        timestamp
-      }
-    })
-
-    prayedMarked.value = true
-  } catch (err: any) {
-    console.error('Failed to record prayer:', err)
-    alert('Failed to record prayer. Please try again.')
-  } finally {
-    submitting.value = false
-  }
-}
-
 // Set page title
 useHead(() => ({
   title: data.value?.content
     ? `${data.value.content.title} - ${data.value.campaign.title}`
     : `Prayer Fuel - ${data.value?.campaign.title || 'Loading...'}`
 }))
-
-// Update page open time when component mounts
-onMounted(() => {
-  pageOpenTime.value = Date.now()
-})
 </script>
 
 <style scoped>
@@ -253,47 +206,6 @@ onMounted(() => {
   font-size: 1.125rem;
 }
 
-/* Footer with Button */
-.prayer-footer {
-  border-top: 1px solid var(--border);
-  padding: 2rem 0;
-  background: var(--bg-soft);
-  text-align: center;
-}
-
-.btn-prayed {
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 1rem 3rem;
-  border-radius: 8px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  min-width: 200px;
-}
-
-.btn-prayed:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.btn-prayed:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-prayed:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.prayed-message {
-  margin-top: 1rem;
-  color: var(--text-muted, #666);
-  font-size: 0.875rem;
-}
-
 /* Buttons */
 .btn-primary {
   display: inline-block;
@@ -320,14 +232,8 @@ onMounted(() => {
     font-size: 1.5rem;
   }
 
-  .btn-prayed {
-    width: 100%;
-    max-width: 100%;
-  }
-
   .prayer-header,
-  .prayer-main,
-  .prayer-footer {
+  .prayer-main {
     padding-left: 1rem;
     padding-right: 1rem;
   }

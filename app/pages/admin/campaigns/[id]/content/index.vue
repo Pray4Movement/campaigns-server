@@ -5,6 +5,9 @@
         <NuxtLink to="/admin/campaigns" class="back-link">← Back to Campaigns</NuxtLink>
         <h1 v-if="campaign">{{ campaign.title }} - Prayer Content</h1>
         <h1 v-else>Prayer Content</h1>
+        <p v-if="campaign" class="default-language">
+          Default Language: {{ getLanguageName(campaign.default_language) }} {{ getLanguageFlag(campaign.default_language) }}
+        </p>
       </div>
       <NuxtLink :to="`/admin/campaigns/${campaignId}/content/new`" class="btn-primary">
         + Add Content
@@ -15,7 +18,7 @@
 
     <div v-else-if="error" class="error">{{ error }}</div>
 
-    <div v-else-if="!content || content.length === 0" class="empty-state">
+    <div v-else-if="!groupedContent || groupedContent.length === 0" class="empty-state">
       <p>No prayer content yet. Create your first content entry.</p>
       <NuxtLink :to="`/admin/campaigns/${campaignId}/content/new`" class="btn-primary">
         Add Content
@@ -23,17 +26,47 @@
     </div>
 
     <div v-else class="content-list">
-      <div v-for="item in content" :key="item.id" class="content-card">
+      <div v-for="group in groupedContent" :key="group.date" class="content-card">
         <div class="content-header">
           <div>
-            <h3>{{ item.title }}</h3>
-            <span class="date">{{ formatDate(item.content_date) }}</span>
+            <h3>{{ formatDate(group.date) }}</h3>
           </div>
           <div class="content-actions">
-            <NuxtLink :to="`/admin/campaigns/${campaignId}/content/${item.id}/edit`" class="btn-secondary">
+            <NuxtLink
+              :to="`/admin/campaigns/${campaignId}/content/new?date=${group.date}`"
+              class="btn-secondary"
+            >
+              + Add Content
+            </NuxtLink>
+            <button
+              v-if="group.content.length === 1"
+              @click="deleteContent(group.content[0])"
+              class="btn-danger"
+            >
+              Delete
+            </button>
+            <button
+              v-else
+              @click="deleteAllForDate(group)"
+              class="btn-danger"
+            >
+              Delete All
+            </button>
+          </div>
+        </div>
+        <div v-if="group.content.length > 0" class="content-preview">
+          <div v-for="contentItem in group.content" :key="contentItem.id" class="preview-item">
+            <div class="preview-info">
+              <span class="preview-lang">{{ getLanguageFlag(contentItem.language_code) }}</span>
+              <span class="preview-title">{{ contentItem.title }}</span>
+            </div>
+            <NuxtLink
+              :to="`/admin/campaigns/${campaignId}/content/${contentItem.id}/edit`"
+              class="btn-edit"
+              :title="`Edit ${getLanguageName(contentItem.language_code)} version`"
+            >
               Edit
             </NuxtLink>
-            <button @click="deleteContent(item)" class="btn-danger">Delete</button>
           </div>
         </div>
       </div>
@@ -42,6 +75,8 @@
 </template>
 
 <script setup lang="ts">
+import { getLanguageName, getLanguageFlag } from '~/utils/languages'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'auth'
@@ -53,18 +88,26 @@ const campaignId = computed(() => parseInt(route.params.id as string))
 interface Campaign {
   id: number
   title: string
+  default_language: string
 }
 
 interface PrayerContent {
   id: number
   campaign_id: number
   content_date: string
+  language_code: string
   title: string
   content_json: any
 }
 
+interface GroupedContent {
+  date: string
+  languages: string[]
+  content: PrayerContent[]
+}
+
 const campaign = ref<Campaign | null>(null)
-const content = ref<PrayerContent[]>([])
+const groupedContent = ref<GroupedContent[]>([])
 const loading = ref(true)
 const error = ref('')
 
@@ -80,19 +123,19 @@ async function loadContent() {
   try {
     loading.value = true
     error.value = ''
-    const response = await $fetch<{ content: PrayerContent[] }>(`/api/admin/campaigns/${campaignId.value}/content`)
-    content.value = response.content || []
+    const response = await $fetch<{ content: GroupedContent[] }>(`/api/admin/campaigns/${campaignId.value}/content?grouped=true`)
+    groupedContent.value = response.content || []
   } catch (err: any) {
     error.value = 'Failed to load content'
     console.error(err)
-    content.value = []
+    groupedContent.value = []
   } finally {
     loading.value = false
   }
 }
 
 async function deleteContent(item: PrayerContent) {
-  if (!confirm(`Are you sure you want to delete "${item.title}"?`)) {
+  if (!confirm(`Are you sure you want to delete the ${getLanguageName(item.language_code)} version of "${item.title}"?`)) {
     return
   }
 
@@ -100,6 +143,25 @@ async function deleteContent(item: PrayerContent) {
     await $fetch(`/api/admin/campaigns/${campaignId.value}/content/${item.id}`, {
       method: 'DELETE'
     })
+    await loadContent()
+  } catch (err: any) {
+    alert(err.data?.statusMessage || 'Failed to delete content')
+  }
+}
+
+async function deleteAllForDate(group: GroupedContent) {
+  if (!confirm(`Are you sure you want to delete ALL language versions for ${formatDate(group.date)}? This will delete ${group.content.length} content items.`)) {
+    return
+  }
+
+  try {
+    await Promise.all(
+      group.content.map(item =>
+        $fetch(`/api/admin/campaigns/${campaignId.value}/content/${item.id}`, {
+          method: 'DELETE'
+        })
+      )
+    )
     await loadContent()
   } catch (err: any) {
     alert(err.data?.statusMessage || 'Failed to delete content')
@@ -145,7 +207,13 @@ onMounted(() => {
 }
 
 .page-header h1 {
+  margin: 0 0 0.25rem;
+}
+
+.default-language {
   margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
 }
 
 .btn-primary {
@@ -251,5 +319,71 @@ onMounted(() => {
 .content-actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.content-preview {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  transition: border-color 0.15s;
+}
+
+.preview-item:hover {
+  border-color: var(--text-muted);
+}
+
+.preview-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-lang {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.preview-title {
+  color: var(--color-text);
+  flex: 1;
+  font-size: 0.9375rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-edit {
+  background-color: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  padding: 0.375rem 0.875rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-edit:hover {
+  border-color: var(--text);
+  background-color: var(--color-background);
 }
 </style>

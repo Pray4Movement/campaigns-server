@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   title TEXT NOT NULL,
   description TEXT DEFAULT '',
   status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
+  default_language TEXT DEFAULT 'en' NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -71,16 +72,18 @@ CREATE TABLE IF NOT EXISTS prayer_content (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   campaign_id INTEGER NOT NULL,
   content_date DATE NOT NULL,
+  language_code TEXT DEFAULT 'en' NOT NULL,
   title TEXT NOT NULL,
   content_json TEXT DEFAULT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
-  UNIQUE(campaign_id, content_date)
+  UNIQUE(campaign_id, content_date, language_code)
 );
 
 CREATE INDEX IF NOT EXISTS idx_prayer_content_campaign_date ON prayer_content(campaign_id, content_date);
 CREATE INDEX IF NOT EXISTS idx_prayer_content_date ON prayer_content(content_date);
+CREATE INDEX IF NOT EXISTS idx_prayer_content_language ON prayer_content(language_code);
 
 
 -- Reminder signups table
@@ -93,6 +96,7 @@ CREATE TABLE IF NOT EXISTS reminder_signups (
   phone TEXT DEFAULT '',
   delivery_method TEXT NOT NULL CHECK(delivery_method IN ('email', 'whatsapp', 'app')),
   frequency TEXT NOT NULL,
+  days_of_week TEXT DEFAULT NULL,
   time_preference TEXT NOT NULL,
   status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'unsubscribed')),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

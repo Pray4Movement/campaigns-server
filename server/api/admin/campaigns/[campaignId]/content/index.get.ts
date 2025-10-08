@@ -17,8 +17,45 @@ export default defineEventHandler((event) => {
   const options = {
     startDate: query.startDate as string | undefined,
     endDate: query.endDate as string | undefined,
+    language: query.language as string | undefined,
     limit: query.limit ? parseInt(query.limit as string) : undefined,
     offset: query.offset ? parseInt(query.offset as string) : undefined
+  }
+
+  // If grouped by date is requested, return grouped data
+  if (query.grouped === 'true') {
+    const grouped = prayerContentService.getCampaignContentGroupedByDate(campaignId, options)
+
+    // For each date, get the content for all languages
+    const groupedWithContent = grouped.map(group => {
+      const dateContent = prayerContentService.getCampaignPrayerContent(campaignId, {
+        startDate: group.date,
+        endDate: group.date
+      })
+
+      // Parse content_json for each item
+      const parsedContent = dateContent.map(item => {
+        if (typeof item.content_json === 'string') {
+          try {
+            return { ...item, content_json: JSON.parse(item.content_json) }
+          } catch (e) {
+            return item
+          }
+        }
+        return item
+      })
+
+      return {
+        date: group.date,
+        languages: group.languages,
+        content: parsedContent
+      }
+    })
+
+    return {
+      content: groupedWithContent,
+      total: grouped.length
+    }
   }
 
   const content = prayerContentService.getCampaignPrayerContent(campaignId, options)

@@ -36,17 +36,31 @@ export default defineEventHandler((event) => {
   // Extract just the date part (YYYY-MM-DD)
   const date = userDate.split('T')[0]
 
-  // Get prayer content for the date
-  const content = prayerContentService.getPrayerContentByDate(campaign.id, date)
+  // Get language preference (default to campaign's default language)
+  const languageCode = (query.language as string) || campaign.default_language || 'en'
+
+  // Get prayer content for the date and language
+  let content = prayerContentService.getPrayerContentByDate(campaign.id, date, languageCode)
+
+  // If content not found in requested language, fall back to campaign default language
+  if (!content && languageCode !== campaign.default_language) {
+    content = prayerContentService.getPrayerContentByDate(campaign.id, date, campaign.default_language)
+  }
+
+  // Get available languages for this date
+  const availableLanguages = prayerContentService.getAvailableLanguages(campaign.id, date)
 
   if (!content) {
     return {
       campaign: {
         id: campaign.id,
         slug: campaign.slug,
-        title: campaign.title
+        title: campaign.title,
+        default_language: campaign.default_language
       },
       date,
+      language: languageCode,
+      availableLanguages,
       content: null,
       message: 'No prayer content available for this date'
     }
@@ -65,12 +79,16 @@ export default defineEventHandler((event) => {
     campaign: {
       id: campaign.id,
       slug: campaign.slug,
-      title: campaign.title
+      title: campaign.title,
+      default_language: campaign.default_language
     },
     date,
+    language: content.language_code,
+    availableLanguages,
     content: {
       id: content.id,
       title: content.title,
+      language_code: content.language_code,
       content_json: content.content_json,
       content_date: content.content_date
     }

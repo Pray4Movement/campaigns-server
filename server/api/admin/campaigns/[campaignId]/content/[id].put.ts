@@ -17,11 +17,9 @@ export default defineEventHandler(async (event) => {
   try {
     const content = prayerContentService.updatePrayerContent(id, {
       title: body.title,
-      body_text: body.body_text,
       content_json: body.content_json,
-      scripture_references: body.scripture_references,
-      prayer_prompts: body.prayer_prompts,
-      content_date: body.content_date
+      content_date: body.content_date,
+      language_code: body.language_code
     })
 
     if (!content) {

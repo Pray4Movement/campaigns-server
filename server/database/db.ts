@@ -6,24 +6,24 @@ let db: Database.Database | null = null
 
 export function getDatabase(): Database.Database {
   if (!db) {
-    // Create database file in data directory (Nuxt 4.1 best practice)
-    const dataDir = join(process.cwd(), 'data')
-    const dbPath = join(dataDir, 'database.sqlite')
-    
-    // Ensure data directory exists
-    if (!existsSync(dataDir)) {
-      mkdirSync(dataDir, { recursive: true })
+    // Create database file in server/database directory
+    const dbDir = join(process.cwd(), 'server/database')
+    const dbPath = join(dbDir, 'database.sqlite')
+
+    // Ensure database directory exists
+    if (!existsSync(dbDir)) {
+      mkdirSync(dbDir, { recursive: true })
     }
-    
+
     db = new Database(dbPath)
-    
+
     // Enable WAL mode for better concurrent access
     db.pragma('journal_mode = WAL')
-    
+
     // Initialize schema
     initializeDatabase()
   }
-  
+
   return db
 }
 

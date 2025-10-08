@@ -45,6 +45,30 @@
                 required
               />
             </div>
+
+            <div class="form-group">
+              <label for="language_code">Language *</label>
+              <select id="language_code" v-model="form.language_code" disabled>
+                <option v-for="lang in LANGUAGES" :key="lang.code" :value="lang.code">
+                  {{ lang.flag }} {{ lang.name }} ({{ lang.nativeName }})
+                </option>
+              </select>
+              <small>Language cannot be changed after creation. Create a new translation instead.</small>
+            </div>
+
+            <div v-if="availableLanguages.length > 0" class="sidebar-section">
+              <h4>Other Languages</h4>
+              <div class="translation-links">
+                <NuxtLink
+                  v-for="lang in otherLanguages"
+                  :key="lang.contentId"
+                  :to="`/admin/campaigns/${campaignId}/content/${lang.contentId}/edit`"
+                  class="translation-link"
+                >
+                  {{ getLanguageFlag(lang.code) }} {{ getLanguageName(lang.code) }}
+                </NuxtLink>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
@@ -53,6 +77,8 @@
 </template>
 
 <script setup lang="ts">
+import { LANGUAGES, getLanguageName, getLanguageFlag } from '~/utils/languages'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'auth'
@@ -67,23 +93,30 @@ interface PrayerContent {
   id: number
   title: string
   content_date: string
+  language_code: string
   content_json: any
 }
 
 const content = ref<PrayerContent | null>(null)
 const loading = ref(true)
 const error = ref('')
+const availableLanguages = ref<Array<{ code: string, contentId: number }>>([])
 
 const form = ref({
   title: '',
   content_date: '',
+  language_code: 'en',
   content_json: null as any
 })
 
 const saving = ref(false)
 
 const isValid = computed(() => {
-  return form.value.title && form.value.content_date
+  return form.value.title && form.value.content_date && form.value.language_code
+})
+
+const otherLanguages = computed(() => {
+  return availableLanguages.value.filter(lang => lang.code !== form.value.language_code)
 })
 
 async function loadContent() {
@@ -99,13 +132,31 @@ async function loadContent() {
     form.value = {
       title: data.title,
       content_date: data.content_date,
+      language_code: data.language_code,
       content_json: data.content_json || { time: Date.now(), blocks: [] }
     }
+
+    // Load other language versions for this date
+    await loadAvailableLanguages(data.content_date)
   } catch (err: any) {
     error.value = 'Failed to load content'
     console.error(err)
   } finally {
     loading.value = false
+  }
+}
+
+async function loadAvailableLanguages(date: string) {
+  try {
+    const response = await $fetch<{ content: PrayerContent[] }>(
+      `/api/admin/campaigns/${campaignId.value}/content?startDate=${date}&endDate=${date}`
+    )
+    availableLanguages.value = response.content.map(item => ({
+      code: item.language_code,
+      contentId: item.id
+    }))
+  } catch (err) {
+    console.error('Failed to load available languages:', err)
   }
 }
 
@@ -120,6 +171,7 @@ async function saveContent() {
       body: {
         title: form.value.title,
         content_date: form.value.content_date,
+        language_code: form.value.language_code,
         content_json: form.value.content_json
       }
     })
@@ -304,10 +356,65 @@ onMounted(() => {
   color: var(--color-text);
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: var(--text);
   box-shadow: 0 0 0 3px var(--shadow);
+}
+
+.form-group select {
+  width: 100%;
+  padding: 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-background);
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.form-group select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.sidebar-section h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.translation-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.translation-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  transition: all 0.15s;
+}
+
+.translation-link:hover {
+  border-color: var(--text);
+  background-color: var(--color-background-soft);
 }
 
 @media (max-width: 768px) {

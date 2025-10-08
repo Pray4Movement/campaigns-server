@@ -40,6 +40,16 @@
               required
             />
           </div>
+
+          <div class="form-group">
+            <label for="language_code">Language *</label>
+            <select id="language_code" v-model="form.language_code">
+              <option v-for="lang in LANGUAGES" :key="lang.code" :value="lang.code">
+                {{ lang.flag }} {{ lang.name }} ({{ lang.nativeName }})
+              </option>
+            </select>
+            <small v-if="campaign">Campaign default: {{ getLanguageName(campaign.default_language) }}</small>
+          </div>
         </div>
       </aside>
     </div>
@@ -47,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import { LANGUAGES, getLanguageName } from '~/utils/languages'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'auth'
@@ -55,10 +67,19 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const campaignId = computed(() => parseInt(route.params.id as string))
+const queryDate = route.query.date as string | undefined
+
+interface Campaign {
+  id: number
+  default_language: string
+}
+
+const campaign = ref<Campaign | null>(null)
 
 const form = ref({
   title: '',
   content_date: '',
+  language_code: 'en',
   content_json: {
     time: Date.now(),
     blocks: []
@@ -68,8 +89,20 @@ const form = ref({
 const saving = ref(false)
 
 const isValid = computed(() => {
-  return form.value.title && form.value.content_date
+  return form.value.title && form.value.content_date && form.value.language_code
 })
+
+async function loadCampaign() {
+  try {
+    campaign.value = await $fetch(`/api/admin/campaigns/${campaignId.value}`)
+    // Set default language from campaign
+    if (campaign.value) {
+      form.value.language_code = campaign.value.default_language
+    }
+  } catch (err) {
+    console.error('Failed to load campaign:', err)
+  }
+}
 
 async function saveContent() {
   if (!isValid.value) return
@@ -82,6 +115,7 @@ async function saveContent() {
       body: {
         title: form.value.title,
         content_date: form.value.content_date,
+        language_code: form.value.language_code,
         content_json: form.value.content_json
       }
     })
@@ -95,10 +129,16 @@ async function saveContent() {
   }
 }
 
-// Set default date to today
 onMounted(() => {
-  const today = new Date().toISOString().split('T')[0]
-  form.value.content_date = today
+  loadCampaign()
+
+  // Set date from query param or default to today
+  if (queryDate) {
+    form.value.content_date = queryDate
+  } else {
+    const today = new Date().toISOString().split('T')[0]
+    form.value.content_date = today
+  }
 })
 </script>
 

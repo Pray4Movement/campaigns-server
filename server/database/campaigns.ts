@@ -6,6 +6,7 @@ export interface Campaign {
   title: string
   description: string
   status: 'active' | 'inactive'
+  default_language: string
   created_at: string
   updated_at: string
 }
@@ -15,6 +16,7 @@ export interface CreateCampaignData {
   description?: string
   slug?: string
   status?: 'active' | 'inactive'
+  default_language?: string
 }
 
 export interface UpdateCampaignData {
@@ -22,6 +24,7 @@ export interface UpdateCampaignData {
   description?: string
   slug?: string
   status?: 'active' | 'inactive'
+  default_language?: string
 }
 
 export class CampaignService {
@@ -61,7 +64,7 @@ export class CampaignService {
 
   // Create a new campaign
   createCampaign(data: CreateCampaignData): Campaign {
-    const { title, description = '', status = 'active' } = data
+    const { title, description = '', status = 'active', default_language = 'en' } = data
 
     // Generate unique slug if not provided
     const slug = data.slug || this.generateUniqueSlug(title)
@@ -72,12 +75,12 @@ export class CampaignService {
     }
 
     const stmt = this.db.prepare(`
-      INSERT INTO campaigns (slug, title, description, status)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO campaigns (slug, title, description, status, default_language)
+      VALUES (?, ?, ?, ?, ?)
     `)
 
     try {
-      const result = stmt.run(slug, title, description, status)
+      const result = stmt.run(slug, title, description, status, default_language)
       return this.getCampaignById(result.lastInsertRowid as number)!
     } catch (error: any) {
       if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
@@ -90,7 +93,7 @@ export class CampaignService {
   // Get campaign by ID
   getCampaignById(id: number): Campaign | null {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, created_at, updated_at
       FROM campaigns
       WHERE id = ?
     `)
@@ -101,7 +104,7 @@ export class CampaignService {
   // Get campaign by slug
   getCampaignBySlug(slug: string): Campaign | null {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, created_at, updated_at
       FROM campaigns
       WHERE slug = ?
     `)
@@ -112,7 +115,7 @@ export class CampaignService {
   // Get all campaigns
   getAllCampaigns(statusFilter?: 'active' | 'inactive'): Campaign[] {
     let query = `
-      SELECT id, slug, title, description, status, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, created_at, updated_at
       FROM campaigns
     `
 
@@ -161,6 +164,11 @@ export class CampaignService {
     if (data.status !== undefined) {
       updates.push('status = ?')
       values.push(data.status)
+    }
+
+    if (data.default_language !== undefined) {
+      updates.push('default_language = ?')
+      values.push(data.default_language)
     }
 
     if (updates.length === 0) {

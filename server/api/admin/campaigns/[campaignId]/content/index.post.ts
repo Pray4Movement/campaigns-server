@@ -25,12 +25,9 @@ export default defineEventHandler(async (event) => {
     const content = prayerContentService.createPrayerContent({
       campaign_id: campaignId,
       content_date: body.content_date,
+      language_code: body.language_code || 'en',
       title: body.title,
-      body_text: body.body_text,
-      content_json: body.content_json,
-      scripture_references: body.scripture_references,
-      prayer_prompts: body.prayer_prompts,
-      media: body.media
+      content_json: body.content_json
     })
 
     return {
