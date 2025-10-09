@@ -24,7 +24,9 @@ export default defineNuxtConfig({
       cookieKey: 'preferred_language',
       redirectOn: 'root',
       alwaysRedirect: true
-    }
+    },
+    types: 'composition',
+    vueI18n: './i18n.config.ts'
   },
 
   alias: {

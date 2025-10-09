@@ -334,9 +334,7 @@ onMounted(() => {
           if (phoneInput.value && !iti) {
             iti = intlTelInput(phoneInput.value, {
               separateDialCode: true,
-              initialCountry: 'us',
-              preferredCountries: ['us', 'gb', 'ca', 'au'],
-              utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.12/build/js/utils.js'
+              initialCountry: 'us'
             })
           }
         })
