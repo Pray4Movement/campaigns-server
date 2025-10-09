@@ -1,6 +1,7 @@
 import { Pool, PoolClient, QueryResult } from 'pg'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { MigrationRunner } from '../utils/migrations'
 
 let pool: Pool | null = null
 
@@ -93,7 +94,7 @@ export function getDatabase(): DatabaseWrapper {
       console.error('Unexpected error on idle PostgreSQL client', err)
     })
 
-    // Initialize schema
+    // Initialize database with migrations
     initializeDatabase().catch(err => {
       console.error('Failed to initialize database:', err)
       throw err
@@ -107,12 +108,10 @@ async function initializeDatabase() {
   if (!pool) return
 
   try {
-    // Read and execute schema
-    const schemaPath = join(process.cwd(), 'server/database/schema.sql')
-    const schema = readFileSync(schemaPath, 'utf-8')
-
-    // Execute schema (PostgreSQL can handle multiple statements in one query)
-    await pool.query(schema)
+    // Initialize and run migrations
+    const migrationRunner = new MigrationRunner(pool)
+    await migrationRunner.initialize()
+    await migrationRunner.runMigrations()
 
     console.log('Database initialized successfully')
   } catch (error) {
