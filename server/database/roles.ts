@@ -19,7 +19,7 @@ export class RoleService {
   private db = getDatabase()
 
   // Create default roles if they don't exist
-  initializeDefaultRoles() {
+  async initializeDefaultRoles() {
     const roles = [
       { name: 'admin', description: 'Full system administrator' },
       { name: 'campaign_editor', description: 'Can create and edit campaigns' },
@@ -40,45 +40,45 @@ export class RoleService {
 
     // Insert roles if they don't exist
     for (const role of roles) {
-      const existing = this.db.prepare('SELECT id FROM roles WHERE name = ?').get(role.name)
+      const existing = await this.db.prepare('SELECT id FROM roles WHERE name = ?').get(role.name)
       if (!existing) {
-        this.db.prepare('INSERT INTO roles (name, description) VALUES (?, ?)').run(role.name, role.description)
+        await this.db.prepare('INSERT INTO roles (name, description) VALUES (?, ?)').run(role.name, role.description)
       }
     }
 
     // Insert permissions if they don't exist
     for (const permission of permissions) {
-      const existing = this.db.prepare('SELECT id FROM permissions WHERE name = ?').get(permission.name)
+      const existing = await this.db.prepare('SELECT id FROM permissions WHERE name = ?').get(permission.name)
       if (!existing) {
-        this.db.prepare('INSERT INTO permissions (name, description) VALUES (?, ?)').run(permission.name, permission.description)
+        await this.db.prepare('INSERT INTO permissions (name, description) VALUES (?, ?)').run(permission.name, permission.description)
       }
     }
 
     // Assign all permissions to admin role
-    const adminRole = this.db.prepare('SELECT id FROM roles WHERE name = ?').get('admin') as { id: number } | undefined
+    const adminRole = await this.db.prepare('SELECT id FROM roles WHERE name = ?').get('admin') as { id: number } | undefined
     if (adminRole) {
-      const allPermissions = this.db.prepare('SELECT id FROM permissions').all() as { id: number }[]
+      const allPermissions = await this.db.prepare('SELECT id FROM permissions').all() as { id: number }[]
       for (const perm of allPermissions) {
-        const existing = this.db.prepare('SELECT 1 FROM role_permissions WHERE role_id = ? AND permission_id = ?')
+        const existing = await this.db.prepare('SELECT 1 FROM role_permissions WHERE role_id = ? AND permission_id = ?')
           .get(adminRole.id, perm.id)
         if (!existing) {
-          this.db.prepare('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)')
+          await this.db.prepare('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)')
             .run(adminRole.id, perm.id)
         }
       }
     }
 
     // Assign campaign permissions to campaign_editor role
-    const editorRole = this.db.prepare('SELECT id FROM roles WHERE name = ?').get('campaign_editor') as { id: number } | undefined
+    const editorRole = await this.db.prepare('SELECT id FROM roles WHERE name = ?').get('campaign_editor') as { id: number } | undefined
     if (editorRole) {
-      const campaignPerms = this.db.prepare(
+      const campaignPerms = await this.db.prepare(
         "SELECT id FROM permissions WHERE name LIKE 'campaigns.%'"
       ).all() as { id: number }[]
       for (const perm of campaignPerms) {
-        const existing = this.db.prepare('SELECT 1 FROM role_permissions WHERE role_id = ? AND permission_id = ?')
+        const existing = await this.db.prepare('SELECT 1 FROM role_permissions WHERE role_id = ? AND permission_id = ?')
           .get(editorRole.id, perm.id)
         if (!existing) {
-          this.db.prepare('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)')
+          await this.db.prepare('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)')
             .run(editorRole.id, perm.id)
         }
       }
@@ -86,39 +86,39 @@ export class RoleService {
   }
 
   // Get all roles
-  getAllRoles(): Role[] {
+  async getAllRoles(): Promise<Role[]> {
     const stmt = this.db.prepare('SELECT * FROM roles ORDER BY name')
-    return stmt.all() as Role[]
+    return await stmt.all() as Role[]
   }
 
   // Get role by ID
-  getRoleById(id: number): Role | null {
+  async getRoleById(id: number): Promise<Role | null> {
     const stmt = this.db.prepare('SELECT * FROM roles WHERE id = ?')
-    return stmt.get(id) as Role | null
+    return await stmt.get(id) as Role | null
   }
 
   // Get permissions for a role
-  getRolePermissions(roleId: number): Permission[] {
+  async getRolePermissions(roleId: number): Promise<Permission[]> {
     const stmt = this.db.prepare(`
       SELECT p.* FROM permissions p
       JOIN role_permissions rp ON p.id = rp.permission_id
       WHERE rp.role_id = ?
     `)
-    return stmt.all(roleId) as Permission[]
+    return await stmt.all(roleId) as Permission[]
   }
 
   // Get user roles
-  getUserRoles(userId: number): Role[] {
+  async getUserRoles(userId: number): Promise<Role[]> {
     const stmt = this.db.prepare(`
       SELECT r.* FROM roles r
       JOIN user_roles ur ON r.id = ur.role_id
       WHERE ur.user_id = ?
     `)
-    return stmt.all(userId) as Role[]
+    return await stmt.all(userId) as Role[]
   }
 
   // Check if user has permission
-  userHasPermission(userId: number, permissionName: string): boolean {
+  async userHasPermission(userId: number, permissionName: string): Promise<boolean> {
     const stmt = this.db.prepare(`
       SELECT 1 FROM permissions p
       JOIN role_permissions rp ON p.id = rp.permission_id
@@ -126,24 +126,26 @@ export class RoleService {
       WHERE ur.user_id = ? AND p.name = ?
       LIMIT 1
     `)
-    return !!stmt.get(userId, permissionName)
+    return !!(await stmt.get(userId, permissionName))
   }
 
   // Assign role to user
-  assignRoleToUser(userId: number, roleId: number): void {
-    const stmt = this.db.prepare('INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES (?, ?)')
-    stmt.run(userId, roleId)
+  async assignRoleToUser(userId: number, roleId: number): Promise<void> {
+    const stmt = this.db.prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?) ON CONFLICT DO NOTHING')
+    await stmt.run(userId, roleId)
   }
 
   // Remove role from user
-  removeRoleFromUser(userId: number, roleId: number): void {
+  async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
     const stmt = this.db.prepare('DELETE FROM user_roles WHERE user_id = ? AND role_id = ?')
-    stmt.run(userId, roleId)
+    await stmt.run(userId, roleId)
   }
 }
 
 // Export singleton instance
 export const roleService = new RoleService()
 
-// Initialize default roles on import
-roleService.initializeDefaultRoles()
+// Initialize default roles on import (runs asynchronously)
+roleService.initializeDefaultRoles().catch(err => {
+  console.error('Failed to initialize default roles:', err)
+})

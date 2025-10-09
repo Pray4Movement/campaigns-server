@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // Find user by token_key
-    const user = userService.getUserByTokenKey(sanitizedToken)
+    const user = await userService.getUserByTokenKey(sanitizedToken)
     
     if (!user) {
       // Redirect to login with error message
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // Mark user as verified and generate new token key for security
-    const success = userService.verifyUser(user.id)
+    const success = await userService.verifyUser(user.id)
     
     if (!success) {
       throw createError({
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // Generate new token key to invalidate the old one (security best practice)
-    userService.updateTokenKey(user.id)
+    await userService.updateTokenKey(user.id)
     
     // Send welcome email (fire and forget - don't block the response)
     sendWelcomeEmail(user.email, user.display_name || user.email.split('@')[0])

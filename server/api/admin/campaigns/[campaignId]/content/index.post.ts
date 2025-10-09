@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const content = prayerContentService.createPrayerContent({
+    const content = await prayerContentService.createPrayerContent({
       campaign_id: campaignId,
       content_date: body.content_date,
       language_code: body.language_code || 'en',

@@ -1,7 +1,7 @@
 import { campaignService } from '#server/database/campaigns'
 import { requireAuth } from '#server/utils/auth'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   // Require authentication
   requireAuth(event)
 
@@ -14,7 +14,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const campaign = campaignService.getCampaignById(campaignId)
+  const campaign = await campaignService.getCampaignById(campaignId)
 
   if (!campaign) {
     throw createError({

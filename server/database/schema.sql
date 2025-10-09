@@ -1,14 +1,14 @@
 -- Users table (admin users)
 CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   display_name TEXT DEFAULT '' NOT NULL,
   verified BOOLEAN DEFAULT FALSE NOT NULL,
   superadmin BOOLEAN DEFAULT FALSE NOT NULL,
   token_key TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes for faster lookups
@@ -17,18 +17,18 @@ CREATE INDEX IF NOT EXISTS idx_users_token_key ON users(token_key);
 
 -- Roles table
 CREATE TABLE IF NOT EXISTS roles (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   description TEXT DEFAULT '',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- User roles junction table
 CREATE TABLE IF NOT EXISTS user_roles (
   user_id INTEGER NOT NULL,
   role_id INTEGER NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, role_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
@@ -36,17 +36,17 @@ CREATE TABLE IF NOT EXISTS user_roles (
 
 -- Permissions table
 CREATE TABLE IF NOT EXISTS permissions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   description TEXT DEFAULT '',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Role permissions junction table
 CREATE TABLE IF NOT EXISTS role_permissions (
   role_id INTEGER NOT NULL,
   permission_id INTEGER NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (role_id, permission_id),
   FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
   FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
@@ -54,14 +54,14 @@ CREATE TABLE IF NOT EXISTS role_permissions (
 
 -- Campaigns table
 CREATE TABLE IF NOT EXISTS campaigns (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   slug TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL,
   description TEXT DEFAULT '',
   status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
   default_language TEXT DEFAULT 'en' NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_campaigns_slug ON campaigns(slug);
@@ -69,14 +69,14 @@ CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status);
 
 -- Prayer content table
 CREATE TABLE IF NOT EXISTS prayer_content (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   campaign_id INTEGER NOT NULL,
   content_date DATE NOT NULL,
   language_code TEXT DEFAULT 'en' NOT NULL,
   title TEXT NOT NULL,
   content_json TEXT DEFAULT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
   UNIQUE(campaign_id, content_date, language_code)
 );
@@ -88,7 +88,7 @@ CREATE INDEX IF NOT EXISTS idx_prayer_content_language ON prayer_content(languag
 
 -- Reminder signups table
 CREATE TABLE IF NOT EXISTS reminder_signups (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   campaign_id INTEGER NOT NULL,
   tracking_id TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
@@ -99,8 +99,8 @@ CREATE TABLE IF NOT EXISTS reminder_signups (
   days_of_week TEXT DEFAULT NULL,
   time_preference TEXT NOT NULL,
   status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'unsubscribed')),
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 
@@ -110,11 +110,11 @@ CREATE INDEX IF NOT EXISTS idx_reminder_signups_status ON reminder_signups(statu
 
 -- Prayer activity table
 CREATE TABLE IF NOT EXISTS prayer_activity (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   campaign_id INTEGER NOT NULL,
   tracking_id TEXT DEFAULT NULL,
   duration INTEGER DEFAULT 0,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 

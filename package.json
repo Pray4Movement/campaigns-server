@@ -27,22 +27,23 @@
     "@editorjs/quote": "^2.7.6",
     "@editorjs/table": "^2.4.5",
     "@editorjs/warning": "^1.4.1",
+    "@nuxtjs/i18n": "^10.1.0",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.2.0",
     "formidable": "^3.5.4",
     "intl-tel-input": "^25.11.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.6",
     "nuxt": "^4.1.0",
+    "pg": "^8.13.1",
     "uuid": "^12.0.0",
     "vue": "^3.5.20",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^7.0.1",
+    "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0"
   }
 }

@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const campaign = campaignService.createCampaign({
+    const campaign = await campaignService.createCampaign({
       title: body.title,
       description: body.description,
       slug: body.slug,

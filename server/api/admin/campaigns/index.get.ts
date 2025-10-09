@@ -1,14 +1,14 @@
 import { campaignService } from '#server/database/campaigns'
 import { requireAuth } from '#server/utils/auth'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   // Require authentication
   requireAuth(event)
 
   const query = getQuery(event)
   const status = query.status as 'active' | 'inactive' | undefined
 
-  const campaigns = campaignService.getAllCampaigns(status)
+  const campaigns = await campaignService.getAllCampaigns(status)
 
   return {
     campaigns,

@@ -27,23 +27,23 @@ export class UserService {
   // Create a new user
   async createUser(userData: CreateUserData): Promise<User> {
     const { email, password, display_name = '' } = userData
-    
+
     // Hash the password
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
-    
+
     // Generate unique token key
     const tokenKey = uuidv4()
-    
+
     const stmt = this.db.prepare(`
       INSERT INTO users (email, password_hash, display_name, token_key)
       VALUES (?, ?, ?, ?)
     `)
-    
+
     try {
-      const result = stmt.run(email, passwordHash, display_name, tokenKey)
-      return this.getUserById(result.lastInsertRowid as number)!
+      const result = await stmt.run(email, passwordHash, display_name, tokenKey)
+      return (await this.getUserById(result.lastInsertRowid as number))!
     } catch (error: any) {
-      if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      if (error.code === '23505') { // PostgreSQL unique violation
         throw new Error('User with this email already exists')
       }
       throw error
@@ -51,36 +51,36 @@ export class UserService {
   }
 
   // Get user by ID
-  getUserById(id: number): User | null {
+  async getUserById(id: number): Promise<User | null> {
     const stmt = this.db.prepare(`
       SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
       FROM users
       WHERE id = ?
     `)
-    
-    return stmt.get(id) as User | null
+
+    return await stmt.get(id) as User | null
   }
 
   // Get user by email
-  getUserByEmail(email: string): User | null {
+  async getUserByEmail(email: string): Promise<User | null> {
     const stmt = this.db.prepare(`
       SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
       FROM users
       WHERE email = ?
     `)
-    
-    return stmt.get(email) as User | null
+
+    return await stmt.get(email) as User | null
   }
 
   // Get user by token key (for email verification)
-  getUserByTokenKey(tokenKey: string): User | null {
+  async getUserByTokenKey(tokenKey: string): Promise<User | null> {
     const stmt = this.db.prepare(`
       SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
       FROM users
       WHERE token_key = ?
     `)
-    
-    return stmt.get(tokenKey) as User | null
+
+    return await stmt.get(tokenKey) as User | null
   }
 
   // Verify user password
@@ -90,15 +90,15 @@ export class UserService {
       FROM users
       WHERE email = ?
     `)
-    
-    const user = stmt.get(email) as (User & { password_hash: string }) | null
-    
+
+    const user = await stmt.get(email) as (User & { password_hash: string }) | null
+
     if (!user) {
       return null
     }
 
     const isValid = await bcrypt.compare(password, user.password_hash)
-    
+
     if (!isValid) {
       return null
     }
@@ -109,43 +109,43 @@ export class UserService {
   }
 
   // Get all users (for admin purposes)
-  getAllUsers(): User[] {
+  async getAllUsers(): Promise<User[]> {
     const stmt = this.db.prepare(`
       SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
       FROM users
       ORDER BY created_at DESC
     `)
-    
-    return stmt.all() as User[]
+
+    return await stmt.all() as User[]
   }
 
   // Update token key (for security rotation)
-  updateTokenKey(id: number): string {
+  async updateTokenKey(id: number): Promise<string> {
     const newTokenKey = uuidv4()
     const stmt = this.db.prepare(`
       UPDATE users SET token_key = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `)
-    
-    stmt.run(newTokenKey, id)
+
+    await stmt.run(newTokenKey, id)
     return newTokenKey
   }
 
   // Mark user as verified
-  verifyUser(id: number): boolean {
+  async verifyUser(id: number): Promise<boolean> {
     const stmt = this.db.prepare(`
       UPDATE users SET verified = TRUE, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `)
-    
-    const result = stmt.run(id)
+
+    const result = await stmt.run(id)
     return result.changes > 0
   }
 
   // Delete user
-  deleteUser(id: number): boolean {
+  async deleteUser(id: number): Promise<boolean> {
     const stmt = this.db.prepare('DELETE FROM users WHERE id = ?')
-    const result = stmt.run(id)
+    const result = await stmt.run(id)
     return result.changes > 0
   }
 }

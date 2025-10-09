@@ -1,7 +1,7 @@
 import { prayerContentService } from '#server/database/prayer-content'
 import { requireAuth } from '#server/utils/auth'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   requireAuth(event)
 
   const id = parseInt(event.context.params?.id || '0')
@@ -13,7 +13,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const content = prayerContentService.getPrayerContentById(id)
+  const content = await prayerContentService.getPrayerContentById(id)
 
   if (!content) {
     throw createError({

@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get campaign by slug
-  const campaign = campaignService.getCampaignBySlug(slug)
+  const campaign = await campaignService.getCampaignBySlug(slug)
 
   if (!campaign) {
     throw createError({
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Create the signup
-    const signup = reminderSignupService.createSignup({
+    const signup = await reminderSignupService.createSignup({
       campaign_id: campaign.id,
       name: body.name,
       email: body.email,

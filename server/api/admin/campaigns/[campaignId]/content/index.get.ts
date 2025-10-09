@@ -1,7 +1,7 @@
 import { prayerContentService } from '#server/database/prayer-content'
 import { requireAuth } from '#server/utils/auth'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   requireAuth(event)
 
   const campaignId = parseInt(event.context.params?.campaignId || '0')
@@ -24,11 +24,11 @@ export default defineEventHandler((event) => {
 
   // If grouped by date is requested, return grouped data
   if (query.grouped === 'true') {
-    const grouped = prayerContentService.getCampaignContentGroupedByDate(campaignId, options)
+    const grouped = await prayerContentService.getCampaignContentGroupedByDate(campaignId, options)
 
     // For each date, get the content for all languages
-    const groupedWithContent = grouped.map(group => {
-      const dateContent = prayerContentService.getCampaignPrayerContent(campaignId, {
+    const groupedWithContent = await Promise.all(grouped.map(async (group) => {
+      const dateContent = await prayerContentService.getCampaignPrayerContent(campaignId, {
         startDate: group.date,
         endDate: group.date
       })
@@ -50,7 +50,7 @@ export default defineEventHandler((event) => {
         languages: group.languages,
         content: parsedContent
       }
-    })
+    }))
 
     return {
       content: groupedWithContent,
@@ -58,8 +58,8 @@ export default defineEventHandler((event) => {
     }
   }
 
-  const content = prayerContentService.getCampaignPrayerContent(campaignId, options)
-  const count = prayerContentService.getContentCount(campaignId)
+  const content = await prayerContentService.getCampaignPrayerContent(campaignId, options)
+  const count = await prayerContentService.getContentCount(campaignId)
 
   // Parse content_json for each item if it's a string
   const parsedContent = content.map(item => {

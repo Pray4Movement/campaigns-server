@@ -1,6 +1,6 @@
 import { campaignService } from '#server/database/campaigns'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
 
   if (!slug) {
@@ -10,7 +10,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const campaign = campaignService.getCampaignBySlug(slug)
+  const campaign = await campaignService.getCampaignBySlug(slug)
 
   if (!campaign) {
     throw createError({

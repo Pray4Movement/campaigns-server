@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get campaign by slug
-  const campaign = campaignService.getCampaignBySlug(slug)
+  const campaign = await campaignService.getCampaignBySlug(slug)
 
   if (!campaign) {
     throw createError({
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   `)
 
   try {
-    stmt.run(campaign.id, userId || null, duration, timestamp)
+    await stmt.run(campaign.id, userId || null, duration, timestamp)
 
     return {
       success: true,

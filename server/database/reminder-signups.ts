@@ -1,5 +1,4 @@
 import { getDatabase } from './db'
-import type { Database } from 'better-sqlite3'
 import { randomUUID } from 'crypto'
 
 export interface ReminderSignup {
@@ -30,14 +29,10 @@ export interface CreateReminderSignupInput {
 }
 
 class ReminderSignupService {
-  private db: Database.Database
-
-  constructor() {
-    this.db = getDatabase()
-  }
+  private db = getDatabase()
 
   // Create a new reminder signup
-  createSignup(input: CreateReminderSignupInput): ReminderSignup {
+  async createSignup(input: CreateReminderSignupInput): Promise<ReminderSignup> {
     const tracking_id = randomUUID()
 
     // Validate delivery method has corresponding contact info
@@ -59,7 +54,7 @@ class ReminderSignupService {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
     `)
 
-    const result = stmt.run(
+    const result = await stmt.run(
       input.campaign_id,
       tracking_id,
       input.name,
@@ -71,27 +66,27 @@ class ReminderSignupService {
       input.time_preference
     )
 
-    return this.getSignupById(result.lastInsertRowid as number)!
+    return (await this.getSignupById(result.lastInsertRowid as number))!
   }
 
   // Get signup by ID
-  getSignupById(id: number): ReminderSignup | null {
+  async getSignupById(id: number): Promise<ReminderSignup | null> {
     const stmt = this.db.prepare('SELECT * FROM reminder_signups WHERE id = ?')
-    return stmt.get(id) as ReminderSignup | null
+    return await stmt.get(id) as ReminderSignup | null
   }
 
   // Get signup by tracking ID
-  getSignupByTrackingId(tracking_id: string): ReminderSignup | null {
+  async getSignupByTrackingId(tracking_id: string): Promise<ReminderSignup | null> {
     const stmt = this.db.prepare('SELECT * FROM reminder_signups WHERE tracking_id = ?')
-    return stmt.get(tracking_id) as ReminderSignup | null
+    return await stmt.get(tracking_id) as ReminderSignup | null
   }
 
   // Get all signups for a campaign
-  getCampaignSignups(campaignId: number, options?: {
+  async getCampaignSignups(campaignId: number, options?: {
     status?: 'active' | 'inactive' | 'unsubscribed'
     limit?: number
     offset?: number
-  }): ReminderSignup[] {
+  }): Promise<ReminderSignup[]> {
     let query = 'SELECT * FROM reminder_signups WHERE campaign_id = ?'
     const params: any[] = [campaignId]
 
@@ -113,46 +108,46 @@ class ReminderSignupService {
     }
 
     const stmt = this.db.prepare(query)
-    return stmt.all(...params) as ReminderSignup[]
+    return await stmt.all(...params) as ReminderSignup[]
   }
 
   // Update signup status
-  updateSignupStatus(id: number, status: 'active' | 'inactive' | 'unsubscribed'): ReminderSignup | null {
+  async updateSignupStatus(id: number, status: 'active' | 'inactive' | 'unsubscribed'): Promise<ReminderSignup | null> {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
       SET status = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `)
-    stmt.run(status, id)
+    await stmt.run(status, id)
     return this.getSignupById(id)
   }
 
   // Unsubscribe by tracking ID
-  unsubscribeByTrackingId(tracking_id: string): boolean {
+  async unsubscribeByTrackingId(tracking_id: string): Promise<boolean> {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
       SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP
       WHERE tracking_id = ?
     `)
-    const result = stmt.run(tracking_id)
+    const result = await stmt.run(tracking_id)
     return result.changes > 0
   }
 
   // Delete signup
-  deleteSignup(id: number): boolean {
+  async deleteSignup(id: number): Promise<boolean> {
     const stmt = this.db.prepare('DELETE FROM reminder_signups WHERE id = ?')
-    const result = stmt.run(id)
+    const result = await stmt.run(id)
     return result.changes > 0
   }
 
   // Get count of active signups for a campaign
-  getActiveSignupCount(campaignId: number): number {
+  async getActiveSignupCount(campaignId: number): Promise<number> {
     const stmt = this.db.prepare(`
       SELECT COUNT(*) as count
       FROM reminder_signups
       WHERE campaign_id = ? AND status = 'active'
     `)
-    const result = stmt.get(campaignId) as { count: number }
+    const result = await stmt.get(campaignId) as { count: number }
     return result.count
   }
 }

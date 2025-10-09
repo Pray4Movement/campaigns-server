@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   try {
-    const campaign = campaignService.updateCampaign(campaignId, {
+    const campaign = await campaignService.updateCampaign(campaignId, {
       title: body.title,
       description: body.description,
       slug: body.slug,

@@ -1,7 +1,7 @@
 import { campaignService } from '#server/database/campaigns'
 import { prayerContentService } from '#server/database/prayer-content'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   const query = getQuery(event)
 
@@ -13,7 +13,7 @@ export default defineEventHandler((event) => {
   }
 
   // Get campaign by slug
-  const campaign = campaignService.getCampaignBySlug(slug)
+  const campaign = await campaignService.getCampaignBySlug(slug)
 
   if (!campaign) {
     throw createError({
@@ -40,15 +40,15 @@ export default defineEventHandler((event) => {
   const languageCode = (query.language as string) || campaign.default_language || 'en'
 
   // Get prayer content for the date and language
-  let content = prayerContentService.getPrayerContentByDate(campaign.id, date, languageCode)
+  let content = await prayerContentService.getPrayerContentByDate(campaign.id, date, languageCode)
 
   // If content not found in requested language, fall back to campaign default language
   if (!content && languageCode !== campaign.default_language) {
-    content = prayerContentService.getPrayerContentByDate(campaign.id, date, campaign.default_language)
+    content = await prayerContentService.getPrayerContentByDate(campaign.id, date, campaign.default_language)
   }
 
   // Get available languages for this date
-  const availableLanguages = prayerContentService.getAvailableLanguages(campaign.id, date)
+  const availableLanguages = await prayerContentService.getAvailableLanguages(campaign.id, date)
 
   if (!content) {
     return {

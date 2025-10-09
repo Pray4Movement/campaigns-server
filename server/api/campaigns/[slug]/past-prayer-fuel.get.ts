@@ -1,7 +1,7 @@
 import { campaignService } from '#server/database/campaigns'
 import { prayerContentService } from '#server/database/prayer-content'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   const query = getQuery(event)
 
@@ -13,7 +13,7 @@ export default defineEventHandler((event) => {
   }
 
   // Get campaign by slug
-  const campaign = campaignService.getCampaignBySlug(slug)
+  const campaign = await campaignService.getCampaignBySlug(slug)
 
   if (!campaign) {
     throw createError({
@@ -37,7 +37,7 @@ export default defineEventHandler((event) => {
   const today = new Date().toISOString().split('T')[0]
 
   // Get past prayer content (limit to 30 most recent)
-  const pastContent = prayerContentService.getCampaignPrayerContent(campaign.id, {
+  const pastContent = await prayerContentService.getCampaignPrayerContent(campaign.id, {
     endDate: today,
     language: languageCode,
     limit: 31 // Get 31 so we can exclude today

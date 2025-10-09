@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if user exists
-    let user = userService.getUserByEmail(userInfo.email)
+    let user = await userService.getUserByEmail(userInfo.email)
 
     // If user doesn't exist, create them
     if (!user) {
@@ -73,8 +73,8 @@ export default defineEventHandler(async (event) => {
       })
 
       // Auto-verify Google users
-      userService.verifyUser(user.id)
-      user = userService.getUserById(user.id)!
+      await userService.verifyUser(user.id)
+      user = (await userService.getUserById(user.id))!
     }
 
     // Generate JWT token

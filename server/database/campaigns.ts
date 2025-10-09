@@ -41,20 +41,20 @@ export class CampaignService {
   }
 
   // Check if slug is unique
-  isSlugUnique(slug: string, excludeId?: number): boolean {
+  async isSlugUnique(slug: string, excludeId?: number): Promise<boolean> {
     const stmt = this.db.prepare(`
       SELECT id FROM campaigns WHERE slug = ? ${excludeId ? 'AND id != ?' : ''}
     `)
-    const result = excludeId ? stmt.get(slug, excludeId) : stmt.get(slug)
+    const result = excludeId ? await stmt.get(slug, excludeId) : await stmt.get(slug)
     return !result
   }
 
   // Generate unique slug
-  generateUniqueSlug(title: string, excludeId?: number): string {
+  async generateUniqueSlug(title: string, excludeId?: number): Promise<string> {
     let slug = this.generateSlug(title)
     let counter = 1
 
-    while (!this.isSlugUnique(slug, excludeId)) {
+    while (!(await this.isSlugUnique(slug, excludeId))) {
       slug = `${this.generateSlug(title)}-${counter}`
       counter++
     }
@@ -63,14 +63,14 @@ export class CampaignService {
   }
 
   // Create a new campaign
-  createCampaign(data: CreateCampaignData): Campaign {
+  async createCampaign(data: CreateCampaignData): Promise<Campaign> {
     const { title, description = '', status = 'active', default_language = 'en' } = data
 
     // Generate unique slug if not provided
-    const slug = data.slug || this.generateUniqueSlug(title)
+    const slug = data.slug || await this.generateUniqueSlug(title)
 
     // Validate slug is unique
-    if (!this.isSlugUnique(slug)) {
+    if (!(await this.isSlugUnique(slug))) {
       throw new Error('Slug already exists')
     }
 
@@ -80,10 +80,10 @@ export class CampaignService {
     `)
 
     try {
-      const result = stmt.run(slug, title, description, status, default_language)
-      return this.getCampaignById(result.lastInsertRowid as number)!
+      const result = await stmt.run(slug, title, description, status, default_language)
+      return (await this.getCampaignById(result.lastInsertRowid as number))!
     } catch (error: any) {
-      if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      if (error.code === '23505') { // PostgreSQL unique violation
         throw new Error('Campaign with this slug already exists')
       }
       throw error
@@ -91,29 +91,29 @@ export class CampaignService {
   }
 
   // Get campaign by ID
-  getCampaignById(id: number): Campaign | null {
+  async getCampaignById(id: number): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
       SELECT id, slug, title, description, status, default_language, created_at, updated_at
       FROM campaigns
       WHERE id = ?
     `)
 
-    return stmt.get(id) as Campaign | null
+    return await stmt.get(id) as Campaign | null
   }
 
   // Get campaign by slug
-  getCampaignBySlug(slug: string): Campaign | null {
+  async getCampaignBySlug(slug: string): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
       SELECT id, slug, title, description, status, default_language, created_at, updated_at
       FROM campaigns
       WHERE slug = ?
     `)
 
-    return stmt.get(slug) as Campaign | null
+    return await stmt.get(slug) as Campaign | null
   }
 
   // Get all campaigns
-  getAllCampaigns(statusFilter?: 'active' | 'inactive'): Campaign[] {
+  async getAllCampaigns(statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
     let query = `
       SELECT id, slug, title, description, status, default_language, created_at, updated_at
       FROM campaigns
@@ -128,13 +128,13 @@ export class CampaignService {
     const stmt = this.db.prepare(query)
 
     return statusFilter
-      ? stmt.all(statusFilter) as Campaign[]
-      : stmt.all() as Campaign[]
+      ? await stmt.all(statusFilter) as Campaign[]
+      : await stmt.all() as Campaign[]
   }
 
   // Update campaign
-  updateCampaign(id: number, data: UpdateCampaignData): Campaign | null {
-    const campaign = this.getCampaignById(id)
+  async updateCampaign(id: number, data: UpdateCampaignData): Promise<Campaign | null> {
+    const campaign = await this.getCampaignById(id)
     if (!campaign) {
       return null
     }
@@ -154,7 +154,7 @@ export class CampaignService {
 
     if (data.slug !== undefined) {
       // Validate slug is unique (excluding current campaign)
-      if (!this.isSlugUnique(data.slug, id)) {
+      if (!(await this.isSlugUnique(data.slug, id))) {
         throw new Error('Slug already exists')
       }
       updates.push('slug = ?')
@@ -183,19 +183,19 @@ export class CampaignService {
       WHERE id = ?
     `)
 
-    stmt.run(...values)
+    await stmt.run(...values)
     return this.getCampaignById(id)
   }
 
   // Delete campaign
-  deleteCampaign(id: number): boolean {
+  async deleteCampaign(id: number): Promise<boolean> {
     const stmt = this.db.prepare('DELETE FROM campaigns WHERE id = ?')
-    const result = stmt.run(id)
+    const result = await stmt.run(id)
     return result.changes > 0
   }
 
   // Get campaign count
-  getCampaignCount(statusFilter?: 'active' | 'inactive'): number {
+  async getCampaignCount(statusFilter?: 'active' | 'inactive'): Promise<number> {
     let query = 'SELECT COUNT(*) as count FROM campaigns'
 
     if (statusFilter) {
@@ -204,8 +204,8 @@ export class CampaignService {
 
     const stmt = this.db.prepare(query)
     const result = statusFilter
-      ? stmt.get(statusFilter) as { count: number }
-      : stmt.get() as { count: number }
+      ? await stmt.get(statusFilter) as { count: number }
+      : await stmt.get() as { count: number }
 
     return result.count
   }

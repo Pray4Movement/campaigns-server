@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const content = prayerContentService.updatePrayerContent(id, {
+    const content = await prayerContentService.updatePrayerContent(id, {
       title: body.title,
       content_json: body.content_json,
       content_date: body.content_date,
