@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Get all subscribers for this campaign
-    const subscribers = db.prepare(`
+    const subscribers = await db.prepare(`
       SELECT
         id,
         campaign_id,

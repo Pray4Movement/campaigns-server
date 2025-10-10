@@ -399,7 +399,7 @@ onMounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 50px);
 }
 
 .list-header {
@@ -503,7 +503,7 @@ onMounted(() => {
   padding: 2rem;
   background-color: var(--color-background-soft);
   overflow-y: auto;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 50px);
 }
 
 .no-selection {
