@@ -1,4 +1,6 @@
 import { getDatabase } from './db'
+import { roleService } from './roles'
+import { campaignAccessService } from './campaign-access'
 
 export interface Campaign {
   id: number
@@ -208,6 +210,53 @@ export class CampaignService {
       : await stmt.get() as { count: number }
 
     return result.count
+  }
+
+  // Check if user can access a campaign
+  // Admins can access all campaigns, campaign editors can only access assigned campaigns
+  async userCanAccessCampaign(userId: number, campaignId: number): Promise<boolean> {
+    // Check if user is admin
+    const isAdmin = await roleService.isAdmin(userId)
+    if (isAdmin) {
+      return true
+    }
+
+    // Check if user has access to this specific campaign
+    return await campaignAccessService.userHasAccess(userId, campaignId)
+  }
+
+  // Get all campaigns accessible to a user (based on their role)
+  async getCampaignsForUser(userId: number, statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
+    // Check if user is admin
+    const isAdmin = await roleService.isAdmin(userId)
+    if (isAdmin) {
+      // Admins see all campaigns
+      return this.getAllCampaigns(statusFilter)
+    }
+
+    // Get campaign IDs user has access to
+    const campaignIds = await campaignAccessService.getUserCampaigns(userId)
+    if (campaignIds.length === 0) {
+      return []
+    }
+
+    // Build query to get only accessible campaigns
+    let query = `
+      SELECT id, slug, title, description, status, default_language, created_at, updated_at
+      FROM campaigns
+      WHERE id IN (${campaignIds.map(() => '?').join(',')})
+    `
+
+    if (statusFilter) {
+      query += ' AND status = ?'
+    }
+
+    query += ' ORDER BY created_at DESC'
+
+    const stmt = this.db.prepare(query)
+    const params = statusFilter ? [...campaignIds, statusFilter] : campaignIds
+
+    return await stmt.all(...params) as Campaign[]
   }
 }
 

@@ -18,7 +18,7 @@ export class MigrationRunner {
     // Create migrations table if it doesn't exist
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS migrations (
-        id INTEGER PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         executed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )

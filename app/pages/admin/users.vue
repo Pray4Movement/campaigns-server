@@ -7,6 +7,11 @@
       </button>
     </div>
 
+    <!-- Success Toast -->
+    <div v-if="successMessage" class="toast toast-success">
+      {{ successMessage }}
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="loading">Loading...</div>
 
@@ -28,7 +33,9 @@
             <tr>
               <th>Email</th>
               <th>Display Name</th>
+              <th>Role</th>
               <th>Status</th>
+              <th>Campaigns</th>
               <th>Joined</th>
             </tr>
           </thead>
@@ -37,10 +44,37 @@
               <td>{{ user.email }}</td>
               <td>{{ user.display_name || '—' }}</td>
               <td>
+                <select
+                  v-if="availableRoles.length > 0"
+                  :value="user.roles[0]?.id || ''"
+                  @change="(e) => updateUserRole(user.id, parseInt((e.target as HTMLSelectElement).value) || null)"
+                  class="role-select"
+                >
+                  <option value="">No Role</option>
+                  <option
+                    v-for="role in availableRoles"
+                    :key="role.id"
+                    :value="role.id"
+                  >
+                    {{ formatRoleName(role.name) }}
+                  </option>
+                </select>
+                <span v-else>{{ user.roles[0] ? formatRoleName(user.roles[0].name) : 'No role' }}</span>
+              </td>
+              <td>
                 <span class="badge" :class="{ verified: user.verified, unverified: !user.verified }">
                   {{ user.verified ? 'Verified' : 'Unverified' }}
                 </span>
-                <span v-if="user.superadmin" class="badge superadmin">Superadmin</span>
+              </td>
+              <td>
+                <button
+                  v-if="user.roles[0]?.name === 'campaign_editor'"
+                  @click="openCampaignModal(user)"
+                  class="btn-small btn-secondary"
+                >
+                  Manage
+                </button>
+                <span v-else class="text-muted">—</span>
               </td>
               <td>{{ formatDate(user.created_at) }}</td>
             </tr>
@@ -98,6 +132,68 @@
       </section>
     </div>
 
+    <!-- Manage Campaigns Modal -->
+    <div v-if="showCampaignModal" class="modal-overlay" @click.self="closeCampaignModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Manage Campaign Access</h2>
+          <button @click="closeCampaignModal" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p class="modal-intro">
+            Select which campaigns <strong>{{ selectedUser?.display_name || selectedUser?.email }}</strong> can access:
+          </p>
+
+          <div v-if="campaignModalLoading" class="loading">Loading campaigns...</div>
+
+          <div v-else-if="campaignModalError" class="error-message">
+            {{ campaignModalError }}
+          </div>
+
+          <div v-else class="campaigns-list">
+            <label
+              v-for="campaign in availableCampaigns"
+              :key="campaign.id"
+              class="campaign-checkbox"
+            >
+              <input
+                type="checkbox"
+                :checked="campaign.hasAccess"
+                @change="toggleCampaignAccess(campaign.id)"
+              />
+              <span class="campaign-info">
+                <strong>{{ campaign.title }}</strong>
+                <span class="campaign-slug">{{ campaign.slug }}</span>
+              </span>
+            </label>
+
+            <div v-if="availableCampaigns.length === 0" class="empty-state">
+              No campaigns available
+            </div>
+          </div>
+
+          <div v-if="campaignModalSuccess" class="success-message">
+            Campaign access updated successfully!
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" @click="closeCampaignModal" class="btn-secondary">
+              Cancel
+            </button>
+            <button
+              type="button"
+              @click="saveCampaignAccess"
+              class="btn-primary"
+              :disabled="campaignModalSubmitting"
+            >
+              {{ campaignModalSubmitting ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Invite User Modal -->
     <div v-if="showInviteModal" class="modal-overlay" @click.self="showInviteModal = false">
       <div class="modal">
@@ -117,7 +213,25 @@
               placeholder="user@example.com"
               class="form-input"
             />
-            <small class="form-hint">Invitation will expire in 7 days</small>
+          </div>
+
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select
+              id="role"
+              v-model="inviteForm.role_id"
+              class="form-input"
+            >
+              <option :value="null">No Role (must be assigned later)</option>
+              <option
+                v-for="role in availableRoles"
+                :key="role.id"
+                :value="role.id"
+              >
+                {{ formatRoleName(role.name) }} - {{ role.description }}
+              </option>
+            </select>
+            <small class="form-hint">Select the role for this user. Invitation will expire in 7 days.</small>
           </div>
 
           <div v-if="inviteError" class="error-message">
@@ -148,13 +262,28 @@ definePageMeta({
   middleware: 'auth'
 })
 
+interface Role {
+  id: number
+  name: string
+  description: string
+}
+
 interface User {
   id: number
   email: string
   display_name: string
   verified: boolean
-  superadmin: boolean
   created_at: string
+  roles: Role[]
+}
+
+interface Campaign {
+  id: number
+  slug: string
+  title: string
+  description: string
+  status: string
+  hasAccess?: boolean
 }
 
 interface Invitation {
@@ -162,6 +291,7 @@ interface Invitation {
   email: string
   token: string
   invited_by: number
+  role_id: number | null
   status: 'pending' | 'accepted' | 'expired' | 'revoked'
   expires_at: string
   accepted_at: string | null
@@ -174,15 +304,27 @@ const loading = ref(true)
 const error = ref('')
 const users = ref<User[]>([])
 const allInvitations = ref<Invitation[]>([])
+const availableRoles = ref<Role[]>([])
 const showInviteModal = ref(false)
 
 const inviteForm = ref({
-  email: ''
+  email: '',
+  role_id: null as number | null
 })
 
 const inviteSubmitting = ref(false)
 const inviteError = ref('')
 const inviteSuccess = ref(false)
+const successMessage = ref('')
+
+// Campaign modal state
+const showCampaignModal = ref(false)
+const selectedUser = ref<User | null>(null)
+const availableCampaigns = ref<Campaign[]>([])
+const campaignModalLoading = ref(false)
+const campaignModalError = ref('')
+const campaignModalSubmitting = ref(false)
+const campaignModalSuccess = ref(false)
 
 const pendingInvitations = computed(() => {
   return allInvitations.value.filter(inv => {
@@ -193,19 +335,30 @@ const pendingInvitations = computed(() => {
   })
 })
 
+// Convert database role names to display names
+function formatRoleName(roleName: string): string {
+  const roleDisplayNames: Record<string, string> = {
+    'admin': 'Admin',
+    'campaign_editor': 'Campaign Editor'
+  }
+  return roleDisplayNames[roleName] || roleName
+}
+
 async function loadData() {
   try {
     loading.value = true
     error.value = ''
 
-    // Load users and invitations in parallel
-    const [usersResponse, invitationsResponse] = await Promise.all([
+    // Load users, invitations, and roles in parallel
+    const [usersResponse, invitationsResponse, rolesResponse] = await Promise.all([
       $fetch<{ users: User[] }>('/api/admin/users'),
-      $fetch<{ invitations: Invitation[] }>('/api/admin/users/invitations')
+      $fetch<{ invitations: Invitation[] }>('/api/admin/users/invitations'),
+      $fetch<{ roles: Role[] }>('/api/admin/roles')
     ])
 
     users.value = usersResponse.users
     allInvitations.value = invitationsResponse.invitations
+    availableRoles.value = rolesResponse.roles
   } catch (err: any) {
     error.value = err.data?.statusMessage || 'Failed to load data'
     console.error(err)
@@ -223,12 +376,14 @@ async function handleInvite() {
     await $fetch('/api/admin/users/invite', {
       method: 'POST',
       body: {
-        email: inviteForm.value.email
+        email: inviteForm.value.email,
+        role_id: inviteForm.value.role_id
       }
     })
 
     inviteSuccess.value = true
     inviteForm.value.email = ''
+    inviteForm.value.role_id = null
 
     // Reload invitations
     await loadData()
@@ -242,6 +397,30 @@ async function handleInvite() {
     inviteError.value = err.data?.statusMessage || 'Failed to send invitation'
   } finally {
     inviteSubmitting.value = false
+  }
+}
+
+async function updateUserRole(userId: number, roleId: number | null) {
+  try {
+    const response = await $fetch<{ success: boolean; message: string }>(`/api/admin/users/${userId}/role`, {
+      method: 'PUT',
+      body: {
+        role_id: roleId
+      }
+    })
+
+    // Show success message
+    successMessage.value = response.message || 'Role updated successfully'
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+
+    // Reload users to show updated role
+    await loadData()
+  } catch (err: any) {
+    alert(err.data?.statusMessage || 'Failed to update user role')
+    // Reload to reset the dropdown
+    await loadData()
   }
 }
 
@@ -271,6 +450,75 @@ async function revokeInvitation(id: number) {
     await loadData()
   } catch (err: any) {
     alert(err.data?.statusMessage || 'Failed to revoke invitation')
+  }
+}
+
+// Campaign modal functions
+async function openCampaignModal(user: User) {
+  selectedUser.value = user
+  showCampaignModal.value = true
+  campaignModalError.value = ''
+  campaignModalSuccess.value = false
+  campaignModalLoading.value = true
+
+  try {
+    const response = await $fetch<{ campaigns: Campaign[] }>(`/api/admin/users/${user.id}/campaigns`)
+    availableCampaigns.value = response.campaigns
+  } catch (err: any) {
+    campaignModalError.value = err.data?.statusMessage || 'Failed to load campaigns'
+  } finally {
+    campaignModalLoading.value = false
+  }
+}
+
+function closeCampaignModal() {
+  showCampaignModal.value = false
+  selectedUser.value = null
+  availableCampaigns.value = []
+  campaignModalError.value = ''
+  campaignModalSuccess.value = false
+}
+
+function toggleCampaignAccess(campaignId: number) {
+  const campaign = availableCampaigns.value.find(c => c.id === campaignId)
+  if (campaign) {
+    campaign.hasAccess = !campaign.hasAccess
+  }
+}
+
+async function saveCampaignAccess() {
+  if (!selectedUser.value) return
+
+  campaignModalSubmitting.value = true
+  campaignModalError.value = ''
+  campaignModalSuccess.value = false
+
+  try {
+    const selectedCampaignIds = availableCampaigns.value
+      .filter(c => c.hasAccess)
+      .map(c => c.id)
+
+    await $fetch(`/api/admin/users/${selectedUser.value.id}/campaigns`, {
+      method: 'PUT',
+      body: {
+        campaign_ids: selectedCampaignIds
+      }
+    })
+
+    campaignModalSuccess.value = true
+    successMessage.value = 'Campaign access updated successfully'
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+
+    // Close modal after a delay
+    setTimeout(() => {
+      closeCampaignModal()
+    }, 1500)
+  } catch (err: any) {
+    campaignModalError.value = err.data?.statusMessage || 'Failed to update campaign access'
+  } finally {
+    campaignModalSubmitting.value = false
   }
 }
 
@@ -586,5 +834,108 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 1.5rem;
+}
+
+/* Role Select */
+.role-select {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.role-select:hover {
+  border-color: var(--text);
+}
+
+.role-select:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toast-success {
+  background-color: var(--text);
+  color: var(--bg);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Campaign Modal */
+.modal-intro {
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+.campaigns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.campaign-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.campaign-checkbox:hover {
+  background-color: var(--bg-soft);
+}
+
+.campaign-checkbox input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}
+
+.campaign-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.campaign-slug {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.text-muted {
+  color: var(--text-muted);
 }
 </style>

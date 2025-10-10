@@ -1,6 +1,7 @@
 import { userInvitationService } from '#server/database/user-invitations'
 import { userService } from '#server/database/users'
-import { generateToken, setAuthCookie } from '#server/utils/auth'
+import { roleService } from '#server/database/roles'
+import { generateToken, setAuthCookie, getUserWithRoles } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -67,6 +68,11 @@ export default defineEventHandler(async (event) => {
     // Mark user as verified (since they came through an invitation)
     await userService.verifyUser(user.id)
 
+    // Assign role if specified in invitation
+    if (invitation.role_id) {
+      await roleService.assignRoleToUser(user.id, invitation.role_id)
+    }
+
     // Mark invitation as accepted
     await userInvitationService.acceptInvitation(invitation.id)
 
@@ -80,14 +86,12 @@ export default defineEventHandler(async (event) => {
     // Set secure HTTP-only cookie
     setAuthCookie(event, token)
 
+    // Get user with roles
+    const userWithRoles = await getUserWithRoles(user.id, user.email, user.display_name, true)
+
     return {
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        display_name: user.display_name,
-        verified: true
-      },
+      user: userWithRoles,
       message: 'Account created successfully'
     }
   } catch (error: any) {

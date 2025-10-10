@@ -21,16 +21,16 @@ export class RoleService {
   // Create default roles if they don't exist
   async initializeDefaultRoles() {
     const roles = [
-      { name: 'admin', description: 'Full system administrator' },
-      { name: 'campaign_editor', description: 'Can create and edit campaigns' },
-      { name: 'content_creator', description: 'Can create prayer content' }
+      { name: 'admin', description: 'Full system administrator - can see and do everything' },
+      { name: 'campaign_editor', description: 'Can manage campaigns they have been given access to' }
     ]
 
     const permissions = [
+      { name: 'campaigns.view', description: 'View campaigns' },
       { name: 'campaigns.create', description: 'Create campaigns' },
       { name: 'campaigns.edit', description: 'Edit campaigns' },
       { name: 'campaigns.delete', description: 'Delete campaigns' },
-      { name: 'campaigns.view', description: 'View campaigns' },
+      { name: 'content.view', description: 'View prayer content' },
       { name: 'content.create', description: 'Create prayer content' },
       { name: 'content.edit', description: 'Edit prayer content' },
       { name: 'content.delete', description: 'Delete prayer content' },
@@ -68,13 +68,13 @@ export class RoleService {
       }
     }
 
-    // Assign campaign permissions to campaign_editor role
+    // Assign campaign and content permissions to campaign_editor role (but not user/role management)
     const editorRole = await this.db.prepare('SELECT id FROM roles WHERE name = ?').get('campaign_editor') as { id: number } | undefined
     if (editorRole) {
-      const campaignPerms = await this.db.prepare(
-        "SELECT id FROM permissions WHERE name LIKE 'campaigns.%'"
+      const editorPermissions = await this.db.prepare(
+        "SELECT id FROM permissions WHERE name LIKE 'campaigns.%' OR name LIKE 'content.%'"
       ).all() as { id: number }[]
-      for (const perm of campaignPerms) {
+      for (const perm of editorPermissions) {
         const existing = await this.db.prepare('SELECT 1 FROM role_permissions WHERE role_id = ? AND permission_id = ?')
           .get(editorRole.id, perm.id)
         if (!existing) {
@@ -140,12 +140,35 @@ export class RoleService {
     const stmt = this.db.prepare('DELETE FROM user_roles WHERE user_id = ? AND role_id = ?')
     await stmt.run(userId, roleId)
   }
+
+  // Check if user has admin role
+  async isAdmin(userId: number): Promise<boolean> {
+    const stmt = this.db.prepare(`
+      SELECT 1 FROM user_roles ur
+      JOIN roles r ON ur.role_id = r.id
+      WHERE ur.user_id = ? AND r.name = 'admin'
+      LIMIT 1
+    `)
+    return !!(await stmt.get(userId))
+  }
+
+  // Check if user has campaign_editor role
+  async isCampaignEditor(userId: number): Promise<boolean> {
+    const stmt = this.db.prepare(`
+      SELECT 1 FROM user_roles ur
+      JOIN roles r ON ur.role_id = r.id
+      WHERE ur.user_id = ? AND r.name = 'campaign_editor'
+      LIMIT 1
+    `)
+    return !!(await stmt.get(userId))
+  }
+
+  // Get role by name
+  async getRoleByName(name: string): Promise<Role | null> {
+    const stmt = this.db.prepare('SELECT * FROM roles WHERE name = ?')
+    return await stmt.get(name) as Role | null
+  }
 }
 
 // Export singleton instance
 export const roleService = new RoleService()
-
-// Initialize default roles on import (runs asynchronously)
-roleService.initializeDefaultRoles().catch(err => {
-  console.error('Failed to initialize default roles:', err)
-})

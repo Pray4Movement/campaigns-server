@@ -1,28 +1,39 @@
 // Global state for auth
 const isLoggedIn = ref(false)
-const user = ref<{ 
-  id: number; 
-  email: string; 
-  display_name?: string;
-  verified?: boolean;
-  superadmin?: boolean;
+const user = ref<{
+  id: number;
+  email: string;
+  display_name: string;
+  verified: boolean;
+  roles: string[];
+  isAdmin: boolean;
 } | null>(null)
 let initialized = false
 
 export const useAuth = () => {
   const login = async (email: string, password: string) => {
     try {
-      const data = await $fetch<{ success: boolean; user: { id: number; email: string; display_name: string; verified: boolean; superadmin: boolean } }>('/api/auth/login', {
+      const data = await $fetch<{
+        success: boolean;
+        user: {
+          id: number;
+          email: string;
+          display_name: string;
+          verified: boolean;
+          roles: string[];
+          isAdmin: boolean;
+        }
+      }>('/api/auth/login', {
         method: 'POST',
         body: { email, password }
       })
-      
+
       if (data.success) {
         isLoggedIn.value = true
         user.value = data.user
         return { success: true }
       }
-      
+
       return { success: false, error: 'Login failed' }
     } catch (error: any) {
       console.error('Login error:', error)
@@ -32,11 +43,18 @@ export const useAuth = () => {
 
   const register = async (email: string, password: string, display_name?: string) => {
     try {
-      const data = await $fetch<{ 
-        success: boolean; 
+      const data = await $fetch<{
+        success: boolean;
         requiresVerification?: boolean;
         message?: string;
-        user: { id: number; email: string; display_name: string; verified: boolean; superadmin: boolean } 
+        user: {
+          id: number;
+          email: string;
+          display_name: string;
+          verified: boolean;
+          roles: string[];
+          isAdmin: boolean;
+        }
       }>('/api/auth/register', {
         method: 'POST',
         body: { email, password, display_name }
@@ -81,8 +99,17 @@ export const useAuth = () => {
   const initAuth = async () => {
     if (!initialized) {
       try {
-        const data = await $fetch<{ user: { id: number; email: string; display_name: string } }>('/api/auth/me')
-        
+        const data = await $fetch<{
+          user: {
+            id: number;
+            email: string;
+            display_name: string;
+            verified: boolean;
+            roles: string[];
+            isAdmin: boolean;
+          }
+        }>('/api/auth/me')
+
         if (data.user) {
           isLoggedIn.value = true
           user.value = data.user
@@ -92,7 +119,7 @@ export const useAuth = () => {
         isLoggedIn.value = false
         user.value = null
       }
-      
+
       initialized = true
     }
   }

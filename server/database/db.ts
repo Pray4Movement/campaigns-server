@@ -22,16 +22,39 @@ class PreparedStatement {
   async run(...params: any[]): Promise<{ lastInsertRowid: number; changes: number }> {
     const { text, values } = this.convertPlaceholders(this.sql, params)
 
-    // For INSERT statements, add RETURNING id to get the inserted ID
+    // For INSERT statements, try to get the inserted ID
     let finalText = text
+    let lastInsertRowid = 0
+
     if (text.trim().toUpperCase().startsWith('INSERT')) {
-      finalText = text + ' RETURNING id'
+      // Try to return id, but handle cases where table doesn't have an id column
+      try {
+        finalText = text + ' RETURNING id'
+        const result = await this.pool.query(finalText, values)
+        lastInsertRowid = result.rows[0]?.id || 0
+
+        return {
+          lastInsertRowid,
+          changes: result.rowCount || 0
+        }
+      } catch (error: any) {
+        // If the table doesn't have an id column (e.g., junction tables),
+        // run the query without RETURNING
+        if (error.message?.includes('column "id" does not exist')) {
+          const result = await this.pool.query(text, values)
+          return {
+            lastInsertRowid: 0,
+            changes: result.rowCount || 0
+          }
+        }
+        throw error
+      }
     }
 
     const result = await this.pool.query(finalText, values)
 
     return {
-      lastInsertRowid: result.rows[0]?.id || 0,
+      lastInsertRowid,
       changes: result.rowCount || 0
     }
   }
@@ -114,6 +137,11 @@ async function initializeDatabase() {
     await migrationRunner.runMigrations()
 
     console.log('Database initialized successfully')
+
+    // Initialize default roles after migrations are complete
+    const { roleService } = await import('./roles')
+    await roleService.initializeDefaultRoles()
+    console.log('Default roles initialized')
   } catch (error) {
     console.error('Error initializing database:', error)
     throw error

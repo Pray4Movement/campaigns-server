@@ -1,8 +1,9 @@
 import { prayerContentService } from '#server/database/prayer-content'
+import { campaignService } from '#server/database/campaigns'
 import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  requireAuth(event)
+  const user = requireAuth(event)
 
   const id = parseInt(event.context.params?.id || '0')
 
@@ -19,6 +20,15 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 404,
       statusMessage: 'Content not found'
+    })
+  }
+
+  // Check if user has access to this content's campaign
+  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, content.campaign_id)
+  if (!hasAccess) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'You do not have access to this campaign'
     })
   }
 

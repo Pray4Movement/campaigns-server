@@ -1,13 +1,24 @@
 import { getDatabase } from '#server/database/db'
+import { campaignService } from '#server/database/campaigns'
+import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  // TODO: Add authentication check
+  const user = requireAuth(event)
   const campaignId = getRouterParam(event, 'campaignId')
 
   if (!campaignId) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Campaign ID is required'
+    })
+  }
+
+  // Check if user has access to this campaign
+  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, parseInt(campaignId))
+  if (!hasAccess) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'You do not have access to this campaign'
     })
   }
 

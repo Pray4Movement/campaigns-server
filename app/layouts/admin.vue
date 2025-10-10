@@ -21,11 +21,6 @@
             Users
           </NuxtLink>
         </li>
-        <li>
-          <NuxtLink to="/admin/roles" class="nav-link">
-            Roles & Permissions
-          </NuxtLink>
-        </li>
       </ul>
 
       <div class="sidebar-footer">

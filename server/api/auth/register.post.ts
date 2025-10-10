@@ -1,5 +1,6 @@
 import { userService } from '#server/database/users'
 import { sendVerificationEmail } from '#server/utils/email'
+import { getUserWithRoles } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -46,17 +47,14 @@ export default defineEventHandler(async (event) => {
     sendVerificationEmail(user.email, user.display_name, verificationUrl)
       .catch(error => console.error('Failed to send verification email:', error))
 
+    // Get user with roles
+    const userWithRoles = await getUserWithRoles(user.id, user.email, user.display_name, user.verified)
+
     return {
       success: true,
       requiresVerification: true,
       message: 'Registration successful! Please check your email to verify your account before logging in.',
-      user: {
-        id: user.id,
-        email: user.email,
-        display_name: user.display_name,
-        verified: user.verified,
-        superadmin: user.superadmin
-      }
+      user: userWithRoles
     }
   } catch (error: any) {
     if (error.statusCode) {

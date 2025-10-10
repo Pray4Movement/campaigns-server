@@ -1,5 +1,5 @@
 import { userService } from '#server/database/users'
-import { generateToken, setAuthCookie } from '#server/utils/auth'
+import { generateToken, setAuthCookie, getUserWithRoles } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -42,15 +42,12 @@ export default defineEventHandler(async (event) => {
     // Set secure HTTP-only cookie
     setAuthCookie(event, token)
 
+    // Get user with roles
+    const userWithRoles = await getUserWithRoles(user.id, user.email, user.display_name, user.verified)
+
     return {
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        display_name: user.display_name,
-        verified: user.verified,
-        superadmin: user.superadmin
-      }
+      user: userWithRoles
     }
   } catch (error: any) {
     if (error.statusCode) {

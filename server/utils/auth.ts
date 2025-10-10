@@ -1,10 +1,20 @@
 import jwt from 'jsonwebtoken'
 import type { H3Event } from 'h3'
+import { roleService } from '#server/database/roles'
 
 export interface JWTPayload {
   userId: number
   email: string
   display_name?: string
+}
+
+export interface UserWithRoles {
+  id: number
+  email: string
+  display_name: string
+  verified: boolean
+  roles: string[]
+  isAdmin: boolean
 }
 
 export function getJWTSecret(): string {
@@ -69,4 +79,35 @@ export function clearAuthCookie(event: H3Event) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict'
   })
+}
+
+// Get user with their roles
+export async function getUserWithRoles(userId: number, userEmail: string, displayName: string, verified: boolean): Promise<UserWithRoles> {
+  const roles = await roleService.getUserRoles(userId)
+  const roleNames = roles.map(r => r.name)
+  const isAdmin = roleNames.includes('admin')
+
+  return {
+    id: userId,
+    email: userEmail,
+    display_name: displayName,
+    verified,
+    roles: roleNames,
+    isAdmin
+  }
+}
+
+// Require admin role
+export async function requireAdmin(event: H3Event): Promise<JWTPayload> {
+  const user = requireAuth(event)
+  const isAdmin = await roleService.isAdmin(user.userId)
+
+  if (!isAdmin) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Admin access required'
+    })
+  }
+
+  return user
 }
