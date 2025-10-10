@@ -112,6 +112,28 @@ export async function sendWelcomeEmail(to: string, userName: string): Promise<bo
   })
 }
 
+export async function sendInvitationEmail(
+  to: string,
+  invitationToken: string,
+  invitedBy: string,
+  expiresAt: string
+): Promise<boolean> {
+  const { getInvitationEmailTemplate } = await import('./email-templates')
+
+  const config = useRuntimeConfig()
+  const baseUrl = config.public.siteUrl || 'http://localhost:3000'
+  const invitationUrl = `${baseUrl}/accept-invitation?token=${invitationToken}`
+  const expiresDate = new Date(expiresAt).toLocaleDateString()
+
+  const template = getInvitationEmailTemplate(to, invitationUrl, invitedBy, expiresDate)
+
+  return sendEmail({
+    to,
+    subject: template.subject,
+    template
+  })
+}
+
 // Test email functionality
 export async function sendTestEmail(to: string): Promise<boolean> {
   return sendEmail({

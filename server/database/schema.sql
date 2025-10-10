@@ -121,3 +121,24 @@ CREATE TABLE IF NOT EXISTS prayer_activity (
 CREATE INDEX IF NOT EXISTS idx_prayer_activity_campaign ON prayer_activity(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_prayer_activity_tracking_id ON prayer_activity(tracking_id);
 CREATE INDEX IF NOT EXISTS idx_prayer_activity_timestamp ON prayer_activity(timestamp);
+
+-- User invitations table
+CREATE TABLE IF NOT EXISTS user_invitations (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL,
+  token TEXT UNIQUE NOT NULL,
+  invited_by INTEGER NOT NULL,
+  role_id INTEGER DEFAULT NULL,
+  status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'expired', 'revoked')),
+  expires_at TIMESTAMP NOT NULL,
+  accepted_at TIMESTAMP DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_invitations_email ON user_invitations(email);
+CREATE INDEX IF NOT EXISTS idx_user_invitations_token ON user_invitations(token);
+CREATE INDEX IF NOT EXISTS idx_user_invitations_status ON user_invitations(status);
+CREATE INDEX IF NOT EXISTS idx_user_invitations_invited_by ON user_invitations(invited_by);
