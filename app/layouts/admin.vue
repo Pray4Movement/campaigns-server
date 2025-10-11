@@ -21,6 +21,11 @@
             Users
           </NuxtLink>
         </li>
+        <li v-if="isSuperAdmin">
+          <NuxtLink to="/superadmin" class="nav-link">
+            Superadmin
+          </NuxtLink>
+        </li>
       </ul>
 
       <div class="sidebar-footer">
@@ -42,6 +47,9 @@
 
 <script setup lang="ts">
 const user = ref<any>(null)
+const isSuperAdmin = computed(() => {
+  return user.value?.user?.isSuperAdmin || false
+})
 
 onMounted(async () => {
   try {

@@ -7,9 +7,6 @@ export default defineNuxtConfig({
   ssr: false,
   css: ['~/assets/css/main.css'],
 
-  nitro: {
-    errorHandler: './server/errors/handler.ts'
-  },
 
   modules: ['@nuxtjs/i18n'],
 

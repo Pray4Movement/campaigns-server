@@ -45,9 +45,13 @@ export async function createDatabaseBackup(options: BackupOptions = {}): Promise
     const dbUser = dbUrl.username
     const dbPassword = dbUrl.password
 
+    // Get pg_dump path (allow override via environment variable)
+    // This is useful when you have multiple PostgreSQL versions installed
+    const pgDumpPath = process.env.PG_DUMP_PATH || 'pg_dump'
+
     // Create pg_dump command
     // Using custom format (-Fc) for better compression and flexibility
-    const pgDumpCommand = `PGPASSWORD="${dbPassword}" pg_dump -h ${dbHost} -p ${dbPort} -U ${dbUser} -Fc -f "${localPath}" ${dbName}`
+    const pgDumpCommand = `PGPASSWORD="${dbPassword}" ${pgDumpPath} -h ${dbHost} -p ${dbPort} -U ${dbUser} -Fc -f "${localPath}" ${dbName}`
 
     console.log(`Creating database backup: ${filename}`)
     await execAsync(pgDumpCommand)
@@ -119,7 +123,9 @@ async function uploadBackupToS3(filename: string, data: Buffer): Promise<string>
 
   // Add custom endpoint if provided (for S3-compatible services)
   if (endpoint) {
-    s3ClientConfig.endpoint = endpoint
+    // Remove protocol from endpoint if present (SDK handles this automatically)
+    const cleanEndpoint = endpoint.replace(/^https?:\/\//, '')
+    s3ClientConfig.endpoint = `https://${cleanEndpoint}`
     // Force path-style addressing for compatibility with some S3-compatible services
     s3ClientConfig.forcePathStyle = true
   }

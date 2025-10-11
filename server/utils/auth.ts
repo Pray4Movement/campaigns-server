@@ -15,6 +15,7 @@ export interface UserWithRoles {
   verified: boolean
   roles: string[]
   isAdmin: boolean
+  isSuperAdmin: boolean
 }
 
 export function getJWTSecret(): string {
@@ -82,7 +83,7 @@ export function clearAuthCookie(event: H3Event) {
 }
 
 // Get user with their roles
-export async function getUserWithRoles(userId: number, userEmail: string, displayName: string, verified: boolean): Promise<UserWithRoles> {
+export async function getUserWithRoles(userId: number, userEmail: string, displayName: string, verified: boolean, superadmin: boolean): Promise<UserWithRoles> {
   const roles = await roleService.getUserRoles(userId)
   const roleNames = roles.map(r => r.name)
   const isAdmin = roleNames.includes('admin')
@@ -93,7 +94,8 @@ export async function getUserWithRoles(userId: number, userEmail: string, displa
     display_name: displayName,
     verified,
     roles: roleNames,
-    isAdmin
+    isAdmin,
+    isSuperAdmin: superadmin
   }
 }
 

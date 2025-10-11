@@ -6,6 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Nuxt.js 4.1.0 application with Vue 3, configured as an ES module project. The project uses TypeScript with Nuxt's automatic TypeScript configuration system.
 
+## RULES
+- NEVER EDIT THE .env file directly. Ask the user to.
+
 ## Development Commands
 
 - **Start development server**: `npm run dev`

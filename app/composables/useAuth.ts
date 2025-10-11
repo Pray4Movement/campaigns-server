@@ -7,6 +7,7 @@ const user = ref<{
   verified: boolean;
   roles: string[];
   isAdmin: boolean;
+  isSuperAdmin: boolean;
 } | null>(null)
 let initialized = false
 
@@ -22,6 +23,7 @@ export const useAuth = () => {
           verified: boolean;
           roles: string[];
           isAdmin: boolean;
+          isSuperAdmin: boolean;
         }
       }>('/api/auth/login', {
         method: 'POST',
@@ -54,6 +56,7 @@ export const useAuth = () => {
           verified: boolean;
           roles: string[];
           isAdmin: boolean;
+          isSuperAdmin: boolean;
         }
       }>('/api/auth/register', {
         method: 'POST',
@@ -107,6 +110,7 @@ export const useAuth = () => {
             verified: boolean;
             roles: string[];
             isAdmin: boolean;
+            isSuperAdmin: boolean;
           }
         }>('/api/auth/me')
 

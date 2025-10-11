@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     setAuthCookie(event, token)
 
     // Get user with roles
-    const userWithRoles = await getUserWithRoles(user.id, user.email, user.display_name, user.verified)
+    const userWithRoles = await getUserWithRoles(user.id, user.email, user.display_name, user.verified, user.superadmin)
 
     return {
       success: true,

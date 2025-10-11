@@ -1,11 +1,10 @@
-import cron from 'node-cron'
 import { createDatabaseBackup } from '../utils/backup'
 
 /**
  * Nitro plugin to schedule automatic daily database backups
  *
- * This plugin runs when the server starts and sets up a cron job
- * to automatically backup the database every day at 2 AM (server time)
+ * This plugin runs when the server starts and checks every hour
+ * to see if it's time to run a backup (at 2 AM daily)
  */
 export default defineNitroPlugin((nitroApp) => {
   // Only run scheduled backups in production or if explicitly enabled
@@ -18,40 +17,43 @@ export default defineNitroPlugin((nitroApp) => {
     return
   }
 
-  // Schedule daily backup at 2 AM
-  // Cron format: minute hour day month day-of-week
-  // '0 2 * * *' = At 02:00 every day
-  const cronSchedule = process.env.BACKUP_CRON_SCHEDULE || '0 2 * * *'
+  console.log('📅 Scheduling automatic database backups (daily at 2 AM)')
 
-  console.log(`📅 Scheduling automatic database backups: ${cronSchedule}`)
+  let lastBackupDate: string | null = null
 
-  const task = cron.schedule(cronSchedule, async () => {
-    console.log('🔄 Starting scheduled database backup...')
+  // Check every hour if we need to run a backup
+  const interval = setInterval(async () => {
+    const now = new Date()
+    const hour = now.getHours()
+    const dateKey = now.toISOString().split('T')[0]
 
-    try {
-      const result = await createDatabaseBackup()
+    // Run backup at 2 AM if we haven't already today
+    if (hour === 2 && lastBackupDate !== dateKey) {
+      console.log('🔄 Starting scheduled database backup...')
 
-      if (result.success) {
-        console.log(`✅ Scheduled backup completed successfully`)
-        console.log(`   File: ${result.filename}`)
-        console.log(`   Size: ${(result.size! / 1024 / 1024).toFixed(2)} MB`)
-        console.log(`   Location: ${result.s3Location}`)
-      } else {
-        console.error(`❌ Scheduled backup failed: ${result.error}`)
+      try {
+        const result = await createDatabaseBackup()
+
+        if (result.success) {
+          lastBackupDate = dateKey
+          console.log(`✅ Scheduled backup completed successfully`)
+          console.log(`   File: ${result.filename}`)
+          console.log(`   Size: ${(result.size! / 1024 / 1024).toFixed(2)} MB`)
+          console.log(`   Location: ${result.s3Location}`)
+        } else {
+          console.error(`❌ Scheduled backup failed: ${result.error}`)
+        }
+      } catch (error: any) {
+        console.error('❌ Scheduled backup error:', error.message)
       }
-    } catch (error: any) {
-      console.error('❌ Scheduled backup error:', error.message)
     }
-  }, {
-    scheduled: true,
-    timezone: process.env.BACKUP_TIMEZONE || 'UTC'
-  })
+  }, 60 * 60 * 1000) // Check every hour
 
   console.log('✅ Backup scheduler initialized')
 
   // Cleanup on server shutdown
   nitroApp.hooks.hook('close', () => {
     console.log('🛑 Stopping backup scheduler...')
-    task.stop()
+    clearInterval(interval)
   })
 })

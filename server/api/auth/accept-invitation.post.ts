@@ -76,18 +76,27 @@ export default defineEventHandler(async (event) => {
     // Mark invitation as accepted
     await userInvitationService.acceptInvitation(invitation.id)
 
+    // Get updated user data
+    const verifiedUser = await userService.getUserById(user.id)
+    if (!verifiedUser) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Failed to retrieve user after verification'
+      })
+    }
+
     // Generate secure JWT token
     const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      display_name: user.display_name
+      userId: verifiedUser.id,
+      email: verifiedUser.email,
+      display_name: verifiedUser.display_name
     })
 
     // Set secure HTTP-only cookie
     setAuthCookie(event, token)
 
     // Get user with roles
-    const userWithRoles = await getUserWithRoles(user.id, user.email, user.display_name, true)
+    const userWithRoles = await getUserWithRoles(verifiedUser.id, verifiedUser.email, verifiedUser.display_name, verifiedUser.verified, verifiedUser.superadmin)
 
     return {
       success: true,
