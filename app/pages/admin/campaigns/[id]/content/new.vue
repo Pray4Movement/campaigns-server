@@ -13,7 +13,7 @@
 
     <div class="editor-container">
       <div class="editor-main">
-        <EditorPrayerFuelEditor v-model="form.content_json" />
+        <RichTextEditor v-model="form.content_json" />
       </div>
 
       <aside class="editor-sidebar">
@@ -81,8 +81,8 @@ const form = ref({
   content_date: '',
   language_code: 'en',
   content_json: {
-    time: Date.now(),
-    blocks: []
+    type: 'doc',
+    content: []
   }
 })
 

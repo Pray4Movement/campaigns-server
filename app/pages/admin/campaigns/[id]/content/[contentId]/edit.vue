@@ -18,7 +18,7 @@
 
       <div class="editor-container">
         <div class="editor-main">
-          <EditorPrayerFuelEditor v-model="form.content_json" />
+          <RichTextEditor v-model="form.content_json" />
         </div>
 
         <aside class="editor-sidebar">
@@ -133,7 +133,7 @@ async function loadContent() {
       title: data.title,
       content_date: data.content_date,
       language_code: data.language_code,
-      content_json: data.content_json || { time: Date.now(), blocks: [] }
+      content_json: data.content_json || { type: 'doc', content: [] }
     }
 
     // Load other language versions for this date
