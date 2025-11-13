@@ -26,7 +26,7 @@
         <div class="container">
           <div v-if="data.content" class="prayer-content-wrapper">
             <h2 class="content-title">{{ data.content.title }}</h2>
-            <PrayerContentRenderer :content="data.content.content_json" />
+            <RichTextViewer :content="data.content.content_json" :item-id="String(data.content.id)" />
           </div>
 
           <div v-else class="no-content">
