@@ -9,6 +9,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "start": "node .output/server/index.mjs",
     "mailhog:start": "echo 'ℹ Using shared MailHog from sale/nuxtui project at http://localhost:8025'",
     "mailhog:stop": "echo 'ℹ MailHog is shared with sale/nuxtui project - use that project to stop it'",
     "mailhog:logs": "docker logs nuxtui-mailhog",
