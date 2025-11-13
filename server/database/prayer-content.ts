@@ -130,6 +130,7 @@ export class PrayerContentService {
 
     const stmt = this.db.prepare(query)
     const contents = await stmt.all(...params) as PrayerContent[]
+
     return contents
   }
 
@@ -182,6 +183,23 @@ export class PrayerContentService {
     const content = await this.getPrayerContentById(id)
     if (!content) {
       return null
+    }
+
+    // If date or language is being updated, check for conflicts with other records
+    // Use the ID to exclude the current record from the conflict check
+    if (data.content_date !== undefined || data.language_code !== undefined) {
+      const checkDate = data.content_date !== undefined ? data.content_date : content.content_date
+      const checkLanguage = data.language_code !== undefined ? data.language_code : content.language_code
+
+      const conflictStmt = this.db.prepare(`
+        SELECT id FROM prayer_content
+        WHERE campaign_id = ? AND content_date = ? AND language_code = ? AND id != ?
+      `)
+      const conflict = await conflictStmt.get(content.campaign_id, checkDate, checkLanguage, id)
+
+      if (conflict) {
+        throw new Error('Content already exists for this campaign, date, and language')
+      }
     }
 
     const updates: string[] = []

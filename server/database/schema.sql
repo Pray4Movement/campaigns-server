@@ -71,7 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status);
 CREATE TABLE IF NOT EXISTS prayer_content (
   id SERIAL PRIMARY KEY,
   campaign_id INTEGER NOT NULL,
-  content_date DATE NOT NULL,
+  content_date TEXT NOT NULL,
   language_code TEXT DEFAULT 'en' NOT NULL,
   title TEXT NOT NULL,
   content_json TEXT DEFAULT NULL,

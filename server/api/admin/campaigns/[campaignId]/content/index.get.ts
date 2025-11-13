@@ -55,12 +55,6 @@ export default defineEventHandler(async (event) => {
           }
         }
 
-        // Format content_date to YYYY-MM-DD
-        if (parsed.content_date) {
-          const date = new Date(parsed.content_date)
-          parsed.content_date = date.toISOString().split('T')[0]
-        }
-
         return parsed
       })
 
@@ -88,12 +82,6 @@ export default defineEventHandler(async (event) => {
       } catch (e) {
         console.error('Failed to parse content_json:', e)
       }
-    }
-
-    // Format content_date to YYYY-MM-DD
-    if (item.content_date) {
-      const date = new Date(item.content_date)
-      item.content_date = date.toISOString().split('T')[0]
     }
 
     return item
