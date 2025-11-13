@@ -41,5 +41,11 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Format content_date to YYYY-MM-DD for HTML date input
+  if (content.content_date) {
+    const date = new Date(content.content_date)
+    content.content_date = date.toISOString().split('T')[0]
+  }
+
   return content
 })

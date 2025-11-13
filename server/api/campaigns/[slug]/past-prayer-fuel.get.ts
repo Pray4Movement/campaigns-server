@@ -44,7 +44,13 @@ export default defineEventHandler(async (event) => {
   })
 
   // Filter out today's content
-  const filteredContent = pastContent.filter(item => item.content_date < today)
+  // Convert content_date to YYYY-MM-DD format for comparison
+  const filteredContent = pastContent.filter(item => {
+    const itemDate = typeof item.content_date === 'string'
+      ? item.content_date.split('T')[0]
+      : new Date(item.content_date).toISOString().split('T')[0]
+    return itemDate < today
+  })
 
   // Parse content_json if needed
   const parsedContent = filteredContent.map(item => {

@@ -53,6 +53,14 @@ export default defineEventHandler(async (event) => {
       content
     }
   } catch (error: any) {
+    // Check for unique constraint violation
+    if (error.code === '23505' || error.message?.includes('unique constraint')) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Content already exists for this campaign, date, and language combination'
+      })
+    }
+
     throw createError({
       statusCode: 400,
       statusMessage: error.message || 'Failed to update content'

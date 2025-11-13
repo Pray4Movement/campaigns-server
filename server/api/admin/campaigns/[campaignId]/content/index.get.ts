@@ -43,16 +43,25 @@ export default defineEventHandler(async (event) => {
         endDate: group.date
       })
 
-      // Parse content_json for each item
+      // Parse content_json and format date for each item
       const parsedContent = dateContent.map(item => {
-        if (typeof item.content_json === 'string') {
+        const parsed = { ...item }
+
+        if (typeof parsed.content_json === 'string') {
           try {
-            return { ...item, content_json: JSON.parse(item.content_json) }
+            parsed.content_json = JSON.parse(parsed.content_json)
           } catch (e) {
-            return item
+            // Keep as is if parse fails
           }
         }
-        return item
+
+        // Format content_date to YYYY-MM-DD
+        if (parsed.content_date) {
+          const date = new Date(parsed.content_date)
+          parsed.content_date = date.toISOString().split('T')[0]
+        }
+
+        return parsed
       })
 
       return {
@@ -71,7 +80,7 @@ export default defineEventHandler(async (event) => {
   const content = await prayerContentService.getCampaignPrayerContent(campaignId, options)
   const count = await prayerContentService.getContentCount(campaignId)
 
-  // Parse content_json for each item if it's a string
+  // Parse content_json and format date for each item
   const parsedContent = content.map(item => {
     if (typeof item.content_json === 'string') {
       try {
@@ -80,6 +89,13 @@ export default defineEventHandler(async (event) => {
         console.error('Failed to parse content_json:', e)
       }
     }
+
+    // Format content_date to YYYY-MM-DD
+    if (item.content_date) {
+      const date = new Date(item.content_date)
+      item.content_date = date.toISOString().split('T')[0]
+    }
+
     return item
   })
 
