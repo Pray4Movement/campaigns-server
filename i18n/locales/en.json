@@ -19,9 +19,7 @@
     "signIn": "Sign In",
     "signingIn": "Signing in...",
     "error": {
-      "failed": "Login failed. Please check your credentials.",
-      "googleAuthFailed": "Google authentication failed. Please try again.",
-      "emailNotVerified": "Your Google email is not verified."
+      "failed": "Login failed. Please check your credentials."
     }
   },
   "footer": {

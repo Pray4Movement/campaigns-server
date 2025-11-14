@@ -69,16 +69,10 @@ export default defineNuxtConfig({
     s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
     s3BucketName: process.env.S3_BUCKET_NAME || process.env.S3_BACKUP_BUCKET || '',
 
-    // Project-specific: Google OAuth configuration
-    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback',
-
     // Public keys (exposed to the frontend)
     public: {
       nodeEnv: process.env.NODE_ENV || 'development',
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-      googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     }
   }
 })
