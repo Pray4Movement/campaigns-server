@@ -1,4 +1,3 @@
-import { requireAdmin } from '#server/utils/auth'
 import { roleService } from '#server/database/roles'
 import { userService } from '#server/database/users'
 

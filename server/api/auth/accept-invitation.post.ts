@@ -1,7 +1,6 @@
 import { userInvitationService } from '#server/database/user-invitations'
 import { userService } from '#server/database/users'
 import { roleService } from '#server/database/roles'
-import { generateToken, setAuthCookie, getUserWithRoles } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

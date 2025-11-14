@@ -1,4 +1,3 @@
-import { requireAdmin } from '#server/utils/auth'
 import { campaignAccessService } from '#server/database/campaign-access'
 import { campaignService } from '#server/database/campaigns'
 

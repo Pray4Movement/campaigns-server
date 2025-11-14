@@ -1,5 +1,4 @@
 import { campaignService } from '#server/database/campaigns'
-import { requireAdmin } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication - only admins can create campaigns

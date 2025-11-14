@@ -1,6 +1,5 @@
 import { userService } from '#server/database/users'
 import { roleService } from '#server/database/roles'
-import { requireAdmin } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication

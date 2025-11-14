@@ -29,6 +29,9 @@
       </ul>
 
       <div class="sidebar-footer">
+        <button @click="toggleTheme" class="theme-toggle" :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+          {{ isDark ? '☀️' : '🌙' }} {{ isDark ? 'Light' : 'Dark' }}
+        </button>
         <div class="user-info" v-if="user">
           <p class="user-name">{{ user.display_name || user.email }}</p>
           <p class="user-email">{{ user.email }}</p>
@@ -46,6 +49,8 @@
 </template>
 
 <script setup lang="ts">
+const { toggleTheme, isDark } = useTheme()
+
 const user = ref<any>(null)
 const isSuperAdmin = computed(() => {
   return user.value?.user?.isSuperAdmin || false
@@ -75,24 +80,27 @@ async function logout() {
 .admin-layout {
   display: flex;
   min-height: 100vh;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
 }
 
 .sidebar {
   width: 250px;
-  background-color: var(--color-background-soft);
-  border-right: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border-right: 1px solid var(--ui-border);
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-header {
   padding: 1.5rem 1rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
 }
 
 .logo {
   font-size: 1.25rem;
   margin: 0;
+  color: var(--ui-text);
 }
 
 .nav-menu {
@@ -109,59 +117,83 @@ async function logout() {
 .nav-link {
   display: block;
   padding: 0.75rem 1rem;
-  color: inherit;
+  color: var(--ui-text);
   text-decoration: none;
   transition: background-color 0.2s;
 }
 
 .nav-link:hover {
-  background-color: var(--color-background);
+  background-color: var(--ui-bg);
 }
 
 .nav-link.router-link-active {
-  background-color: var(--color-background);
-  border-right: 3px solid var(--text);
+  background-color: var(--ui-bg);
+  border-right: 3px solid var(--ui-text);
 }
 
 .sidebar-footer {
   padding: 1rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--ui-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.theme-toggle {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+  color: var(--ui-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.theme-toggle:hover {
+  border-color: var(--ui-border-accented);
+  background-color: var(--ui-bg-accented);
 }
 
 .user-info {
-  margin-bottom: 1rem;
+  padding: 0.5rem 0;
 }
 
 .user-name {
   font-weight: 600;
   margin: 0 0 0.25rem;
   font-size: 0.875rem;
+  color: var(--ui-text);
 }
 
 .user-email {
   margin: 0;
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .logout-btn {
   width: 100%;
   padding: 0.5rem;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   border-radius: 4px;
+  color: var(--ui-text);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .logout-btn:hover {
-  background-color: var(--color-background-soft);
+  border-color: var(--ui-border-accented);
+  background-color: var(--ui-bg-accented);
 }
 
 .main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: var(--ui-bg);
 }
 
 .main-content {

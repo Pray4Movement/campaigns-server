@@ -1,16 +1,16 @@
 import { getDatabase } from './db'
 import bcrypt from 'bcrypt'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 export interface User {
-  id: number
+  id: string // UUID
   email: string
   display_name: string
   verified: boolean
   superadmin: boolean
   token_key: string
-  created_at: string
-  updated_at: string
+  created: string
+  updated: string
 }
 
 export interface CreateUserData {
@@ -32,16 +32,17 @@ export class UserService {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
 
     // Generate unique token key
-    const tokenKey = uuidv4()
+    const tokenKey = randomUUID()
 
     const stmt = this.db.prepare(`
-      INSERT INTO users (email, password_hash, display_name, token_key)
+      INSERT INTO users (email, password, display_name, token_key)
       VALUES (?, ?, ?, ?)
     `)
 
     try {
       const result = await stmt.run(email, passwordHash, display_name, tokenKey)
-      return (await this.getUserById(result.lastInsertRowid as number))!
+      // For UUID primary keys, we need to query back the inserted row
+      return (await this.getUserByEmail(email))!
     } catch (error: any) {
       if (error.code === '23505') { // PostgreSQL unique violation
         throw new Error('User with this email already exists')
@@ -51,9 +52,9 @@ export class UserService {
   }
 
   // Get user by ID
-  async getUserById(id: number): Promise<User | null> {
+  async getUserById(id: string): Promise<User | null> {
     const stmt = this.db.prepare(`
-      SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
+      SELECT id, email, display_name, verified, superadmin, token_key, created, updated
       FROM users
       WHERE id = ?
     `)
@@ -64,7 +65,7 @@ export class UserService {
   // Get user by email
   async getUserByEmail(email: string): Promise<User | null> {
     const stmt = this.db.prepare(`
-      SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
+      SELECT id, email, display_name, verified, superadmin, token_key, created, updated
       FROM users
       WHERE email = ?
     `)
@@ -72,79 +73,24 @@ export class UserService {
     return await stmt.get(email) as User | null
   }
 
-  // Get user by token key (for email verification)
-  async getUserByTokenKey(tokenKey: string): Promise<User | null> {
-    const stmt = this.db.prepare(`
-      SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
-      FROM users
-      WHERE token_key = ?
-    `)
-
-    return await stmt.get(tokenKey) as User | null
-  }
-
-  // Verify user password
-  async verifyPassword(email: string, password: string): Promise<User | null> {
-    const stmt = this.db.prepare(`
-      SELECT id, email, display_name, verified, superadmin, token_key, password_hash, created_at, updated_at
-      FROM users
-      WHERE email = ?
-    `)
-
-    const user = await stmt.get(email) as (User & { password_hash: string }) | null
-
-    if (!user) {
-      return null
-    }
-
-    const isValid = await bcrypt.compare(password, user.password_hash)
-
-    if (!isValid) {
-      return null
-    }
-
-    // Return user without password hash
-    const { password_hash, ...userWithoutPassword } = user
-    return userWithoutPassword
-  }
-
   // Get all users (for admin purposes)
   async getAllUsers(): Promise<User[]> {
     const stmt = this.db.prepare(`
-      SELECT id, email, display_name, verified, superadmin, token_key, created_at, updated_at
+      SELECT id, email, display_name, verified, superadmin, token_key, created, updated
       FROM users
-      ORDER BY created_at DESC
+      ORDER BY created DESC
     `)
 
     return await stmt.all() as User[]
   }
 
-  // Update token key (for security rotation)
-  async updateTokenKey(id: number): Promise<string> {
-    const newTokenKey = uuidv4()
-    const stmt = this.db.prepare(`
-      UPDATE users SET token_key = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `)
-
-    await stmt.run(newTokenKey, id)
-    return newTokenKey
-  }
-
   // Mark user as verified
-  async verifyUser(id: number): Promise<boolean> {
+  async verifyUser(id: string): Promise<boolean> {
     const stmt = this.db.prepare(`
-      UPDATE users SET verified = TRUE, updated_at = CURRENT_TIMESTAMP
+      UPDATE users SET verified = TRUE, updated = NOW()
       WHERE id = ?
     `)
 
-    const result = await stmt.run(id)
-    return result.changes > 0
-  }
-
-  // Delete user
-  async deleteUser(id: number): Promise<boolean> {
-    const stmt = this.db.prepare('DELETE FROM users WHERE id = ?')
     const result = await stmt.run(id)
     return result.changes > 0
   }

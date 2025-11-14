@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
-import { Pool } from 'pg'
-import { MigrationRunner } from '../server/utils/migrations'
+import postgres from 'postgres'
+import { MigrationRunner } from '../../../base/server/utils/migrations'
 
 async function testMigrations() {
   console.log('🧪 Testing PostgreSQL migrations system...\n')
@@ -14,20 +14,18 @@ async function testMigrations() {
     process.exit(1)
   }
 
-  // Create a connection pool for testing
-  const pool = new Pool({
-    connectionString: testDatabaseUrl,
+  // Create postgres connection for testing
+  const sql = postgres(testDatabaseUrl, {
     max: 5
   })
 
   try {
     // Test connection
-    await pool.query('SELECT NOW()')
+    await sql`SELECT NOW()`
     console.log('✅ Database connection successful\n')
 
-    // Initialize migration runner
-    const migrationRunner = new MigrationRunner(pool)
-    await migrationRunner.initialize()
+    // Initialize migration runner (base layer's MigrationRunner)
+    const migrationRunner = new MigrationRunner(sql)
 
     // Get migration status before running
     const statusBefore = await migrationRunner.getMigrationStatus()
@@ -44,16 +42,16 @@ async function testMigrations() {
     console.log('')
 
     // Verify that tables were created
-    const result = await pool.query(`
+    const result = await sql`
       SELECT table_name
       FROM information_schema.tables
       WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE'
       ORDER BY table_name
-    `)
+    `
 
     console.log('📋 Tables in database:')
-    result.rows.forEach(row => console.log(`  - ${row.table_name}`))
+    result.forEach(row => console.log(`  - ${row.table_name}`))
     console.log('')
 
     console.log('✅ Migration system test completed successfully!')
@@ -62,7 +60,7 @@ async function testMigrations() {
     console.error('❌ Migration test failed:', error)
     process.exit(1)
   } finally {
-    await pool.end()
+    await sql.end()
   }
 }
 
