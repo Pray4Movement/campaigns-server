@@ -18,9 +18,7 @@
                 </option>
               </select>
             </div>
-            <button @click="toggleTheme" class="theme-toggle" :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
-              {{ isDark ? '☀️' : '🌙' }}
-            </button>
+            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -46,7 +44,6 @@ const { locale, setLocale, locales } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
 const router = useRouter()
 const { campaignTitle } = useCampaign()
-const { toggleTheme, isDark } = useTheme()
 
 const selectedLanguage = ref(locale.value)
 const availableLocales = computed(() => locales.value)
@@ -136,23 +133,6 @@ async function onLanguageChange() {
 .language-select:focus {
   outline: none;
   border-color: var(--ui-ring);
-}
-
-.theme-toggle {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background: var(--ui-bg);
-  color: var(--ui-text);
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  line-height: 1;
-}
-
-.theme-toggle:hover {
-  border-color: var(--ui-border-accented);
-  background: var(--ui-bg-elevated);
 }
 
 .main-content {

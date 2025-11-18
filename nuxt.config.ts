@@ -10,6 +10,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
 
+  css: ['~/assets/css/main.css'],
 
   modules: ['@nuxtjs/i18n', '@nuxt/icon'],
 
