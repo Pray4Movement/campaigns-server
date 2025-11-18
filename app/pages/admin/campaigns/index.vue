@@ -56,6 +56,14 @@
                 Content
               </UButton>
               <UButton
+                @click="navigateToLibraries(campaign.id)"
+                variant="link"
+                size="sm"
+                title="Configure Libraries"
+              >
+                Libraries
+              </UButton>
+              <UButton
                 @click="navigateToSubscribers(campaign.id)"
                 variant="link"
                 size="sm"
@@ -231,6 +239,10 @@ async function loadCampaigns() {
 
 function navigateToContent(campaignId: number) {
   navigateTo(`/admin/campaigns/${campaignId}/content`)
+}
+
+function navigateToLibraries(campaignId: number) {
+  navigateTo(`/admin/campaigns/${campaignId}/libraries`)
 }
 
 function navigateToSubscribers(campaignId: number) {
