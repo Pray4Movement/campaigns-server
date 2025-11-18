@@ -5,9 +5,9 @@
         <h1>Campaigns</h1>
         <p class="subtitle">Manage your prayer campaigns</p>
       </div>
-      <button @click="showCreateModal = true" class="btn-primary">
+      <UButton @click="showCreateModal = true" size="lg">
         + Create Campaign
-      </button>
+      </UButton>
     </div>
 
     <div v-if="loading" class="loading">Loading campaigns...</div>
@@ -16,9 +16,9 @@
 
     <div v-else-if="campaigns.length === 0" class="empty-state">
       <p>No campaigns yet. Create your first campaign to get started.</p>
-      <button @click="showCreateModal = true" class="btn-primary">
+      <UButton @click="showCreateModal = true" size="lg">
         Create Campaign
-      </button>
+      </UButton>
     </div>
 
     <div v-else class="campaigns-table-container">
@@ -39,24 +39,48 @@
               <a :href="`/${campaign.slug}`" target="_blank" rel="noopener noreferrer">/{{ campaign.slug }}</a>
             </td>
             <td>
-              <span class="status-badge" :class="campaign.status">
-                {{ campaign.status }}
-              </span>
+              <UBadge
+                :label="campaign.status"
+                :variant="campaign.status === 'active' ? 'solid' : 'outline'"
+                :color="campaign.status === 'active' ? 'primary' : 'neutral'"
+              />
             </td>
             <td class="date-cell">{{ formatDate(campaign.created_at) }}</td>
             <td class="actions-cell">
-              <button @click="navigateToContent(campaign.id)" class="btn-action" title="Manage Content">
+              <UButton
+                @click="navigateToContent(campaign.id)"
+                variant="link"
+                size="sm"
+                title="Manage Content"
+              >
                 Content
-              </button>
-              <button @click="navigateToSubscribers(campaign.id)" class="btn-action" title="Subscribers">
+              </UButton>
+              <UButton
+                @click="navigateToSubscribers(campaign.id)"
+                variant="link"
+                size="sm"
+                title="Subscribers"
+              >
                 Subscribers
-              </button>
-              <button @click="editCampaign(campaign)" class="btn-action" title="Edit">
+              </UButton>
+              <UButton
+                @click="editCampaign(campaign)"
+                variant="link"
+                size="sm"
+                title="Edit"
+              >
                 Edit
-              </button>
-              <button @click="deleteCampaign(campaign)" class="btn-action btn-delete" title="Delete">
+              </UButton>
+              <UButton
+                @click="deleteCampaign(campaign)"
+                variant="link"
+                size="sm"
+                color="neutral"
+                title="Delete"
+                class="delete-btn"
+              >
                 Delete
-              </button>
+              </UButton>
             </td>
           </tr>
         </tbody>
@@ -308,53 +332,6 @@ onMounted(() => {
   color: var(--color-text-muted);
 }
 
-.btn-primary {
-  background-color: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.2s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: var(--color-background-soft);
-}
-
-.btn-danger {
-  background-color: var(--text);
-  color: var(--bg);
-  border: 1px solid var(--border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-danger:hover {
-  opacity: 0.9;
-}
-
 .loading, .error {
   text-align: center;
   padding: 2rem;
@@ -443,51 +420,14 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.status-badge.active {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.status-badge.inactive {
-  background-color: var(--color-background);
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-}
-
 .actions-cell {
   white-space: nowrap;
+  display: flex;
+  gap: 0.25rem;
 }
 
-.btn-action {
-  background: none;
-  border: none;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  color: var(--text);
-  text-decoration: underline;
-  transition: opacity 0.2s;
-}
-
-.btn-action:hover {
-  opacity: 0.7;
-}
-
-.btn-action.btn-delete {
+.delete-btn {
   color: var(--color-text-muted);
-}
-
-.btn-action.btn-delete:hover {
-  color: var(--text);
 }
 
 .modal-content {
