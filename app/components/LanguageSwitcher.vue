@@ -1,21 +1,37 @@
 <template>
   <div class="language-switcher">
-    <select v-model="currentLocale" @change="changeLocale" class="language-select">
-      <option v-for="locale in availableLocales" :key="locale.code" :value="locale.code">
-        {{ locale.name }}
+    <label for="language-select" class="sr-only">Select Language</label>
+    <select
+      id="language-select"
+      v-model="selectedLanguage"
+      @change="onLanguageChange"
+      class="language-select"
+    >
+      <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
+        {{ getLanguageFlag(lang.code) }} {{ lang.name }}
       </option>
     </select>
   </div>
 </template>
 
 <script setup lang="ts">
-const { locale, locales, setLocale } = useI18n()
+import { getLanguageFlag } from '~/utils/languages'
 
-const currentLocale = ref(locale.value)
+const { locale, locales } = useI18n()
+const switchLocalePath = useSwitchLocalePath()
+const router = useRouter()
+
+const selectedLanguage = ref(locale.value)
 const availableLocales = computed(() => locales.value)
 
-const changeLocale = async () => {
-  await setLocale(currentLocale.value)
+// Watch for locale changes to update selected language
+watch(locale, (newLang) => {
+  selectedLanguage.value = newLang
+})
+
+async function onLanguageChange() {
+  const newPath = switchLocalePath(selectedLanguage.value)
+  await router.push(newPath)
 }
 </script>
 
@@ -24,23 +40,42 @@ const changeLocale = async () => {
   display: inline-block;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .language-select {
-  padding: 0.5rem 1rem;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.875rem;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s, background-color 0.2s;
+  min-width: 140px;
 }
 
 .language-select:hover {
-  background-color: var(--bg-secondary);
+  border-color: var(--color-text-muted);
+  background: var(--color-background-soft);
 }
 
 .language-select:focus {
   outline: none;
-  border-color: var(--text-primary);
+  border-color: var(--color-text);
+}
+
+.language-select option {
+  background: var(--color-background);
+  color: var(--color-text);
 }
 </style>

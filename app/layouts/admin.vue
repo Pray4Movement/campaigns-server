@@ -3,6 +3,7 @@
     <nav class="sidebar">
       <div class="sidebar-header">
         <h1 class="logo">Prayer.Tools Admin</h1>
+        <LanguageSwitcher />
       </div>
 
       <ul class="nav-menu">
@@ -88,6 +89,9 @@ async function logout() {
 .sidebar-header {
   padding: 1.5rem 1rem;
   border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .logo {
