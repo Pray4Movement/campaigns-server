@@ -173,7 +173,7 @@ watch(() => props.modelValue, async (newValue) => {
 @import url('https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editor.css');
 
 .prayer-fuel-editor {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   overflow: hidden;
   background: var(--bg);

@@ -225,7 +225,7 @@ onMounted(() => {
   bottom: 0;
   display: flex;
   flex-direction: column;
-  background: var(--color-background);
+  background: var(--ui-bg);
 }
 
 .loading-state,
@@ -246,12 +246,12 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-background-soft);
+  border-bottom: 1px solid var(--ui-border);
+  background: var(--ui-bg-elevated);
 }
 
 .back-link {
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   text-decoration: none;
   font-size: 0.875rem;
 }
@@ -317,8 +317,8 @@ onMounted(() => {
 
 .editor-sidebar {
   width: 320px;
-  border-left: 1px solid var(--color-border);
-  background: var(--color-background-soft);
+  border-left: 1px solid var(--ui-border);
+  background: var(--ui-bg-elevated);
   overflow-y: auto;
   padding: 1.5rem;
 }
@@ -349,9 +349,9 @@ onMounted(() => {
 .form-group input {
   width: 100%;
   padding: 0.625rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background-color: var(--color-background);
+  background-color: var(--ui-bg);
   font-size: 0.875rem;
   color: var(--color-text);
 }
@@ -366,9 +366,9 @@ onMounted(() => {
 .form-group select {
   width: 100%;
   padding: 0.625rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background-color: var(--color-background);
+  background-color: var(--ui-bg);
   font-size: 0.875rem;
   color: var(--color-text);
 }
@@ -382,7 +382,7 @@ onMounted(() => {
   display: block;
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .sidebar-section h4 {
@@ -403,8 +403,8 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   border-radius: 6px;
   text-decoration: none;
   color: var(--color-text);
@@ -414,7 +414,7 @@ onMounted(() => {
 
 .translation-link:hover {
   border-color: var(--text);
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
 }
 
 @media (max-width: 768px) {
@@ -425,7 +425,7 @@ onMounted(() => {
   .editor-sidebar {
     width: 100%;
     border-left: none;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--ui-border);
   }
 }
 </style>

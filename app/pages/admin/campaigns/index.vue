@@ -329,7 +329,7 @@ onMounted(() => {
 
 .subtitle {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .loading, .error {
@@ -348,11 +348,11 @@ onMounted(() => {
 
 .empty-state p {
   margin-bottom: 1.5rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .campaigns-table-container {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -363,8 +363,8 @@ onMounted(() => {
 }
 
 .campaigns-table thead {
-  background-color: var(--color-background-soft);
-  border-bottom: 2px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border-bottom: 2px solid var(--ui-border);
 }
 
 .campaigns-table th {
@@ -377,12 +377,12 @@ onMounted(() => {
 }
 
 .campaigns-table tbody tr {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
   transition: background-color 0.2s;
 }
 
 .campaigns-table tbody tr:hover {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
 }
 
 .campaigns-table tbody tr:last-child {
@@ -404,7 +404,7 @@ onMounted(() => {
 }
 
 .slug-cell a {
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -416,7 +416,7 @@ onMounted(() => {
 
 .date-cell {
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   white-space: nowrap;
 }
 
@@ -427,7 +427,7 @@ onMounted(() => {
 }
 
 .delete-btn {
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .modal-content {
