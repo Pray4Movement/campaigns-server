@@ -1,4 +1,3 @@
-import { requireAdmin } from '#server/utils/auth'
 import { campaignAccessService } from '#server/database/campaign-access'
 import { campaignService } from '#server/database/campaigns'
 
@@ -6,8 +5,8 @@ export default defineEventHandler(async (event) => {
   // Require admin authentication
   await requireAdmin(event)
 
-  // Get user ID from route params
-  const userId = parseInt(getRouterParam(event, 'id') || '0')
+  // Get user ID from route params (UUID string)
+  const userId = getRouterParam(event, 'id')
   if (!userId) {
     throw createError({
       statusCode: 400,

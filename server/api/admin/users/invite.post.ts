@@ -1,6 +1,5 @@
 import { userInvitationService } from '#server/database/user-invitations'
 import { userService } from '#server/database/users'
-import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -55,7 +54,6 @@ export default defineEventHandler(async (event) => {
 
     // Send invitation email
     try {
-      const { sendInvitationEmail } = await import('#server/utils/email')
       await sendInvitationEmail(
         invitation.email,
         invitation.token,

@@ -32,7 +32,7 @@ export default class UserInvitationsMigration extends BaseMigration {
         id SERIAL PRIMARY KEY,
         email TEXT NOT NULL,
         token TEXT UNIQUE NOT NULL,
-        invited_by INTEGER NOT NULL,
+        invited_by UUID NOT NULL,
         role_id INTEGER DEFAULT NULL,
         status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'expired', 'revoked')),
         expires_at TIMESTAMP NOT NULL,

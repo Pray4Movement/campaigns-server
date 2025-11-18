@@ -1,5 +1,4 @@
-import { createDatabaseBackup } from '../../../utils/backup'
-import { requireAdmin } from '../../../utils/auth'
+import { createDatabaseBackup } from '#server/utils/backup'
 
 /**
  * API endpoint to manually trigger a database backup

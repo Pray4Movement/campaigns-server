@@ -1,6 +1,5 @@
 import { prayerContentService } from '#server/database/prayer-content'
 import { campaignService } from '#server/database/campaigns'
-import { requireAuth } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const user = requireAuth(event)

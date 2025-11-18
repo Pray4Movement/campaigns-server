@@ -361,7 +361,7 @@ onMounted(() => {
 
 /* Past Prayers */
 .past-prayers {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
   border-top: 1px solid var(--border);
   padding: 3rem 0;
 }

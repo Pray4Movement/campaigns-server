@@ -196,7 +196,7 @@ onMounted(() => {
 
 .back-link {
   display: inline-block;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   text-decoration: none;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
@@ -213,7 +213,7 @@ onMounted(() => {
 .default-language {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .btn-primary {
@@ -234,8 +234,8 @@ onMounted(() => {
 }
 
 .btn-secondary {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -246,7 +246,7 @@ onMounted(() => {
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
 }
 
 .btn-danger {
@@ -279,7 +279,7 @@ onMounted(() => {
 
 .empty-state p {
   margin-bottom: 1.5rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .content-list {
@@ -289,8 +289,8 @@ onMounted(() => {
 }
 
 .content-card {
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 1.5rem;
   transition: border-color 0.15s;
@@ -313,7 +313,7 @@ onMounted(() => {
 
 .date {
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .content-actions {
@@ -325,7 +325,7 @@ onMounted(() => {
 .content-preview {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--ui-border);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -337,8 +337,8 @@ onMounted(() => {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.5rem;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   border-radius: 6px;
   transition: border-color 0.15s;
 }
@@ -370,8 +370,8 @@ onMounted(() => {
 }
 
 .btn-edit {
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
   padding: 0.375rem 0.875rem;
   border-radius: 4px;
   cursor: pointer;
@@ -384,6 +384,6 @@ onMounted(() => {
 
 .btn-edit:hover {
   border-color: var(--text);
-  background-color: var(--color-background);
+  background-color: var(--ui-bg);
 }
 </style>

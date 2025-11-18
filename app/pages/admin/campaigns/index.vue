@@ -5,9 +5,9 @@
         <h1>Campaigns</h1>
         <p class="subtitle">Manage your prayer campaigns</p>
       </div>
-      <button @click="showCreateModal = true" class="btn-primary">
+      <UButton @click="showCreateModal = true" size="lg">
         + Create Campaign
-      </button>
+      </UButton>
     </div>
 
     <div v-if="loading" class="loading">Loading campaigns...</div>
@@ -16,9 +16,9 @@
 
     <div v-else-if="campaigns.length === 0" class="empty-state">
       <p>No campaigns yet. Create your first campaign to get started.</p>
-      <button @click="showCreateModal = true" class="btn-primary">
+      <UButton @click="showCreateModal = true" size="lg">
         Create Campaign
-      </button>
+      </UButton>
     </div>
 
     <div v-else class="campaigns-table-container">
@@ -39,24 +39,48 @@
               <a :href="`/${campaign.slug}`" target="_blank" rel="noopener noreferrer">/{{ campaign.slug }}</a>
             </td>
             <td>
-              <span class="status-badge" :class="campaign.status">
-                {{ campaign.status }}
-              </span>
+              <UBadge
+                :label="campaign.status"
+                :variant="campaign.status === 'active' ? 'solid' : 'outline'"
+                :color="campaign.status === 'active' ? 'primary' : 'neutral'"
+              />
             </td>
             <td class="date-cell">{{ formatDate(campaign.created_at) }}</td>
             <td class="actions-cell">
-              <button @click="navigateToContent(campaign.id)" class="btn-action" title="Manage Content">
+              <UButton
+                @click="navigateToContent(campaign.id)"
+                variant="link"
+                size="sm"
+                title="Manage Content"
+              >
                 Content
-              </button>
-              <button @click="navigateToSubscribers(campaign.id)" class="btn-action" title="Subscribers">
+              </UButton>
+              <UButton
+                @click="navigateToSubscribers(campaign.id)"
+                variant="link"
+                size="sm"
+                title="Subscribers"
+              >
                 Subscribers
-              </button>
-              <button @click="editCampaign(campaign)" class="btn-action" title="Edit">
+              </UButton>
+              <UButton
+                @click="editCampaign(campaign)"
+                variant="link"
+                size="sm"
+                title="Edit"
+              >
                 Edit
-              </button>
-              <button @click="deleteCampaign(campaign)" class="btn-action btn-delete" title="Delete">
+              </UButton>
+              <UButton
+                @click="deleteCampaign(campaign)"
+                variant="link"
+                size="sm"
+                color="neutral"
+                title="Delete"
+                class="delete-btn"
+              >
                 Delete
-              </button>
+              </UButton>
             </td>
           </tr>
         </tbody>
@@ -64,80 +88,71 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showCreateModal || editingCampaign" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>{{ editingCampaign ? 'Edit Campaign' : 'Create Campaign' }}</h2>
-          <button @click="closeModal" class="close-btn">&times;</button>
-        </div>
-
-        <form @submit.prevent="saveCampaign" class="modal-body">
-          <div class="form-group">
-            <label for="title">Title *</label>
-            <input
-              id="title"
+    <UModal
+      v-model:open="isModalOpen"
+      :title="editingCampaign ? 'Edit Campaign' : 'Create Campaign'"
+      :ui="{ content: 'max-w-2xl' }"
+    >
+      <template #body>
+        <form @submit.prevent="saveCampaign" class="modal-content">
+          <UFormField label="Title" required>
+            <UInput
               v-model="form.title"
-              type="text"
-              required
               placeholder="Enter campaign title"
+              class="w-full"
             />
-          </div>
+          </UFormField>
 
-          <div class="form-group">
-            <label for="slug">Slug</label>
-            <input
-              id="slug"
+          <UFormField
+            label="Slug"
+            description="Leave empty to auto-generate from title"
+          >
+            <UInput
               v-model="form.slug"
-              type="text"
               placeholder="auto-generated from title"
+              class="w-full"
             />
-            <small>Leave empty to auto-generate from title</small>
-          </div>
+          </UFormField>
 
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
+          <UFormField label="Description">
+            <UTextarea
               v-model="form.description"
-              rows="4"
+              :rows="4"
               placeholder="Enter campaign description"
-            ></textarea>
-          </div>
+              class="w-full"
+            />
+          </UFormField>
 
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" v-model="form.status">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
+          <UFormField label="Status">
+            <USelect
+              v-model="form.status"
+              :items="statusOptions"
+              value-key="value"
+              class="w-full"
+            />
+          </UFormField>
 
-          <div class="form-group">
-            <label for="default_language">Default Language</label>
-            <select id="default_language" v-model="form.default_language">
-              <option value="en">English</option>
-              <option value="es">Spanish (Español)</option>
-              <option value="fr">French (Français)</option>
-              <option value="pt">Portuguese (Português)</option>
-              <option value="de">German (Deutsch)</option>
-              <option value="it">Italian (Italiano)</option>
-              <option value="zh">Chinese (中文)</option>
-              <option value="ar">Arabic (العربية)</option>
-              <option value="ru">Russian (Русский)</option>
-              <option value="hi">Hindi (हिन्दी)</option>
-            </select>
-            <small>Primary language for this campaign</small>
-          </div>
+          <UFormField
+            label="Default Language"
+            description="Primary language for this campaign"
+          >
+            <USelect
+              v-model="form.default_language"
+              :items="languageOptions"
+              value-key="value"
+              class="w-full"
+            />
+          </UFormField>
 
           <div class="modal-footer">
-            <button type="button" @click="closeModal" class="btn-secondary">Cancel</button>
-            <button type="submit" class="btn-primary" :disabled="saving">
+            <UButton type="button" variant="outline" @click="closeModal">Cancel</UButton>
+            <UButton type="submit" :disabled="saving">
               {{ saving ? 'Saving...' : 'Save Campaign' }}
-            </button>
+            </UButton>
           </div>
         </form>
-      </div>
-    </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -165,6 +180,15 @@ const showCreateModal = ref(false)
 const editingCampaign = ref<Campaign | null>(null)
 const saving = ref(false)
 
+const isModalOpen = computed({
+  get: () => showCreateModal.value || !!editingCampaign.value,
+  set: (value: boolean) => {
+    if (!value) {
+      closeModal()
+    }
+  }
+})
+
 const form = ref({
   title: '',
   slug: '',
@@ -172,6 +196,24 @@ const form = ref({
   status: 'active' as 'active' | 'inactive',
   default_language: 'en'
 })
+
+const statusOptions = [
+  { label: 'Active', value: 'active' },
+  { label: 'Inactive', value: 'inactive' }
+]
+
+const languageOptions = [
+  { label: 'English', value: 'en' },
+  { label: 'Spanish (Español)', value: 'es' },
+  { label: 'French (Français)', value: 'fr' },
+  { label: 'Portuguese (Português)', value: 'pt' },
+  { label: 'German (Deutsch)', value: 'de' },
+  { label: 'Italian (Italiano)', value: 'it' },
+  { label: 'Chinese (中文)', value: 'zh' },
+  { label: 'Arabic (العربية)', value: 'ar' },
+  { label: 'Russian (Русский)', value: 'ru' },
+  { label: 'Hindi (हिन्दी)', value: 'hi' }
+]
 
 async function loadCampaigns() {
   try {
@@ -287,54 +329,7 @@ onMounted(() => {
 
 .subtitle {
   margin: 0;
-  color: var(--color-text-muted);
-}
-
-.btn-primary {
-  background-color: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.2s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: var(--color-background-soft);
-}
-
-.btn-danger {
-  background-color: var(--text);
-  color: var(--bg);
-  border: 1px solid var(--border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-danger:hover {
-  opacity: 0.9;
+  color: var(--ui-text-muted);
 }
 
 .loading, .error {
@@ -353,11 +348,11 @@ onMounted(() => {
 
 .empty-state p {
   margin-bottom: 1.5rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .campaigns-table-container {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -368,8 +363,8 @@ onMounted(() => {
 }
 
 .campaigns-table thead {
-  background-color: var(--color-background-soft);
-  border-bottom: 2px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border-bottom: 2px solid var(--ui-border);
 }
 
 .campaigns-table th {
@@ -382,12 +377,12 @@ onMounted(() => {
 }
 
 .campaigns-table tbody tr {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
   transition: background-color 0.2s;
 }
 
 .campaigns-table tbody tr:hover {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
 }
 
 .campaigns-table tbody tr:last-child {
@@ -409,7 +404,7 @@ onMounted(() => {
 }
 
 .slug-cell a {
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -421,141 +416,27 @@ onMounted(() => {
 
 .date-cell {
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   white-space: nowrap;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.status-badge.active {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.status-badge.inactive {
-  background-color: var(--color-background);
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
 }
 
 .actions-cell {
   white-space: nowrap;
-}
-
-.btn-action {
-  background: none;
-  border: none;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  color: var(--text);
-  text-decoration: underline;
-  transition: opacity 0.2s;
-}
-
-.btn-action:hover {
-  opacity: 0.7;
-}
-
-.btn-action.btn-delete {
-  color: var(--color-text-muted);
-}
-
-.btn-action.btn-delete:hover {
-  color: var(--text);
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  gap: 0.25rem;
 }
 
-.modal {
-  background-color: var(--color-background);
-  border-radius: 8px;
-  width: 90%;
+.delete-btn {
+  color: var(--ui-text-muted);
+}
+
+.modal-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.modal-header h2 {
-  margin: 0;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  line-height: 1;
-}
-
-.close-btn:hover {
-  color: var(--color-text);
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background-soft);
-  font-size: 1rem;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--text);
-}
-
-.form-group small {
-  display: block;
-  margin-top: 0.25rem;
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
+  margin: 0 auto;
 }
 
 .modal-footer {
@@ -564,6 +445,6 @@ onMounted(() => {
   gap: 0.5rem;
   padding: 1.5rem;
   border-top: 1px solid var(--color-border);
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 </style>

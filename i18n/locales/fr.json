@@ -19,9 +19,7 @@
     "signIn": "Se connecter",
     "signingIn": "Connexion en cours...",
     "error": {
-      "failed": "Échec de la connexion. Veuillez vérifier vos identifiants.",
-      "googleAuthFailed": "L'authentification Google a échoué. Veuillez réessayer.",
-      "emailNotVerified": "Votre e-mail Google n'est pas vérifié."
+      "failed": "Échec de la connexion. Veuillez vérifier vos identifiants."
     }
   },
   "footer": {

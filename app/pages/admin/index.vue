@@ -40,32 +40,34 @@ definePageMeta({
 }
 
 .card {
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 1.5rem;
 }
 
 .card h3 {
   margin: 0 0 0.5rem;
+  color: var(--ui-text);
 }
 
 .card p {
   margin: 0 0 1rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .btn {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   border-radius: 4px;
   text-decoration: none;
+  color: var(--ui-text);
   transition: background-color 0.2s;
 }
 
 .btn:hover {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
 }
 </style>

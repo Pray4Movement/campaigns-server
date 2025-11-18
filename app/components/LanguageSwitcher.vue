@@ -54,10 +54,10 @@ async function onLanguageChange() {
 
 .language-select {
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background: var(--color-background);
-  color: var(--color-text);
+  background: var(--ui-bg);
+  color: var(--ui-text);
   font-size: 0.875rem;
   cursor: pointer;
   transition: border-color 0.2s, background-color 0.2s;
@@ -65,17 +65,17 @@ async function onLanguageChange() {
 }
 
 .language-select:hover {
-  border-color: var(--color-text-muted);
-  background: var(--color-background-soft);
+  border-color: var(--ui-border-accented);
+  background: var(--ui-bg-elevated);
 }
 
 .language-select:focus {
   outline: none;
-  border-color: var(--color-text);
+  border-color: var(--ui-ring);
 }
 
 .language-select option {
-  background: var(--color-background);
-  color: var(--color-text);
+  background: var(--ui-bg);
+  color: var(--ui-text);
 }
 </style>

@@ -1,4 +1,3 @@
-import { requireAuth } from '#server/utils/auth'
 import { uploadMedia, validateImageFile, validateVideoFile } from '#server/utils/media'
 
 export default defineEventHandler(async (event) => {

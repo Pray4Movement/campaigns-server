@@ -1,4 +1,3 @@
-import { requireAdmin } from '#server/utils/auth'
 import { roleService } from '#server/database/roles'
 
 export default defineEventHandler(async (event) => {
