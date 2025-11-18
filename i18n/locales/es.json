@@ -19,9 +19,7 @@
     "signIn": "Iniciar Sesión",
     "signingIn": "Iniciando sesión...",
     "error": {
-      "failed": "Error de inicio de sesión. Por favor verifique sus credenciales.",
-      "googleAuthFailed": "Autenticación de Google falló. Por favor intente de nuevo.",
-      "emailNotVerified": "Su correo electrónico de Google no está verificado."
+      "failed": "Error de inicio de sesión. Por favor verifique sus credenciales."
     }
   },
   "footer": {

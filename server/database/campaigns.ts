@@ -214,7 +214,7 @@ export class CampaignService {
 
   // Check if user can access a campaign
   // Admins can access all campaigns, campaign editors can only access assigned campaigns
-  async userCanAccessCampaign(userId: number, campaignId: number): Promise<boolean> {
+  async userCanAccessCampaign(userId: string, campaignId: number): Promise<boolean> {
     // Check if user is admin
     const isAdmin = await roleService.isAdmin(userId)
     if (isAdmin) {
@@ -226,7 +226,7 @@ export class CampaignService {
   }
 
   // Get all campaigns accessible to a user (based on their role)
-  async getCampaignsForUser(userId: number, statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
+  async getCampaignsForUser(userId: string, statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
     // Check if user is admin
     const isAdmin = await roleService.isAdmin(userId)
     if (isAdmin) {

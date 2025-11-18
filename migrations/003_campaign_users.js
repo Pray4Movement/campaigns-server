@@ -31,7 +31,7 @@ export default class CampaignUsersMigration extends BaseMigration {
     await this.exec(pool, `
       CREATE TABLE IF NOT EXISTS campaign_users (
         campaign_id INTEGER NOT NULL,
-        user_id INTEGER NOT NULL,
+        user_id UUID NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (campaign_id, user_id),
         FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,

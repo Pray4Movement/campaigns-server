@@ -5,9 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a Nuxt.js 4.1.0 application with Vue 3, configured as an ES module project. The project uses TypeScript with Nuxt's automatic TypeScript configuration system.
+We are using NUXT UI v4.1
+This project consumes the base layer defined here: https://github.com/corsacca/nuxt-base
 
 ## RULES
 - NEVER EDIT THE .env file directly. Ask the user to.
+- always kill dev servers you start
+- When building modals, first reference [nuxt-ui-modals.md](documentation/nuxt-ui-modals.md) for proper implementation patterns.
 
 ## Development Commands
 
@@ -92,5 +96,7 @@ Comprehensive Nuxt 4.1 documentation is available in the `documentation/` folder
 - `nuxt-4x-directory-structure.md` - App directory structure and organization
 - `nuxt-4x-auto-imports.md` - Auto-import system for composables, components, and utils
 - `nuxt-4x-styling.md` - Styling approaches, CSS imports, and preprocessors
+- `nuxt-ui-modals.md` - Guide for properly implementing Nuxt UI modals
+- `wysiwyg-editor.md` - WYSIWYG editor implementation
 
 For the most up-to-date information, refer to the official [Nuxt 4.x Documentation](https://nuxt.com/docs/4.x).

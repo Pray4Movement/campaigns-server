@@ -15,18 +15,19 @@
       <!-- Left Column: Subscriber List (1/3 width) -->
       <div class="subscriber-list">
         <div class="list-header">
-          <input
+          <UInput
             v-model="searchQuery"
             type="text"
             placeholder="Search by name, email, or phone..."
             class="search-input"
           />
-          <select v-model="filterMethod" class="filter-select">
-            <option value="">All Methods</option>
-            <option value="email">Email</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="app">Mobile App</option>
-          </select>
+          <USelect
+            v-model="filterMethod"
+            :items="deliveryMethodOptions"
+            value-key="value"
+            placeholder="All Methods"
+            class="filter-select"
+          />
         </div>
 
         <div v-if="filteredSubscribers.length === 0" class="empty-list">
@@ -46,9 +47,12 @@
               {{ subscriber.email || subscriber.phone }}
             </div>
             <div class="subscriber-meta">
-              <span class="badge" :class="subscriber.delivery_method">
-                {{ subscriber.delivery_method }}
-              </span>
+              <UBadge
+                :label="subscriber.delivery_method"
+                :variant="subscriber.delivery_method === 'email' ? 'solid' : 'outline'"
+                :color="subscriber.delivery_method === 'email' ? 'primary' : 'neutral'"
+                size="xs"
+              />
               <span class="date">{{ formatDate(subscriber.created_at) }}</span>
             </div>
           </div>
@@ -64,82 +68,80 @@
         <div v-else class="details-content">
           <div class="details-header">
             <h2>{{ selectedSubscriber.name }}</h2>
-            <button @click="confirmDelete" class="btn-danger">Delete</button>
+            <UButton @click="confirmDelete" color="neutral" variant="outline">Delete</UButton>
           </div>
 
           <form @submit.prevent="saveSubscriber" class="details-form">
             <div class="form-section">
               <h3>Contact Information</h3>
 
-              <div class="form-group">
-                <label for="name">Name</label>
-                <input
-                  id="name"
+              <UFormField label="Name" required>
+                <UInput
                   v-model="editForm.name"
                   type="text"
-                  required
+                  class="w-full"
                 />
-              </div>
+              </UFormField>
 
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input
-                  id="email"
+              <UFormField label="Email">
+                <UInput
                   v-model="editForm.email"
                   type="email"
                   :disabled="editForm.delivery_method !== 'email'"
+                  class="w-full"
                 />
-              </div>
+              </UFormField>
 
-              <div class="form-group">
-                <label for="phone">Phone</label>
-                <input
-                  id="phone"
+              <UFormField label="Phone">
+                <UInput
                   v-model="editForm.phone"
                   type="tel"
                   :disabled="editForm.delivery_method !== 'whatsapp'"
+                  class="w-full"
                 />
-              </div>
+              </UFormField>
             </div>
 
             <div class="form-section">
               <h3>Delivery Preferences</h3>
 
-              <div class="form-group">
-                <label for="delivery_method">Delivery Method</label>
-                <select id="delivery_method" v-model="editForm.delivery_method" disabled>
-                  <option value="email">Email</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="app">Mobile App</option>
-                </select>
-                <small>Cannot be changed after signup</small>
-              </div>
+              <UFormField
+                label="Delivery Method"
+                description="Cannot be changed after signup"
+              >
+                <USelect
+                  v-model="editForm.delivery_method"
+                  :items="deliveryMethodSelectOptions"
+                  value-key="value"
+                  disabled
+                  class="w-full"
+                />
+              </UFormField>
 
-              <div class="form-group">
-                <label for="frequency">Frequency</label>
-                <input
-                  id="frequency"
+              <UFormField label="Frequency">
+                <UInput
                   v-model="editForm.frequency"
                   type="text"
+                  class="w-full"
                 />
-              </div>
+              </UFormField>
 
-              <div class="form-group">
-                <label for="time_preference">Time Preference</label>
-                <input
-                  id="time_preference"
+              <UFormField label="Time Preference">
+                <UInput
                   v-model="editForm.time_preference"
                   type="time"
+                  class="w-full"
                 />
-              </div>
+              </UFormField>
 
-              <div class="form-group">
-                <label for="status">Status</label>
-                <select id="status" v-model="editForm.status">
-                  <option value="active">Active</option>
-                  <option value="unsubscribed">Unsubscribed</option>
-                </select>
-              </div>
+              <UFormField label="Status">
+                <USelect
+                  v-model="editForm.status"
+                  :items="statusOptions"
+                  value-key="value"
+                  class="w-full"
+                />
+              </UFormField>
             </div>
 
             <div class="form-section">
@@ -162,10 +164,10 @@
             </div>
 
             <div class="form-actions">
-              <button type="button" @click="resetForm" class="btn-secondary">Reset</button>
-              <button type="submit" class="btn-primary" :disabled="saving">
+              <UButton type="button" @click="resetForm" variant="outline">Reset</UButton>
+              <UButton type="submit" :disabled="saving">
                 {{ saving ? 'Saving...' : 'Save Changes' }}
-              </button>
+              </UButton>
             </div>
           </form>
         </div>
@@ -222,6 +224,23 @@ const editForm = ref({
   time_preference: '',
   status: 'active' as 'active' | 'unsubscribed'
 })
+
+const deliveryMethodOptions = [
+  { label: 'Email', value: 'email' },
+  { label: 'WhatsApp', value: 'whatsapp' },
+  { label: 'Mobile App', value: 'app' }
+]
+
+const deliveryMethodSelectOptions = [
+  { label: 'Email', value: 'email' },
+  { label: 'WhatsApp', value: 'whatsapp' },
+  { label: 'Mobile App', value: 'app' }
+]
+
+const statusOptions = [
+  { label: 'Active', value: 'active' },
+  { label: 'Unsubscribed', value: 'unsubscribed' }
+]
 
 const filteredSubscribers = computed(() => {
   let filtered = subscribers.value
@@ -373,7 +392,7 @@ onMounted(() => {
 
 .subtitle {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .loading, .error {
@@ -394,7 +413,7 @@ onMounted(() => {
 
 /* Left Column: Subscriber List */
 .subscriber-list {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -404,31 +423,23 @@ onMounted(() => {
 
 .list-header {
   padding: 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background-soft);
+  border-bottom: 1px solid var(--ui-border);
+  background-color: var(--ui-bg-elevated);
 }
 
 .search-input {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background);
   margin-bottom: 0.5rem;
 }
 
 .filter-select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background);
 }
 
 .empty-list {
   padding: 2rem;
   text-align: center;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .list-items {
@@ -438,17 +449,17 @@ onMounted(() => {
 
 .subscriber-item {
   padding: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .subscriber-item:hover {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
 }
 
 .subscriber-item.active {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
   border-left: 3px solid var(--text);
 }
 
@@ -459,7 +470,7 @@ onMounted(() => {
 
 .subscriber-contact {
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -470,38 +481,16 @@ onMounted(() => {
   font-size: 0.75rem;
 }
 
-.badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.badge.email {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.badge.whatsapp {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-}
-
-.badge.app {
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
-}
-
 .date {
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 /* Right Column: Subscriber Details */
 .subscriber-details {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   padding: 2rem;
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
   overflow-y: auto;
   max-height: calc(100vh - 50px);
 }
@@ -511,7 +500,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .details-header {
@@ -520,25 +509,11 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
 }
 
 .details-header h2 {
   margin: 0;
-}
-
-.btn-danger {
-  background-color: var(--text);
-  color: var(--bg);
-  border: 1px solid var(--border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-danger:hover {
-  opacity: 0.9;
 }
 
 .details-form {
@@ -558,48 +533,11 @@ onMounted(() => {
   font-size: 1.125rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.form-group input,
-.form-group select {
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background);
-  font-size: 1rem;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--text);
-}
-
-.form-group input:disabled,
-.form-group select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.form-group small {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-}
-
 .info-row {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
   font-size: 0.875rem;
 }
 
@@ -608,7 +546,7 @@ onMounted(() => {
 }
 
 .info-row .value {
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .monospace {
@@ -620,39 +558,6 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.btn-primary {
-  background-color: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.2s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: var(--color-background-soft);
+  border-top: 1px solid var(--ui-border);
 }
 </style>

@@ -18,28 +18,8 @@ export default class InitialSchemaMigration extends BaseMigration {
   name = 'Initial Schema'
 
   async up(pool) {
-    console.log('📥 Creating initial schema...')
-
-    // Users table (admin users)
-    await this.exec(pool, `
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        display_name TEXT DEFAULT '' NOT NULL,
-        verified BOOLEAN DEFAULT FALSE NOT NULL,
-        superadmin BOOLEAN DEFAULT FALSE NOT NULL,
-        token_key TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `)
-
-    // Create indexes for faster lookups
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_users_token_key ON users(token_key)')
-
-    console.log('  ✅ Users table created')
+    console.log('📥 Creating project-specific schema...')
+    console.log('  ℹ️  Users table provided by base layer')
 
     // Roles table
     await this.exec(pool, `
@@ -55,7 +35,7 @@ export default class InitialSchemaMigration extends BaseMigration {
     // User roles junction table
     await this.exec(pool, `
       CREATE TABLE IF NOT EXISTS user_roles (
-        user_id INTEGER NOT NULL,
+        user_id UUID NOT NULL,
         role_id INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (user_id, role_id),

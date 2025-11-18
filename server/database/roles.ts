@@ -108,7 +108,7 @@ export class RoleService {
   }
 
   // Get user roles
-  async getUserRoles(userId: number): Promise<Role[]> {
+  async getUserRoles(userId: string): Promise<Role[]> {
     const stmt = this.db.prepare(`
       SELECT r.* FROM roles r
       JOIN user_roles ur ON r.id = ur.role_id
@@ -118,7 +118,7 @@ export class RoleService {
   }
 
   // Check if user has permission
-  async userHasPermission(userId: number, permissionName: string): Promise<boolean> {
+  async userHasPermission(userId: string, permissionName: string): Promise<boolean> {
     const stmt = this.db.prepare(`
       SELECT 1 FROM permissions p
       JOIN role_permissions rp ON p.id = rp.permission_id
@@ -130,19 +130,19 @@ export class RoleService {
   }
 
   // Assign role to user
-  async assignRoleToUser(userId: number, roleId: number): Promise<void> {
+  async assignRoleToUser(userId: string, roleId: number): Promise<void> {
     const stmt = this.db.prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?) ON CONFLICT DO NOTHING')
     await stmt.run(userId, roleId)
   }
 
   // Remove role from user
-  async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
+  async removeRoleFromUser(userId: string, roleId: number): Promise<void> {
     const stmt = this.db.prepare('DELETE FROM user_roles WHERE user_id = ? AND role_id = ?')
     await stmt.run(userId, roleId)
   }
 
   // Check if user has admin role
-  async isAdmin(userId: number): Promise<boolean> {
+  async isAdmin(userId: string): Promise<boolean> {
     const stmt = this.db.prepare(`
       SELECT 1 FROM user_roles ur
       JOIN roles r ON ur.role_id = r.id
@@ -153,7 +153,7 @@ export class RoleService {
   }
 
   // Check if user has campaign_editor role
-  async isCampaignEditor(userId: number): Promise<boolean> {
+  async isCampaignEditor(userId: string): Promise<boolean> {
     const stmt = this.db.prepare(`
       SELECT 1 FROM user_roles ur
       JOIN roles r ON ur.role_id = r.id

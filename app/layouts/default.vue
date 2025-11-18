@@ -4,18 +4,21 @@
       <div class="container">
         <div class="header-content">
           <h1 class="logo">{{ campaignTitle }}</h1>
-          <div class="language-selector">
-            <label for="global-language-select" class="sr-only">{{ $t('language') }}</label>
-            <select
-              id="global-language-select"
-              v-model="selectedLanguage"
-              @change="onLanguageChange"
-              class="language-select"
-            >
-              <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
-                {{ getLanguageFlag(lang.code) }} {{ lang.name }}
-              </option>
-            </select>
+          <div class="header-actions">
+            <div class="language-selector">
+              <label for="global-language-select" class="sr-only">{{ $t('language') }}</label>
+              <select
+                id="global-language-select"
+                v-model="selectedLanguage"
+                @change="onLanguageChange"
+                class="language-select"
+              >
+                <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
+                  {{ getLanguageFlag(lang.code) }} {{ lang.name }}
+                </option>
+              </select>
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -61,11 +64,13 @@ async function onLanguageChange() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
 }
 
 .header {
-  background-color: var(--color-background-soft);
-  border-bottom: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border-bottom: 1px solid var(--ui-border);
   padding: 1rem 0;
 }
 
@@ -85,6 +90,13 @@ async function onLanguageChange() {
 .logo {
   font-size: 1.5rem;
   margin: 0;
+  color: var(--ui-text);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .language-selector {
@@ -105,22 +117,22 @@ async function onLanguageChange() {
 
 .language-select {
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background: var(--color-background);
-  color: var(--color-text);
+  background: var(--ui-bg);
+  color: var(--ui-text);
   font-size: 0.875rem;
   cursor: pointer;
   transition: border-color 0.2s;
 }
 
 .language-select:hover {
-  border-color: var(--color-text-muted);
+  border-color: var(--ui-border-accented);
 }
 
 .language-select:focus {
   outline: none;
-  border-color: var(--color-text);
+  border-color: var(--ui-ring);
 }
 
 .main-content {
@@ -130,8 +142,8 @@ async function onLanguageChange() {
 }
 
 .footer {
-  background-color: var(--color-background-soft);
-  border-top: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border-top: 1px solid var(--ui-border);
   padding: 1rem 0;
   text-align: center;
 }
@@ -139,6 +151,6 @@ async function onLanguageChange() {
 .footer p {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 </style>

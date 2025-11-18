@@ -108,7 +108,7 @@ h1 {
 .tabs {
   display: flex;
   gap: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ui-border);
   margin-bottom: 2rem;
 }
 
@@ -119,7 +119,7 @@ h1 {
   border-bottom: 2px solid transparent;
   cursor: pointer;
   font-size: 1rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
   transition: all 0.2s;
 }
 
@@ -139,12 +139,12 @@ h1 {
 
 .tab-panel p {
   margin: 0 0 1.5rem;
-  color: var(--color-text-muted);
+  color: var(--ui-text-muted);
 }
 
 .backup-btn {
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-background);
+  background-color: var(--ui-bg);
   color: var(--text);
   border: 2px solid var(--text);
   border-radius: 4px;
@@ -172,20 +172,20 @@ h1 {
 }
 
 .message.success {
-  background-color: var(--color-background-soft);
-  border-color: var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border-color: var(--ui-border);
 }
 
 .message.error {
-  background-color: var(--color-background-soft);
+  background-color: var(--ui-bg-elevated);
   border-color: var(--text);
 }
 
 .backup-info {
   margin-top: 2rem;
   padding: 1.5rem;
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
+  background-color: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
   border-radius: 4px;
 }
 
