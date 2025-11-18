@@ -5,19 +5,7 @@
         <div class="header-content">
           <h1 class="logo">{{ campaignTitle }}</h1>
           <div class="header-actions">
-            <div class="language-selector">
-              <label for="global-language-select" class="sr-only">{{ $t('language') }}</label>
-              <select
-                id="global-language-select"
-                v-model="selectedLanguage"
-                @change="onLanguageChange"
-                class="language-select"
-              >
-                <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
-                  {{ getLanguageFlag(lang.code) }} {{ lang.name }}
-                </option>
-              </select>
-            </div>
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
         </div>
@@ -37,26 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { getLanguageFlag } from '~/utils/languages'
-
 const currentYear = new Date().getFullYear()
-const { locale, setLocale, locales } = useI18n()
-const switchLocalePath = useSwitchLocalePath()
-const router = useRouter()
 const { campaignTitle } = useCampaign()
-
-const selectedLanguage = ref(locale.value)
-const availableLocales = computed(() => locales.value)
-
-// Watch for locale changes to update selected language
-watch(locale, (newLang) => {
-  selectedLanguage.value = newLang
-})
-
-async function onLanguageChange() {
-  const newPath = switchLocalePath(selectedLanguage.value)
-  await router.push(newPath)
-}
 </script>
 
 <style scoped>
@@ -97,42 +67,6 @@ async function onLanguageChange() {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.language-selector {
-  flex-shrink: 0;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.language-select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background: var(--ui-bg);
-  color: var(--ui-text);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.language-select:hover {
-  border-color: var(--ui-border-accented);
-}
-
-.language-select:focus {
-  outline: none;
-  border-color: var(--ui-ring);
 }
 
 .main-content {
