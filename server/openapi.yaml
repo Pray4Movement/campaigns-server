@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: Prayer Tools API
+  description: Public API for accessing prayer campaigns and signing up for prayer reminders
+  version: 1.0.0
+  contact:
+    name: Prayer Tools Support
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://api.prayertools.app
+    description: Production
+
+tags:
+  - name: Campaigns
+    description: Prayer campaign operations
+  - name: Signups
+    description: Prayer reminder signup operations
+
+paths:
+  /api/campaigns:
+    get:
+      tags:
+        - Campaigns
+      summary: List all active campaigns
+      description: Returns a list of all active prayer campaigns available to the public
+      operationId: listCampaigns
+      responses:
+        '200':
+          description: Successfully retrieved campaigns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaigns:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+
+  /api/campaigns/{slug}:
+    get:
+      tags:
+        - Campaigns
+      summary: Get campaign by slug
+      description: Returns details for a specific active campaign
+      operationId: getCampaignBySlug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+          example: 40-days-of-prayer
+      responses:
+        '200':
+          description: Successfully retrieved campaign
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaign:
+                    $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Campaign slug is required
+        '404':
+          description: Campaign not found or not active
+
+  /api/campaigns/{slug}/signup:
+    post:
+      tags:
+        - Signups
+      summary: Sign up for campaign prayer reminders
+      description: Creates a new subscription for prayer reminders for a specific campaign
+      operationId: signupForCampaign
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - delivery_method
+                - frequency
+                - reminder_time
+              properties:
+                name:
+                  type: string
+                  description: Subscriber name
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  description: Email address (required for email delivery)
+                  example: john@example.com
+                phone:
+                  type: string
+                  description: Phone number (required for WhatsApp delivery)
+                  example: "+1234567890"
+                delivery_method:
+                  type: string
+                  enum: [email, whatsapp, app]
+                  description: Delivery method for reminders
+                  example: email
+                frequency:
+                  type: string
+                  enum: [daily, weekly, custom]
+                  description: Reminder frequency
+                  example: daily
+                days_of_week:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of days for weekly frequency (required if frequency is weekly)
+                  example: ["Monday", "Wednesday", "Friday"]
+                reminder_time:
+                  type: string
+                  description: Preferred reminder time (HH:MM format)
+                  example: "09:00"
+      responses:
+        '200':
+          description: Successfully signed up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  tracking_id:
+                    type: string
+                    description: Unique tracking ID for this subscription
+                    example: abc123def456
+                  message:
+                    type: string
+                    example: Successfully signed up for prayer reminders
+        '400':
+          description: Missing required fields, invalid delivery method, or campaign not active
+        '404':
+          description: Campaign not found
+        '500':
+          description: Failed to create signup
+
+  /api/campaigns/{slug}/prayed:
+    post:
+      tags:
+        - Prayer
+      summary: Mark as prayed
+      description: Records that a user has prayed for this campaign
+      operationId: markAsPrayed
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully recorded prayer
+        '404':
+          description: Campaign not found
+
+  /api/campaigns/{slug}/prayer-fuel:
+    get:
+      tags:
+        - Prayer
+      summary: Get today's prayer content
+      description: Returns the prayer content (prayer fuel) for today for a specific campaign
+      operationId: getPrayerFuel
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved prayer content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    description: Today's prayer content
+        '404':
+          description: Campaign not found or no content available
+
+  /api/campaigns/{slug}/past-prayer-fuel:
+    get:
+      tags:
+        - Prayer
+      summary: Get past prayer content
+      description: Returns historical prayer content for a specific campaign
+      operationId: getPastPrayerFuel
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved past prayer content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      type: object
+                    description: Array of past prayer content
+        '404':
+          description: Campaign not found
+
+components:
+  schemas:
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Campaign ID
+          example: 1
+        title:
+          type: string
+          description: Campaign title
+          example: 40 Days of Prayer
+        description:
+          type: string
+          description: Campaign description
+          example: Join us for 40 days of focused prayer
+        slug:
+          type: string
+          description: URL-friendly campaign identifier
+          example: 40-days-of-prayer
+        status:
+          type: string
+          enum: [active, inactive]
+          description: Campaign status
+          example: active
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
