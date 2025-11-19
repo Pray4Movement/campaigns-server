@@ -1,11 +1,8 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import { spawn } from 'child_process'
 import { readFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { tmpdir } from 'os'
-
-const execAsync = promisify(exec)
 
 interface BackupOptions {
   filename?: string
@@ -18,6 +15,35 @@ interface BackupResult {
   size?: number
   error?: string
   s3Location?: string
+}
+
+/**
+ * Execute pg_dump using spawn for security (prevents command injection)
+ */
+function executePgDump(pgDumpPath: string, args: string[], env: NodeJS.ProcessEnv): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(pgDumpPath, args, { env })
+
+    let stderr = ''
+
+    if (child.stderr) {
+      child.stderr.on('data', (data) => {
+        stderr += data.toString()
+      })
+    }
+
+    child.on('error', (error) => {
+      reject(new Error(`Failed to execute pg_dump: ${error.message}`))
+    })
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`pg_dump exited with code ${code}: ${stderr}`))
+      }
+    })
+  })
 }
 
 /**
@@ -49,12 +75,25 @@ export async function createDatabaseBackup(options: BackupOptions = {}): Promise
     // This is useful when you have multiple PostgreSQL versions installed
     const pgDumpPath = process.env.PG_DUMP_PATH || 'pg_dump'
 
-    // Create pg_dump command
+    // Build pg_dump arguments array (secure - prevents command injection)
     // Using custom format (-Fc) for better compression and flexibility
-    const pgDumpCommand = `PGPASSWORD="${dbPassword}" ${pgDumpPath} -h ${dbHost} -p ${dbPort} -U ${dbUser} -Fc -f "${localPath}" ${dbName}`
+    const pgDumpArgs = [
+      '-h', dbHost,
+      '-p', dbPort,
+      '-U', dbUser,
+      '-Fc',
+      '-f', localPath,
+      dbName
+    ]
+
+    // Pass password via environment variable (secure - not visible in process list)
+    const pgDumpEnv = {
+      ...process.env,
+      PGPASSWORD: dbPassword
+    }
 
     console.log(`Creating database backup: ${filename}`)
-    await execAsync(pgDumpCommand)
+    await executePgDump(pgDumpPath, pgDumpArgs, pgDumpEnv)
 
     // Read the backup file
     const backupData = await readFile(localPath)
