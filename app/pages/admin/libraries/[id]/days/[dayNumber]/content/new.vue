@@ -35,17 +35,6 @@
               <span class="language-native">({{ selectedLanguage?.nativeName }})</span>
             </div>
           </div>
-
-          <div class="form-group">
-            <label for="title">Title *</label>
-            <input
-              id="title"
-              v-model="form.title"
-              type="text"
-              required
-              placeholder="Enter content title"
-            />
-          </div>
         </div>
       </aside>
     </div>
@@ -80,7 +69,6 @@ const languageCode = computed(() => route.query.lang as string || 'en')
 const selectedLanguage = computed(() => getLanguageByCode(languageCode.value))
 
 const form = ref({
-  title: '',
   content_json: {
     type: 'doc',
     content: []
@@ -93,15 +81,11 @@ const showUnsavedChangesModal = ref(false)
 const pendingNavigation = ref<any>(null)
 
 const isValid = computed(() => {
-  return form.value.title.trim().length > 0
+  // Content is always valid since we just need the content_json structure
+  return true
 })
 
 const hasActualContent = computed(() => {
-  // Check if title has content
-  if (form.value.title.trim().length > 0) {
-    return true
-  }
-
   // Check if content_json has actual content (not just empty doc structure)
   if (form.value.content_json?.content && Array.isArray(form.value.content_json.content)) {
     // Check if there's any actual text content
@@ -137,7 +121,6 @@ async function saveContent() {
       body: {
         day_number: dayNumber.value,
         language_code: languageCode.value,
-        title: form.value.title,
         content_json: form.value.content_json
       }
     })

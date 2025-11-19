@@ -16,10 +16,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   // Validate required fields
-  if (!body.day_number || !body.title || !body.language_code) {
+  if (!body.day_number || !body.language_code) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Day number, title, and language code are required'
+      statusMessage: 'Day number and language code are required'
     })
   }
 
@@ -28,7 +28,6 @@ export default defineEventHandler(async (event) => {
       library_id: libraryId,
       day_number: body.day_number,
       language_code: body.language_code,
-      title: body.title,
       content_json: body.content_json
     })
 

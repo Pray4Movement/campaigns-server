@@ -87,7 +87,6 @@
             </template>
 
             <div class="translation-body">
-              <h3 class="translation-title">{{ translation.title }}</h3>
               <div class="translation-preview" v-html="getContentPreview(translation.content_json)"></div>
             </div>
           </UCard>
@@ -173,7 +172,6 @@ interface LibraryContent {
   library_id: number
   day_number: number
   language_code: string
-  title: string
   content_json: any
 }
 
@@ -406,18 +404,6 @@ onMounted(async () => {
 .translation-actions {
   display: flex;
   gap: 0.5rem;
-}
-
-.translation-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.translation-title {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
 }
 
 .translation-preview {

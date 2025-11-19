@@ -47,17 +47,6 @@
                 <span class="language-native">({{ selectedLanguage?.nativeName }})</span>
               </div>
             </div>
-
-            <div class="form-group">
-              <label for="title">Title *</label>
-              <input
-                id="title"
-                v-model="form.title"
-                type="text"
-                required
-                placeholder="Enter content title"
-              />
-            </div>
           </div>
         </aside>
       </div>
@@ -95,7 +84,6 @@ interface LibraryContent {
   library_id: number
   day_number: number
   language_code: string
-  title: string
   content_json: any
 }
 
@@ -108,7 +96,6 @@ const selectedLanguage = computed(() =>
 )
 
 const form = ref({
-  title: '',
   content_json: {
     type: 'doc',
     content: []
@@ -122,7 +109,8 @@ const showUnsavedChangesModal = ref(false)
 const pendingNavigation = ref<any>(null)
 
 const isValid = computed(() => {
-  return form.value.title.trim().length > 0
+  // Content is always valid since we just need the content_json structure
+  return true
 })
 
 async function loadContent() {
@@ -137,7 +125,6 @@ async function loadContent() {
     content.value = response.content
 
     // Populate form with existing data
-    form.value.title = response.content.title
     form.value.content_json = response.content.content_json
       ? (typeof response.content.content_json === 'string'
           ? JSON.parse(response.content.content_json)
@@ -173,7 +160,6 @@ async function saveContent() {
     await $fetch(`/api/admin/libraries/${libraryId.value}/content/${contentId.value}`, {
       method: 'PUT',
       body: {
-        title: form.value.title,
         content_json: form.value.content_json
       }
     })

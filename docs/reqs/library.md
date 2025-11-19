@@ -146,7 +146,6 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 - List of existing translations for this day
 - Each translation shows:
   - Language flag and name
-  - Title
   - Content preview (first 100 characters)
   - Edit button
   - Delete button (`<UButton>` color="red" variant="ghost")
@@ -185,7 +184,6 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 
 **Content Fields** (migrated from campaign content creator, use Nuxt UI components):
 - Language display (read-only, shows flag and language name)
-- Title field (`<UInput>` component, required)
 - Prayer fuel content (rich text/WYSIWYG editor - use existing `RichTextEditor` component)
 
 **Actions**:
@@ -194,7 +192,6 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 - Unsaved changes warning when navigating away
 
 **UI Components** (use Nuxt UI):
-- `<UInput>` for title
 - `RichTextEditor` for content
 - `<UButton>` for save/cancel actions
 - Unsaved changes detection
@@ -206,7 +203,7 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 **Components to Migrate from `/admin/campaigns/[id]/content/new.vue`**:
 - Content editor UI layout (editor-page, editor-container, editor-main, editor-sidebar)
 - `RichTextEditor` component for content editing
-- Form structure with title and content
+- Form structure
 - Save/validation logic
 
 **Key Changes**:
@@ -371,7 +368,7 @@ Library Order:
 9. Clicks "Add Translation"
 10. Selects language (e.g., English) from dropdown/modal
 11. Navigates to content creation page (`/admin/libraries/[id]/days/1/content/new?lang=en`)
-12. Enters title and content
+12. Enters content
 13. Clicks Save
 14. Returns to Day 1 overview page, now showing English translation
 15. Optionally adds more translations or navigates back to calendar
@@ -387,7 +384,7 @@ Library Order:
 5. Sees list of existing translations (e.g., English, Spanish)
 6. Clicks "Edit" on Spanish translation
 7. Navigates to content editing page (`/admin/libraries/[id]/days/200/content/[contentId]`)
-8. Edits title and/or content
+8. Edits content
 9. Clicks Save
 10. Returns to Day 200 overview page with updated content
 11. Navigates back to calendar view
@@ -405,7 +402,7 @@ Library Order:
 9. Clicks "Add Translation"
 10. Selects "Spanish" from language dropdown
 11. Navigates to content creation page (`/admin/libraries/[id]/days/50/content/new?lang=es`)
-12. Enters Spanish title and content
+12. Enters Spanish content
 13. Clicks Save
 14. Returns to Day 50 overview page, now showing Spanish translation
 

@@ -3,8 +3,8 @@ import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({
   // Testing local base layer changes (switch back to github:corsacca/nuxt-base#TAG before deploying)
-  // extends: ['../../base'],
-  extends: ['github:corsacca/nuxt-base#1.1.0'],
+  extends: ['../../base'],
+  // extends: ['github:corsacca/nuxt-base#1.1.0'],
 
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },

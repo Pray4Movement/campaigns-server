@@ -5,7 +5,6 @@ export interface LibraryContent {
   library_id: number
   day_number: number
   language_code: string
-  title: string
   content_json: string | null
   created_at: string
   updated_at: string
@@ -15,12 +14,10 @@ export interface CreateLibraryContentData {
   library_id: number
   day_number: number
   language_code: string
-  title: string
   content_json?: any
 }
 
 export interface UpdateLibraryContentData {
-  title?: string
   content_json?: any
   day_number?: number
   language_code?: string
@@ -35,19 +32,18 @@ export class LibraryContentService {
       library_id,
       day_number,
       language_code,
-      title,
       content_json = null
     } = data
 
     const contentJsonString = content_json ? JSON.stringify(content_json) : null
 
     const stmt = this.db.prepare(`
-      INSERT INTO library_content (library_id, day_number, language_code, title, content_json)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO library_content (library_id, day_number, language_code, content_json)
+      VALUES (?, ?, ?, ?)
     `)
 
     try {
-      const result = await stmt.run(library_id, day_number, language_code, title, contentJsonString)
+      const result = await stmt.run(library_id, day_number, language_code, contentJsonString)
       const contentId = result.lastInsertRowid as number
 
       return (await this.getLibraryContentById(contentId))!
@@ -222,11 +218,6 @@ export class LibraryContentService {
 
     const updates: string[] = []
     const values: any[] = []
-
-    if (data.title !== undefined) {
-      updates.push('title = ?')
-      values.push(data.title)
-    }
 
     if (data.content_json !== undefined) {
       updates.push('content_json = ?')

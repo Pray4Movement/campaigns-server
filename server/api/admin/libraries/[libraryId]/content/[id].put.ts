@@ -17,7 +17,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     const content = await libraryContentService.updateLibraryContent(id, {
-      title: body.title,
       content_json: body.content_json,
       day_number: body.day_number,
       language_code: body.language_code
