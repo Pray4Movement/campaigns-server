@@ -6,6 +6,8 @@ import { appConfigService } from '#server/database/app-config'
  * This sets which libraries are available to all campaigns and the global start date
  */
 export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
+
   try {
     const body = await readBody(event)
 

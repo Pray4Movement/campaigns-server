@@ -1,7 +1,8 @@
 import { getDatabase } from '#server/database/db'
 
 export default defineEventHandler(async (event) => {
-  // TODO: Add authentication check
+  await requireAdmin(event)
+
   const subscriberId = getRouterParam(event, 'id')
 
   if (!subscriberId) {
