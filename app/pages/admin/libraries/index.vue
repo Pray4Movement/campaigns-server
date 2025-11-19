@@ -115,6 +115,19 @@
         </form>
       </template>
     </UModal>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-model:open="showDeleteModal"
+      title="Delete Library"
+      :message="libraryToDelete ? `Are you sure you want to delete &quot;${libraryToDelete.name}&quot;?` : ''"
+      warning="This will also delete all associated content. This action cannot be undone."
+      confirm-text="Delete"
+      confirm-color="primary"
+      :loading="deleting"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
@@ -144,6 +157,10 @@ const error = ref('')
 const showCreateModal = ref(false)
 const editingLibrary = ref<Library | null>(null)
 const saving = ref(false)
+const showDeleteModal = ref(false)
+const libraryToDelete = ref<Library | null>(null)
+const deleting = ref(false)
+const toast = useToast()
 
 const isModalOpen = computed({
   get: () => showCreateModal.value || !!editingLibrary.value,
@@ -187,7 +204,11 @@ function editLibrary(library: Library) {
 
 async function saveLibrary() {
   if (!form.value.name.trim()) {
-    alert('Library name is required')
+    toast.add({
+      title: 'Validation Error',
+      description: 'Library name is required',
+      color: 'red'
+    })
     return
   }
 
@@ -200,11 +221,23 @@ async function saveLibrary() {
         method: 'PUT',
         body: form.value
       })
+
+      toast.add({
+        title: 'Library updated',
+        description: `"${form.value.name}" has been updated successfully.`,
+        color: 'green'
+      })
     } else {
       // Create new library
       const response = await $fetch<{ library: Library }>('/api/admin/libraries', {
         method: 'POST',
         body: form.value
+      })
+
+      toast.add({
+        title: 'Library created',
+        description: `"${form.value.name}" has been created successfully.`,
+        color: 'green'
       })
 
       // Redirect to content editor for new library
@@ -216,25 +249,55 @@ async function saveLibrary() {
     closeModal()
     await loadLibraries()
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to save library')
+    toast.add({
+      title: 'Failed to save library',
+      description: err.data?.statusMessage || 'An error occurred while saving the library.',
+      color: 'red'
+    })
   } finally {
     saving.value = false
   }
 }
 
-async function deleteLibrary(library: Library) {
-  if (!confirm(`Are you sure you want to delete "${library.name}"? This will also delete all associated content.`)) {
-    return
-  }
+function deleteLibrary(library: Library) {
+  libraryToDelete.value = library
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!libraryToDelete.value) return
+
+  const library = libraryToDelete.value
 
   try {
+    deleting.value = true
     await $fetch(`/api/admin/libraries/${library.id}`, {
       method: 'DELETE'
     })
+
+    toast.add({
+      title: 'Library deleted',
+      description: `"${library.name}" has been deleted successfully.`,
+      color: 'green'
+    })
+
     await loadLibraries()
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to delete library')
+    toast.add({
+      title: 'Failed to delete library',
+      description: err.data?.statusMessage || 'An error occurred while deleting the library.',
+      color: 'red'
+    })
+  } finally {
+    deleting.value = false
+    showDeleteModal.value = false
+    libraryToDelete.value = null
   }
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  libraryToDelete.value = null
 }
 
 function closeModal() {

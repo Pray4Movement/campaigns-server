@@ -48,22 +48,6 @@
             <td class="date-cell">{{ formatDate(campaign.created_at) }}</td>
             <td class="actions-cell">
               <UButton
-                @click="navigateToContent(campaign.id)"
-                variant="link"
-                size="sm"
-                title="Manage Content"
-              >
-                Content
-              </UButton>
-              <UButton
-                @click="navigateToLibraries(campaign.id)"
-                variant="link"
-                size="sm"
-                title="Configure Libraries"
-              >
-                Libraries
-              </UButton>
-              <UButton
                 @click="navigateToSubscribers(campaign.id)"
                 variant="link"
                 size="sm"
@@ -235,14 +219,6 @@ async function loadCampaigns() {
   } finally {
     loading.value = false
   }
-}
-
-function navigateToContent(campaignId: number) {
-  navigateTo(`/admin/campaigns/${campaignId}/content`)
-}
-
-function navigateToLibraries(campaignId: number) {
-  navigateTo(`/admin/campaigns/${campaignId}/libraries`)
 }
 
 function navigateToSubscribers(campaignId: number) {

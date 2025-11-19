@@ -23,6 +23,11 @@
           </NuxtLink>
         </li>
         <li>
+          <NuxtLink to="/admin/campaign-config" class="nav-link">
+            Campaign Config
+          </NuxtLink>
+        </li>
+        <li>
           <NuxtLink to="/admin/users" class="nav-link">
             Users
           </NuxtLink>

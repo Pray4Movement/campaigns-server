@@ -1,10 +1,9 @@
 <template>
-  <div class="campaign-libraries-page">
+  <div class="campaign-config-page">
     <div class="page-header">
       <div>
-        <NuxtLink to="/admin/campaigns" class="back-link">← Back to Campaigns</NuxtLink>
-        <h1 v-if="campaign" class="campaign-name">{{ campaign.title }} - Library Configuration</h1>
-        <p class="subtitle">Configure which content libraries this campaign uses</p>
+        <h1>Global Campaign Configuration</h1>
+        <p class="subtitle">Configure which libraries are available to all campaigns</p>
       </div>
     </div>
 
@@ -15,10 +14,10 @@
     <div v-else class="config-container">
       <div class="config-section">
         <h3>Available Libraries</h3>
-        <p class="section-description">Select libraries to add to this campaign</p>
+        <p class="section-description">Select libraries to make available to all campaigns</p>
 
         <div v-if="availableLibraries.length === 0" class="empty-message">
-          <p>All libraries are already added to this campaign.</p>
+          <p>All libraries are already added to the global configuration.</p>
         </div>
 
         <div v-else class="library-list">
@@ -29,6 +28,9 @@
           >
             <div class="library-info">
               <strong>{{ library.name }}</strong>
+              <span v-if="library.description" class="library-description">
+                {{ library.description }}
+              </span>
               <span class="library-stats">
                 {{ library.stats?.totalDays || 0 }} days
               </span>
@@ -45,16 +47,18 @@
 
       <div class="config-section">
         <h3>Selected Libraries</h3>
-        <p class="section-description">Drag to reorder. Content will be served in this order.</p>
+        <p class="section-description">
+          These libraries are available to all campaigns. Drag to reorder. Content will be served in this order.
+        </p>
 
         <div v-if="selectedLibraries.length === 0" class="empty-message">
-          <p>No libraries selected. Add libraries to provide content for this campaign.</p>
+          <p>No libraries selected. Add libraries to make them available to all campaigns.</p>
         </div>
 
         <div v-else class="library-list">
           <div
-            v-for="(item, index) in selectedLibraries"
-            :key="item.library_id"
+            v-for="(libraryId, index) in selectedLibraries"
+            :key="libraryId"
             class="library-card selected"
             draggable="true"
             @dragstart="dragStart(index)"
@@ -66,13 +70,16 @@
               ⋮⋮
             </div>
             <div class="library-info">
-              <strong>{{ getLibraryName(item.library_id) }}</strong>
+              <strong>{{ getLibraryName(libraryId) }}</strong>
+              <span v-if="getLibraryDescription(libraryId)" class="library-description">
+                {{ getLibraryDescription(libraryId) }}
+              </span>
               <span class="library-stats">
-                {{ getLibraryStats(item.library_id) }}
+                {{ getLibraryStats(libraryId) }}
               </span>
             </div>
             <UButton
-              @click="removeLibrary(item.library_id)"
+              @click="removeLibrary(libraryId)"
               size="sm"
               color="neutral"
               variant="outline"
@@ -102,14 +109,6 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const route = useRoute()
-const campaignId = computed(() => parseInt(route.params.id as string))
-
-interface Campaign {
-  id: number
-  title: string
-}
-
 interface Library {
   id: number
   name: string
@@ -120,37 +119,25 @@ interface Library {
   }
 }
 
-interface CampaignLibraryConfig {
-  id: number
-  campaign_id: number
-  library_id: number
-  order_index: number
-  enabled: boolean
-  library?: Library
+interface GlobalConfig {
+  campaignLibraries: Array<{
+    libraryId: number
+    order: number
+  }>
 }
 
-const campaign = ref<Campaign | null>(null)
 const allLibraries = ref<Library[]>([])
-const selectedLibraries = ref<CampaignLibraryConfig[]>([])
+const selectedLibraries = ref<number[]>([])
 const loading = ref(true)
 const error = ref('')
 const saving = ref(false)
 const draggedIndex = ref<number | null>(null)
+const toast = useToast()
 
 const availableLibraries = computed(() => {
-  const selectedIds = new Set(selectedLibraries.value.map(item => item.library_id))
+  const selectedIds = new Set(selectedLibraries.value)
   return allLibraries.value.filter(lib => !selectedIds.has(lib.id))
 })
-
-async function loadCampaign() {
-  try {
-    const response = await $fetch<{ campaign: Campaign }>(`/api/admin/campaigns/${campaignId.value}`)
-    campaign.value = response.campaign
-  } catch (err) {
-    console.error('Failed to load campaign:', err)
-    error.value = 'Failed to load campaign'
-  }
-}
 
 async function loadLibraries() {
   try {
@@ -167,10 +154,14 @@ async function loadConfiguration() {
     loading.value = true
     error.value = ''
 
-    const response = await $fetch<{ libraries: CampaignLibraryConfig[] }>(
-      `/api/admin/campaigns/${campaignId.value}/libraries`
+    const response = await $fetch<{ config: GlobalConfig }>(
+      '/api/admin/campaign-config/libraries'
     )
-    selectedLibraries.value = response.libraries.sort((a, b) => a.order_index - b.order_index)
+
+    // Extract library IDs in order
+    selectedLibraries.value = response.config.campaignLibraries
+      .sort((a, b) => a.order - b.order)
+      .map(item => item.libraryId)
   } catch (err: any) {
     error.value = 'Failed to load configuration'
     console.error(err)
@@ -180,32 +171,21 @@ async function loadConfiguration() {
 }
 
 function addLibrary(libraryId: number) {
-  const library = allLibraries.value.find(lib => lib.id === libraryId)
-  if (!library) return
-
-  selectedLibraries.value.push({
-    id: 0, // Temporary ID
-    campaign_id: campaignId.value,
-    library_id: libraryId,
-    order_index: selectedLibraries.value.length + 1,
-    enabled: true,
-    library
-  })
+  selectedLibraries.value.push(libraryId)
 }
 
 function removeLibrary(libraryId: number) {
-  selectedLibraries.value = selectedLibraries.value.filter(
-    item => item.library_id !== libraryId
-  )
-  // Update order indices
-  selectedLibraries.value.forEach((item, index) => {
-    item.order_index = index + 1
-  })
+  selectedLibraries.value = selectedLibraries.value.filter(id => id !== libraryId)
 }
 
 function getLibraryName(libraryId: number): string {
   const library = allLibraries.value.find(lib => lib.id === libraryId)
   return library?.name || 'Unknown'
+}
+
+function getLibraryDescription(libraryId: number): string {
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  return library?.description || ''
 }
 
 function getLibraryStats(libraryId: number): string {
@@ -225,11 +205,6 @@ function drop(dropIndex: number) {
   const [draggedItem] = items.splice(draggedIndex.value, 1)
   items.splice(dropIndex, 0, draggedItem)
 
-  // Update order indices
-  items.forEach((item, index) => {
-    item.order_index = index + 1
-  })
-
   selectedLibraries.value = items
   draggedIndex.value = null
 }
@@ -238,16 +213,24 @@ async function saveConfiguration() {
   try {
     saving.value = true
 
-    await $fetch(`/api/admin/campaigns/${campaignId.value}/libraries`, {
+    await $fetch('/api/admin/campaign-config/libraries', {
       method: 'PUT',
       body: {
-        library_ids: selectedLibraries.value.map(item => item.library_id)
+        library_ids: selectedLibraries.value
       }
     })
 
-    alert('Configuration saved successfully!')
+    toast.add({
+      title: 'Configuration saved',
+      description: 'Global campaign library configuration has been updated successfully.',
+      color: 'green'
+    })
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to save configuration')
+    toast.add({
+      title: 'Failed to save configuration',
+      description: err.data?.statusMessage || 'An error occurred while saving the configuration.',
+      color: 'red'
+    })
   } finally {
     saving.value = false
   }
@@ -255,7 +238,6 @@ async function saveConfiguration() {
 
 onMounted(async () => {
   await Promise.all([
-    loadCampaign(),
     loadLibraries(),
     loadConfiguration()
   ])
@@ -263,27 +245,15 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.campaign-libraries-page {
-  max-width: 1200px;
+.campaign-config-page {
+  max-width: 1400px;
 }
 
 .page-header {
   margin-bottom: 2rem;
 }
 
-.back-link {
-  display: inline-block;
-  color: var(--ui-text-muted);
-  text-decoration: none;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.back-link:hover {
-  color: var(--color-text);
-}
-
-.campaign-name {
+.page-header h1 {
   margin: 0 0 0.5rem;
 }
 
@@ -318,6 +288,7 @@ onMounted(async () => {
   margin: 0 0 1.5rem;
   font-size: 0.875rem;
   color: var(--ui-text-muted);
+  line-height: 1.5;
 }
 
 .empty-message {
@@ -370,12 +341,12 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background-color: var(--text);
   color: var(--bg);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -384,6 +355,16 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.library-info strong {
+  font-size: 0.9375rem;
+}
+
+.library-description {
+  font-size: 0.8125rem;
+  color: var(--ui-text-muted);
+  line-height: 1.4;
 }
 
 .library-stats {
