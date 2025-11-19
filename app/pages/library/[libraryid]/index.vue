@@ -22,13 +22,10 @@
       <!-- Calendar View -->
       <div class="calendar-container">
         <div class="calendar-header">
-          <h3>Content Calendar</h3>
+          <h3>Content Calendar - {{ getLanguageName(locale) }}</h3>
           <div class="legend">
             <span class="legend-item">
-              <span class="indicator complete"></span> All languages
-            </span>
-            <span class="legend-item">
-              <span class="indicator partial"></span> Some languages
+              <span class="indicator complete"></span> Has content
             </span>
             <span class="legend-item">
               <span class="indicator empty"></span> No content
@@ -76,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { getLanguageName, getLanguageFlag, LANGUAGES } from '~/utils/languages'
+import { getLanguageName } from '~/utils/languages'
 
 const route = useRoute()
 const { locale } = useI18n()
@@ -171,16 +168,7 @@ function getDayStatus(day: number): string {
 
   // Check if content exists in current language
   const hasCurrentLanguage = content.some(c => c.language_code === locale.value)
-
-  // Check if all languages are present
-  const languages = new Set(content.map(c => c.language_code))
-  if (languages.size >= LANGUAGES.length) {
-    return 'complete'
-  } else if (languages.size > 0) {
-    return 'partial'
-  }
-
-  return 'empty'
+  return hasCurrentLanguage ? 'complete' : 'empty'
 }
 
 function getDayTooltip(day: number): string {
@@ -190,8 +178,13 @@ function getDayTooltip(day: number): string {
     return `Day ${day}: No content`
   }
 
-  const languages = content.map(c => getLanguageName(c.language_code)).join(', ')
-  return `Day ${day}: ${languages}`
+  const hasCurrentLanguage = content.some(c => c.language_code === locale.value)
+  if (hasCurrentLanguage) {
+    return `Day ${day}: Available in ${getLanguageName(locale.value)}`
+  } else {
+    const languages = content.map(c => getLanguageName(c.language_code)).join(', ')
+    return `Day ${day}: Not available in ${getLanguageName(locale.value)} (Available: ${languages})`
+  }
 }
 
 async function selectDay(day: number) {
@@ -307,10 +300,6 @@ watch(locale, async () => {
   background-color: #22c55e;
 }
 
-.indicator.partial {
-  background-color: #eab308;
-}
-
 .indicator.empty {
   background-color: var(--ui-bg-elevated);
 }
@@ -344,12 +333,6 @@ watch(locale, async () => {
   background-color: #22c55e;
   color: white;
   border-color: #16a34a;
-}
-
-.day-cell.partial {
-  background-color: #eab308;
-  color: white;
-  border-color: #ca8a04;
 }
 
 .day-cell.empty {
