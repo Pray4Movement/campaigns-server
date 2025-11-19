@@ -231,6 +231,183 @@ paths:
         '404':
           description: Campaign not found
 
+  /api/campaigns/{slug}/content/day/{dayNumber}:
+    get:
+      tags:
+        - Prayer
+      summary: Get prayer content by day number
+      description: Returns prayer content for a specific day number (1-based) for a campaign
+      operationId: getPrayerContentByDay
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+          example: 40-days-of-prayer
+        - name: dayNumber
+          in: path
+          required: true
+          description: Day number (1-based, starting from global campaign start date)
+          schema:
+            type: integer
+            minimum: 1
+          example: 15
+        - name: language
+          in: query
+          required: false
+          description: Language code (defaults to campaign default language)
+          schema:
+            type: string
+          example: en
+      responses:
+        '200':
+          description: Successfully retrieved prayer content for the day
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaign:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      slug:
+                        type: string
+                      title:
+                        type: string
+                      default_language:
+                        type: string
+                  dayNumber:
+                    type: integer
+                    description: The requested day number
+                  date:
+                    type: string
+                    format: date
+                    description: The corresponding date (YYYY-MM-DD)
+                  language:
+                    type: string
+                    description: Language code of the returned content
+                  availableLanguages:
+                    type: array
+                    items:
+                      type: string
+                    description: Available languages for this day
+                  content:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        language_code:
+                          type: string
+                        content_json:
+                          type: object
+                        content_date:
+                          type: string
+                          format: date
+                    description: Array of prayer content items from all libraries
+                  hasContent:
+                    type: boolean
+                    description: Whether any content was found for this day
+        '400':
+          description: Invalid campaign slug or day number
+        '404':
+          description: Campaign not found
+        '500':
+          description: Global campaign start date not configured
+
+  /api/campaigns/{slug}/content/date/{date}:
+    get:
+      tags:
+        - Prayer
+      summary: Get prayer content by date
+      description: Returns prayer content for a specific date for a campaign
+      operationId: getPrayerContentByDate
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Campaign slug identifier
+          schema:
+            type: string
+          example: 40-days-of-prayer
+        - name: date
+          in: path
+          required: true
+          description: Date in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+          example: "2025-11-19"
+        - name: language
+          in: query
+          required: false
+          description: Language code (defaults to campaign default language)
+          schema:
+            type: string
+          example: en
+      responses:
+        '200':
+          description: Successfully retrieved prayer content for the date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaign:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      slug:
+                        type: string
+                      title:
+                        type: string
+                      default_language:
+                        type: string
+                  date:
+                    type: string
+                    format: date
+                    description: The requested date (YYYY-MM-DD)
+                  language:
+                    type: string
+                    description: Language code of the returned content
+                  availableLanguages:
+                    type: array
+                    items:
+                      type: string
+                    description: Available languages for this date
+                  content:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        language_code:
+                          type: string
+                        content_json:
+                          type: object
+                        content_date:
+                          type: string
+                          format: date
+                    description: Array of prayer content items from all libraries
+                  hasContent:
+                    type: boolean
+                    description: Whether any content was found for this date
+        '400':
+          description: Invalid campaign slug or date format
+        '404':
+          description: Campaign not found
+
 components:
   schemas:
     Campaign:
