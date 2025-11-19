@@ -6,6 +6,8 @@ import { appConfigService } from '#server/database/app-config'
  * This returns which libraries are available to all campaigns and the global start date
  */
 export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
+
   try {
     const config = await appConfigService.getConfig('global_campaign_libraries')
     const startDate = await appConfigService.getConfig<string>('global_campaign_start_date')

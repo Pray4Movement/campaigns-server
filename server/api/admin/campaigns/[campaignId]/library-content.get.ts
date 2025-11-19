@@ -8,6 +8,8 @@ import { libraryService } from '#server/database/libraries'
  * This endpoint fetches content from all globally configured libraries
  */
 export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
+
   const campaignIdParam = getRouterParam(event, 'campaignId')
   const campaignId = Number(campaignIdParam)
 
