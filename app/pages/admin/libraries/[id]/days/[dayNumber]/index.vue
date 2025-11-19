@@ -87,7 +87,7 @@
             </template>
 
             <div class="translation-body">
-              <div class="translation-preview" v-html="getContentPreview(translation.content_json)"></div>
+              <div class="translation-preview">{{ getContentPreview(translation.content_json)}}</div>
             </div>
           </UCard>
         </div>
@@ -260,7 +260,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Translation deleted',
       description: `${getLanguageName(translation.language_code)} translation has been deleted.`,
-      color: 'green'
+      color: 'primary'
     })
 
     await loadTranslations()
@@ -269,7 +269,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Failed to delete translation',
       description: err.data?.statusMessage || 'An error occurred while deleting the translation.',
-      color: 'red'
+      color: 'warning'
     })
   } finally {
     showDeleteModal.value = false
