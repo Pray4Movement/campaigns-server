@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   // Require authentication
   await requireAuth(event)
 
-  const id = parseInt(event.context.params?.id || '0')
+  const id = parseInt(event.context.params?.libraryId || '0')
 
   if (!id) {
     throw createError({

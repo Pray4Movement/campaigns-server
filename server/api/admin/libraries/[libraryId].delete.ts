@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   // Require admin authentication
   await requireAdmin(event)
 
-  const id = parseInt(event.context.params?.id || '0')
+  const id = parseInt(event.context.params?.libraryId || '0')
 
   if (!id) {
     throw createError({
@@ -13,15 +13,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const body = await readBody(event)
-
   try {
-    const library = await libraryService.updateLibrary(id, {
-      name: body.name,
-      description: body.description
-    })
+    const success = await libraryService.deleteLibrary(id)
 
-    if (!library) {
+    if (!success) {
       throw createError({
         statusCode: 404,
         statusMessage: 'Library not found'
@@ -29,13 +24,12 @@ export default defineEventHandler(async (event) => {
     }
 
     return {
-      success: true,
-      library
+      success: true
     }
   } catch (error: any) {
     throw createError({
       statusCode: 400,
-      statusMessage: error.message || 'Failed to update library'
+      statusMessage: error.message || 'Failed to delete library'
     })
   }
 })
