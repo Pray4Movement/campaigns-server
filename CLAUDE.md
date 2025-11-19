@@ -12,6 +12,8 @@ This project consumes the base layer defined here: https://github.com/corsacca/n
 - NEVER EDIT THE .env file directly. Ask the user to.
 - always kill dev servers you start
 - When building modals, first reference [nuxt-ui-modals.md](documentation/nuxt-ui-modals.md) for proper implementation patterns.
+- never user alert() or confirm(), this is horrible user UI. Toasts and modals are a better solution.
+- User Nuxt UI components. See https://ui.nuxt.com/llms.txt and https://ui.nuxt.com/llms-full.txt for documentation.
 
 ## Development Commands
 

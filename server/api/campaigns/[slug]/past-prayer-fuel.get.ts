@@ -43,33 +43,42 @@ export default defineEventHandler(async (event) => {
     limit: 31 // Get 31 so we can exclude today
   })
 
-  // Filter out today's content
-  // Convert content_date to YYYY-MM-DD format for comparison
-  const filteredContent = pastContent.filter(item => {
+  // Filter out today's content and group by unique dates
+  const dateMap = new Map<string, any>()
+
+  for (const item of pastContent) {
     const itemDate = typeof item.content_date === 'string'
       ? item.content_date.split('T')[0]
       : new Date(item.content_date).toISOString().split('T')[0]
-    return itemDate < today
-  })
 
-  // Parse content_json if needed
-  const parsedContent = filteredContent.map(item => {
-    let contentJson = item.content_json
-    if (typeof contentJson === 'string') {
-      try {
-        contentJson = JSON.parse(contentJson)
-      } catch (e) {
-        console.error('Failed to parse content_json:', e)
+    // Skip today and future dates
+    if (itemDate >= today) continue
+
+    // Only keep first content item for each unique date
+    if (!dateMap.has(itemDate)) {
+      let contentJson = item.content_json
+      if (typeof contentJson === 'string') {
+        try {
+          contentJson = JSON.parse(contentJson)
+        } catch (e) {
+          console.error('Failed to parse content_json:', e)
+        }
       }
+
+      dateMap.set(itemDate, {
+        id: item.id,
+        title: item.title,
+        content_date: item.content_date,
+        language_code: item.language_code,
+        content_json: contentJson
+      })
     }
-    return {
-      id: item.id,
-      title: item.title,
-      content_date: item.content_date,
-      language_code: item.language_code,
-      content_json: contentJson
-    }
-  })
+  }
+
+  // Convert map to array and sort by date DESC
+  const uniqueContent = Array.from(dateMap.values())
+    .sort((a, b) => b.content_date.localeCompare(a.content_date))
+    .slice(0, 30) // Return max 30 unique dates
 
   return {
     campaign: {
@@ -79,6 +88,6 @@ export default defineEventHandler(async (event) => {
       default_language: campaign.default_language
     },
     language: languageCode,
-    content: parsedContent.slice(0, 30) // Return max 30 items
+    content: uniqueContent
   }
 })

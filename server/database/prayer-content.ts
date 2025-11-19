@@ -1,4 +1,6 @@
 import { getDatabase } from './db'
+import { appConfigService } from './app-config'
+import { libraryContentService } from './library-content'
 
 export interface PrayerContent {
   id: number
@@ -29,66 +31,196 @@ export interface UpdatePrayerContentData {
 export class PrayerContentService {
   private db = getDatabase()
 
-  // Create prayer content
-  async createPrayerContent(data: CreatePrayerContentData): Promise<PrayerContent> {
-    const {
-      campaign_id,
-      content_date,
-      language_code,
-      title,
-      content_json = null
-    } = data
+  /**
+   * Convert a date string to a day number based on global start date
+   */
+  private async dateToDayNumber(date: string): Promise<number> {
+    const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
 
-    const contentJsonString = content_json ? JSON.stringify(content_json) : null
+    if (!globalStartDate) {
+      throw new Error('Global campaign start date is not configured')
+    }
 
-    const stmt = this.db.prepare(`
-      INSERT INTO prayer_content (campaign_id, content_date, language_code, title, content_json)
-      VALUES (?, ?, ?, ?, ?)
-    `)
+    const startDate = new Date(globalStartDate)
+    const targetDate = new Date(date)
 
-    try {
-      const result = await stmt.run(campaign_id, content_date, language_code, title, contentJsonString)
-      const contentId = result.lastInsertRowid as number
+    const diffTime = targetDate.getTime() - startDate.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
-      return (await this.getPrayerContentById(contentId))!
-    } catch (error: any) {
-      if (error.code === '23505') { // PostgreSQL unique violation
-        throw new Error('Content already exists for this campaign, date, and language')
-      }
-      throw error
+    // Day numbers start at 1, so add 1
+    return diffDays + 1
+  }
+
+  /**
+   * Convert a day number to a date string based on global start date
+   */
+  private async dayNumberToDate(dayNumber: number): Promise<string> {
+    const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
+
+    if (!globalStartDate) {
+      throw new Error('Global campaign start date is not configured')
+    }
+
+    const startDate = new Date(globalStartDate)
+    // Day numbers start at 1, so subtract 1
+    startDate.setDate(startDate.getDate() + (dayNumber - 1))
+
+    return startDate.toISOString().split('T')[0]
+  }
+
+  /**
+   * Get global library configuration
+   */
+  private async getGlobalLibraries(): Promise<Array<{ libraryId: number; order: number }>> {
+    const globalConfig = await appConfigService.getConfig('global_campaign_libraries')
+
+    if (!globalConfig || !globalConfig.campaignLibraries) {
+      return []
+    }
+
+    return globalConfig.campaignLibraries
+  }
+
+  /**
+   * Transform library content to prayer content format
+   */
+  private transformLibraryContent(libraryContent: any, campaignId: number, date: string): PrayerContent {
+    return {
+      id: libraryContent.id,
+      campaign_id: campaignId,
+      content_date: date,
+      language_code: libraryContent.language_code,
+      title: '', // Library content doesn't have titles, but keeping for compatibility
+      content_json: libraryContent.content_json,
+      created_at: libraryContent.created_at,
+      updated_at: libraryContent.updated_at
     }
   }
 
-  // Get prayer content by ID
+  // ==========================================
+  // READ OPERATIONS (Library-based)
+  // ==========================================
+
+  /**
+   * Get prayer content by ID
+   * Note: This is deprecated as content is now library-based, not campaign-specific
+   */
   async getPrayerContentById(id: number): Promise<PrayerContent | null> {
-    const contentStmt = this.db.prepare(`
-      SELECT * FROM prayer_content WHERE id = ?
-    `)
-    const content = await contentStmt.get(id) as PrayerContent | null
-    return content
+    // This would need to search across all libraries, which is inefficient
+    // For now, return null and log deprecation warning
+    console.warn('getPrayerContentById is deprecated - content is now library-based')
+    return null
   }
 
-  // Get prayer content by campaign, date, and language
+  /**
+   * Get prayer content by campaign, date, and language
+   * This now fetches from globally configured libraries
+   * Returns only the FIRST content found
+   */
   async getPrayerContentByDate(campaignId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent | null> {
-    const contentStmt = this.db.prepare(`
-      SELECT * FROM prayer_content WHERE campaign_id = ? AND content_date = ? AND language_code = ?
-    `)
-    const content = await contentStmt.get(campaignId, date, languageCode) as PrayerContent | null
-    return content
+    try {
+      // Convert date to day number
+      const dayNumber = await this.dateToDayNumber(date)
+
+      // Get global libraries
+      const libraries = await this.getGlobalLibraries()
+
+      if (libraries.length === 0) {
+        return null
+      }
+
+      // Search libraries in order for content on this day in the requested language
+      for (const libConfig of libraries) {
+        const content = await libraryContentService.getLibraryContentByDay(
+          libConfig.libraryId,
+          dayNumber,
+          languageCode
+        )
+
+        if (content) {
+          return this.transformLibraryContent(content, campaignId, date)
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error('Error getting prayer content by date:', error)
+      return null
+    }
   }
 
-  // Get all languages available for a specific campaign and date
+  /**
+   * Get ALL prayer content for a specific date from ALL libraries
+   * Returns array of content items (one from each library that has content for this day)
+   */
+  async getAllPrayerContentByDate(campaignId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent[]> {
+    try {
+      // Convert date to day number
+      const dayNumber = await this.dateToDayNumber(date)
+
+      // Get global libraries
+      const libraries = await this.getGlobalLibraries()
+
+      if (libraries.length === 0) {
+        return []
+      }
+
+      const allContent: PrayerContent[] = []
+
+      // Collect content from ALL libraries for this day
+      for (const libConfig of libraries) {
+        const content = await libraryContentService.getLibraryContentByDay(
+          libConfig.libraryId,
+          dayNumber,
+          languageCode
+        )
+
+        if (content) {
+          allContent.push(this.transformLibraryContent(content, campaignId, date))
+        }
+      }
+
+      // Sort by library order (libraries are already sorted by order in config)
+      return allContent
+    } catch (error) {
+      console.error('Error getting all prayer content by date:', error)
+      return []
+    }
+  }
+
+  /**
+   * Get all languages available for a specific campaign and date
+   */
   async getAvailableLanguages(campaignId: number, date: string): Promise<string[]> {
-    const stmt = this.db.prepare(`
-      SELECT language_code FROM prayer_content
-      WHERE campaign_id = ? AND content_date = ?
-      ORDER BY language_code
-    `)
-    const results = await stmt.all(campaignId, date) as Array<{ language_code: string }>
-    return results.map(r => r.language_code)
+    try {
+      // Convert date to day number
+      const dayNumber = await this.dateToDayNumber(date)
+
+      // Get global libraries
+      const libraries = await this.getGlobalLibraries()
+
+      const languageSet = new Set<string>()
+
+      // Collect languages from all libraries for this day
+      for (const libConfig of libraries) {
+        const languages = await libraryContentService.getAvailableLanguages(
+          libConfig.libraryId,
+          dayNumber
+        )
+        languages.forEach(lang => languageSet.add(lang))
+      }
+
+      return Array.from(languageSet).sort()
+    } catch (error) {
+      console.error('Error getting available languages:', error)
+      return []
+    }
   }
 
-  // Get all prayer content for a campaign
+  /**
+   * Get all prayer content for a campaign
+   * This now fetches from globally configured libraries
+   */
   async getCampaignPrayerContent(campaignId: number, options?: {
     startDate?: string
     endDate?: string
@@ -96,163 +228,200 @@ export class PrayerContentService {
     limit?: number
     offset?: number
   }): Promise<PrayerContent[]> {
-    let query = `
-      SELECT * FROM prayer_content WHERE campaign_id = ?
-    `
-    const params: any[] = [campaignId]
+    try {
+      // Get global libraries
+      const libraries = await this.getGlobalLibraries()
 
-    if (options?.startDate) {
-      query += ' AND content_date >= ?'
-      params.push(options.startDate)
-    }
-
-    if (options?.endDate) {
-      query += ' AND content_date <= ?'
-      params.push(options.endDate)
-    }
-
-    if (options?.language) {
-      query += ' AND language_code = ?'
-      params.push(options.language)
-    }
-
-    query += ' ORDER BY content_date DESC, language_code'
-
-    if (options?.limit) {
-      query += ' LIMIT ?'
-      params.push(options.limit)
-
-      if (options?.offset) {
-        query += ' OFFSET ?'
-        params.push(options.offset)
+      if (libraries.length === 0) {
+        return []
       }
+
+      // Convert dates to day numbers
+      let startDay: number | undefined
+      let endDay: number | undefined
+
+      if (options?.startDate) {
+        startDay = await this.dateToDayNumber(options.startDate)
+      }
+
+      if (options?.endDate) {
+        endDay = await this.dateToDayNumber(options.endDate)
+      }
+
+      // Fetch content from all libraries
+      const allContent: PrayerContent[] = []
+
+      for (const libConfig of libraries) {
+        const libraryContent = await libraryContentService.getLibraryContent(libConfig.libraryId, {
+          startDay,
+          endDay,
+          language: options?.language
+        })
+
+        // Transform each library content item to prayer content format
+        for (const item of libraryContent) {
+          const date = await this.dayNumberToDate(item.day_number)
+          allContent.push(this.transformLibraryContent(item, campaignId, date))
+        }
+      }
+
+      // Sort by content_date DESC (like the old behavior)
+      allContent.sort((a, b) => {
+        if (a.content_date !== b.content_date) {
+          return b.content_date.localeCompare(a.content_date)
+        }
+        return a.language_code.localeCompare(b.language_code)
+      })
+
+      // Apply limit and offset
+      let result = allContent
+      if (options?.offset) {
+        result = result.slice(options.offset)
+      }
+      if (options?.limit) {
+        result = result.slice(0, options.limit)
+      }
+
+      return result
+    } catch (error) {
+      console.error('Error getting campaign prayer content:', error)
+      return []
     }
-
-    const stmt = this.db.prepare(query)
-    const contents = await stmt.all(...params) as PrayerContent[]
-
-    return contents
   }
 
-  // Get prayer content grouped by date with language information
+  /**
+   * Get prayer content grouped by date with language information
+   */
   async getCampaignContentGroupedByDate(campaignId: number, options?: {
     startDate?: string
     endDate?: string
     limit?: number
     offset?: number
   }): Promise<Array<{ date: string; languages: string[] }>> {
-    let query = `
-      SELECT content_date as date, STRING_AGG(language_code, ',') as languages
-      FROM prayer_content
-      WHERE campaign_id = ?
-    `
-    const params: any[] = [campaignId]
+    try {
+      // Get global libraries
+      const libraries = await this.getGlobalLibraries()
 
-    if (options?.startDate) {
-      query += ' AND content_date >= ?'
-      params.push(options.startDate)
-    }
+      if (libraries.length === 0) {
+        return []
+      }
 
-    if (options?.endDate) {
-      query += ' AND content_date <= ?'
-      params.push(options.endDate)
-    }
+      // Convert dates to day numbers
+      let startDay: number | undefined
+      let endDay: number | undefined
 
-    query += ' GROUP BY content_date ORDER BY content_date DESC'
+      if (options?.startDate) {
+        startDay = await this.dateToDayNumber(options.startDate)
+      }
 
-    if (options?.limit) {
-      query += ' LIMIT ?'
-      params.push(options.limit)
+      if (options?.endDate) {
+        endDay = await this.dateToDayNumber(options.endDate)
+      }
 
+      // Collect all day numbers and their languages across libraries
+      const dayMap = new Map<number, Set<string>>()
+
+      for (const libConfig of libraries) {
+        const grouped = await libraryContentService.getLibraryContentGroupedByDay(libConfig.libraryId, {
+          startDay,
+          endDay
+        })
+
+        grouped.forEach(({ dayNumber, languages }) => {
+          if (!dayMap.has(dayNumber)) {
+            dayMap.set(dayNumber, new Set())
+          }
+          languages.forEach(lang => dayMap.get(dayNumber)!.add(lang))
+        })
+      }
+
+      // Convert day numbers back to dates
+      const result: Array<{ date: string; languages: string[] }> = []
+
+      for (const [dayNumber, languageSet] of dayMap.entries()) {
+        const date = await this.dayNumberToDate(dayNumber)
+        result.push({
+          date,
+          languages: Array.from(languageSet).sort()
+        })
+      }
+
+      // Sort by date DESC
+      result.sort((a, b) => b.date.localeCompare(a.date))
+
+      // Apply limit and offset
+      let finalResult = result
       if (options?.offset) {
-        query += ' OFFSET ?'
-        params.push(options.offset)
+        finalResult = finalResult.slice(options.offset)
       }
-    }
-
-    const stmt = this.db.prepare(query)
-    const results = await stmt.all(...params) as Array<{ date: string; languages: string }>
-    return results.map(r => ({
-      date: r.date,
-      languages: r.languages.split(',')
-    }))
-  }
-
-  // Update prayer content
-  async updatePrayerContent(id: number, data: UpdatePrayerContentData): Promise<PrayerContent | null> {
-    const content = await this.getPrayerContentById(id)
-    if (!content) {
-      return null
-    }
-
-    // If date or language is being updated, check for conflicts with other records
-    // Use the ID to exclude the current record from the conflict check
-    if (data.content_date !== undefined || data.language_code !== undefined) {
-      const checkDate = data.content_date !== undefined ? data.content_date : content.content_date
-      const checkLanguage = data.language_code !== undefined ? data.language_code : content.language_code
-
-      const conflictStmt = this.db.prepare(`
-        SELECT id FROM prayer_content
-        WHERE campaign_id = ? AND content_date = ? AND language_code = ? AND id != ?
-      `)
-      const conflict = await conflictStmt.get(content.campaign_id, checkDate, checkLanguage, id)
-
-      if (conflict) {
-        throw new Error('Content already exists for this campaign, date, and language')
+      if (options?.limit) {
+        finalResult = finalResult.slice(0, options.limit)
       }
+
+      return finalResult
+    } catch (error) {
+      console.error('Error getting campaign content grouped by date:', error)
+      return []
     }
-
-    const updates: string[] = []
-    const values: any[] = []
-
-    if (data.title !== undefined) {
-      updates.push('title = ?')
-      values.push(data.title)
-    }
-
-    if (data.content_json !== undefined) {
-      updates.push('content_json = ?')
-      values.push(data.content_json ? JSON.stringify(data.content_json) : null)
-    }
-
-    if (data.content_date !== undefined) {
-      updates.push('content_date = ?')
-      values.push(data.content_date)
-    }
-
-    if (data.language_code !== undefined) {
-      updates.push('language_code = ?')
-      values.push(data.language_code)
-    }
-
-    if (updates.length === 0) {
-      return content
-    }
-
-    updates.push('updated_at = CURRENT_TIMESTAMP')
-    values.push(id)
-
-    const stmt = this.db.prepare(`
-      UPDATE prayer_content SET ${updates.join(', ')}
-      WHERE id = ?
-    `)
-
-    await stmt.run(...values)
-    return this.getPrayerContentById(id)
   }
 
-  // Delete prayer content
-  async deletePrayerContent(id: number): Promise<boolean> {
-    const stmt = this.db.prepare('DELETE FROM prayer_content WHERE id = ?')
-    const result = await stmt.run(id)
-    return result.changes > 0
-  }
-
-  // Get content count for campaign
+  /**
+   * Get content count for campaign
+   */
   async getContentCount(campaignId: number): Promise<number> {
-    const stmt = this.db.prepare('SELECT COUNT(*) as count FROM prayer_content WHERE campaign_id = ?')
-    const result = await stmt.get(campaignId) as { count: number }
-    return result.count
+    try {
+      // Get global libraries
+      const libraries = await this.getGlobalLibraries()
+
+      let totalCount = 0
+
+      for (const libConfig of libraries) {
+        const count = await libraryContentService.getContentCount(libConfig.libraryId)
+        totalCount += count
+      }
+
+      return totalCount
+    } catch (error) {
+      console.error('Error getting content count:', error)
+      return 0
+    }
+  }
+
+  // ==========================================
+  // WRITE OPERATIONS (Deprecated)
+  // ==========================================
+
+  /**
+   * @deprecated Campaign-specific content creation is no longer supported.
+   * Content should be created in libraries via the library management system.
+   */
+  async createPrayerContent(data: CreatePrayerContentData): Promise<PrayerContent> {
+    throw new Error(
+      'Campaign-specific content creation is deprecated. ' +
+      'Please create content in libraries via /admin/libraries instead.'
+    )
+  }
+
+  /**
+   * @deprecated Campaign-specific content updates are no longer supported.
+   * Content should be edited in libraries via the library management system.
+   */
+  async updatePrayerContent(id: number, data: UpdatePrayerContentData): Promise<PrayerContent | null> {
+    throw new Error(
+      'Campaign-specific content updates are deprecated. ' +
+      'Please edit content in libraries via /admin/libraries instead.'
+    )
+  }
+
+  /**
+   * @deprecated Campaign-specific content deletion is no longer supported.
+   * Content should be managed in libraries via the library management system.
+   */
+  async deletePrayerContent(id: number): Promise<boolean> {
+    throw new Error(
+      'Campaign-specific content deletion is deprecated. ' +
+      'Please manage content in libraries via /admin/libraries instead.'
+    )
   }
 }
 
