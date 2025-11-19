@@ -3,7 +3,7 @@ import { appConfigService } from '#server/database/app-config'
 
 /**
  * Update global campaign library configuration
- * This sets which libraries are available to all campaigns
+ * This sets which libraries are available to all campaigns and the global start date
  */
 export default defineEventHandler(async (event) => {
   try {
@@ -16,6 +16,13 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    if (!body.global_start_date) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'global_start_date is required'
+      })
+    }
+
     // Create config object with library IDs and their order
     const config = {
       campaignLibraries: body.library_ids.map((libraryId: number, index: number) => ({
@@ -24,11 +31,18 @@ export default defineEventHandler(async (event) => {
       }))
     }
 
+    // Save library configuration
     await appConfigService.setConfig('global_campaign_libraries', config)
+
+    // Save global start date
+    await appConfigService.setConfig('global_campaign_start_date', body.global_start_date)
 
     return {
       success: true,
-      config
+      config: {
+        ...config,
+        globalStartDate: body.global_start_date
+      }
     }
   } catch (error: any) {
     console.error('Error updating global campaign library config:', error)

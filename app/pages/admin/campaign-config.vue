@@ -12,6 +12,29 @@
     <div v-else-if="error" class="error">{{ error }}</div>
 
     <div v-else class="config-container">
+      <!-- Global Start Date Section -->
+      <div class="config-section full-width">
+        <h3>Global Campaign Start Date</h3>
+        <p class="section-description">
+          This date determines when Day 1 begins for all campaigns. Library content will be shown based on how many days have passed since this date.
+        </p>
+
+        <div class="start-date-section">
+          <UFormField label="Start Date" required>
+            <input
+              type="date"
+              v-model="globalStartDate"
+              class="date-input"
+            />
+          </UFormField>
+
+          <div v-if="globalStartDate" class="date-info">
+            <p><strong>Day 1:</strong> {{ formatDisplayDate(globalStartDate) }}</p>
+            <p><strong>Current Day:</strong> Day {{ currentDay }}</p>
+          </div>
+        </div>
+      </div>
+
       <div class="config-section">
         <h3>Available Libraries</h3>
         <p class="section-description">Select libraries to make available to all campaigns</p>
@@ -124,15 +147,31 @@ interface GlobalConfig {
     libraryId: number
     order: number
   }>
+  globalStartDate?: string
 }
 
 const allLibraries = ref<Library[]>([])
 const selectedLibraries = ref<number[]>([])
+const globalStartDate = ref('')
 const loading = ref(true)
 const error = ref('')
 const saving = ref(false)
 const draggedIndex = ref<number | null>(null)
 const toast = useToast()
+
+const currentDay = computed(() => {
+  if (!globalStartDate.value) return 1
+
+  const startDate = new Date(globalStartDate.value)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  startDate.setHours(0, 0, 0, 0)
+
+  const diffTime = today.getTime() - startDate.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  return Math.max(1, diffDays + 1)
+})
 
 const availableLibraries = computed(() => {
   const selectedIds = new Set(selectedLibraries.value)
@@ -162,6 +201,9 @@ async function loadConfiguration() {
     selectedLibraries.value = response.config.campaignLibraries
       .sort((a, b) => a.order - b.order)
       .map(item => item.libraryId)
+
+    // Load global start date
+    globalStartDate.value = response.config.globalStartDate || ''
   } catch (err: any) {
     error.value = 'Failed to load configuration'
     console.error(err)
@@ -210,19 +252,29 @@ function drop(dropIndex: number) {
 }
 
 async function saveConfiguration() {
+  if (!globalStartDate.value) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Global start date is required',
+      color: 'red'
+    })
+    return
+  }
+
   try {
     saving.value = true
 
     await $fetch('/api/admin/campaign-config/libraries', {
       method: 'PUT',
       body: {
-        library_ids: selectedLibraries.value
+        library_ids: selectedLibraries.value,
+        global_start_date: globalStartDate.value
       }
     })
 
     toast.add({
       title: 'Configuration saved',
-      description: 'Global campaign library configuration has been updated successfully.',
+      description: 'Global campaign configuration has been updated successfully.',
       color: 'green'
     })
   } catch (err: any) {
@@ -234,6 +286,17 @@ async function saveConfiguration() {
   } finally {
     saving.value = false
   }
+}
+
+function formatDisplayDate(dateString: string): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
 onMounted(async () => {
@@ -380,9 +443,60 @@ onMounted(async () => {
   justify-content: flex-end;
 }
 
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.start-date-section {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.date-input {
+  padding: 0.625rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  background-color: var(--ui-bg);
+  font-size: 0.875rem;
+  color: var(--color-text);
+  min-width: 200px;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--shadow);
+}
+
+.date-info {
+  padding: 1rem;
+  background-color: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  min-width: 300px;
+}
+
+.date-info p {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+}
+
+.date-info p:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 768px) {
   .config-container {
     grid-template-columns: 1fr;
+  }
+
+  .start-date-section {
+    flex-direction: column;
+  }
+
+  .date-info {
+    width: 100%;
   }
 }
 </style>

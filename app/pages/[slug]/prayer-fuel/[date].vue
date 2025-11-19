@@ -24,15 +24,21 @@
       <!-- Content or No Content Message -->
       <main class="prayer-main">
         <div class="container">
-          <div v-if="data.content" class="prayer-content-wrapper">
-            <h2 class="content-title">{{ data.content.title }}</h2>
-            <RichTextViewer :content="data.content.content_json" :item-id="String(data.content.id)" />
+          <div v-if="data.hasContent" class="prayer-content-wrapper">
+            <!-- Loop through all content items from different libraries -->
+            <div v-for="(contentItem, index) in data.content" :key="contentItem.id" class="content-section">
+              <div v-if="data.content.length > 1" class="content-divider">
+                <span class="content-number">{{ index + 1 }}</span>
+              </div>
+              <h2 v-if="contentItem.title" class="content-title">{{ contentItem.title }}</h2>
+              <RichTextViewer :content="contentItem.content_json" :item-id="String(contentItem.id)" />
+            </div>
           </div>
 
           <div v-else class="no-content">
             <div class="no-content-icon">📖</div>
             <h2>{{ $t('prayerFuel.dateView.noContent.title') }}</h2>
-            <p>{{ data.message || $t('prayerFuel.dateView.noContent.message') }}</p>
+            <p>{{ $t('prayerFuel.dateView.noContent.message') }}</p>
           </div>
         </div>
       </main>
@@ -98,8 +104,8 @@ function formatDate(dateString: string) {
 
 // Set page title
 useHead(() => ({
-  title: data.value?.content
-    ? `${data.value.content.title} - ${data.value.campaign.title}`
+  title: data.value?.hasContent
+    ? `${t('prayerFuel.pageTitle')} - ${data.value.campaign.title}`
     : `${t('prayerFuel.pageTitle')} - ${data.value?.campaign.title || t('common.loading')}`
 }))
 </script>
@@ -188,6 +194,45 @@ useHead(() => ({
 .prayer-main {
   flex: 1;
   padding: 2rem 0;
+}
+
+.content-section {
+  margin-bottom: 3rem;
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+.content-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 3rem 0 2rem;
+  position: relative;
+}
+
+.content-divider::before,
+.content-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.content-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 1rem;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted, #666);
 }
 
 .content-title {
