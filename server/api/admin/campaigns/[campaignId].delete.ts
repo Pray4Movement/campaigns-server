@@ -1,8 +1,8 @@
 import { campaignService } from '#server/database/campaigns'
 
 export default defineEventHandler(async (event) => {
-  // Require authentication
-  const user = requireAuth(event)
+  // Require campaigns.delete permission
+  const user = await requirePermission(event, 'campaigns.delete')
 
   const campaignId = parseInt(event.context.params?.campaignId || '0')
 

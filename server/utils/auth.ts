@@ -38,6 +38,24 @@ export async function requireAdmin(event: H3Event) {
   return user
 }
 
+// Require specific permission - checks user's role permissions
+export async function requirePermission(event: H3Event, permission: string) {
+  // Get the authenticated user from base layer's requireAuth (auto-imported)
+  const user = requireAuth(event)
+
+  // Check if user has the required permission
+  const hasPermission = await roleService.userHasPermission(user.userId, permission)
+
+  if (!hasPermission) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Permission required: ${permission}`
+    })
+  }
+
+  return user
+}
+
 // Generate JWT token
 export function generateToken(payload: JWTPayload): string {
   const config = useRuntimeConfig()

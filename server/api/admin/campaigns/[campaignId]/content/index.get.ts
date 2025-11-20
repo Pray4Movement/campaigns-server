@@ -2,7 +2,8 @@ import { prayerContentService } from '#server/database/prayer-content'
 import { campaignService } from '#server/database/campaigns'
 
 export default defineEventHandler(async (event) => {
-  const user = requireAuth(event)
+  // Require content.view permission
+  const user = await requirePermission(event, 'content.view')
 
   const campaignId = parseInt(event.context.params?.campaignId || '0')
   const query = getQuery(event)

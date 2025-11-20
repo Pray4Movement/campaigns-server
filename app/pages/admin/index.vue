@@ -9,16 +9,10 @@
         <NuxtLink to="/admin/campaigns" class="btn">View Campaigns</NuxtLink>
       </div>
 
-      <div class="card">
+      <div v-if="isAdmin" class="card">
         <h3>Users</h3>
         <p>Manage admin users</p>
         <NuxtLink to="/admin/users" class="btn">View Users</NuxtLink>
-      </div>
-
-      <div class="card">
-        <h3>Roles</h3>
-        <p>Manage roles and permissions</p>
-        <NuxtLink to="/admin/roles" class="btn">View Roles</NuxtLink>
       </div>
     </div>
   </div>
@@ -28,6 +22,20 @@
 definePageMeta({
   layout: 'admin',
   middleware: 'auth'
+})
+
+const user = ref<any>(null)
+const isAdmin = computed(() => {
+  return user.value?.user?.isAdmin || false
+})
+
+onMounted(async () => {
+  try {
+    const response = await $fetch('/api/auth/me')
+    user.value = response
+  } catch (error) {
+    console.error('Failed to fetch user:', error)
+  }
 })
 </script>
 

@@ -1,8 +1,8 @@
 import { campaignService } from '#server/database/campaigns'
 
 export default defineEventHandler(async (event) => {
-  // Require authentication
-  const user = requireAuth(event)
+  // Require campaigns.view permission
+  const user = await requirePermission(event, 'campaigns.view')
 
   const query = getQuery(event)
   const status = query.status as 'active' | 'inactive' | undefined

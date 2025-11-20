@@ -1,8 +1,8 @@
 import { libraryContentService } from '#server/database/library-content'
 
 export default defineEventHandler(async (event) => {
-  // Require authentication
-  await requireAuth(event)
+  // Require content.create permission
+  await requirePermission(event, 'content.create')
 
   const libraryId = parseInt(event.context.params?.libraryId || '0')
 

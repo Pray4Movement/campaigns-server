@@ -1,8 +1,10 @@
 import { campaignService } from '#server/database/campaigns'
+import { campaignAccessService } from '#server/database/campaign-access'
+import { roleService } from '#server/database/roles'
 
 export default defineEventHandler(async (event) => {
-  // Require admin authentication - only admins can create campaigns
-  await requireAdmin(event)
+  // Require campaigns.create permission - both admins and campaign_editors can create campaigns
+  const user = await requirePermission(event, 'campaigns.create')
 
   const body = await readBody(event)
 
@@ -21,6 +23,13 @@ export default defineEventHandler(async (event) => {
       slug: body.slug,
       status: body.status || 'active'
     })
+
+    // Automatically grant creator access if they're not an admin
+    // (admins already have access to all campaigns)
+    const isAdmin = await roleService.isAdmin(user.userId)
+    if (!isAdmin) {
+      await campaignAccessService.assignUserToCampaign(user.userId, campaign.id)
+    }
 
     return {
       success: true,

@@ -17,17 +17,17 @@
             Campaigns
           </NuxtLink>
         </li>
-        <li>
+        <li v-if="isAdmin">
           <NuxtLink to="/admin/libraries" class="nav-link">
             Libraries
           </NuxtLink>
         </li>
-        <li>
+        <li v-if="isAdmin">
           <NuxtLink to="/admin/campaign-config" class="nav-link">
             Campaign Config
           </NuxtLink>
         </li>
-        <li>
+        <li v-if="isAdmin">
           <NuxtLink to="/admin/users" class="nav-link">
             Users
           </NuxtLink>
@@ -76,6 +76,9 @@
 const { toggleTheme, theme } = useTheme()
 
 const user = ref<any>(null)
+const isAdmin = computed(() => {
+  return user.value?.user?.isAdmin || false
+})
 const isSuperAdmin = computed(() => {
   return user.value?.user?.isSuperAdmin || false
 })
