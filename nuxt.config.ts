@@ -2,11 +2,11 @@
 import { fileURLToPath } from 'node:url'
 
 const appTitle = process.env.APP_TITLE || 'Base'
+const baseLayerUrl = process.env.BASE_LAYER_URL || 'github:corsacca/nuxt-base#master'
 
 export default defineNuxtConfig({
   // Testing local base layer changes (switch back to github:corsacca/nuxt-base#TAG before deploying)
-  // extends: ['../../base'],
-  extends: ['github:corsacca/nuxt-base#master'],
+  extends: [baseLayerUrl], //  'github:corsacca/nuxt-base#master'
 
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
