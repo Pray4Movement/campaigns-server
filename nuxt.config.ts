@@ -5,8 +5,8 @@ const appTitle = process.env.APP_TITLE || 'Base'
 
 export default defineNuxtConfig({
   // Testing local base layer changes (switch back to github:corsacca/nuxt-base#TAG before deploying)
-  extends: ['../../base'],
-  // extends: ['github:corsacca/nuxt-base#master'],
+  // extends: ['../../base'],
+  extends: ['github:corsacca/nuxt-base#master'],
 
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
