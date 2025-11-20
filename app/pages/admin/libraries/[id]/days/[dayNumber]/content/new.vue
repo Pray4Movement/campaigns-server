@@ -16,27 +16,11 @@
 
     <div class="editor-container">
       <div class="editor-main">
+        <div class="editor-details">
+          Day {{ dayNumber }} • {{ selectedLanguage?.flag }} {{ selectedLanguage?.name }} ({{ selectedLanguage?.nativeName }})
+        </div>
         <RichTextEditor v-model="form.content_json" />
       </div>
-
-      <aside class="editor-sidebar">
-        <div class="sidebar-section">
-          <h3>Details</h3>
-
-          <div class="info-field">
-            <label>Day</label>
-            <div class="info-value">Day {{ dayNumber }}</div>
-          </div>
-
-          <div class="info-field">
-            <label>Language</label>
-            <div class="info-value">
-              {{ selectedLanguage?.flag }} {{ selectedLanguage?.name }}
-              <span class="language-native">({{ selectedLanguage?.nativeName }})</span>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
 
     <!-- Unsaved Changes Modal -->
@@ -257,89 +241,17 @@ onBeforeRouteLeave((to, from, next) => {
   width: 100%;
 }
 
-.editor-sidebar {
-  width: 320px;
-  border-left: 1px solid var(--ui-border);
-  background: var(--ui-bg-elevated);
-  overflow-y: auto;
-  padding: 1.5rem;
-}
-
-.sidebar-section {
-  margin-bottom: 2rem;
-}
-
-.sidebar-section h3 {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.info-field {
-  margin-bottom: 1.25rem;
-}
-
-.info-field label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+.editor-details {
   font-size: 0.875rem;
   color: var(--ui-text-muted);
-}
-
-.info-value {
-  font-size: 0.875rem;
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.language-native {
-  color: var(--ui-text-muted);
-  font-weight: normal;
-}
-
-.form-group {
-  margin-bottom: 1.25rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  color: var(--color-text);
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.625rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background-color: var(--ui-bg);
-  font-size: 0.875rem;
-  color: var(--color-text);
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--text);
-  box-shadow: 0 0 0 3px var(--shadow);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ui-border);
 }
 
 @media (max-width: 768px) {
   .editor-page {
     left: 0;
-  }
-
-  .editor-container {
-    flex-direction: column-reverse;
-  }
-
-  .editor-sidebar {
-    width: 100%;
-    border-left: none;
-    border-bottom: 1px solid var(--ui-border);
   }
 }
 </style>
