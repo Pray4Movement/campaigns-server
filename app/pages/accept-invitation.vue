@@ -202,8 +202,9 @@ onMounted(() => {
 })
 
 // Set page title
+const config = useRuntimeConfig()
 useHead({
-  title: 'Accept Invitation - Prayer Tools'
+  title: `Accept Invitation - ${config.public.appName || 'Base'}`
 })
 </script>
 

@@ -86,6 +86,7 @@ export default defineNuxtConfig({
 
     // Public keys (exposed to the frontend)
     public: {
+      appName: appTitle,
       nodeEnv: process.env.NODE_ENV || 'development',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     }

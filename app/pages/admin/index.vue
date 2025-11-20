@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Welcome to the Prayer Tools admin panel.</p>
+    <p>Welcome to the {{ config.public.appName || 'Base' }} admin panel.</p>
 
     <div class="dashboard-grid">
       <div class="card">
@@ -23,6 +23,8 @@ definePageMeta({
   layout: 'admin',
   middleware: 'auth'
 })
+
+const config = useRuntimeConfig()
 
 const user = ref<any>(null)
 const isAdmin = computed(() => {

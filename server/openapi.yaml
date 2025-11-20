@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: Prayer Tools API
+  title: Prayer.Tools API
   description: Public API for accessing prayer campaigns and signing up for prayer reminders
   version: 1.0.0
   contact:
-    name: Prayer Tools Support
+    name: Prayer.Tools Support
 
 servers:
   - url: http://localhost:3000

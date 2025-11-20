@@ -18,13 +18,14 @@
 
     <footer class="footer">
       <div class="container">
-        <p>&copy; {{ currentYear }} Prayer.Tools {{ $t('footer.allRightsReserved') }}</p>
+        <p>&copy; {{ currentYear }} {{ config.public.appName || 'Base' }} {{ $t('footer.allRightsReserved') }}</p>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig()
 const currentYear = new Date().getFullYear()
 const { campaignTitle } = useCampaign()
 </script>

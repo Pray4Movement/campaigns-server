@@ -2,7 +2,7 @@
   <div class="admin-layout">
     <nav class="sidebar">
       <div class="sidebar-header">
-        <h1 class="logo">Prayer.Tools Admin</h1>
+        <h1 class="logo">{{ config.public.appName || 'Base' }} Admin</h1>
         <LanguageSwitcher />
       </div>
 
@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig()
 const { toggleTheme, theme } = useTheme()
 
 const user = ref<any>(null)
