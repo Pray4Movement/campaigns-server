@@ -68,6 +68,15 @@
                 </span>
                 <div class="translation-actions">
                   <UButton
+                    :to="getPublicUrl(translation.language_code)"
+                    variant="link"
+                    size="sm"
+                    target="_blank"
+                    trailing-icon="lucide:external-link"
+                  >
+                    View
+                  </UButton>
+                  <UButton
                     :to="`/admin/libraries/${libraryId}/days/${dayNumber}/content/${translation.id}`"
                     variant="link"
                     size="sm"
@@ -295,6 +304,15 @@ function navigateToPreviousDay() {
 
 function navigateToNextDay() {
   navigateTo(`/admin/libraries/${libraryId.value}/days/${dayNumber.value + 1}`)
+}
+
+function getPublicUrl(languageCode: string): string {
+  // For English (default locale), no prefix is needed
+  if (languageCode === 'en') {
+    return `/library/${libraryId.value}/${dayNumber.value}`
+  }
+  // For other languages, add the language prefix
+  return `/${languageCode}/library/${libraryId.value}/${dayNumber.value}`
 }
 
 onMounted(async () => {
