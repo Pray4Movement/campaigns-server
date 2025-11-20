@@ -253,6 +253,31 @@
         </form>
       </div>
     </div>
+
+    <!-- Resend Invitation Confirmation Modal -->
+    <ConfirmModal
+      v-model:open="showResendConfirm"
+      title="Resend Invitation"
+      message="Are you sure you want to resend this invitation?"
+      confirm-text="Resend"
+      confirm-color="primary"
+      :loading="resending"
+      @confirm="confirmResendInvitation"
+      @cancel="cancelResendInvitation"
+    />
+
+    <!-- Revoke Invitation Confirmation Modal -->
+    <ConfirmModal
+      v-model:open="showRevokeConfirm"
+      title="Revoke Invitation"
+      message="Are you sure you want to revoke this invitation?"
+      warning="This action cannot be undone."
+      confirm-text="Revoke"
+      confirm-color="primary"
+      :loading="revoking"
+      @confirm="confirmRevokeInvitation"
+      @cancel="cancelRevokeInvitation"
+    />
   </div>
 </template>
 
@@ -324,6 +349,17 @@ const campaignModalLoading = ref(false)
 const campaignModalError = ref('')
 const campaignModalSubmitting = ref(false)
 const campaignModalSuccess = ref(false)
+
+// Confirm modals state
+const showResendConfirm = ref(false)
+const resendInvitationId = ref<number | null>(null)
+const showRevokeConfirm = ref(false)
+const revokeInvitationId = ref<number | null>(null)
+const resending = ref(false)
+const revoking = ref(false)
+
+// Toast
+const toast = useToast()
 
 const pendingInvitations = computed(() => {
   return allInvitations.value.filter(inv => {
@@ -417,39 +453,93 @@ async function updateUserRole(userId: number, roleName: string | null) {
     // Reload users to show updated role
     await loadData()
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to update user role')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to update user role',
+      color: 'red'
+    })
     // Reload to reset the dropdown
     await loadData()
   }
 }
 
-async function resendInvitation(id: number) {
-  if (!confirm('Resend this invitation?')) return
+function resendInvitation(id: number) {
+  resendInvitationId.value = id
+  showResendConfirm.value = true
+}
+
+async function confirmResendInvitation() {
+  if (!resendInvitationId.value) return
 
   try {
-    await $fetch(`/api/admin/users/invitations/${id}/resend`, {
+    resending.value = true
+    await $fetch(`/api/admin/users/invitations/${resendInvitationId.value}/resend`, {
       method: 'POST'
     })
 
-    alert('Invitation resent successfully')
+    toast.add({
+      title: 'Success',
+      description: 'Invitation resent successfully',
+      color: 'green'
+    })
+
+    showResendConfirm.value = false
+    resendInvitationId.value = null
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to resend invitation')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to resend invitation',
+      color: 'red'
+    })
+  } finally {
+    resending.value = false
   }
 }
 
-async function revokeInvitation(id: number) {
-  if (!confirm('Are you sure you want to revoke this invitation?')) return
+function cancelResendInvitation() {
+  showResendConfirm.value = false
+  resendInvitationId.value = null
+}
+
+function revokeInvitation(id: number) {
+  revokeInvitationId.value = id
+  showRevokeConfirm.value = true
+}
+
+async function confirmRevokeInvitation() {
+  if (!revokeInvitationId.value) return
 
   try {
-    await $fetch(`/api/admin/users/invitations/${id}`, {
+    revoking.value = true
+    await $fetch(`/api/admin/users/invitations/${revokeInvitationId.value}`, {
       method: 'DELETE'
     })
+
+    toast.add({
+      title: 'Success',
+      description: 'Invitation revoked successfully',
+      color: 'green'
+    })
+
+    showRevokeConfirm.value = false
+    revokeInvitationId.value = null
 
     // Reload data
     await loadData()
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to revoke invitation')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to revoke invitation',
+      color: 'red'
+    })
+  } finally {
+    revoking.value = false
   }
+}
+
+function cancelRevokeInvitation() {
+  showRevokeConfirm.value = false
+  revokeInvitationId.value = null
 }
 
 // Campaign modal functions

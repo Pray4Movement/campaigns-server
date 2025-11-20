@@ -145,6 +145,19 @@
         </form>
       </template>
     </UModal>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-model:open="showDeleteModal"
+      title="Delete Campaign"
+      :message="campaignToDelete ? `Are you sure you want to delete &quot;${campaignToDelete.title}&quot;?` : ''"
+      warning="This will also delete all associated prayer content. This action cannot be undone."
+      confirm-text="Delete"
+      confirm-color="primary"
+      :loading="deleting"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
@@ -171,6 +184,14 @@ const error = ref('')
 const showCreateModal = ref(false)
 const editingCampaign = ref<Campaign | null>(null)
 const saving = ref(false)
+
+// Delete confirmation modal state
+const showDeleteModal = ref(false)
+const campaignToDelete = ref<Campaign | null>(null)
+const deleting = ref(false)
+
+// Toast
+const toast = useToast()
 
 const isModalOpen = computed({
   get: () => showCreateModal.value || !!editingCampaign.value,
@@ -257,25 +278,53 @@ async function saveCampaign() {
     closeModal()
     await loadCampaigns()
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to save campaign')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to save campaign',
+      color: 'red'
+    })
   } finally {
     saving.value = false
   }
 }
 
-async function deleteCampaign(campaign: Campaign) {
-  if (!confirm(`Are you sure you want to delete "${campaign.title}"? This will also delete all associated prayer content.`)) {
-    return
-  }
+function deleteCampaign(campaign: Campaign) {
+  campaignToDelete.value = campaign
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!campaignToDelete.value) return
 
   try {
-    await $fetch(`/api/admin/campaigns/${campaign.id}`, {
+    deleting.value = true
+    await $fetch(`/api/admin/campaigns/${campaignToDelete.value.id}`, {
       method: 'DELETE'
     })
+
+    toast.add({
+      title: 'Campaign deleted',
+      description: `"${campaignToDelete.value.title}" has been deleted successfully.`,
+      color: 'green'
+    })
+
+    showDeleteModal.value = false
+    campaignToDelete.value = null
     await loadCampaigns()
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to delete campaign')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to delete campaign',
+      color: 'red'
+    })
+  } finally {
+    deleting.value = false
   }
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  campaignToDelete.value = null
 }
 
 function closeModal() {
