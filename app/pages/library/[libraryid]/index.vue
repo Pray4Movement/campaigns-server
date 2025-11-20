@@ -1,73 +1,75 @@
 <template>
   <div class="library-calendar-page">
-    <div class="page-header">
-      <div>
-        <h1 v-if="library" class="library-name">{{ library.name }}</h1>
-        <p v-if="library && library.description" class="library-description">{{ library.description }}</p>
-      </div>
-    </div>
-
-    <div v-if="loading" class="loading">Loading library content...</div>
-
-    <div v-else-if="error" class="error">{{ error }}</div>
-
-    <div v-else class="content-view">
-      <!-- Stats Bar -->
-      <div class="stats-bar">
-        <div class="stats">
-          <span>Total Days: {{ dayRange.maxDay || 0 }}</span>
+    <div class="container">
+      <div class="page-header">
+        <div>
+          <h1 v-if="library" class="library-name">{{ library.name }}</h1>
+          <p v-if="library && library.description" class="library-description">{{ library.description }}</p>
         </div>
       </div>
 
-      <!-- Calendar View -->
-      <div class="calendar-container">
-        <div class="calendar-header">
-          <h3>Content Calendar - {{ getLanguageName(locale) }}</h3>
-          <div class="legend">
-            <span class="legend-item">
-              <span class="indicator complete"></span> Has content
-            </span>
-            <span class="legend-item">
-              <span class="indicator empty"></span> No content
-            </span>
+      <div v-if="loading" class="loading">Loading library content...</div>
+
+      <div v-else-if="error" class="error">{{ error }}</div>
+
+      <div v-else class="content-view">
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+          <div class="stats">
+            <span>Total Days: {{ dayRange.maxDay || 0 }}</span>
           </div>
         </div>
 
-        <div class="days-grid">
-          <button
-            v-for="day in displayDays"
-            :key="day"
-            @click="selectDay(day)"
-            class="day-cell"
-            :class="getDayStatus(day)"
-            :title="getDayTooltip(day)"
-          >
-            {{ day }}
-          </button>
+        <!-- Calendar View -->
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <h3>Content Calendar - {{ getLanguageName(locale) }}</h3>
+            <div class="legend">
+              <span class="legend-item">
+                <span class="indicator complete"></span> Has content
+              </span>
+              <span class="legend-item">
+                <span class="indicator empty"></span> No content
+              </span>
+            </div>
+          </div>
+
+          <div class="days-grid">
+            <button
+              v-for="day in displayDays"
+              :key="day"
+              @click="selectDay(day)"
+              class="day-cell"
+              :class="getDayStatus(day)"
+              :title="getDayTooltip(day)"
+            >
+              {{ day }}
+            </button>
+          </div>
+
+          <div class="pagination-controls">
+            <UButton
+              v-if="currentPage > 1"
+              @click="previousPage"
+              variant="outline"
+              size="sm"
+            >
+              Previous
+            </UButton>
+            <span class="page-info">
+              Days {{ startDay }}-{{ endDay }}
+            </span>
+            <UButton
+              @click="nextPage"
+              variant="outline"
+              size="sm"
+            >
+              Next
+            </UButton>
+          </div>
         </div>
 
-        <div class="pagination-controls">
-          <UButton
-            v-if="currentPage > 1"
-            @click="previousPage"
-            variant="outline"
-            size="sm"
-          >
-            Previous
-          </UButton>
-          <span class="page-info">
-            Days {{ startDay }}-{{ endDay }}
-          </span>
-          <UButton
-            @click="nextPage"
-            variant="outline"
-            size="sm"
-          >
-            Next
-          </UButton>
-        </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -214,12 +216,19 @@ watch(locale, async () => {
 
 <style scoped>
 .library-calendar-page {
-  max-width: 1400px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 1rem;
 }
 
 .page-header {
+  padding: 2rem 0 1.5rem;
   margin-bottom: 2rem;
 }
 

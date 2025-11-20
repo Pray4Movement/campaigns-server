@@ -1,82 +1,84 @@
 <template>
   <div class="library-day-page">
-    <!-- Breadcrumb Navigation -->
-    <div class="breadcrumb">
-      <NuxtLink :to="`/library/${libraryId}`" class="breadcrumb-link">Library Calendar</NuxtLink>
-      <span class="breadcrumb-separator">›</span>
-      <span class="breadcrumb-current">Day {{ dayNumber }}</span>
-    </div>
+    <div class="container">
+      <!-- Breadcrumb Navigation -->
+      <div class="breadcrumb">
+        <NuxtLink :to="`/library/${libraryId}`" class="breadcrumb-link">Library Calendar</NuxtLink>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-current">Day {{ dayNumber }}</span>
+      </div>
 
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1>Day {{ dayNumber }}</h1>
-        <div class="header-info" v-if="library">
-          <span class="library-badge">{{ library.name }}</span>
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="header-content">
+          <h1>Day {{ dayNumber }}</h1>
+          <div class="header-info" v-if="library">
+            <span class="library-badge">{{ library.name }}</span>
+          </div>
+        </div>
+
+        <!-- Day Navigation -->
+        <div class="day-navigation">
+          <UButton
+            @click="navigateToPreviousDay"
+            variant="outline"
+            size="md"
+            :disabled="dayNumber <= 1"
+          >
+            ← Previous
+          </UButton>
+          <UButton
+            :to="`/library/${libraryId}`"
+            variant="outline"
+            size="md"
+          >
+            Back to Calendar
+          </UButton>
+          <UButton
+            @click="navigateToNextDay"
+            variant="outline"
+            size="md"
+          >
+            Next →
+          </UButton>
         </div>
       </div>
 
-      <!-- Day Navigation -->
-      <div class="day-navigation">
-        <UButton
-          @click="navigateToPreviousDay"
-          variant="outline"
-          size="md"
-          :disabled="dayNumber <= 1"
-        >
-          ← Previous
-        </UButton>
-        <UButton
-          :to="`/library/${libraryId}`"
-          variant="outline"
-          size="md"
-        >
-          Back to Calendar
-        </UButton>
-        <UButton
-          @click="navigateToNextDay"
-          variant="outline"
-          size="md"
-        >
-          Next →
-        </UButton>
-      </div>
-    </div>
+      <div v-if="loading" class="loading">Loading content...</div>
 
-    <div v-if="loading" class="loading">Loading content...</div>
+      <div v-else-if="error" class="error">{{ error }}</div>
 
-    <div v-else-if="error" class="error">{{ error }}</div>
-
-    <div v-else-if="!currentContent" class="empty-state">
-      <div class="empty-icon">📄</div>
-      <h2>No Content Available</h2>
-      <p>There is no content available for Day {{ dayNumber }} in {{ getLanguageName(locale) }}.</p>
-      <div v-if="availableLanguages.length > 0" class="available-languages">
-        <p>Content is available in:</p>
-        <div class="language-chips">
-          <span v-for="lang in availableLanguages" :key="lang" class="language-chip">
-            {{ getLanguageFlag(lang) }} {{ getLanguageName(lang) }}
-          </span>
+      <div v-else-if="!currentContent" class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h2>No Content Available</h2>
+        <p>There is no content available for Day {{ dayNumber }} in {{ getLanguageName(locale) }}.</p>
+        <div v-if="availableLanguages.length > 0" class="available-languages">
+          <p>Content is available in:</p>
+          <div class="language-chips">
+            <span v-for="lang in availableLanguages" :key="lang" class="language-chip">
+              {{ getLanguageFlag(lang) }} {{ getLanguageName(lang) }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div v-else class="content-section">
-      <!-- Language Indicator -->
-      <div v-if="displayedLanguage !== locale" class="language-fallback-notice">
-        <span class="notice-icon">ℹ️</span>
-        Content not available in {{ getLanguageName(locale) }}. Showing {{ getLanguageName(displayedLanguage) }} instead.
-      </div>
+      <div v-else class="content-section">
+        <!-- Language Indicator -->
+        <div v-if="displayedLanguage !== locale" class="language-fallback-notice">
+          <span class="notice-icon">ℹ️</span>
+          Content not available in {{ getLanguageName(locale) }}. Showing {{ getLanguageName(displayedLanguage) }} instead.
+        </div>
 
-      <!-- Content Display -->
-      <div class="content-display">
-        <RichTextViewer
-          v-if="currentContent.content_json"
-          :content="currentContent.content_json"
-          :item-id="`day-${dayNumber}`"
-        />
-        <div v-else class="no-content">
-          <p>No content to display</p>
+        <!-- Content Display -->
+        <div class="content-display">
+          <RichTextViewer
+            v-if="currentContent.content_json"
+            :content="currentContent.content_json"
+            :item-id="`day-${dayNumber}`"
+          />
+          <div v-else class="no-content">
+            <p>No content to display</p>
+          </div>
         </div>
       </div>
     </div>
@@ -190,9 +192,15 @@ watch(locale, async () => {
 
 <style scoped>
 .library-day-page {
-  max-width: 800px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 1rem;
 }
 
 .breadcrumb {
@@ -200,6 +208,7 @@ watch(locale, async () => {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  padding-top: 2rem;
   font-size: 0.875rem;
 }
 
