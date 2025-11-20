@@ -13,7 +13,7 @@ export interface UserWithRoles {
   email: string
   display_name: string
   verified: boolean
-  roles: string[]
+  role: string | null
   isAdmin: boolean
   isSuperAdmin: boolean
 }
@@ -54,18 +54,17 @@ export function setAuthCookie(event: H3Event, token: string) {
   })
 }
 
-// Get user with their roles
-export async function getUserWithRoles(userId: number, userEmail: string, displayName: string, verified: boolean, superadmin: boolean): Promise<UserWithRoles> {
-  const roles = await roleService.getUserRoles(userId)
-  const roleNames = roles.map(r => r.name)
-  const isAdmin = roleNames.includes('admin')
+// Get user with their role
+export async function getUserWithRoles(userId: string, userEmail: string, displayName: string, verified: boolean, superadmin: boolean): Promise<UserWithRoles> {
+  const role = await roleService.getUserRole(userId)
+  const isAdmin = role === 'admin'
 
   return {
-    id: userId,
+    id: userId as any, // Keep as any for backward compatibility
     email: userEmail,
     display_name: displayName,
     verified,
-    roles: roleNames,
+    role,
     isAdmin,
     isSuperAdmin: superadmin
   }

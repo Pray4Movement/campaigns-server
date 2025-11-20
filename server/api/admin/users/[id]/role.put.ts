@@ -1,4 +1,4 @@
-import { roleService } from '#server/database/roles'
+import { roleService, type RoleName } from '#server/database/roles'
 import { userService } from '#server/database/users'
 
 export default defineEventHandler(async (event) => {
@@ -17,11 +17,11 @@ export default defineEventHandler(async (event) => {
   // Get request body
   const body = await readBody(event)
 
-  // Validate role_id is provided
-  if (body.role_id === undefined && body.role_id === null) {
+  // Validate role is provided (can be null to remove role)
+  if (body.role === undefined) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'role_id is required'
+      statusMessage: 'role is required (use null to remove role)'
     })
   }
 
@@ -35,44 +35,32 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // If role_id is null, remove all roles
-    if (body.role_id === null) {
-      const currentRoles = await roleService.getUserRoles(userId)
-      for (const role of currentRoles) {
-        await roleService.removeRoleFromUser(userId, role.id)
-      }
+    // If role is null, remove the user's role
+    if (body.role === null) {
+      await roleService.setUserRole(userId, null)
 
       return {
         success: true,
-        message: 'User roles removed'
+        message: 'User role removed'
       }
     }
 
-    // Validate role exists
-    const role = await roleService.getRoleById(body.role_id)
-    if (!role) {
+    // Validate role name
+    const roleConfig = roleService.getRoleByName(body.role)
+    if (!roleConfig) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Role not found'
+        statusMessage: 'Invalid role. Valid roles: admin, campaign_editor'
       })
     }
 
-    // Remove all existing roles
-    const currentRoles = await roleService.getUserRoles(userId)
-    for (const currentRole of currentRoles) {
-      await roleService.removeRoleFromUser(userId, currentRole.id)
-    }
-
-    // Assign new role
-    await roleService.assignRoleToUser(userId, body.role_id)
-
-    // Get updated user roles
-    const updatedRoles = await roleService.getUserRoles(userId)
+    // Set new role
+    await roleService.setUserRole(userId, body.role as RoleName)
 
     return {
       success: true,
-      roles: updatedRoles,
-      message: `User role updated to ${role.name}`
+      role: body.role,
+      message: `User role updated to ${body.role}`
     }
   } catch (error: any) {
     console.error('Error updating user role:', error)

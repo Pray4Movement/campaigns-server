@@ -1,12 +1,13 @@
 import { getDatabase } from './db'
 import { v4 as uuidv4 } from 'uuid'
+import type { RoleName } from './roles'
 
 export interface UserInvitation {
   id: number
   email: string
   token: string
   invited_by: number
-  role_id: number | null
+  role: RoleName | null
   status: 'pending' | 'accepted' | 'expired' | 'revoked'
   expires_at: string
   accepted_at: string | null
@@ -22,7 +23,7 @@ export interface UserInvitationWithInviter extends UserInvitation {
 export interface CreateInvitationData {
   email: string
   invited_by: number
-  role_id?: number | null
+  role?: RoleName | null
   expires_in_days?: number // Default: 7 days
 }
 
@@ -31,7 +32,7 @@ export class UserInvitationService {
 
   // Create a new invitation
   async createInvitation(data: CreateInvitationData): Promise<UserInvitation> {
-    const { email, invited_by, role_id = null, expires_in_days = 7 } = data
+    const { email, invited_by, role = null, expires_in_days = 7 } = data
 
     // Generate unique token
     const token = uuidv4()
@@ -41,7 +42,7 @@ export class UserInvitationService {
     expiresAt.setDate(expiresAt.getDate() + expires_in_days)
 
     const stmt = this.db.prepare(`
-      INSERT INTO user_invitations (email, token, invited_by, role_id, expires_at)
+      INSERT INTO user_invitations (email, token, invited_by, role, expires_at)
       VALUES (?, ?, ?, ?, ?)
     `)
 
@@ -50,7 +51,7 @@ export class UserInvitationService {
         email,
         token,
         invited_by,
-        role_id,
+        role,
         expiresAt.toISOString()
       )
       return (await this.getInvitationById(result.lastInsertRowid as number))!

@@ -1,5 +1,5 @@
 import { userService } from '#server/database/users'
-import { roleService } from '#server/database/roles'
+import { roleService, ROLES } from '#server/database/roles'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -9,17 +9,16 @@ export default defineEventHandler(async (event) => {
     // Get all users
     const users = await userService.getAllUsers()
 
-    // Get roles for each user
+    // Get role for each user
     const usersWithRoles = await Promise.all(
       users.map(async (user) => {
-        const roles = await roleService.getUserRoles(user.id)
+        const role = await roleService.getUserRole(user.id)
         return {
           ...user,
-          roles: roles.map(r => ({
-            id: r.id,
-            name: r.name,
-            description: r.description
-          }))
+          role: role ? {
+            name: role,
+            description: ROLES[role].description
+          } : null
         }
       })
     )

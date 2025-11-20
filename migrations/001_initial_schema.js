@@ -21,52 +21,16 @@ export default class InitialSchemaMigration extends BaseMigration {
     console.log('📥 Creating project-specific schema...')
     console.log('  ℹ️  Users table provided by base layer')
 
-    // Roles table
+    // Add role column to users table (simple role management)
     await this.exec(pool, `
-      CREATE TABLE IF NOT EXISTS roles (
-        id SERIAL PRIMARY KEY,
-        name TEXT UNIQUE NOT NULL,
-        description TEXT DEFAULT '',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS role TEXT DEFAULT NULL
+      CHECK(role IN ('admin', 'campaign_editor'))
     `)
 
-    // User roles junction table
-    await this.exec(pool, `
-      CREATE TABLE IF NOT EXISTS user_roles (
-        user_id UUID NOT NULL,
-        role_id INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (user_id, role_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-      )
-    `)
+    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)')
 
-    // Permissions table
-    await this.exec(pool, `
-      CREATE TABLE IF NOT EXISTS permissions (
-        id SERIAL PRIMARY KEY,
-        name TEXT UNIQUE NOT NULL,
-        description TEXT DEFAULT '',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `)
-
-    // Role permissions junction table
-    await this.exec(pool, `
-      CREATE TABLE IF NOT EXISTS role_permissions (
-        role_id INTEGER NOT NULL,
-        permission_id INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (role_id, permission_id),
-        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-        FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
-      )
-    `)
-
-    console.log('  ✅ Roles and permissions tables created')
+    console.log('  ✅ Role column added to users table')
 
     // Campaigns table
     await this.exec(pool, `

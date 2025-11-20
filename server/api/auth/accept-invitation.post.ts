@@ -68,8 +68,8 @@ export default defineEventHandler(async (event) => {
     await userService.verifyUser(user.id)
 
     // Assign role if specified in invitation
-    if (invitation.role_id) {
-      await roleService.assignRoleToUser(user.id, invitation.role_id)
+    if (invitation.role) {
+      await roleService.setUserRole(user.id, invitation.role)
     }
 
     // Mark invitation as accepted

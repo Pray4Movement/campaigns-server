@@ -46,20 +46,20 @@
               <td>
                 <select
                   v-if="availableRoles.length > 0"
-                  :value="user.roles[0]?.id || ''"
-                  @change="(e) => updateUserRole(user.id, parseInt((e.target as HTMLSelectElement).value) || null)"
+                  :value="user.role?.name || ''"
+                  @change="(e) => updateUserRole(user.id, (e.target as HTMLSelectElement).value || null)"
                   class="role-select"
                 >
                   <option value="">No Role</option>
                   <option
                     v-for="role in availableRoles"
-                    :key="role.id"
-                    :value="role.id"
+                    :key="role.name"
+                    :value="role.name"
                   >
                     {{ formatRoleName(role.name) }}
                   </option>
                 </select>
-                <span v-else>{{ user.roles[0] ? formatRoleName(user.roles[0].name) : 'No role' }}</span>
+                <span v-else>{{ user.role ? formatRoleName(user.role.name) : 'No role' }}</span>
               </td>
               <td>
                 <span class="badge" :class="{ verified: user.verified, unverified: !user.verified }">
@@ -68,7 +68,7 @@
               </td>
               <td>
                 <button
-                  v-if="user.roles[0]?.name === 'campaign_editor'"
+                  v-if="user.role?.name === 'campaign_editor'"
                   @click="openCampaignModal(user)"
                   class="btn-small btn-secondary"
                 >
@@ -219,14 +219,14 @@
             <label for="role">Role</label>
             <select
               id="role"
-              v-model="inviteForm.role_id"
+              v-model="inviteForm.role"
               class="form-input"
             >
               <option :value="null">No Role (must be assigned later)</option>
               <option
                 v-for="role in availableRoles"
-                :key="role.id"
-                :value="role.id"
+                :key="role.name"
+                :value="role.name"
               >
                 {{ formatRoleName(role.name) }} - {{ role.description }}
               </option>
@@ -263,7 +263,6 @@ definePageMeta({
 })
 
 interface Role {
-  id: number
   name: string
   description: string
 }
@@ -274,7 +273,7 @@ interface User {
   display_name: string
   verified: boolean
   created_at: string
-  roles: Role[]
+  role: { name: string; description: string } | null
 }
 
 interface Campaign {
@@ -291,7 +290,7 @@ interface Invitation {
   email: string
   token: string
   invited_by: number
-  role_id: number | null
+  role: string | null
   status: 'pending' | 'accepted' | 'expired' | 'revoked'
   expires_at: string
   accepted_at: string | null
@@ -309,7 +308,7 @@ const showInviteModal = ref(false)
 
 const inviteForm = ref({
   email: '',
-  role_id: null as number | null
+  role: null as string | null
 })
 
 const inviteSubmitting = ref(false)
@@ -377,13 +376,13 @@ async function handleInvite() {
       method: 'POST',
       body: {
         email: inviteForm.value.email,
-        role_id: inviteForm.value.role_id
+        role: inviteForm.value.role
       }
     })
 
     inviteSuccess.value = true
     inviteForm.value.email = ''
-    inviteForm.value.role_id = null
+    inviteForm.value.role = null
 
     // Reload invitations
     await loadData()
@@ -400,12 +399,12 @@ async function handleInvite() {
   }
 }
 
-async function updateUserRole(userId: number, roleId: number | null) {
+async function updateUserRole(userId: number, roleName: string | null) {
   try {
     const response = await $fetch<{ success: boolean; message: string }>(`/api/admin/users/${userId}/role`, {
       method: 'PUT',
       body: {
-        role_id: roleId
+        role: roleName
       }
     })
 

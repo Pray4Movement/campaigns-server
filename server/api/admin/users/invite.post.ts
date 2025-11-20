@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
     const invitation = await userInvitationService.createInvitation({
       email: body.email,
       invited_by: user.userId,
-      role_id: body.role_id || null,
+      role: body.role || null,
       expires_in_days: body.expires_in_days || 7
     })
 

@@ -33,14 +33,13 @@ export default class UserInvitationsMigration extends BaseMigration {
         email TEXT NOT NULL,
         token TEXT UNIQUE NOT NULL,
         invited_by UUID NOT NULL,
-        role_id INTEGER DEFAULT NULL,
+        role TEXT DEFAULT NULL,
         status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'expired', 'revoked')),
         expires_at TIMESTAMP NOT NULL,
         accepted_at TIMESTAMP DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL
+        FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE
       )
     `)
 
