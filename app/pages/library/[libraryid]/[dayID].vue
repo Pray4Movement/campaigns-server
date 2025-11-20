@@ -63,12 +63,6 @@
       </div>
 
       <div v-else class="content-section">
-        <!-- Language Indicator -->
-        <div v-if="displayedLanguage !== locale" class="language-fallback-notice">
-          <span class="notice-icon">ℹ️</span>
-          Content not available in {{ getLanguageName(locale) }}. Showing {{ getLanguageName(displayedLanguage) }} instead.
-        </div>
-
         <!-- Content Display -->
         <div class="content-display">
           <RichTextViewer
@@ -86,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { getLanguageName, getLanguageFlag, LANGUAGES } from '~/utils/languages'
+import { getLanguageName, getLanguageFlag } from '~/utils/languages'
 
 const route = useRoute()
 const { locale } = useI18n()
@@ -116,24 +110,12 @@ const availableLanguages = computed(() => {
   return content.value.map(c => c.language_code)
 })
 
-// Get content in current language, or fallback to English, or first available
+// Get content only in current language (no fallback)
 const currentContent = computed(() => {
   if (content.value.length === 0) return null
 
-  // Try to find content in current locale
-  const localeContent = content.value.find(c => c.language_code === locale.value)
-  if (localeContent) return localeContent
-
-  // Fallback to English
-  const enContent = content.value.find(c => c.language_code === 'en')
-  if (enContent) return enContent
-
-  // Fallback to first available
-  return content.value[0]
-})
-
-const displayedLanguage = computed(() => {
-  return currentContent.value?.language_code || locale.value
+  // Only return content in current locale
+  return content.value.find(c => c.language_code === locale.value) || null
 })
 
 async function loadLibrary() {
@@ -325,23 +307,6 @@ watch(locale, async () => {
 .content-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-.language-fallback-notice {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-
-.notice-icon {
-  font-size: 1.25rem;
 }
 
 .content-display {
