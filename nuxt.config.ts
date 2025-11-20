@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
 
+const appTitle = process.env.APP_TITLE || 'Base'
+
 export default defineNuxtConfig({
   // Testing local base layer changes (switch back to github:corsacca/nuxt-base#TAG before deploying)
   // extends: ['../../base'],
@@ -11,6 +13,17 @@ export default defineNuxtConfig({
   ssr: false,
 
   css: ['~/assets/css/main.css'],
+
+  app: {
+    head: {
+      title: appTitle,
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }
+      ]
+    }
+  },
 
   modules: ['@nuxtjs/i18n', '@nuxt/icon'],
 
@@ -51,7 +64,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Private keys (only available on the server-side)
     // Base layer config
-    jwtSecret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
+    appName: appTitle,
+    jwtSecret: process.env.JWT_SECRET,
     databaseUrl: process.env.DATABASE_URL || '',
 
     // Email configuration (base layer)
