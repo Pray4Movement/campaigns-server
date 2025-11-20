@@ -12,7 +12,9 @@ import Typography from '@tiptap/extension-typography'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
+import Youtube from '@tiptap/extension-youtube'
 import { Spacer } from '~/extensions/spacer'
+import { Vimeo } from '~/extensions/vimeo'
 
 const props = defineProps<{
   content: any // TipTap JSON object (or string for backward compatibility)
@@ -58,6 +60,31 @@ const editor = useEditor({
     HorizontalRule,
     Spacer.configure({
       defaultHeight: 24
+    }),
+    Youtube.configure({
+      inline: false,
+      width: 640,
+      height: 360,
+      ccLanguage: 'en',
+      interfaceLanguage: 'en',
+      allowFullscreen: true,
+      autoplay: false,
+      controls: true,
+      nocookie: true,
+      enableIFrameApi: false,
+      origin: '',
+    }),
+    Vimeo.configure({
+      inline: false,
+      width: 640,
+      height: 360,
+      allowFullscreen: true,
+      autoplay: false,
+      byline: true,
+      color: '00adef',
+      portrait: true,
+      title: true,
+      controls: true
     }),
     TextStyle,
     Color,
@@ -409,5 +436,31 @@ onBeforeUnmount(() => {
   position: relative;
   min-height: 12px;
   cursor: default;
+}
+
+/* YouTube Video Embeds */
+:deep(.prose div[data-youtube-video]) {
+  margin: 2em 0;
+  position: relative;
+}
+
+:deep(.prose div[data-youtube-video] iframe) {
+  border-radius: 0.375rem;
+  border: none;
+  max-width: 100%;
+  display: block;
+}
+
+/* Vimeo Video Embeds */
+:deep(.prose div[data-vimeo-video]) {
+  margin: 2em 0;
+  position: relative;
+}
+
+:deep(.prose div[data-vimeo-video] iframe) {
+  border-radius: 0.375rem;
+  border: none;
+  max-width: 100%;
+  display: block;
 }
 </style>

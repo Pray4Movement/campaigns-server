@@ -10,6 +10,7 @@ import SlashCommandMenu from '~/components/SlashCommandMenu.vue'
 import tippy from 'tippy.js'
 import type { Instance as TippyInstance } from 'tippy.js'
 import { editorConfig } from '~/config/editor.config'
+import { useVideoEmbed } from './useVideoEmbed'
 
 /**
  * Command item interface
@@ -146,6 +147,20 @@ export const getCommandItems = ({ query }: { query: string }): CommandItem[] => 
       aliases: ['picture', 'photo', 'img'],
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).setImageUploadNode().run()
+      }
+    },
+    {
+      title: 'Video',
+      description: 'Embed YouTube or Vimeo video',
+      icon: 'lucide:video',
+      group: 'Media',
+      aliases: ['youtube', 'vimeo', 'embed', 'yt'],
+      command: async ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run()
+
+        // Use modal for video URL input
+        const { showVideoUrlModal } = useVideoEmbed()
+        await showVideoUrlModal(editor)
       }
     }
   ]

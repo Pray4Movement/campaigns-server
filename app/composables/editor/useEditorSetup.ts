@@ -16,8 +16,10 @@ import Typography from '@tiptap/extension-typography'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
+import Youtube from '@tiptap/extension-youtube'
 import { ImageUploadExtension } from '~/utils/imageUploadExtension'
 import { Spacer } from '~/extensions/spacer'
+import { Vimeo } from '~/extensions/vimeo'
 import { editorConfig } from '~/config/editor.config'
 import { uploadImage } from './useImageUpload'
 import { useSlashCommands } from './useSlashCommands'
@@ -105,6 +107,31 @@ export const createEditorExtensions = (
     HorizontalRule,
     Spacer.configure({
       defaultHeight: 24
+    }),
+    Youtube.configure({
+      inline: false,
+      width: 640,
+      height: 360,
+      ccLanguage: 'en',
+      interfaceLanguage: 'en',
+      allowFullscreen: true,
+      autoplay: false,
+      controls: true,
+      nocookie: true,
+      enableIFrameApi: false,
+      origin: '',
+    }),
+    Vimeo.configure({
+      inline: false,
+      width: 640,
+      height: 360,
+      allowFullscreen: true,
+      autoplay: false,
+      byline: true,
+      color: '00adef',
+      portrait: true,
+      title: true,
+      controls: true
     }),
     ImageUploadExtension.configure({
       type: 'imageResize',

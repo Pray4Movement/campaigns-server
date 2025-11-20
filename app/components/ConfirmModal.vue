@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 interface Props {
-  open: boolean
+  open?: boolean
   title?: string
   message?: string
   warning?: string
@@ -44,6 +44,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  open: true,
   title: 'Confirm',
   confirmText: 'Confirm',
   cancelText: 'Cancel',
@@ -55,6 +56,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
   confirm: []
   cancel: []
+  close: [confirmed: boolean]
 }>()
 
 const isOpen = computed({
@@ -64,10 +66,12 @@ const isOpen = computed({
 
 function handleConfirm() {
   emit('confirm')
+  emit('close', true)
 }
 
 function handleCancel() {
   emit('cancel')
+  emit('close', false)
   isOpen.value = false
 }
 </script>

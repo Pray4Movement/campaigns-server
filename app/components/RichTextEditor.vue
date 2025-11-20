@@ -529,6 +529,64 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
+/* YouTube Video Embeds */
+:deep(.ProseMirror div[data-youtube-video]) {
+  margin: 1.5rem 0;
+  position: relative;
+  cursor: pointer;
+}
+
+:deep(.ProseMirror div[data-youtube-video] iframe) {
+  border-radius: 8px;
+  border: none;
+  max-width: 100%;
+  display: block;
+}
+
+:deep(.ProseMirror div[data-youtube-video].ProseMirror-selectednode) {
+  outline: 2px solid #3B82F6;
+  border-radius: 8px;
+}
+
+:deep(.ProseMirror div[data-youtube-video]::after) {
+  content: '';
+  position: absolute;
+  left: -60px;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Vimeo Video Embeds */
+:deep(.ProseMirror div[data-vimeo-video]) {
+  margin: 1.5rem 0;
+  position: relative;
+  cursor: pointer;
+}
+
+:deep(.ProseMirror div[data-vimeo-video] iframe) {
+  border-radius: 8px;
+  border: none;
+  max-width: 100%;
+  display: block;
+}
+
+:deep(.ProseMirror div[data-vimeo-video].ProseMirror-selectednode) {
+  outline: 2px solid #3B82F6;
+  border-radius: 8px;
+}
+
+:deep(.ProseMirror div[data-vimeo-video]::after) {
+  content: '';
+  position: absolute;
+  left: -60px;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  cursor: pointer;
+}
+
 /* Links */
 :deep(.ProseMirror a) {
   color: #3B82F6;
