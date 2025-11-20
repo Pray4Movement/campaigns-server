@@ -93,6 +93,7 @@ const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
 const { setCampaignTitle } = useCampaign()
+const toast = useToast()
 
 // Get tracking ID from URL if present (from email/WhatsApp links)
 const trackingId = route.query.uid as string | undefined
@@ -191,7 +192,11 @@ async function markAsPrayed() {
     prayedMarked.value = true
   } catch (err: any) {
     console.error('Failed to record prayer:', err)
-    alert(t('prayerFuel.error.recordFailed'))
+    toast.add({
+      title: 'Error',
+      description: t('prayerFuel.error.recordFailed'),
+      color: 'red'
+    })
   } finally {
     submitting.value = false
   }

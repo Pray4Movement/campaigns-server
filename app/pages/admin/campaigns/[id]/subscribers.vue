@@ -68,7 +68,7 @@
         <div v-else class="details-content">
           <div class="details-header">
             <h2>{{ selectedSubscriber.name }}</h2>
-            <UButton @click="confirmDelete" color="neutral" variant="outline">Delete</UButton>
+            <UButton @click="openDeleteModal" color="neutral" variant="outline">Delete</UButton>
           </div>
 
           <form @submit.prevent="saveSubscriber" class="details-form">
@@ -173,6 +173,19 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-model:open="showDeleteModal"
+      title="Delete Subscriber"
+      :message="subscriberToDelete ? `Are you sure you want to delete &quot;${subscriberToDelete.name}&quot;?` : ''"
+      warning="This action cannot be undone."
+      confirm-text="Delete"
+      confirm-color="primary"
+      :loading="deleting"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
@@ -214,6 +227,14 @@ const error = ref('')
 const saving = ref(false)
 const searchQuery = ref('')
 const filterMethod = ref('')
+
+// Delete confirmation modal state
+const showDeleteModal = ref(false)
+const subscriberToDelete = ref<Subscriber | null>(null)
+const deleting = ref(false)
+
+// Toast
+const toast = useToast()
 
 const editForm = ref({
   name: '',
@@ -317,32 +338,62 @@ async function saveSubscriber() {
       selectedSubscriber.value = subscribers.value[index]
     }
 
-    alert('Subscriber updated successfully')
+    toast.add({
+      title: 'Success',
+      description: 'Subscriber updated successfully',
+      color: 'green'
+    })
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to update subscriber')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to update subscriber',
+      color: 'red'
+    })
   } finally {
     saving.value = false
   }
 }
 
-async function confirmDelete() {
+function openDeleteModal() {
   if (!selectedSubscriber.value) return
+  subscriberToDelete.value = selectedSubscriber.value
+  showDeleteModal.value = true
+}
 
-  if (!confirm(`Are you sure you want to delete subscriber "${selectedSubscriber.value.name}"?`)) {
-    return
-  }
+async function confirmDelete() {
+  if (!subscriberToDelete.value) return
 
   try {
-    await $fetch(`/api/admin/subscribers/${selectedSubscriber.value.id}`, {
+    deleting.value = true
+    await $fetch(`/api/admin/subscribers/${subscriberToDelete.value.id}`, {
       method: 'DELETE'
     })
 
+    toast.add({
+      title: 'Success',
+      description: `Subscriber "${subscriberToDelete.value.name}" has been deleted.`,
+      color: 'green'
+    })
+
     // Remove from local list
-    subscribers.value = subscribers.value.filter(s => s.id !== selectedSubscriber.value!.id)
+    subscribers.value = subscribers.value.filter(s => s.id !== subscriberToDelete.value!.id)
     selectedSubscriber.value = null
+    showDeleteModal.value = false
+    subscriberToDelete.value = null
   } catch (err: any) {
-    alert(err.data?.statusMessage || 'Failed to delete subscriber')
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to delete subscriber',
+      color: 'red'
+    })
+  } finally {
+    deleting.value = false
   }
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  subscriberToDelete.value = null
 }
 
 function resetForm() {
