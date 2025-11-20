@@ -75,32 +75,22 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 const { toggleTheme, theme } = useTheme()
-
-const user = ref<any>(null)
-const isAdmin = computed(() => {
-  return user.value?.user?.isAdmin || false
-})
-const isSuperAdmin = computed(() => {
-  return user.value?.user?.isSuperAdmin || false
-})
+const { user, isAdmin, isSuperAdmin, checkAuth, logout: authLogout } = useAuthUser()
 
 onMounted(async () => {
-  try {
-    const response = await $fetch('/api/auth/me')
-    user.value = response
-  } catch (error) {
-    // If not authenticated, redirect to login
-    navigateTo('/')
+  // Only fetch if we don't have user data yet
+  if (!user.value) {
+    try {
+      await checkAuth()
+    } catch (error) {
+      // If not authenticated, redirect to login
+      navigateTo('/')
+    }
   }
 })
 
 async function logout() {
-  try {
-    await $fetch('/api/auth/logout', { method: 'POST' })
-    navigateTo('/')
-  } catch (error) {
-    console.error('Logout failed:', error)
-  }
+  await authLogout()
 }
 </script>
 

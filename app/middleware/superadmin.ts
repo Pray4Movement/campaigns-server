@@ -2,22 +2,20 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side
   if (process.server) return
 
-  try {
-    // Check if user is authenticated
-    const response = await $fetch('/api/auth/me')
-    const user = response?.user
+  const { user, isSuperAdmin, checkAuth } = useAuthUser()
 
-    if (!user) {
-      return navigateTo('/')
-    }
+  // Fetch user if not already loaded
+  if (!user.value) {
+    await checkAuth()
+  }
 
-    // Check if user has superadmin flag
-    if (!user.isSuperAdmin) {
-      // Redirect to admin dashboard if not superadmin
-      return navigateTo('/admin')
-    }
-  } catch (error) {
-    // Not authenticated, redirect to home
+  if (!user.value) {
     return navigateTo('/')
+  }
+
+  // Check if user has superadmin flag
+  if (!isSuperAdmin.value) {
+    // Redirect to admin dashboard if not superadmin
+    return navigateTo('/admin')
   }
 })

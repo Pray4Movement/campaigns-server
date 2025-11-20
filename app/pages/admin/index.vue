@@ -25,20 +25,7 @@ definePageMeta({
 })
 
 const config = useRuntimeConfig()
-
-const user = ref<any>(null)
-const isAdmin = computed(() => {
-  return user.value?.user?.isAdmin || false
-})
-
-onMounted(async () => {
-  try {
-    const response = await $fetch('/api/auth/me')
-    user.value = response
-  } catch (error) {
-    console.error('Failed to fetch user:', error)
-  }
-})
+const { isAdmin } = useAuthUser()
 </script>
 
 <style scoped>
