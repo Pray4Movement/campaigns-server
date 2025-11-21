@@ -109,8 +109,14 @@
                   class="row-library-card"
                   draggable="true"
                   @dragstart="dragStart(rowIndex, libIndex)"
-                  @dragover.prevent
+                  @dragend="dragEnd"
+                  @dragover.prevent="onDragOver($event, rowIndex, libIndex)"
+                  @dragleave="onDragLeave"
                   @drop="drop(rowIndex, libIndex)"
+                  :class="{
+                    'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === libIndex,
+                    'dragging': dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex
+                  }"
                 >
                   <div class="drag-handle">
                     <span class="order-number">{{ libIndex + 1 }}</span>
@@ -133,6 +139,17 @@
                   >
                     ×
                   </UButton>
+                </div>
+                <!-- Drop zone at the end -->
+                <div
+                  v-if="dragState && dragState.rowIndex === rowIndex"
+                  class="drop-zone-end"
+                  @dragover.prevent="onDragOver($event, rowIndex, row.libraries.length)"
+                  @dragleave="onDragLeave"
+                  @drop="drop(rowIndex, row.libraries.length)"
+                  :class="{ 'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === row.libraries.length }"
+                >
+                  Drop here
                 </div>
               </div>
 
@@ -213,6 +230,7 @@ const toast = useToast()
 
 // Drag state
 const dragState = ref<{ rowIndex: number; libIndex: number } | null>(null)
+const dragOverTarget = ref<{ rowIndex: number; libIndex: number } | null>(null)
 
 const currentDay = computed(() => {
   if (!globalStartDate.value) return 1
@@ -324,7 +342,23 @@ function dragStart(rowIndex: number, libIndex: number) {
   dragState.value = { rowIndex, libIndex }
 }
 
+function dragEnd() {
+  dragState.value = null
+  dragOverTarget.value = null
+}
+
+function onDragOver(event: DragEvent, rowIndex: number, libIndex: number) {
+  event.preventDefault()
+  dragOverTarget.value = { rowIndex, libIndex }
+}
+
+function onDragLeave() {
+  dragOverTarget.value = null
+}
+
 function drop(targetRowIndex: number, targetLibIndex: number) {
+  dragOverTarget.value = null
+
   if (!dragState.value) return
 
   const { rowIndex: sourceRowIndex, libIndex: sourceLibIndex } = dragState.value
@@ -335,9 +369,18 @@ function drop(targetRowIndex: number, targetLibIndex: number) {
     return
   }
 
+  // Don't do anything if dropping on itself
+  if (sourceLibIndex === targetLibIndex) {
+    dragState.value = null
+    return
+  }
+
   const items = [...rows.value[sourceRowIndex].libraries]
   const [draggedItem] = items.splice(sourceLibIndex, 1)
-  items.splice(targetLibIndex, 0, draggedItem)
+
+  // Adjust target index if we removed an item before it
+  const adjustedTargetIndex = sourceLibIndex < targetLibIndex ? targetLibIndex - 1 : targetLibIndex
+  items.splice(adjustedTargetIndex, 0, draggedItem)
 
   // Re-order
   items.forEach((lib, idx) => {
@@ -571,6 +614,35 @@ onMounted(async () => {
 .row-library-card:hover {
   border-color: var(--text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.row-library-card.drag-over {
+  border-color: var(--text);
+  border-style: dashed;
+  background-color: var(--ui-bg-elevated);
+}
+
+.row-library-card.dragging {
+  opacity: 0.5;
+}
+
+.drop-zone-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  padding: 0.75rem 1rem;
+  border: 2px dashed var(--ui-border);
+  border-radius: 6px;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.drop-zone-end.drag-over {
+  border-color: var(--text);
+  background-color: var(--ui-bg-elevated);
+  color: var(--text);
 }
 
 .drag-handle {
