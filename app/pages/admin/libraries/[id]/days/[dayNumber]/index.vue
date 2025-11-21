@@ -51,98 +51,71 @@
     <div v-else-if="error" class="error">{{ error }}</div>
 
     <div v-else class="content-section">
-      <!-- Existing Translations -->
-      <div v-if="translations.length > 0" class="translations-list">
-        <h2>Existing Translations</h2>
-        <div class="translations-grid">
-          <UCard
-            v-for="translation in translations"
-            :key="translation.id"
-            class="translation-card"
-          >
-            <template #header>
-              <div class="translation-header">
-                <span class="translation-language">
-                  {{ getLanguageFlag(translation.language_code) }}
-                  {{ getLanguageName(translation.language_code) }}
-                </span>
-                <div class="translation-actions">
-                  <UButton
-                    :to="getPublicUrl(translation.language_code)"
-                    variant="link"
-                    size="sm"
-                    target="_blank"
-                    trailing-icon="lucide:external-link"
-                  >
-                    View
-                  </UButton>
-                  <UButton
-                    :to="`/admin/libraries/${libraryId}/days/${dayNumber}/content/${translation.id}`"
-                    variant="link"
-                    size="sm"
-                  >
-                    Edit
-                  </UButton>
-                  <UButton
-                    @click="promptDeleteTranslation(translation)"
-                    variant="link"
-                    size="sm"
-                    color="neutral"
-                  >
-                    Delete
-                  </UButton>
-                </div>
-              </div>
-            </template>
-
-            <div class="translation-body">
-              <div class="translation-preview">{{ getContentPreview(translation.content_json)}}</div>
-            </div>
-          </UCard>
+      <!-- Languages Table -->
+      <div class="languages-table">
+        <div class="table-header">
+          <div class="col-language">Language</div>
+          <div class="col-preview">Content Preview</div>
+          <div class="col-actions">Actions</div>
         </div>
-      </div>
 
-      <!-- Empty State -->
-      <div v-else class="empty-state">
-        <p>No translations yet for Day {{ dayNumber }}</p>
-      </div>
-
-      <!-- Add Translation Button -->
-      <div class="add-translation-section">
-        <UButton
-          @click="showLanguageSelector = true"
-          size="lg"
+        <div
+          v-for="lang in allLanguagesWithStatus"
+          :key="lang.code"
+          class="table-row"
+          :class="{ 'row-missing': !lang.translation }"
         >
-          Add Translation
-        </UButton>
-      </div>
-    </div>
+          <div class="col-language">
+            <span class="language-flag">{{ lang.flag }}</span>
+            <span class="language-name">{{ lang.name }}</span>
+          </div>
 
-    <!-- Language Selector Modal -->
-    <UModal
-      v-model:open="showLanguageSelector"
-      title="Select Language"
-    >
-      <template #body>
-        <div class="language-selector">
-          <p class="language-selector-description">
-            Choose the language for the new translation:
-          </p>
-          <div class="language-options">
-            <button
-              v-for="lang in availableLanguages"
-              :key="lang.code"
-              @click="createTranslation(lang.code)"
-              class="language-option"
-            >
-              <span class="language-flag">{{ lang.flag }}</span>
-              <span class="language-name">{{ lang.name }}</span>
-              <span class="language-native">({{ lang.nativeName }})</span>
-            </button>
+          <div class="col-preview">
+            <template v-if="lang.translation">
+              {{ getContentPreview(lang.translation.content_json) }}
+            </template>
+            <span v-else class="no-translation">No translation</span>
+          </div>
+
+          <div class="col-actions">
+            <template v-if="lang.translation">
+              <UButton
+                :to="getPublicUrl(lang.code)"
+                variant="link"
+                size="sm"
+                target="_blank"
+                trailing-icon="lucide:external-link"
+              >
+                View
+              </UButton>
+              <UButton
+                :to="`/admin/libraries/${libraryId}/days/${dayNumber}/content/${lang.translation.id}`"
+                variant="link"
+                size="sm"
+              >
+                Edit
+              </UButton>
+              <UButton
+                @click="promptDeleteTranslation(lang.translation)"
+                variant="link"
+                size="sm"
+                color="neutral"
+              >
+                Delete
+              </UButton>
+            </template>
+            <template v-else>
+              <UButton
+                @click="createTranslation(lang.code)"
+                size="sm"
+              >
+                Create
+              </UButton>
+            </template>
           </div>
         </div>
-      </template>
-    </UModal>
+      </div>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <ConfirmModal
@@ -188,14 +161,18 @@ const library = ref<Library | null>(null)
 const translations = ref<LibraryContent[]>([])
 const loading = ref(true)
 const error = ref('')
-const showLanguageSelector = ref(false)
 const showDeleteModal = ref(false)
 const translationToDelete = ref<LibraryContent | null>(null)
 const toast = useToast()
 
-const availableLanguages = computed(() => {
-  const usedLanguages = new Set(translations.value.map(t => t.language_code))
-  return LANGUAGES.filter(lang => !usedLanguages.has(lang.code))
+const allLanguagesWithStatus = computed(() => {
+  const translationMap = new Map(translations.value.map(t => [t.language_code, t]))
+  return LANGUAGES.map(lang => ({
+    code: lang.code,
+    name: lang.name,
+    flag: lang.flag,
+    translation: translationMap.get(lang.code) || null
+  }))
 })
 
 async function loadLibrary() {
@@ -281,7 +258,6 @@ function cancelDelete() {
 }
 
 function createTranslation(languageCode: string) {
-  showLanguageSelector.value = false
   navigateTo(`/admin/libraries/${libraryId.value}/days/${dayNumber.value}/content/new?lang=${languageCode}`)
 }
 
@@ -378,113 +354,73 @@ onMounted(async () => {
   gap: 2rem;
 }
 
-.translations-list h2 {
-  margin: 0 0 1rem;
-  font-size: 1.25rem;
-}
-
-.translations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1rem;
-}
-
-.translation-card {
-  transition: transform 0.2s;
-}
-
-.translation-card:hover {
-  transform: translateY(-2px);
-}
-
-.translation-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.translation-language {
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.translation-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.translation-preview {
-  color: var(--ui-text-muted);
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--ui-text-muted);
-  border: 2px dashed var(--ui-border);
-  border-radius: 8px;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 1.125rem;
-}
-
-.add-translation-section {
-  display: flex;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.language-selector {
-  padding: 1.5rem;
-}
-
-.language-selector-description {
-  margin: 0 0 1.5rem;
-  color: var(--ui-text-muted);
-}
-
-.language-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.language-option {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+.languages-table {
   border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background-color: var(--ui-bg);
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.language-option:hover {
+.table-header {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
   background-color: var(--ui-bg-elevated);
-  border-color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:hover {
+  background-color: var(--ui-bg-elevated);
+}
+
+.row-missing {
+  opacity: 0.7;
+}
+
+.col-language {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .language-flag {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 .language-name {
   font-weight: 500;
-  flex: 1;
 }
 
-.language-native {
+.col-preview {
   color: var(--ui-text-muted);
   font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.no-translation {
+  font-style: italic;
+}
+
+.col-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 </style>
