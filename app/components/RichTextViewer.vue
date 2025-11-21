@@ -297,6 +297,45 @@ onBeforeUnmount(() => {
   border-radius: 0.375rem;
 }
 
+/* ImageResize extension container centering support */
+/* When container has margin: 0 auto or margin: 0px auto, make it fit content width */
+:deep(.prose div[style*="margin: 0 auto"]),
+:deep(.prose div[style*="margin: 0px auto"]) {
+  width: fit-content;
+  display: block;
+}
+
+/* Right-aligned images */
+:deep(.prose div[style*="margin: 0 0 0 auto"]),
+:deep(.prose div[style*="margin: 0px 0px 0px auto"]) {
+  width: fit-content;
+  display: block;
+}
+
+/* Left-aligned images (explicit) */
+:deep(.prose div[style*="margin: 0 auto 0 0"]),
+:deep(.prose div[style*="margin: 0px auto 0px 0px"]) {
+  width: fit-content;
+  display: block;
+}
+
+/* Text alignment support for paragraphs */
+:deep(.prose [style*="text-align: center"]) {
+  text-align: center;
+}
+
+:deep(.prose [style*="text-align: left"]) {
+  text-align: left;
+}
+
+:deep(.prose [style*="text-align: right"]) {
+  text-align: right;
+}
+
+:deep(.prose [style*="text-align: justify"]) {
+  text-align: justify;
+}
+
 :deep(.prose code) {
   font-size: 0.875em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
