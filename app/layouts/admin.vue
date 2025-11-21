@@ -40,27 +40,10 @@
       </ul>
 
       <div class="sidebar-footer">
-        <button @click="toggleTheme" class="theme-toggle outline" :data-theme="theme" :aria-label="theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'">
-          <svg v-if="theme === 'light'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-        </button>
-        <div class="user-info" v-if="user">
-          <p class="user-name">{{ user.display_name || user.email }}</p>
-          <p class="user-email">{{ user.email }}</p>
-        </div>
-        <button @click="logout" class="logout-btn">Logout</button>
+        <NuxtLink to="/profile" class="user-name-link" v-if="user">
+          {{ user.display_name || user.email }}
+        </NuxtLink>
+        <ThemeToggle />
       </div>
     </nav>
 
@@ -74,8 +57,7 @@
 
 <script setup lang="ts">
 const config = useRuntimeConfig()
-const { toggleTheme, theme } = useTheme()
-const { user, isAdmin, isSuperAdmin, checkAuth, logout: authLogout } = useAuthUser()
+const { user, isAdmin, isSuperAdmin, checkAuth } = useAuthUser()
 
 onMounted(async () => {
   // Only fetch if we don't have user data yet
@@ -88,10 +70,6 @@ onMounted(async () => {
     }
   }
 })
-
-async function logout() {
-  await authLogout()
-}
 </script>
 
 <style scoped>
@@ -156,60 +134,22 @@ async function logout() {
   padding: 1rem;
   border-top: 1px solid var(--ui-border);
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.theme-toggle {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: 4px;
-  color: var(--ui-text);
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
-.theme-toggle:hover {
-  border-color: var(--ui-border-accented);
-  background-color: var(--ui-bg-accented);
-}
-
-.user-info {
-  padding: 0.5rem 0;
-}
-
-.user-name {
+.user-name-link {
   font-weight: 600;
-  margin: 0 0 0.25rem;
   font-size: 0.875rem;
   color: var(--ui-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.2s;
 }
 
-.user-email {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--ui-text-muted);
-}
-
-.logout-btn {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: 4px;
-  color: var(--ui-text);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.logout-btn:hover {
-  border-color: var(--ui-border-accented);
-  background-color: var(--ui-bg-accented);
+.user-name-link:hover {
+  opacity: 0.7;
 }
 
 .main-wrapper {
