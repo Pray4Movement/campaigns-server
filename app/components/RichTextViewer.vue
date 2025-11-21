@@ -276,31 +276,15 @@ onBeforeUnmount(() => {
   border-radius: 0.375rem;
 }
 
-/* ImageResize extension container support */
-:deep(.prose div[style*="position: relative"]) {
+/* ImageResize node view containers - the extension wraps images in divs with inline styles */
+:deep(.prose > div) {
   max-width: 100%;
 }
 
-/* When container has margin: 0 auto or margin: 0px auto, make it fit content width */
-:deep(.prose div[style*="margin: 0 auto"]),
-:deep(.prose div[style*="margin: 0px auto"]) {
+/* Centered images need fit-content width for margin auto to work */
+:deep(.prose > div[style*="margin: 0 auto"]),
+:deep(.prose > div[style*="margin: 0px auto"]) {
   width: fit-content;
-  max-width: 100%;
-  display: block;
-}
-
-/* Right-aligned images */
-:deep(.prose div[style*="margin: 0 0 0 auto"]),
-:deep(.prose div[style*="margin: 0px 0px 0px auto"]) {
-  width: fit-content;
-  display: block;
-}
-
-/* Left-aligned images (explicit) */
-:deep(.prose div[style*="margin: 0 auto 0 0"]),
-:deep(.prose div[style*="margin: 0px auto 0px 0px"]) {
-  width: fit-content;
-  display: block;
 }
 
 /* Text alignment support for paragraphs */
