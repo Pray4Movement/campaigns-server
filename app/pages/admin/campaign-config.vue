@@ -117,7 +117,7 @@
               <div v-else class="row-libraries">
                 <div
                   v-for="(libConfig, libIndex) in row.libraries"
-                  :key="libConfig.libraryId"
+                  :key="`${rowIndex}-${libIndex}`"
                   class="row-library-card"
                   draggable="true"
                   @dragstart="dragStart(rowIndex, libIndex)"
@@ -312,8 +312,8 @@ function removeRow(rowIndex: number) {
 }
 
 function getAvailableLibrariesForRow(rowIndex: number): Library[] {
-  const usedInRow = new Set(rows.value[rowIndex].libraries.map(lib => lib.libraryId))
-  return allLibraries.value.filter(lib => !usedInRow.has(lib.id))
+  // Return all libraries - duplicates allowed for repeating content
+  return allLibraries.value
 }
 
 function addLibraryToRow(rowIndex: number, library: Library) {
@@ -395,20 +395,7 @@ function dropFromAvailable(targetRowIndex: number) {
 
   const libraryId = dragState.value.libraryId
 
-  // Check if library is already in this row
-  const alreadyInRow = rows.value[targetRowIndex].libraries.some(lib => lib.libraryId === libraryId)
-  if (alreadyInRow) {
-    toast.add({
-      title: 'Library already in row',
-      description: 'This library is already in this row.',
-      color: 'yellow'
-    })
-    dragState.value = null
-    dragOverRow.value = null
-    return
-  }
-
-  // Find the library and add it
+  // Find the library and add it (duplicates allowed for repeating content)
   const library = allLibraries.value.find(lib => lib.id === libraryId)
   if (library) {
     addLibraryToRow(targetRowIndex, library)
