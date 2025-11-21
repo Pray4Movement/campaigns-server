@@ -276,11 +276,16 @@ onBeforeUnmount(() => {
   border-radius: 0.375rem;
 }
 
-/* ImageResize extension container centering support */
+/* ImageResize extension container support */
+:deep(.prose div[style*="position: relative"]) {
+  max-width: 100%;
+}
+
 /* When container has margin: 0 auto or margin: 0px auto, make it fit content width */
 :deep(.prose div[style*="margin: 0 auto"]),
 :deep(.prose div[style*="margin: 0px auto"]) {
   width: fit-content;
+  max-width: 100%;
   display: block;
 }
 

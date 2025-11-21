@@ -168,9 +168,6 @@ async function saveContent() {
       description: 'Your changes have been saved successfully.',
       color: 'green'
     })
-
-    // Navigate back to day overview
-    router.push(`/admin/libraries/${libraryId.value}/days/${dayNumber.value}`)
   } catch (err: any) {
     console.error('Failed to save content:', err)
     toast.add({
