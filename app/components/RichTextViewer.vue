@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
 
 /* Prose styles for rendered content */
 :deep(.prose) {
-  color: #111827;
+  color: var(--ui-text, var(--color-text, currentColor));
 }
 
 :deep(.prose h1) {
@@ -339,7 +339,7 @@ onBeforeUnmount(() => {
 :deep(.prose code) {
   font-size: 0.875em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  background-color: #f3f4f6;
+  background-color: var(--ui-bg-elevated, #f3f4f6);
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
 }
@@ -365,21 +365,21 @@ onBeforeUnmount(() => {
 
 :deep(.prose blockquote) {
   font-style: italic;
-  border-left: 0.25rem solid #e5e7eb;
+  border-left: 0.25rem solid var(--ui-border, #e5e7eb);
   padding-left: 1em;
   margin-top: 1.6em;
   margin-bottom: 1.6em;
-  color: #6b7280;
+  color: var(--ui-text-muted, #6b7280);
 }
 
 :deep(.prose a) {
-  color: #2563eb;
+  color: var(--ui-text-highlighted, #2563eb);
   text-decoration: underline;
   font-weight: 500;
 }
 
 :deep(.prose a:hover) {
-  color: #1d4ed8;
+  opacity: 0.8;
 }
 
 /* Small prose variant */
@@ -426,9 +426,9 @@ onBeforeUnmount(() => {
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
-  border: 2px solid #6b7280 !important;
+  border: 2px solid var(--ui-border-accented, #6b7280) !important;
   border-radius: 0.25rem !important;
-  background-color: white !important;
+  background-color: var(--ui-bg, white) !important;
   background-image: none !important;
   position: relative;
   transition: all 0.15s ease;
@@ -437,13 +437,13 @@ onBeforeUnmount(() => {
 
 :deep(.prose-sm ul[data-type="taskList"] li input[type="checkbox"]:hover),
 :deep(.prose-sm ul[data-type="taskList"] li[data-type="taskItem"] input[type="checkbox"]:hover) {
-  border-color: #374151 !important;
+  border-color: var(--ui-text-muted, #374151) !important;
 }
 
 :deep(.prose-sm ul[data-type="taskList"] li input[type="checkbox"]:checked),
 :deep(.prose-sm ul[data-type="taskList"] li[data-type="taskItem"] input[type="checkbox"]:checked) {
-  background-color: #000000 !important;
-  border-color: #000000 !important;
+  background-color: var(--ui-text, #000000) !important;
+  border-color: var(--ui-text, #000000) !important;
   background-image: none !important;
 }
 
@@ -456,7 +456,7 @@ onBeforeUnmount(() => {
   top: 0.0625rem;
   width: 0.375rem;
   height: 0.625rem;
-  border: solid white !important;
+  border: solid var(--ui-bg, white) !important;
   border-width: 0 2px 2px 0 !important;
   transform: rotate(45deg);
 }
