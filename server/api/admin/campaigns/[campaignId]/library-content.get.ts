@@ -3,9 +3,27 @@ import { appConfigService } from '#server/database/app-config'
 import { libraryContentService } from '#server/database/library-content'
 import { libraryService } from '#server/database/libraries'
 
+interface LibraryConfig {
+  libraryId: number
+  order: number
+}
+
+interface RowConfig {
+  rowIndex: number
+  libraries: LibraryConfig[]
+}
+
+interface LibraryInfo {
+  id: number
+  name: string
+  totalDays: number
+}
+
 /**
  * Get library content for a campaign based on global library configuration
- * This endpoint fetches content from all globally configured libraries
+ *
+ * Row-based scheduling: Each row runs in parallel, libraries within a row run sequentially.
+ * For campaign day N, we determine which library in each row contains that day.
  */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -21,84 +39,139 @@ export default defineEventHandler(async (event) => {
   }
 
   const query = getQuery(event)
-  const startDay = query.startDay ? Number(query.startDay) : undefined
-  const endDay = query.endDay ? Number(query.endDay) : undefined
+  const campaignDay = query.day ? Number(query.day) : undefined
   const language = query.language as string | undefined
-  const grouped = query.grouped === 'true'
 
   try {
     // Get global library configuration
     const globalConfig = await appConfigService.getConfig('global_campaign_libraries')
 
-    if (!globalConfig || !globalConfig.campaignLibraries) {
+    if (!globalConfig || !globalConfig.rows || globalConfig.rows.length === 0) {
       return {
         content: []
       }
     }
 
-    const libraryConfigs = globalConfig.campaignLibraries
+    const rows: RowConfig[] = globalConfig.rows
 
-    // Fetch content from each library
-    const allContent: any[] = []
-    const libraryNames: { [key: number]: string } = {}
+    // Cache library info (name and total days)
+    const libraryInfoCache: { [key: number]: LibraryInfo } = {}
 
-    for (const config of libraryConfigs) {
-      // Get library name for reference
-      const library = await libraryService.getLibraryById(config.libraryId)
-      if (library) {
-        libraryNames[config.libraryId] = library.name
+    async function getLibraryInfo(libraryId: number): Promise<LibraryInfo | null> {
+      if (libraryInfoCache[libraryId]) {
+        return libraryInfoCache[libraryId]
       }
 
-      // Fetch content from this library
-      const content = await libraryContentService.getLibraryContent(config.libraryId, {
-        startDay,
-        endDay,
-        language
-      })
+      const library = await libraryService.getLibraryById(libraryId)
+      if (!library) return null
 
-      // Add library info to each content item
-      content.forEach(item => {
-        allContent.push({
-          ...item,
-          library_id: config.libraryId,
-          library_name: libraryNames[config.libraryId],
-          library_order: config.order
-        })
-      })
+      // Get total days for this library
+      const stats = await libraryService.getLibraryStats(libraryId)
+
+      libraryInfoCache[libraryId] = {
+        id: libraryId,
+        name: library.name,
+        totalDays: stats?.totalDays || 0
+      }
+
+      return libraryInfoCache[libraryId]
     }
 
-    // Sort by day number, then by library order
-    allContent.sort((a, b) => {
-      if (a.day_number !== b.day_number) {
-        return a.day_number - b.day_number
+    // If a specific campaign day is requested, calculate which library/day for each row
+    if (campaignDay) {
+      const allContent: any[] = []
+
+      for (const row of rows) {
+        // Find which library in this row contains the campaign day
+        let accumulatedDays = 0
+
+        for (const libConfig of row.libraries) {
+          const libraryInfo = await getLibraryInfo(libConfig.libraryId)
+          if (!libraryInfo || libraryInfo.totalDays === 0) continue
+
+          const libraryStartDay = accumulatedDays + 1
+          const libraryEndDay = accumulatedDays + libraryInfo.totalDays
+
+          if (campaignDay >= libraryStartDay && campaignDay <= libraryEndDay) {
+            // This library contains the requested day
+            const dayNumberInLibrary = campaignDay - accumulatedDays
+
+            // Fetch content for this specific day
+            const content = await libraryContentService.getLibraryContent(libConfig.libraryId, {
+              startDay: dayNumberInLibrary,
+              endDay: dayNumberInLibrary,
+              language
+            })
+
+            content.forEach(item => {
+              allContent.push({
+                ...item,
+                library_id: libConfig.libraryId,
+                library_name: libraryInfo.name,
+                row_index: row.rowIndex,
+                campaign_day: campaignDay,
+                day_in_library: dayNumberInLibrary
+              })
+            })
+
+            break // Found the library for this row, move to next row
+          }
+
+          accumulatedDays += libraryInfo.totalDays
+        }
+        // If campaignDay exceeds all libraries in row, nothing is returned for this row
       }
-      return a.library_order - b.library_order
-    })
 
-    if (grouped) {
-      // Group content by day number
-      const groupedByDay = new Map<number, any[]>()
-
-      allContent.forEach(item => {
-        if (!groupedByDay.has(item.day_number)) {
-          groupedByDay.set(item.day_number, [])
-        }
-        groupedByDay.get(item.day_number)!.push(item)
-      })
-
-      const groupedContent = Array.from(groupedByDay.entries()).map(([dayNumber, content]) => {
-        const languages = Array.from(new Set(content.map(c => c.language_code)))
-        return {
-          dayNumber,
-          languages,
-          content
-        }
-      })
+      // Sort by row index
+      allContent.sort((a, b) => a.row_index - b.row_index)
 
       return {
-        content: groupedContent
+        content: allContent,
+        campaignDay
       }
     }
+
+    // If no specific day requested, return all content with row/scheduling metadata
+    const allContent: any[] = []
+
+    for (const row of rows) {
+      let accumulatedDays = 0
+
+      for (const libConfig of row.libraries) {
+        const libraryInfo = await getLibraryInfo(libConfig.libraryId)
+        if (!libraryInfo) continue
+
+        const libraryStartDay = accumulatedDays + 1
+
+        // Fetch all content from this library
+        const content = await libraryContentService.getLibraryContent(libConfig.libraryId, {
+          language
+        })
+
+        content.forEach(item => {
+          const campaignDayForItem = accumulatedDays + item.day_number
+          allContent.push({
+            ...item,
+            library_id: libConfig.libraryId,
+            library_name: libraryInfo.name,
+            row_index: row.rowIndex,
+            library_start_day: libraryStartDay,
+            campaign_day: campaignDayForItem,
+            day_in_library: item.day_number
+          })
+        })
+
+        accumulatedDays += libraryInfo.totalDays
+      }
+    }
+
+    // Sort by campaign day, then by row index
+    allContent.sort((a, b) => {
+      if (a.campaign_day !== b.campaign_day) {
+        return a.campaign_day - b.campaign_day
+      }
+      return a.row_index - b.row_index
+    })
 
     return {
       content: allContent

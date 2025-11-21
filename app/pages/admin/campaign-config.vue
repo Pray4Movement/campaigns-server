@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1>Global Campaign Configuration</h1>
-        <p class="subtitle">Configure which libraries are available to all campaigns</p>
+        <p class="subtitle">Configure library rows for all campaigns. Libraries within a row play sequentially.</p>
       </div>
     </div>
 
@@ -35,84 +35,130 @@
         </div>
       </div>
 
-      <div class="config-section">
+      <!-- Available Libraries Section -->
+      <div class="config-section full-width">
         <h3>Available Libraries</h3>
-        <p class="section-description">Select libraries to make available to all campaigns</p>
+        <p class="section-description">Drag libraries from here into rows below, or click Add to add to a row</p>
 
-        <div v-if="availableLibraries.length === 0" class="empty-message">
-          <p>All libraries are already added to the global configuration.</p>
+        <div v-if="allLibraries.length === 0" class="empty-message">
+          <p>No libraries found. Create libraries first.</p>
         </div>
 
-        <div v-else class="library-list">
+        <div v-else class="available-libraries">
           <div
-            v-for="library in availableLibraries"
+            v-for="library in allLibraries"
             :key="library.id"
-            class="library-card available"
+            class="library-chip"
           >
-            <div class="library-info">
-              <strong>{{ library.name }}</strong>
-              <span v-if="library.description" class="library-description">
-                {{ library.description }}
-              </span>
-              <span class="library-stats">
-                {{ library.stats?.totalDays || 0 }} days
-              </span>
-            </div>
-            <UButton
-              @click="addLibrary(library.id)"
-              size="sm"
-            >
-              Add
-            </UButton>
+            <span class="library-chip-name">{{ library.name }}</span>
+            <span class="library-chip-days">{{ library.stats?.totalDays || 0 }} days</span>
           </div>
         </div>
       </div>
 
-      <div class="config-section">
-        <h3>Selected Libraries</h3>
-        <p class="section-description">
-          These libraries are available to all campaigns. Drag to reorder. Content will be served in this order.
-        </p>
-
-        <div v-if="selectedLibraries.length === 0" class="empty-message">
-          <p>No libraries selected. Add libraries to make them available to all campaigns.</p>
+      <!-- Library Rows Section -->
+      <div class="config-section full-width">
+        <div class="section-header">
+          <div>
+            <h3>Library Rows</h3>
+            <p class="section-description">
+              Each row runs in parallel. Libraries within a row play sequentially (when one finishes, the next starts).
+            </p>
+          </div>
+          <UButton @click="addRow" size="sm">
+            + Add Row
+          </UButton>
         </div>
 
-        <div v-else class="library-list">
+        <div v-if="rows.length === 0" class="empty-message">
+          <p>No rows configured. Add a row to get started.</p>
+        </div>
+
+        <div v-else class="rows-container">
           <div
-            v-for="(libraryId, index) in selectedLibraries"
-            :key="libraryId"
-            class="library-card selected"
-            draggable="true"
-            @dragstart="dragStart(index)"
-            @dragover.prevent
-            @drop="drop(index)"
+            v-for="(row, rowIndex) in rows"
+            :key="rowIndex"
+            class="row-card"
           >
-            <div class="drag-handle">
-              <span class="order-number">{{ index + 1 }}</span>
-              ⋮⋮
+            <div class="row-header">
+              <span class="row-label">Row {{ rowIndex + 1 }}</span>
+              <span class="row-total-days">{{ getRowTotalDays(rowIndex) }} total days</span>
+              <UButton
+                @click="removeRow(rowIndex)"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                :disabled="rows.length === 1 && row.libraries.length === 0"
+              >
+                Remove Row
+              </UButton>
             </div>
-            <div class="library-info">
-              <strong>{{ getLibraryName(libraryId) }}</strong>
-              <span v-if="getLibraryDescription(libraryId)" class="library-description">
-                {{ getLibraryDescription(libraryId) }}
-              </span>
-              <span class="library-stats">
-                {{ getLibraryStats(libraryId) }}
-              </span>
+
+            <div class="row-content">
+              <div
+                v-if="row.libraries.length === 0"
+                class="row-empty"
+              >
+                <p>No libraries in this row. Add libraries below.</p>
+              </div>
+
+              <div v-else class="row-libraries">
+                <div
+                  v-for="(libConfig, libIndex) in row.libraries"
+                  :key="libConfig.libraryId"
+                  class="row-library-card"
+                  draggable="true"
+                  @dragstart="dragStart(rowIndex, libIndex)"
+                  @dragover.prevent
+                  @drop="drop(rowIndex, libIndex)"
+                >
+                  <div class="drag-handle">
+                    <span class="order-number">{{ libIndex + 1 }}</span>
+                    ⋮⋮
+                  </div>
+                  <div class="library-info">
+                    <strong>{{ getLibraryName(libConfig.libraryId) }}</strong>
+                    <span class="library-stats">
+                      {{ getLibraryDays(libConfig.libraryId) }} days
+                      <template v-if="libIndex > 0">
+                        (starts Day {{ getLibraryStartDay(rowIndex, libIndex) }})
+                      </template>
+                    </span>
+                  </div>
+                  <UButton
+                    @click="removeLibraryFromRow(rowIndex, libIndex)"
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                  >
+                    ×
+                  </UButton>
+                </div>
+              </div>
+
+              <div class="add-library-section">
+                <USelectMenu
+                  :model-value="null"
+                  @update:model-value="(lib: Library | null) => lib && addLibraryToRow(rowIndex, lib)"
+                  :items="getAvailableLibrariesForRow(rowIndex)"
+                  placeholder="Add library..."
+                  label-key="name"
+                  searchable
+                  searchable-placeholder="Search libraries..."
+                  class="library-select"
+                  :ui="{ content: 'min-w-64' }"
+                >
+                  <template #item="{ item }">
+                    <span>{{ item.name }}</span>
+                    <span class="select-item-days">{{ item.stats?.totalDays || 0 }} days</span>
+                  </template>
+                </USelectMenu>
+              </div>
             </div>
-            <UButton
-              @click="removeLibrary(libraryId)"
-              size="sm"
-              color="neutral"
-              variant="outline"
-            >
-              Remove
-            </UButton>
           </div>
         </div>
 
-        <div v-if="selectedLibraries.length > 0" class="save-section">
+        <div class="save-section">
           <UButton
             @click="saveConfiguration"
             size="lg"
@@ -142,22 +188,31 @@ interface Library {
   }
 }
 
+interface LibraryConfig {
+  libraryId: number
+  order: number
+}
+
+interface RowConfig {
+  rowIndex: number
+  libraries: LibraryConfig[]
+}
+
 interface GlobalConfig {
-  campaignLibraries: Array<{
-    libraryId: number
-    order: number
-  }>
+  rows: RowConfig[]
   globalStartDate?: string
 }
 
 const allLibraries = ref<Library[]>([])
-const selectedLibraries = ref<number[]>([])
+const rows = ref<RowConfig[]>([])
 const globalStartDate = ref('')
 const loading = ref(true)
 const error = ref('')
 const saving = ref(false)
-const draggedIndex = ref<number | null>(null)
 const toast = useToast()
+
+// Drag state
+const dragState = ref<{ rowIndex: number; libIndex: number } | null>(null)
 
 const currentDay = computed(() => {
   if (!globalStartDate.value) return 1
@@ -171,11 +226,6 @@ const currentDay = computed(() => {
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
   return Math.max(1, diffDays + 1)
-})
-
-const availableLibraries = computed(() => {
-  const selectedIds = new Set(selectedLibraries.value)
-  return allLibraries.value.filter(lib => !selectedIds.has(lib.id))
 })
 
 async function loadLibraries() {
@@ -197,13 +247,13 @@ async function loadConfiguration() {
       '/api/admin/campaign-config/libraries'
     )
 
-    // Extract library IDs in order
-    selectedLibraries.value = response.config.campaignLibraries
-      .sort((a, b) => a.order - b.order)
-      .map(item => item.libraryId)
-
-    // Load global start date
+    rows.value = response.config.rows || []
     globalStartDate.value = response.config.globalStartDate || ''
+
+    // Initialize with one empty row if none exist
+    if (rows.value.length === 0) {
+      rows.value = [{ rowIndex: 1, libraries: [] }]
+    }
   } catch (err: any) {
     error.value = 'Failed to load configuration'
     console.error(err)
@@ -212,12 +262,38 @@ async function loadConfiguration() {
   }
 }
 
-function addLibrary(libraryId: number) {
-  selectedLibraries.value.push(libraryId)
+function addRow() {
+  const newRowIndex = rows.value.length + 1
+  rows.value.push({ rowIndex: newRowIndex, libraries: [] })
 }
 
-function removeLibrary(libraryId: number) {
-  selectedLibraries.value = selectedLibraries.value.filter(id => id !== libraryId)
+function removeRow(rowIndex: number) {
+  rows.value.splice(rowIndex, 1)
+  // Re-index rows
+  rows.value.forEach((row, idx) => {
+    row.rowIndex = idx + 1
+  })
+}
+
+function getAvailableLibrariesForRow(rowIndex: number): Library[] {
+  const usedInRow = new Set(rows.value[rowIndex].libraries.map(lib => lib.libraryId))
+  return allLibraries.value.filter(lib => !usedInRow.has(lib.id))
+}
+
+function addLibraryToRow(rowIndex: number, library: Library) {
+  const newOrder = rows.value[rowIndex].libraries.length + 1
+  rows.value[rowIndex].libraries.push({
+    libraryId: library.id,
+    order: newOrder
+  })
+}
+
+function removeLibraryFromRow(rowIndex: number, libIndex: number) {
+  rows.value[rowIndex].libraries.splice(libIndex, 1)
+  // Re-order
+  rows.value[rowIndex].libraries.forEach((lib, idx) => {
+    lib.order = idx + 1
+  })
 }
 
 function getLibraryName(libraryId: number): string {
@@ -225,30 +301,51 @@ function getLibraryName(libraryId: number): string {
   return library?.name || 'Unknown'
 }
 
-function getLibraryDescription(libraryId: number): string {
+function getLibraryDays(libraryId: number): number {
   const library = allLibraries.value.find(lib => lib.id === libraryId)
-  return library?.description || ''
+  return Number(library?.stats?.totalDays) || 0
 }
 
-function getLibraryStats(libraryId: number): string {
-  const library = allLibraries.value.find(lib => lib.id === libraryId)
-  if (!library?.stats) return ''
-  return `${library.stats.totalDays || 0} days`
+function getRowTotalDays(rowIndex: number): number {
+  return rows.value[rowIndex].libraries.reduce((total, lib) => {
+    return total + getLibraryDays(lib.libraryId)
+  }, 0)
 }
 
-function dragStart(index: number) {
-  draggedIndex.value = index
+function getLibraryStartDay(rowIndex: number, libIndex: number): number {
+  let startDay = 1
+  for (let i = 0; i < libIndex; i++) {
+    startDay += getLibraryDays(rows.value[rowIndex].libraries[i].libraryId)
+  }
+  return startDay
 }
 
-function drop(dropIndex: number) {
-  if (draggedIndex.value === null) return
+function dragStart(rowIndex: number, libIndex: number) {
+  dragState.value = { rowIndex, libIndex }
+}
 
-  const items = [...selectedLibraries.value]
-  const [draggedItem] = items.splice(draggedIndex.value, 1)
-  items.splice(dropIndex, 0, draggedItem)
+function drop(targetRowIndex: number, targetLibIndex: number) {
+  if (!dragState.value) return
 
-  selectedLibraries.value = items
-  draggedIndex.value = null
+  const { rowIndex: sourceRowIndex, libIndex: sourceLibIndex } = dragState.value
+
+  // Only allow reordering within the same row
+  if (sourceRowIndex !== targetRowIndex) {
+    dragState.value = null
+    return
+  }
+
+  const items = [...rows.value[sourceRowIndex].libraries]
+  const [draggedItem] = items.splice(sourceLibIndex, 1)
+  items.splice(targetLibIndex, 0, draggedItem)
+
+  // Re-order
+  items.forEach((lib, idx) => {
+    lib.order = idx + 1
+  })
+
+  rows.value[sourceRowIndex].libraries = items
+  dragState.value = null
 }
 
 async function saveConfiguration() {
@@ -267,7 +364,7 @@ async function saveConfiguration() {
     await $fetch('/api/admin/campaign-config/libraries', {
       method: 'PUT',
       body: {
-        library_ids: selectedLibraries.value,
+        rows: rows.value,
         global_start_date: globalStartDate.value
       }
     })
@@ -331,8 +428,8 @@ onMounted(async () => {
 }
 
 .config-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
 }
 
@@ -347,11 +444,26 @@ onMounted(async () => {
   margin: 0 0 0.5rem;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  margin: 0;
+}
+
 .section-description {
   margin: 0 0 1.5rem;
   font-size: 0.875rem;
   color: var(--ui-text-muted);
   line-height: 1.5;
+}
+
+.section-header .section-description {
+  margin-bottom: 0;
 }
 
 .empty-message {
@@ -361,32 +473,102 @@ onMounted(async () => {
   font-size: 0.875rem;
 }
 
-.library-list {
+/* Available Libraries */
+.available-libraries {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.library-card {
+.library-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 20px;
+  background-color: var(--ui-bg-elevated);
+  font-size: 0.875rem;
+}
+
+.library-chip-name {
+  font-weight: 500;
+}
+
+.library-chip-days {
+  color: var(--ui-text-muted);
+  font-size: 0.75rem;
+}
+
+/* Rows */
+.rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.row-card {
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background-color: var(--ui-bg-elevated);
+  overflow: hidden;
+}
+
+.row-header {
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--ui-bg);
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.row-label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.row-total-days {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: var(--ui-text-muted);
+}
+
+.row-content {
   padding: 1rem;
+}
+
+.row-empty {
+  text-align: center;
+  padding: 1rem;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+}
+
+.row-empty p {
+  margin: 0;
+}
+
+.row-libraries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.row-library-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--ui-border);
   border-radius: 6px;
-  background-color: var(--ui-bg-elevated);
+  background-color: var(--ui-bg);
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.library-card.available:hover {
-  border-color: var(--text);
-}
-
-.library-card.selected {
-  cursor: move;
-}
-
-.library-card.selected:hover {
+.row-library-card:hover {
   border-color: var(--text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -394,7 +576,7 @@ onMounted(async () => {
 .drag-handle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   color: var(--ui-text-muted);
   cursor: move;
   user-select: none;
@@ -404,34 +586,44 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background-color: var(--text);
   color: var(--bg);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .library-info {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.125rem;
 }
 
 .library-info strong {
-  font-size: 0.9375rem;
-}
-
-.library-description {
-  font-size: 0.8125rem;
-  color: var(--ui-text-muted);
-  line-height: 1.4;
+  font-size: 0.875rem;
 }
 
 .library-stats {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  color: var(--ui-text-muted);
+}
+
+.add-library-section {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.library-select {
+  min-width: 250px;
+}
+
+
+.select-item-days {
+  margin-left: auto;
+  font-size: 0.75rem;
   color: var(--ui-text-muted);
 }
 
@@ -444,7 +636,7 @@ onMounted(async () => {
 }
 
 .full-width {
-  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .start-date-section {
@@ -487,10 +679,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .config-container {
-    grid-template-columns: 1fr;
-  }
-
   .start-date-section {
     flex-direction: column;
   }
@@ -498,5 +686,25 @@ onMounted(async () => {
   .date-info {
     width: 100%;
   }
+
+  .row-libraries {
+    flex-direction: column;
+  }
+
+  .add-library-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .library-select {
+    min-width: 100%;
+  }
+}
+</style>
+
+<style>
+/* Global styles for select menu options (rendered in portal) */
+[role="listbox"] [role="option"] {
+  cursor: pointer;
 }
 </style>

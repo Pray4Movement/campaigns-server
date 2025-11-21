@@ -4,6 +4,15 @@ import { appConfigService } from '#server/database/app-config'
 /**
  * Get global campaign library configuration
  * This returns which libraries are available to all campaigns and the global start date
+ *
+ * Structure:
+ * {
+ *   rows: [
+ *     { rowIndex: 1, libraries: [{ libraryId: 1, order: 1 }, { libraryId: 2, order: 2 }] },
+ *     { rowIndex: 2, libraries: [{ libraryId: 3, order: 1 }] }
+ *   ],
+ *   globalStartDate: "2025-01-01"
+ * }
  */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -14,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       config: {
-        campaignLibraries: config?.campaignLibraries || [],
+        rows: config?.rows || [],
         globalStartDate: startDate
       }
     }

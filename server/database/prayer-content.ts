@@ -69,16 +69,79 @@ export class PrayerContentService {
   }
 
   /**
-   * Get global library configuration
+   * Get global library configuration (row-based)
    */
-  private async getGlobalLibraries(): Promise<Array<{ libraryId: number; order: number }>> {
+  private async getGlobalRows(): Promise<Array<{ rowIndex: number; libraries: Array<{ libraryId: number; order: number }> }>> {
     const globalConfig = await appConfigService.getConfig('global_campaign_libraries')
 
-    if (!globalConfig || !globalConfig.campaignLibraries) {
+    if (!globalConfig || !globalConfig.rows) {
       return []
     }
 
-    return globalConfig.campaignLibraries
+    return globalConfig.rows
+  }
+
+  /**
+   * Get library stats (total days) - cached for efficiency
+   */
+  private libraryStatsCache: Map<number, number> = new Map()
+
+  private async getLibraryTotalDays(libraryId: number): Promise<number> {
+    if (this.libraryStatsCache.has(libraryId)) {
+      return this.libraryStatsCache.get(libraryId)!
+    }
+
+    const dayRange = await libraryContentService.getDayRange(libraryId)
+    const totalDays = dayRange?.maxDay || 0
+    this.libraryStatsCache.set(libraryId, totalDays)
+    return totalDays
+  }
+
+  /**
+   * For a given campaign day and row, find which library contains that day
+   * and return the day number within that library
+   */
+  private async findLibraryForDay(row: { rowIndex: number; libraries: Array<{ libraryId: number; order: number }> }, campaignDay: number): Promise<{ libraryId: number; dayInLibrary: number } | null> {
+    let accumulatedDays = 0
+
+    // Sort libraries by order
+    const sortedLibraries = [...row.libraries].sort((a, b) => a.order - b.order)
+
+    for (const libConfig of sortedLibraries) {
+      const libraryTotalDays = await this.getLibraryTotalDays(libConfig.libraryId)
+      if (libraryTotalDays === 0) continue
+
+      const libraryStartDay = accumulatedDays + 1
+      const libraryEndDay = accumulatedDays + libraryTotalDays
+
+      if (campaignDay >= libraryStartDay && campaignDay <= libraryEndDay) {
+        return {
+          libraryId: libConfig.libraryId,
+          dayInLibrary: campaignDay - accumulatedDays
+        }
+      }
+
+      accumulatedDays += libraryTotalDays
+    }
+
+    // Campaign day exceeds all libraries in this row
+    return null
+  }
+
+  /**
+   * Get all unique library IDs from all rows (for aggregate operations)
+   */
+  private async getAllLibraryIds(): Promise<number[]> {
+    const rows = await this.getGlobalRows()
+    const libraryIds = new Set<number>()
+
+    for (const row of rows) {
+      for (const lib of row.libraries) {
+        libraryIds.add(lib.libraryId)
+      }
+    }
+
+    return Array.from(libraryIds)
   }
 
   /**
@@ -114,31 +177,34 @@ export class PrayerContentService {
 
   /**
    * Get prayer content by campaign, date, and language
-   * This now fetches from globally configured libraries
-   * Returns only the FIRST content found
+   * Uses row-based scheduling - returns first content found across all rows
    */
   async getPrayerContentByDate(campaignId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent | null> {
     try {
-      // Convert date to day number
-      const dayNumber = await this.dateToDayNumber(date)
+      // Convert date to campaign day number
+      const campaignDay = await this.dateToDayNumber(date)
 
-      // Get global libraries
-      const libraries = await this.getGlobalLibraries()
+      // Get global rows
+      const rows = await this.getGlobalRows()
 
-      if (libraries.length === 0) {
+      if (rows.length === 0) {
         return null
       }
 
-      // Search libraries in order for content on this day in the requested language
-      for (const libConfig of libraries) {
-        const content = await libraryContentService.getLibraryContentByDay(
-          libConfig.libraryId,
-          dayNumber,
-          languageCode
-        )
+      // Search rows for content on this day
+      for (const row of rows) {
+        const libraryInfo = await this.findLibraryForDay(row, campaignDay)
 
-        if (content) {
-          return this.transformLibraryContent(content, campaignId, date)
+        if (libraryInfo) {
+          const content = await libraryContentService.getLibraryContentByDay(
+            libraryInfo.libraryId,
+            libraryInfo.dayInLibrary,
+            languageCode
+          )
+
+          if (content) {
+            return this.transformLibraryContent(content, campaignId, date)
+          }
         }
       }
 
@@ -150,37 +216,43 @@ export class PrayerContentService {
   }
 
   /**
-   * Get ALL prayer content for a specific date from ALL libraries
-   * Returns array of content items (one from each library that has content for this day)
+   * Get ALL prayer content for a specific date from ALL rows
+   * Uses row-based scheduling: each row runs in parallel, libraries within a row run sequentially
    */
   async getAllPrayerContentByDate(campaignId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent[]> {
     try {
-      // Convert date to day number
-      const dayNumber = await this.dateToDayNumber(date)
+      // Convert date to campaign day number
+      const campaignDay = await this.dateToDayNumber(date)
 
-      // Get global libraries
-      const libraries = await this.getGlobalLibraries()
+      // Get global rows
+      const rows = await this.getGlobalRows()
 
-      if (libraries.length === 0) {
+      if (rows.length === 0) {
         return []
       }
 
       const allContent: PrayerContent[] = []
 
-      // Collect content from ALL libraries for this day
-      for (const libConfig of libraries) {
-        const content = await libraryContentService.getLibraryContentByDay(
-          libConfig.libraryId,
-          dayNumber,
-          languageCode
-        )
+      // For each row, find which library contains this campaign day
+      for (const row of rows) {
+        const libraryInfo = await this.findLibraryForDay(row, campaignDay)
 
-        if (content) {
-          allContent.push(this.transformLibraryContent(content, campaignId, date))
+        if (libraryInfo) {
+          // Fetch content from this library at the calculated day
+          const content = await libraryContentService.getLibraryContentByDay(
+            libraryInfo.libraryId,
+            libraryInfo.dayInLibrary,
+            languageCode
+          )
+
+          if (content) {
+            allContent.push(this.transformLibraryContent(content, campaignId, date))
+          }
         }
+        // If libraryInfo is null, this row is exhausted - nothing to display
       }
 
-      // Sort by library order (libraries are already sorted by order in config)
+      // Sort by row index (maintain row order)
       return allContent
     } catch (error) {
       console.error('Error getting all prayer content by date:', error)
@@ -190,24 +262,29 @@ export class PrayerContentService {
 
   /**
    * Get all languages available for a specific campaign and date
+   * Uses row-based scheduling
    */
   async getAvailableLanguages(campaignId: number, date: string): Promise<string[]> {
     try {
-      // Convert date to day number
-      const dayNumber = await this.dateToDayNumber(date)
+      // Convert date to campaign day number
+      const campaignDay = await this.dateToDayNumber(date)
 
-      // Get global libraries
-      const libraries = await this.getGlobalLibraries()
+      // Get global rows
+      const rows = await this.getGlobalRows()
 
       const languageSet = new Set<string>()
 
-      // Collect languages from all libraries for this day
-      for (const libConfig of libraries) {
-        const languages = await libraryContentService.getAvailableLanguages(
-          libConfig.libraryId,
-          dayNumber
-        )
-        languages.forEach(lang => languageSet.add(lang))
+      // Collect languages from all rows for this campaign day
+      for (const row of rows) {
+        const libraryInfo = await this.findLibraryForDay(row, campaignDay)
+
+        if (libraryInfo) {
+          const languages = await libraryContentService.getAvailableLanguages(
+            libraryInfo.libraryId,
+            libraryInfo.dayInLibrary
+          )
+          languages.forEach(lang => languageSet.add(lang))
+        }
       }
 
       return Array.from(languageSet).sort()
@@ -219,7 +296,7 @@ export class PrayerContentService {
 
   /**
    * Get all prayer content for a campaign
-   * This now fetches from globally configured libraries
+   * This now fetches from all libraries across all rows
    */
   async getCampaignPrayerContent(campaignId: number, options?: {
     startDate?: string
@@ -229,10 +306,10 @@ export class PrayerContentService {
     offset?: number
   }): Promise<PrayerContent[]> {
     try {
-      // Get global libraries
-      const libraries = await this.getGlobalLibraries()
+      // Get all library IDs from all rows
+      const libraryIds = await this.getAllLibraryIds()
 
-      if (libraries.length === 0) {
+      if (libraryIds.length === 0) {
         return []
       }
 
@@ -251,8 +328,8 @@ export class PrayerContentService {
       // Fetch content from all libraries
       const allContent: PrayerContent[] = []
 
-      for (const libConfig of libraries) {
-        const libraryContent = await libraryContentService.getLibraryContent(libConfig.libraryId, {
+      for (const libraryId of libraryIds) {
+        const libraryContent = await libraryContentService.getLibraryContent(libraryId, {
           startDay,
           endDay,
           language: options?.language
@@ -299,10 +376,10 @@ export class PrayerContentService {
     offset?: number
   }): Promise<Array<{ date: string; languages: string[] }>> {
     try {
-      // Get global libraries
-      const libraries = await this.getGlobalLibraries()
+      // Get all library IDs from all rows
+      const libraryIds = await this.getAllLibraryIds()
 
-      if (libraries.length === 0) {
+      if (libraryIds.length === 0) {
         return []
       }
 
@@ -321,8 +398,8 @@ export class PrayerContentService {
       // Collect all day numbers and their languages across libraries
       const dayMap = new Map<number, Set<string>>()
 
-      for (const libConfig of libraries) {
-        const grouped = await libraryContentService.getLibraryContentGroupedByDay(libConfig.libraryId, {
+      for (const libraryId of libraryIds) {
+        const grouped = await libraryContentService.getLibraryContentGroupedByDay(libraryId, {
           startDay,
           endDay
         })
@@ -370,13 +447,13 @@ export class PrayerContentService {
    */
   async getContentCount(campaignId: number): Promise<number> {
     try {
-      // Get global libraries
-      const libraries = await this.getGlobalLibraries()
+      // Get all library IDs from all rows
+      const libraryIds = await this.getAllLibraryIds()
 
       let totalCount = 0
 
-      for (const libConfig of libraries) {
-        const count = await libraryContentService.getContentCount(libConfig.libraryId)
+      for (const libraryId of libraryIds) {
+        const count = await libraryContentService.getContentCount(libraryId)
         totalCount += count
       }
 

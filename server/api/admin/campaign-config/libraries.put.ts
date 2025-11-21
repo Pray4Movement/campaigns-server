@@ -1,9 +1,28 @@
 import { defineEventHandler, createError, readBody } from 'h3'
 import { appConfigService } from '#server/database/app-config'
 
+interface LibraryConfig {
+  libraryId: number
+  order: number
+}
+
+interface RowConfig {
+  rowIndex: number
+  libraries: LibraryConfig[]
+}
+
 /**
  * Update global campaign library configuration
  * This sets which libraries are available to all campaigns and the global start date
+ *
+ * Expected body:
+ * {
+ *   rows: [
+ *     { rowIndex: 1, libraries: [{ libraryId: 1, order: 1 }, { libraryId: 2, order: 2 }] },
+ *     { rowIndex: 2, libraries: [{ libraryId: 3, order: 1 }] }
+ *   ],
+ *   global_start_date: "2025-01-01"
+ * }
  */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -11,10 +30,10 @@ export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
 
-    if (!body.library_ids || !Array.isArray(body.library_ids)) {
+    if (!body.rows || !Array.isArray(body.rows)) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'library_ids must be an array'
+        statusMessage: 'rows must be an array'
       })
     }
 
@@ -25,13 +44,17 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Create config object with library IDs and their order
-    const config = {
-      campaignLibraries: body.library_ids.map((libraryId: number, index: number) => ({
-        libraryId,
-        order: index + 1
+    // Validate and normalize row structure
+    const rows: RowConfig[] = body.rows.map((row: any, index: number) => ({
+      rowIndex: row.rowIndex ?? index + 1,
+      libraries: (row.libraries || []).map((lib: any, libIndex: number) => ({
+        libraryId: lib.libraryId,
+        order: lib.order ?? libIndex + 1
       }))
-    }
+    }))
+
+    // Create config object
+    const config = { rows }
 
     // Save library configuration
     await appConfigService.setConfig('global_campaign_libraries', config)
