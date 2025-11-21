@@ -86,6 +86,10 @@ onMounted(async () => {
   border-right: 1px solid var(--ui-border);
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar-header {
