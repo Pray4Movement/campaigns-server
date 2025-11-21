@@ -38,7 +38,7 @@
       <!-- Available Libraries Section -->
       <div class="config-section full-width">
         <h3>Available Libraries</h3>
-        <p class="section-description">Drag libraries from here into rows below, or click Add to add to a row</p>
+        <p class="section-description">Drag libraries into rows below, or use the dropdown in each row to add them</p>
 
         <div v-if="allLibraries.length === 0" class="empty-message">
           <p>No libraries found. Create libraries first.</p>
@@ -49,6 +49,10 @@
             v-for="library in allLibraries"
             :key="library.id"
             class="library-chip"
+            draggable="true"
+            @dragstart="dragStartFromAvailable(library.id)"
+            @dragend="dragEnd"
+            :class="{ 'dragging': dragState?.source === 'available' && dragState?.libraryId === library.id }"
           >
             <span class="library-chip-name">{{ library.name }}</span>
             <span class="library-chip-days">{{ library.stats?.totalDays || 0 }} days</span>
@@ -94,12 +98,20 @@
               </UButton>
             </div>
 
-            <div class="row-content">
+            <div
+              class="row-content"
+              @dragover.prevent="dragState?.source === 'available' && onDragOverRow($event, rowIndex)"
+              @dragleave="onDragLeaveRow"
+              @drop="dragState?.source === 'available' && dropFromAvailable(rowIndex)"
+              :class="{ 'drop-target': dragState?.source === 'available' && dragOverRow === rowIndex }"
+            >
               <div
                 v-if="row.libraries.length === 0"
                 class="row-empty"
+                :class="{ 'drop-highlight': dragState?.source === 'available' }"
               >
-                <p>No libraries in this row. Add libraries below.</p>
+                <p v-if="dragState?.source === 'available'">Drop library here</p>
+                <p v-else>No libraries in this row. Drag a library here or use the dropdown below.</p>
               </div>
 
               <div v-else class="row-libraries">
@@ -115,7 +127,7 @@
                   @drop="drop(rowIndex, libIndex)"
                   :class="{
                     'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === libIndex,
-                    'dragging': dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex
+                    'dragging': dragState?.source === 'row' && dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex
                   }"
                 >
                   <div class="drag-handle">
@@ -140,9 +152,9 @@
                     ×
                   </UButton>
                 </div>
-                <!-- Drop zone at the end -->
+                <!-- Drop zone at the end (for reordering within row) -->
                 <div
-                  v-if="dragState && dragState.rowIndex === rowIndex"
+                  v-if="dragState?.source === 'row' && dragState?.rowIndex === rowIndex"
                   class="drop-zone-end"
                   @dragover.prevent="onDragOver($event, rowIndex, row.libraries.length)"
                   @dragleave="onDragLeave"
@@ -228,9 +240,15 @@ const error = ref('')
 const saving = ref(false)
 const toast = useToast()
 
-// Drag state
-const dragState = ref<{ rowIndex: number; libIndex: number } | null>(null)
+// Drag state - supports dragging from available libraries or within rows
+const dragState = ref<{
+  source: 'available' | 'row'
+  libraryId?: number  // For available library drag
+  rowIndex?: number   // For row library drag
+  libIndex?: number   // For row library drag
+} | null>(null)
 const dragOverTarget = ref<{ rowIndex: number; libIndex: number } | null>(null)
+const dragOverRow = ref<number | null>(null)
 
 const currentDay = computed(() => {
   if (!globalStartDate.value) return 1
@@ -338,13 +356,18 @@ function getLibraryStartDay(rowIndex: number, libIndex: number): number {
   return startDay
 }
 
+function dragStartFromAvailable(libraryId: number) {
+  dragState.value = { source: 'available', libraryId }
+}
+
 function dragStart(rowIndex: number, libIndex: number) {
-  dragState.value = { rowIndex, libIndex }
+  dragState.value = { source: 'row', rowIndex, libIndex }
 }
 
 function dragEnd() {
   dragState.value = null
   dragOverTarget.value = null
+  dragOverRow.value = null
 }
 
 function onDragOver(event: DragEvent, rowIndex: number, libIndex: number) {
@@ -356,12 +379,58 @@ function onDragLeave() {
   dragOverTarget.value = null
 }
 
+function onDragOverRow(event: DragEvent, rowIndex: number) {
+  event.preventDefault()
+  dragOverRow.value = rowIndex
+}
+
+function onDragLeaveRow() {
+  dragOverRow.value = null
+}
+
+function dropFromAvailable(targetRowIndex: number) {
+  if (!dragState.value || dragState.value.source !== 'available' || !dragState.value.libraryId) {
+    return
+  }
+
+  const libraryId = dragState.value.libraryId
+
+  // Check if library is already in this row
+  const alreadyInRow = rows.value[targetRowIndex].libraries.some(lib => lib.libraryId === libraryId)
+  if (alreadyInRow) {
+    toast.add({
+      title: 'Library already in row',
+      description: 'This library is already in this row.',
+      color: 'yellow'
+    })
+    dragState.value = null
+    dragOverRow.value = null
+    return
+  }
+
+  // Find the library and add it
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  if (library) {
+    addLibraryToRow(targetRowIndex, library)
+  }
+
+  dragState.value = null
+  dragOverRow.value = null
+}
+
 function drop(targetRowIndex: number, targetLibIndex: number) {
   dragOverTarget.value = null
 
   if (!dragState.value) return
 
-  const { rowIndex: sourceRowIndex, libIndex: sourceLibIndex } = dragState.value
+  // Only handle row-to-row reordering here
+  if (dragState.value.source !== 'row') {
+    dragState.value = null
+    return
+  }
+
+  const sourceRowIndex = dragState.value.rowIndex!
+  const sourceLibIndex = dragState.value.libIndex!
 
   // Only allow reordering within the same row
   if (sourceRowIndex !== targetRowIndex) {
@@ -532,6 +601,22 @@ onMounted(async () => {
   border-radius: 20px;
   background-color: var(--ui-bg-elevated);
   font-size: 0.875rem;
+  cursor: grab;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.library-chip:hover {
+  border-color: var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.library-chip:active {
+  cursor: grabbing;
+}
+
+.library-chip.dragging {
+  opacity: 0.5;
 }
 
 .library-chip-name {
@@ -579,6 +664,14 @@ onMounted(async () => {
 
 .row-content {
   padding: 1rem;
+  transition: all 0.2s;
+}
+
+.row-content.drop-target {
+  background-color: var(--ui-bg);
+  border-radius: 0 0 8px 8px;
+  outline: 2px dashed var(--text);
+  outline-offset: -2px;
 }
 
 .row-empty {
@@ -586,6 +679,14 @@ onMounted(async () => {
   padding: 1rem;
   color: var(--ui-text-muted);
   font-size: 0.875rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.row-empty.drop-highlight {
+  border: 2px dashed var(--ui-border);
+  background-color: var(--ui-bg);
+  color: var(--text);
 }
 
 .row-empty p {
