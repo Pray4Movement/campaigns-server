@@ -5,9 +5,35 @@ export interface LibraryContent {
   library_id: number
   day_number: number
   language_code: string
+  content_json: Record<string, any> | null
+  created_at: string
+  updated_at: string
+}
+
+// Internal type for raw database rows
+interface LibraryContentRow {
+  id: number
+  library_id: number
+  day_number: number
+  language_code: string
   content_json: string | null
   created_at: string
   updated_at: string
+}
+
+// Parse content_json from database string to object
+function parseContentRow(row: LibraryContentRow | null): LibraryContent | null {
+  if (!row) return null
+  return {
+    ...row,
+    content_json: row.content_json ? JSON.parse(row.content_json) : null
+  }
+}
+
+// Stringify content_json for database storage
+function stringifyContentJson(content: Record<string, any> | string | null): string | null {
+  if (!content) return null
+  return typeof content === 'string' ? content : JSON.stringify(content)
 }
 
 export interface CreateLibraryContentData {
@@ -35,7 +61,7 @@ export class LibraryContentService {
       content_json = null
     } = data
 
-    const contentJsonString = content_json ? JSON.stringify(content_json) : null
+    const contentJsonString = stringifyContentJson(content_json)
 
     const stmt = this.db.prepare(`
       INSERT INTO library_content (library_id, day_number, language_code, content_json)
@@ -60,8 +86,8 @@ export class LibraryContentService {
     const contentStmt = this.db.prepare(`
       SELECT * FROM library_content WHERE id = ?
     `)
-    const content = await contentStmt.get(id) as LibraryContent | null
-    return content
+    const row = await contentStmt.get(id) as LibraryContentRow | null
+    return parseContentRow(row)
   }
 
   // Get library content by day and language
@@ -69,8 +95,8 @@ export class LibraryContentService {
     const contentStmt = this.db.prepare(`
       SELECT * FROM library_content WHERE library_id = ? AND day_number = ? AND language_code = ?
     `)
-    const content = await contentStmt.get(libraryId, dayNumber, languageCode) as LibraryContent | null
-    return content
+    const row = await contentStmt.get(libraryId, dayNumber, languageCode) as LibraryContentRow | null
+    return parseContentRow(row)
   }
 
   // Get all languages available for a specific library and day
@@ -125,9 +151,9 @@ export class LibraryContentService {
     }
 
     const stmt = this.db.prepare(query)
-    const contents = await stmt.all(...params) as LibraryContent[]
+    const rows = await stmt.all(...params) as LibraryContentRow[]
 
-    return contents
+    return rows.map(row => parseContentRow(row)!)
   }
 
   // Get library content grouped by day with language information
@@ -221,7 +247,7 @@ export class LibraryContentService {
 
     if (data.content_json !== undefined) {
       updates.push('content_json = ?')
-      values.push(data.content_json ? JSON.stringify(data.content_json) : null)
+      values.push(stringifyContentJson(data.content_json))
     }
 
     if (data.day_number !== undefined) {

@@ -225,30 +225,19 @@ async function loadTranslations() {
 }
 
 function getContentPreview(contentJson: any): string {
-  if (!contentJson) return ''
+  if (!contentJson?.content || !Array.isArray(contentJson.content)) return ''
 
-  try {
-    const parsed = typeof contentJson === 'string' ? JSON.parse(contentJson) : contentJson
-
-    // Extract text from Tiptap JSON structure
-    if (parsed.content && Array.isArray(parsed.content)) {
-      let text = ''
-      for (const node of parsed.content) {
-        if (node.content && Array.isArray(node.content)) {
-          for (const child of node.content) {
-            if (child.text) {
-              text += child.text + ' '
-            }
-          }
+  let text = ''
+  for (const node of contentJson.content) {
+    if (node.content && Array.isArray(node.content)) {
+      for (const child of node.content) {
+        if (child.text) {
+          text += child.text + ' '
         }
       }
-      return text.trim().substring(0, 100) + (text.length > 100 ? '...' : '')
     }
-
-    return ''
-  } catch (err) {
-    return ''
   }
+  return text.trim().substring(0, 100) + (text.length > 100 ? '...' : '')
 }
 
 function promptDeleteTranslation(translation: LibraryContent) {

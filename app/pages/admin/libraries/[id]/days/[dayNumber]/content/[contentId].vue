@@ -125,11 +125,7 @@ async function loadContent() {
     content.value = response.content
 
     // Populate form with existing data
-    form.value.content_json = response.content.content_json
-      ? (typeof response.content.content_json === 'string'
-          ? JSON.parse(response.content.content_json)
-          : response.content.content_json)
-      : { type: 'doc', content: [] }
+    form.value.content_json = response.content.content_json || { type: 'doc', content: [] }
 
     // Wait for next tick to ensure all reactive updates are complete
     await nextTick()

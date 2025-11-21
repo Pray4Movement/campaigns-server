@@ -17,7 +17,7 @@ import { Spacer } from '~/extensions/spacer'
 import { Vimeo } from '~/extensions/vimeo'
 
 const props = defineProps<{
-  content: any // TipTap JSON object (or string for backward compatibility)
+  content: Record<string, any> | null // TipTap JSON object
   itemId: string
 }>()
 
@@ -25,17 +25,8 @@ const emit = defineEmits<{
   'checkbox-change': [itemId: string, updatedContent: any]
 }>()
 
-// Parse content if it's a string, otherwise use directly
-let parsedContent
-if (typeof props.content === 'string') {
-  try {
-    parsedContent = JSON.parse(props.content)
-  } catch {
-    parsedContent = { type: 'doc', content: [{ type: 'paragraph' }] }
-  }
-} else {
-  parsedContent = props.content || { type: 'doc', content: [{ type: 'paragraph' }] }
-}
+const emptyDoc = { type: 'doc', content: [{ type: 'paragraph' }] }
+const parsedContent = props.content || emptyDoc
 
 // Create read-only editor
 const editor = useEditor({
@@ -148,23 +139,11 @@ const editor = useEditor({
 watch(() => props.content, (newContent) => {
   if (!editor.value || !newContent) return
 
-  // Parse if string, use directly if object
-  let contentObj
-  if (typeof newContent === 'string') {
-    try {
-      contentObj = JSON.parse(newContent)
-    } catch {
-      return
-    }
-  } else {
-    contentObj = newContent
-  }
-
   const currentJson = JSON.stringify(editor.value.getJSON())
-  const newJsonStr = JSON.stringify(contentObj)
+  const newJsonStr = JSON.stringify(newContent)
 
   if (currentJson !== newJsonStr) {
-    editor.value.commands.setContent(contentObj, false)
+    editor.value.commands.setContent(newContent, false)
   }
 })
 
