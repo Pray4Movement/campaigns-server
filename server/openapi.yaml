@@ -9,7 +9,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local development
-  - url: https://api.prayertools.app
+  - url: https://pray.doxa.life
     description: Production
 
 tags:
