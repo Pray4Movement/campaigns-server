@@ -54,7 +54,7 @@
   --shadow: rgba(0, 0, 0, 0.1);
 }
 
-[data-theme="dark"] {
+.dark {
   /* Dashboard CSS variables */
   --bg-color: #000000;
   --bg: #000000;

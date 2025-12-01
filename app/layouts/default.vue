@@ -70,12 +70,6 @@ const { campaignTitle } = useCampaign()
   gap: 1rem;
 }
 
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
 .footer {
   background-color: var(--ui-bg-elevated);
   border-top: 1px solid var(--ui-border);
