@@ -33,37 +33,40 @@
 
             <form @submit.prevent="handleSignup" class="max-w-md mx-auto space-y-6">
               <!-- Name Field -->
-              <UFormField :label="$t('campaign.signup.form.name.label')" required>
+              <UFormField :label="$t('campaign.signup.form.name.label')" required class="w-full">
                 <UInput
                   v-model="signupForm.name"
                   type="text"
                   required
                   :placeholder="$t('campaign.signup.form.name.placeholder')"
+                  class="w-full"
                 />
               </UFormField>
 
               <!-- Delivery Method -->
-              <UFormField :label="$t('campaign.signup.form.deliveryMethod.label')" required>
+              <UFormField :label="$t('campaign.signup.form.deliveryMethod.label')" required class="w-full">
                 <USelect
                   v-model="signupForm.delivery_method"
                   :items="deliveryMethodOptions"
                   :placeholder="$t('campaign.signup.form.deliveryMethod.placeholder')"
                   required
+                  class="w-full"
                 />
               </UFormField>
 
               <!-- Email Field (conditional) -->
-              <UFormField v-if="signupForm.delivery_method === 'email'" :label="$t('campaign.signup.form.email.label')" required>
+              <UFormField v-if="signupForm.delivery_method === 'email'" :label="$t('campaign.signup.form.email.label')" required class="w-full">
                 <UInput
                   v-model="signupForm.email"
                   type="email"
                   required
                   :placeholder="$t('campaign.signup.form.email.placeholder')"
+                  class="w-full"
                 />
               </UFormField>
 
               <!-- Phone Field (conditional) -->
-              <UFormField v-if="signupForm.delivery_method === 'whatsapp'" :label="$t('campaign.signup.form.phone.label')" required>
+              <UFormField v-if="signupForm.delivery_method === 'whatsapp'" :label="$t('campaign.signup.form.phone.label')" required class="w-full">
                 <input
                   ref="phoneInput"
                   id="phone"
@@ -77,17 +80,18 @@
               </UFormField>
 
               <!-- Frequency -->
-              <UFormField :label="$t('campaign.signup.form.frequency.label')" required>
+              <UFormField :label="$t('campaign.signup.form.frequency.label')" required class="w-full">
                 <USelect
                   v-model="signupForm.frequency"
                   :items="frequencyOptions"
                   required
+                  class="w-full"
                 />
               </UFormField>
 
               <!-- Days of Week (for weekly frequency) -->
-              <UFormField v-if="signupForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')">
-                <div class="grid grid-cols-7 gap-1">
+              <UFormField v-if="signupForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')" class="w-full">
+                <div class="grid grid-cols-7 gap-1 w-full">
                   <label
                     v-for="day in translatedDaysOfWeek"
                     :key="day.value"
@@ -109,11 +113,12 @@
               </UFormField>
 
               <!-- Time Picker -->
-              <UFormField :label="$t('campaign.signup.form.time.label')" required>
+              <UFormField :label="$t('campaign.signup.form.time.label')" required class="w-full">
                 <UInput
                   v-model="signupForm.reminder_time"
                   type="time"
                   required
+                  class="w-full"
                 />
                 <template #hint>
                   {{ $t('campaign.signup.form.time.hint') }}

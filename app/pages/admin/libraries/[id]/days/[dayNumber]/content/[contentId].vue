@@ -251,44 +251,6 @@ onMounted(() => {
   color: var(--color-text);
 }
 
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-primary, .btn-secondary {
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.15s;
-}
-
-.btn-primary {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--ui-border);
-}
-
-.btn-secondary:hover {
-  background-color: var(--ui-bg-elevated);
-}
-
 .editor-container {
   display: flex;
   flex: 1;
@@ -344,34 +306,6 @@ onMounted(() => {
 .language-native {
   color: var(--ui-text-muted);
   font-weight: normal;
-}
-
-.form-group {
-  margin-bottom: 1.25rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  color: var(--color-text);
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.625rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background-color: var(--ui-bg);
-  font-size: 0.875rem;
-  color: var(--color-text);
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--text);
-  box-shadow: 0 0 0 3px var(--shadow);
 }
 
 @media (max-width: 768px) {

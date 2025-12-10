@@ -1,101 +1,118 @@
+@import "tailwindcss" theme(static);
+@import "@nuxt/ui";
+
+@theme static {
+  /* Primary: Forest Green - base #2f3a31 at 500 */
+  --color-forest-50: #e6ebe7;
+  --color-forest-100: #cdd7cf;
+  --color-forest-200: #a8b9ab;
+  --color-forest-300: #7d9481;
+  --color-forest-400: #5a7360;
+  --color-forest-500: #2f3a31;
+  --color-forest-600: #283029;
+  --color-forest-700: #212821;
+  --color-forest-800: #1a1f1a;
+  --color-forest-900: #141a15;
+  --color-forest-950: #0a0d0a;
+
+  /* Secondary: Warm Stone - base #cbc5ba */
+  --color-stone-warm-50: #faf9f7;
+  --color-stone-warm-100: #f3f1ed;
+  --color-stone-warm-200: #e6e2db;
+  --color-stone-warm-300: #d5cfc4;
+  --color-stone-warm-400: #cbc5ba;
+  --color-stone-warm-500: #aea596;
+  --color-stone-warm-600: #958a79;
+  --color-stone-warm-700: #7b7264;
+  --color-stone-warm-800: #665f54;
+  --color-stone-warm-900: #565046;
+  --color-stone-warm-950: #2d2a24;
+}
+
 :root {
   /* Nuxt UI Background colors - Light mode */
   --ui-bg: #ffffff;
   --ui-bg-elevated: #ffffff;
-  --ui-bg-accented: #ffffff;
-  --ui-bg-inverted: #000000;
+  --ui-bg-accented: #faf9f7;
+  --ui-bg-inverted: #2f3a31;
 
   /* Nuxt UI Foreground/Text colors - Light mode */
-  --ui-fg: #000000;
-  --ui-text: #000000;
-  --ui-text-highlighted: #000000;
-  --ui-text-muted: #6b7280;
-  --ui-text-dimmed: #9ca3af;
+  --ui-fg: #2f3a31;
+  --ui-text: #2f3a31;
+  --ui-text-highlighted: #2f3a31;
+  --ui-text-muted: #665f54;
+  --ui-text-dimmed: #958a79;
   --ui-text-inverted: #ffffff;
 
   /* Nuxt UI Border colors - Light mode */
-  --ui-border: #e5e7eb;
-  --ui-border-accented: #d1d5db;
+  --ui-border: #e6e2db;
+  --ui-border-accented: #d5cfc4;
 
   /* Nuxt UI Ring/Focus colors - Light mode */
-  --ui-ring: #000000;
-
-  /* Nuxt UI Primary color - Light mode */
-  --ui-primary: #000000;
-  --ui-primary-50: #f9fafb;
-  --ui-primary-100: #f3f4f6;
-  --ui-primary-500: #000000;
-  --ui-primary-600: #000000;
+  --ui-ring: #2f3a31;
 
   /* Standard color shades */
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
+  --color-gray-50: #faf9f7;
+  --color-gray-100: #f3f1ed;
+  --color-gray-200: #e6e2db;
+  --color-gray-300: #d5cfc4;
+  --color-gray-400: #aea596;
+  --color-gray-500: #7b7264;
+  --color-gray-600: #665f54;
+  --color-gray-700: #565046;
+  --color-gray-800: #3a3832;
+  --color-gray-900: #2d2a24;
 
   /* Theme Variables for dashboard */
   --bg-color: #ffffff;
   --bg: #ffffff;
-  --bg-secondary: #ffffff;
-  --bg-hover: #f0f0f0;
-  --text-color: #000000;
-  --text: #000000;
-  --text-muted: #6c757d;
-  --border-color: #e5e5e5;
-  --border: #e5e5e5;
-  --button-bg: #f5f5f5;
-  --button-hover: #e5e5e5;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --bg-secondary: #faf9f7;
+  --bg-hover: #f3f1ed;
+  --text-color: #2f3a31;
+  --text: #2f3a31;
+  --text-muted: #665f54;
+  --border-color: #e6e2db;
+  --border: #e6e2db;
+  --button-bg: #f3f1ed;
+  --button-hover: #e6e2db;
+  --shadow: rgba(47, 58, 49, 0.1);
 }
 
 .dark {
   /* Dashboard CSS variables */
-  --bg-color: #000000;
-  --bg: #000000;
-  --bg-secondary: #1a1a1a;
-  --bg-hover: #333333;
-  --text-color: #ffffff;
-  --text: #ffffff;
-  --text-muted: #adb5bd;
-  --border-color: #333333;
-  --border: #333333;
-  --button-bg: #1a1a1a;
-  --button-hover: #333333;
-  --shadow: rgba(255, 255, 255, 0.1);
+  --bg-color: #0a0a0a;
+  --bg: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-hover: #1f1f1f;
+  --text-color: #f3f1ed;
+  --text: #f3f1ed;
+  --text-muted: #a1a1a1;
+  --border-color: #2a2a2a;
+  --border: #2a2a2a;
+  --button-bg: #141414;
+  --button-hover: #1f1f1f;
+  --shadow: rgba(255, 255, 255, 0.05);
 
   /* Nuxt UI Background colors - Dark mode */
-  --ui-bg: #000000;
-  --ui-bg-elevated: #1a1a1a;
-  --ui-bg-accented: #1a1a1a;
-  --ui-bg-inverted: #ffffff;
+  --ui-bg: #0a0a0a;
+  --ui-bg-elevated: #141414;
+  --ui-bg-accented: #141414;
+  --ui-bg-inverted: #f3f1ed;
 
   /* Nuxt UI Foreground/Text colors - Dark mode */
-  --ui-fg: #ffffff;
-  --ui-text: #ffffff;
+  --ui-fg: #f3f1ed;
+  --ui-text: #f3f1ed;
   --ui-text-highlighted: #ffffff;
-  --ui-text-muted: #adb5bd;
-  --ui-text-dimmed: #6b7280;
-  --ui-text-inverted: #000000;
+  --ui-text-muted: #a1a1a1;
+  --ui-text-dimmed: #6b6b6b;
+  --ui-text-inverted: #0a0a0a;
 
   /* Nuxt UI Border colors - Dark mode */
-  --ui-border: #333333;
-  --ui-border-accented: #404040;
+  --ui-border: #2a2a2a;
+  --ui-border-accented: #3a3a3a;
 
   /* Nuxt UI Ring/Focus colors - Dark mode */
-  --ui-ring: #ffffff;
-
-  /* Nuxt UI Primary color - Dark mode */
-  --ui-primary: #ffffff;
-  --ui-primary-50: #1a1a1a;
-  --ui-primary-100: #262626;
-  --ui-primary-500: #ffffff;
-  --ui-primary-600: #ffffff;
+  --ui-ring: #7d9481;
 }
 
 /* Button styles */

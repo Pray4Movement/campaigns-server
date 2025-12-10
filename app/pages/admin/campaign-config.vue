@@ -804,22 +804,6 @@ onMounted(async () => {
   align-items: flex-start;
 }
 
-.date-input {
-  padding: 0.625rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background-color: var(--ui-bg);
-  font-size: 0.875rem;
-  color: var(--color-text);
-  min-width: 200px;
-}
-
-.date-input:focus {
-  outline: none;
-  border-color: var(--text);
-  box-shadow: 0 0 0 3px var(--shadow);
-}
-
 .date-info {
   padding: 1rem;
   background-color: var(--ui-bg-elevated);

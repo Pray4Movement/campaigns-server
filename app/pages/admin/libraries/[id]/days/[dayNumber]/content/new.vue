@@ -188,44 +188,6 @@ onBeforeRouteLeave((to, from, next) => {
   color: var(--color-text);
 }
 
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-primary, .btn-secondary {
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.15s;
-}
-
-.btn-primary {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--ui-border);
-}
-
-.btn-secondary:hover {
-  background-color: var(--ui-bg-elevated);
-}
-
 .editor-container {
   display: flex;
   flex: 1;

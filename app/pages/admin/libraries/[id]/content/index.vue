@@ -379,40 +379,6 @@ watch(selectedLanguage, () => {
   margin-bottom: 1.5rem;
 }
 
-.day-cell {
-  aspect-ratio: 1;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background-color: var(--ui-bg-elevated);
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.day-cell:hover {
-  border-color: var(--text);
-  transform: scale(1.05);
-}
-
-.day-cell.complete {
-  background-color: #22c55e;
-  color: white;
-  border-color: #16a34a;
-}
-
-.day-cell.partial {
-  background-color: #eab308;
-  color: white;
-  border-color: #ca8a04;
-}
-
-.day-cell.empty {
-  background-color: var(--ui-bg-elevated);
-}
-
 .pagination-controls {
   display: flex;
   justify-content: center;
