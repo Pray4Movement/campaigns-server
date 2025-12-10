@@ -135,9 +135,8 @@
               </UFormField>
 
               <UFormField label="Time Preference">
-                <UInput
+                <TimePicker
                   v-model="editForm.time_preference"
-                  type="time"
                   class="w-full"
                 />
               </UFormField>

@@ -46,6 +46,7 @@
     "@tiptap/vue-3": "^3.10.4",
     "@types/node-cron": "^3.0.11",
     "bcrypt": "^6.0.0",
+    "clock-timepicker": "^1.0.7",
     "formidable": "^3.5.4",
     "intl-tel-input": "^25.11.2",
     "jsonwebtoken": "^9.0.2",
