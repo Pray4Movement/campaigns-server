@@ -12,6 +12,7 @@ export interface ReminderSignup {
   frequency: string
   days_of_week: string | null // JSON string array for weekly frequency
   time_preference: string
+  prayer_duration: number // Duration in minutes (5, 10, 15, 30, 60)
   status: 'active' | 'inactive' | 'unsubscribed'
   email_verified: boolean
   verification_token: string | null
@@ -30,6 +31,7 @@ export interface CreateReminderSignupInput {
   frequency: string
   days_of_week?: number[]
   time_preference: string
+  prayer_duration?: number
 }
 
 class ReminderSignupService {
@@ -53,9 +55,9 @@ class ReminderSignupService {
     const stmt = this.db.prepare(`
       INSERT INTO reminder_signups (
         campaign_id, tracking_id, name, email, phone,
-        delivery_method, frequency, days_of_week, time_preference, status
+        delivery_method, frequency, days_of_week, time_preference, prayer_duration, status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
     `)
 
     const result = await stmt.run(
@@ -67,7 +69,8 @@ class ReminderSignupService {
       input.delivery_method,
       input.frequency,
       days_of_week_json,
-      input.time_preference
+      input.time_preference,
+      input.prayer_duration || 10
     )
 
     return (await this.getSignupById(result.lastInsertRowid as number))!

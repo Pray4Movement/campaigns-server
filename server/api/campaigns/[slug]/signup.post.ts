@@ -83,7 +83,8 @@ export default defineEventHandler(async (event) => {
       delivery_method: body.delivery_method,
       frequency: body.frequency,
       days_of_week: body.days_of_week,
-      time_preference: body.reminder_time
+      time_preference: body.reminder_time,
+      prayer_duration: body.prayer_duration
     })
 
     // For email delivery, send verification email

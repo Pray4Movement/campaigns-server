@@ -35,7 +35,7 @@
     },
     "signup": {
       "title": "Rejoignez le Mouvement de Prière",
-      "description": "Engagez-vous à prier quotidiennement et recevez des rappels utiles par e-mail, WhatsApp ou application mobile.",
+      "description": "Engagez-vous à prier quotidiennement et recevez des rappels utiles par e-mail.",
       "success": "✓ Bienvenue ! Vous avez rejoint le mouvement de prière. Vous recevrez bientôt votre première invitation à la prière.",
       "successEmail": "✓ Presque terminé ! Veuillez vérifier votre e-mail et cliquer sur le lien de vérification pour finaliser votre inscription.",
       "checkSpam": "Vous ne voyez pas l'e-mail ? Vérifiez votre dossier spam.",
@@ -68,8 +68,7 @@
         "frequency": {
           "label": "Fréquence de Prière",
           "daily": "Quotidien",
-          "weekly": "Hebdomadaire",
-          "custom": "Personnalisé"
+          "weekly": "Hebdomadaire"
         },
         "daysOfWeek": {
           "label": "Sélectionner les Jours",
@@ -87,6 +86,14 @@
         "time": {
           "label": "Heure Préférée",
           "hint": "Votre heure locale"
+        },
+        "duration": {
+          "label": "Durée de Prière",
+          "5min": "5 minutes",
+          "10min": "10 minutes",
+          "15min": "15 minutes",
+          "30min": "30 minutes",
+          "60min": "1 heure"
         },
         "submit": "S'engager à Prier",
         "submitting": "Inscription en cours..."

@@ -35,7 +35,7 @@
     },
     "signup": {
       "title": "Join the Prayer Movement",
-      "description": "Commit to praying daily and receive helpful reminders via email, WhatsApp, or mobile app.",
+      "description": "Commit to praying daily and receive helpful reminders via email.",
       "success": "✓ Welcome! You've joined the prayer movement. You'll receive your first prayer prompt soon.",
       "successEmail": "✓ Almost there! Please check your email and click the verification link to complete your signup.",
       "checkSpam": "Don't see the email? Check your spam folder.",
@@ -68,8 +68,7 @@
         "frequency": {
           "label": "Prayer Frequency",
           "daily": "Daily",
-          "weekly": "Weekly",
-          "custom": "Custom"
+          "weekly": "Weekly"
         },
         "daysOfWeek": {
           "label": "Select Days",
@@ -87,6 +86,14 @@
         "time": {
           "label": "Preferred Time",
           "hint": "Your local time"
+        },
+        "duration": {
+          "label": "Prayer Duration",
+          "5min": "5 minutes",
+          "10min": "10 minutes",
+          "15min": "15 minutes",
+          "30min": "30 minutes",
+          "60min": "1 hour"
         },
         "submit": "Commit to Prayer",
         "submitting": "Joining..."

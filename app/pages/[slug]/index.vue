@@ -43,19 +43,8 @@
                 />
               </UFormField>
 
-              <!-- Delivery Method -->
-              <UFormField :label="$t('campaign.signup.form.deliveryMethod.label')" required class="w-full">
-                <USelect
-                  v-model="signupForm.delivery_method"
-                  :items="deliveryMethodOptions"
-                  :placeholder="$t('campaign.signup.form.deliveryMethod.placeholder')"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Email Field (conditional) -->
-              <UFormField v-if="signupForm.delivery_method === 'email'" :label="$t('campaign.signup.form.email.label')" required class="w-full">
+              <!-- Email Field -->
+              <UFormField :label="$t('campaign.signup.form.email.label')" required class="w-full">
                 <UInput
                   v-model="signupForm.email"
                   type="email"
@@ -63,20 +52,6 @@
                   :placeholder="$t('campaign.signup.form.email.placeholder')"
                   class="w-full"
                 />
-              </UFormField>
-
-              <!-- Phone Field (conditional) -->
-              <UFormField v-if="signupForm.delivery_method === 'whatsapp'" :label="$t('campaign.signup.form.phone.label')" required class="w-full">
-                <input
-                  ref="phoneInput"
-                  id="phone"
-                  type="tel"
-                  required
-                  class="w-full px-3 py-2 border border-[var(--ui-border)] rounded-md bg-[var(--ui-bg)] text-[var(--ui-text)] focus:outline-none focus:border-[var(--ui-primary)]"
-                />
-                <template #hint>
-                  {{ $t('campaign.signup.form.phone.hint') }}
-                </template>
               </UFormField>
 
               <!-- Frequency -->
@@ -123,6 +98,16 @@
                 <template #hint>
                   {{ $t('campaign.signup.form.time.hint') }}
                 </template>
+              </UFormField>
+
+              <!-- Prayer Duration -->
+              <UFormField :label="$t('campaign.signup.form.duration.label')" required class="w-full">
+                <USelect
+                  v-model="signupForm.prayer_duration"
+                  :items="durationOptions"
+                  required
+                  class="w-full"
+                />
               </UFormField>
 
               <!-- Submit Button -->
@@ -212,10 +197,6 @@
 </template>
 
 <script setup lang="ts">
-import intlTelInput from 'intl-tel-input'
-import 'intl-tel-input/build/css/intlTelInput.css'
-import type { Iti } from 'intl-tel-input'
-
 definePageMeta({
   layout: 'default'
 })
@@ -239,22 +220,19 @@ watch(campaign, (newCampaign) => {
   }
 }, { immediate: true })
 
-// Phone input ref and intl-tel-input instance
-const phoneInput = ref<HTMLInputElement | null>(null)
-let iti: Iti | null = null
-
-// Delivery method options
-const deliveryMethodOptions = computed(() => [
-  { value: 'email', label: t('campaign.signup.form.deliveryMethod.email') },
-  { value: 'whatsapp', label: t('campaign.signup.form.deliveryMethod.whatsapp') },
-  { value: 'app', label: t('campaign.signup.form.deliveryMethod.app') }
-])
-
 // Frequency options
 const frequencyOptions = computed(() => [
   { value: 'daily', label: t('campaign.signup.form.frequency.daily') },
-  { value: 'weekly', label: t('campaign.signup.form.frequency.weekly') },
-  { value: 'custom', label: t('campaign.signup.form.frequency.custom') }
+  { value: 'weekly', label: t('campaign.signup.form.frequency.weekly') }
+])
+
+// Prayer duration options (in minutes)
+const durationOptions = computed(() => [
+  { value: 5, label: t('campaign.signup.form.duration.5min') },
+  { value: 10, label: t('campaign.signup.form.duration.10min') },
+  { value: 15, label: t('campaign.signup.form.duration.15min') },
+  { value: 30, label: t('campaign.signup.form.duration.30min') },
+  { value: 60, label: t('campaign.signup.form.duration.60min') }
 ])
 
 // Days of week for weekly frequency (translated)
@@ -271,12 +249,12 @@ const translatedDaysOfWeek = computed(() => [
 // Signup form state
 const signupForm = ref({
   name: '',
-  delivery_method: '',
+  delivery_method: 'email',
   email: '',
-  phone: '',
   frequency: 'daily',
   days_of_week: [] as number[],
-  reminder_time: '09:00'
+  reminder_time: '09:00',
+  prayer_duration: 10
 })
 
 const submitting = ref(false)
@@ -302,15 +280,12 @@ function toggleDayOfWeek(day: number) {
 function resetForm() {
   signupForm.value = {
     name: '',
-    delivery_method: '',
+    delivery_method: 'email',
     email: '',
-    phone: '',
     frequency: 'daily',
     days_of_week: [],
-    reminder_time: '09:00'
-  }
-  if (iti) {
-    iti.setNumber('')
+    reminder_time: '09:00',
+    prayer_duration: 5
   }
   signupRequiresVerification.value = false
 }
@@ -329,16 +304,6 @@ async function handleSignup() {
     return
   }
 
-  // Get phone number if WhatsApp delivery
-  let phoneNumber = signupForm.value.phone
-  if (signupForm.value.delivery_method === 'whatsapp' && iti) {
-    if (!iti.isValidNumber()) {
-      signupError.value = t('campaign.signup.errors.invalidPhone')
-      return
-    }
-    phoneNumber = iti.getNumber()
-  }
-
   submitting.value = true
   signupSuccess.value = false
   signupRequiresVerification.value = false
@@ -350,11 +315,11 @@ async function handleSignup() {
       body: {
         name: signupForm.value.name,
         email: signupForm.value.email,
-        phone: phoneNumber,
         delivery_method: signupForm.value.delivery_method,
         frequency: signupForm.value.frequency,
         days_of_week: signupForm.value.days_of_week,
-        reminder_time: signupForm.value.reminder_time
+        reminder_time: signupForm.value.reminder_time,
+        prayer_duration: signupForm.value.prayer_duration
       }
     })
 
@@ -383,68 +348,9 @@ async function handleSignup() {
   }
 }
 
-// Initialize intl-tel-input when component mounts
-onMounted(() => {
-  // Watch for delivery method changes to initialize phone input
-  watch(
-    () => signupForm.value.delivery_method,
-    (newMethod) => {
-      if (newMethod === 'whatsapp') {
-        // Wait for next tick to ensure phoneInput ref is available
-        nextTick(() => {
-          if (phoneInput.value && !iti) {
-            iti = intlTelInput(phoneInput.value, {
-              separateDialCode: true,
-              initialCountry: 'us'
-            })
-          }
-        })
-      } else {
-        // Clean up intl-tel-input when switching away from WhatsApp
-        if (iti) {
-          iti.destroy()
-          iti = null
-        }
-      }
-    },
-    { immediate: true }
-  )
-})
-
-// Clean up on unmount
-onUnmounted(() => {
-  if (iti) {
-    iti.destroy()
-    iti = null
-  }
-})
-
 // Set page title
 useHead(() => ({
   title: campaign.value ? `${campaign.value.title} - ${t('app.title')}` : `${t('campaign.pageTitle')} - ${t('app.title')}`
 }))
 </script>
 
-<style scoped>
-/* intl-tel-input styling overrides for theme compatibility */
-:deep(.iti) {
-  width: 100%;
-}
-
-:deep(.iti__selected-dial-code) {
-  color: var(--ui-text);
-}
-
-:deep(.iti__country-list) {
-  background-color: var(--ui-bg);
-  border-color: var(--ui-border);
-}
-
-:deep(.iti__country:hover) {
-  background-color: var(--ui-bg-elevated);
-}
-
-:deep(.iti__country.iti__highlight) {
-  background-color: var(--ui-bg-elevated);
-}
-</style>

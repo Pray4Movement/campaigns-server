@@ -126,6 +126,14 @@
                 />
               </UFormField>
 
+              <UFormField v-if="selectedSubscriber?.frequency === 'weekly' && selectedSubscriber?.days_of_week" label="Days of Week">
+                <div class="days-display">{{ formatDaysOfWeek(selectedSubscriber.days_of_week) }}</div>
+              </UFormField>
+
+              <UFormField label="Prayer Duration">
+                <div class="duration-display">{{ formatDuration(selectedSubscriber?.prayer_duration ?? null) }}</div>
+              </UFormField>
+
               <UFormField label="Time Preference">
                 <UInput
                   v-model="editForm.time_preference"
@@ -203,7 +211,9 @@ interface Subscriber {
   phone: string | null
   delivery_method: 'email' | 'whatsapp' | 'app'
   frequency: string
+  days_of_week: string | null
   time_preference: string
+  prayer_duration: number | null
   status: 'active' | 'unsubscribed'
   tracking_id: string
   created_at: string
@@ -410,6 +420,24 @@ function formatDateTime(dateString: string) {
   return new Date(dateString).toLocaleString()
 }
 
+const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+function formatDaysOfWeek(daysJson: string | null): string {
+  if (!daysJson) return ''
+  try {
+    const days = JSON.parse(daysJson) as number[]
+    return days.sort((a, b) => a - b).map(d => dayNames[d]).join(', ')
+  } catch {
+    return ''
+  }
+}
+
+function formatDuration(minutes: number | null): string {
+  if (!minutes) return '10 min'
+  if (minutes >= 60) return `${minutes / 60} hour${minutes > 60 ? 's' : ''}`
+  return `${minutes} min`
+}
+
 onMounted(() => {
   loadData()
 })
@@ -610,5 +638,14 @@ onMounted(() => {
   gap: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--ui-border);
+}
+
+.days-display,
+.duration-display {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  font-size: 0.875rem;
 }
 </style>

@@ -35,7 +35,7 @@
     },
     "signup": {
       "title": "Únase al Movimiento de Oración",
-      "description": "Comprométase a orar diariamente y reciba recordatorios útiles por correo electrónico, WhatsApp o aplicación móvil.",
+      "description": "Comprométase a orar diariamente y reciba recordatorios útiles por correo electrónico.",
       "success": "✓ ¡Bienvenido! Se ha unido al movimiento de oración. Recibirá su primera invitación a orar pronto.",
       "successEmail": "✓ ¡Casi listo! Por favor revise su correo electrónico y haga clic en el enlace de verificación para completar su registro.",
       "checkSpam": "¿No ve el correo? Revise su carpeta de spam.",
@@ -68,8 +68,7 @@
         "frequency": {
           "label": "Frecuencia de Oración",
           "daily": "Diario",
-          "weekly": "Semanal",
-          "custom": "Personalizado"
+          "weekly": "Semanal"
         },
         "daysOfWeek": {
           "label": "Seleccionar Días",
@@ -87,6 +86,14 @@
         "time": {
           "label": "Hora Preferida",
           "hint": "Su hora local"
+        },
+        "duration": {
+          "label": "Duración de la Oración",
+          "5min": "5 minutos",
+          "10min": "10 minutos",
+          "15min": "15 minutos",
+          "30min": "30 minutos",
+          "60min": "1 hora"
         },
         "submit": "Comprometerse a Orar",
         "submitting": "Uniéndose..."
