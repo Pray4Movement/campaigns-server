@@ -92,7 +92,8 @@ The project uses Nuxt's automatic TypeScript configuration system. The main `tsc
 
 ## Documentation
 
-Comprehensive Nuxt 4.1 documentation is available in the `documentation/` folder:
+Comprehensive Base Nuxt Layer and Nuxt 4.1 documentation is available in the `documentation/` folder:
+- `BASE_LAYER.md` - Base layer documentation (authentication, theme, email, storage, database utilities)
 - `nuxt-4x-introduction.md` - Framework overview and key features
 - `nuxt-4x-installation.md` - Installation guide and prerequisites
 - `nuxt-4x-directory-structure.md` - App directory structure and organization
