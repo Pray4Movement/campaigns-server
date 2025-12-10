@@ -1,80 +1,75 @@
 <template>
-  <div class="library-day-page">
-    <div class="container">
+  <div class="min-h-screen flex flex-col">
+    <div class="max-w-4xl mx-auto px-4 w-full">
       <!-- Breadcrumb Navigation -->
-      <div class="breadcrumb">
-        <NuxtLink :to="`/library/${libraryId}`" class="breadcrumb-link">Library Calendar</NuxtLink>
-        <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-current">Day {{ dayNumber }}</span>
-      </div>
+      <UBreadcrumb :items="breadcrumbItems" class="pt-8 mb-6" />
 
       <!-- Page Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1>Day {{ dayNumber }}</h1>
-          <div class="header-info" v-if="library">
-            <span class="library-badge">{{ library.name }}</span>
+      <div class="mb-8">
+        <div class="mb-4">
+          <h1 class="text-3xl font-bold mb-2">Day {{ dayNumber }}</h1>
+          <div v-if="library">
+            <UBadge variant="subtle" color="neutral">{{ library.name }}</UBadge>
           </div>
         </div>
 
         <!-- Day Navigation -->
-        <div class="day-navigation">
+        <div class="flex justify-between gap-4 flex-wrap">
           <UButton
             @click="navigateToPreviousDay"
             variant="outline"
-            size="md"
             :disabled="dayNumber <= 1"
+            icon="i-lucide-chevron-left"
           >
-            ← Previous
+            Previous
           </UButton>
           <UButton
             :to="`/library/${libraryId}`"
             variant="outline"
-            size="md"
           >
             Back to Calendar
           </UButton>
           <UButton
             @click="navigateToNextDay"
             variant="outline"
-            size="md"
+            trailing-icon="i-lucide-chevron-right"
           >
-            Next →
+            Next
           </UButton>
         </div>
       </div>
 
-      <div v-if="loading" class="loading">Loading content...</div>
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <UIcon name="i-lucide-loader" class="w-6 h-6 animate-spin mr-2" />
+        <span>Loading content...</span>
+      </div>
 
-      <div v-else-if="error" class="error">{{ error }}</div>
+      <UAlert v-else-if="error" color="error" :title="error" class="mb-6" />
 
-      <div v-else-if="!currentContent" class="empty-state">
-        <div class="empty-icon">📄</div>
-        <h2>No Content Available</h2>
-        <p>There is no content available for Day {{ dayNumber }} in {{ getLanguageName(locale) }}.</p>
-        <div v-if="availableLanguages.length > 0" class="available-languages">
-          <p>Content is available in:</p>
-          <div class="language-chips">
-            <span v-for="lang in availableLanguages" :key="lang" class="language-chip">
+      <div v-else-if="!currentContent" class="text-center py-16 border-2 border-dashed border-[var(--ui-border)] rounded-lg">
+        <div class="text-6xl mb-4">📄</div>
+        <h2 class="text-xl font-bold mb-2">No Content Available</h2>
+        <p class="text-[var(--ui-text-muted)] mb-6">There is no content available for Day {{ dayNumber }} in {{ getLanguageName(locale) }}.</p>
+        <div v-if="availableLanguages.length > 0">
+          <p class="text-sm text-[var(--ui-text-muted)] mb-3">Content is available in:</p>
+          <div class="flex flex-wrap gap-2 justify-center">
+            <UBadge v-for="lang in availableLanguages" :key="lang" variant="subtle" color="neutral">
               {{ getLanguageFlag(lang) }} {{ getLanguageName(lang) }}
-            </span>
+            </UBadge>
           </div>
         </div>
       </div>
 
-      <div v-else class="content-section">
-        <!-- Content Display -->
-        <div class="content-display">
-          <RichTextViewer
-            v-if="currentContent.content_json"
-            :content="currentContent.content_json"
-            :item-id="`day-${dayNumber}`"
-          />
-          <div v-else class="no-content">
-            <p>No content to display</p>
-          </div>
+      <UCard v-else class="min-h-[400px]">
+        <RichTextViewer
+          v-if="currentContent.content_json"
+          :content="currentContent.content_json"
+          :item-id="`day-${dayNumber}`"
+        />
+        <div v-else class="text-center py-12 text-[var(--ui-text-muted)]">
+          <p>No content to display</p>
         </div>
-      </div>
+      </UCard>
     </div>
   </div>
 </template>
@@ -105,6 +100,11 @@ const library = ref<Library | null>(null)
 const content = ref<LibraryContent[]>([])
 const loading = ref(true)
 const error = ref('')
+
+const breadcrumbItems = computed(() => [
+  { label: 'Library Calendar', to: `/library/${libraryId.value}` },
+  { label: `Day ${dayNumber.value}` }
+])
 
 const availableLanguages = computed(() => {
   return content.value.map(c => c.language_code)
@@ -171,165 +171,3 @@ watch(locale, async () => {
   // We might want to reload if we implement lazy loading later
 })
 </script>
-
-<style scoped>
-.library-day-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding-top: 2rem;
-  font-size: 0.875rem;
-}
-
-.breadcrumb-link {
-  color: var(--ui-text-muted);
-  text-decoration: none;
-}
-
-.breadcrumb-link:hover {
-  color: var(--color-text);
-}
-
-.breadcrumb-separator {
-  color: var(--ui-text-muted);
-}
-
-.breadcrumb-current {
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
-.header-content {
-  margin-bottom: 1rem;
-}
-
-.header-content h1 {
-  margin: 0 0 0.5rem;
-  font-size: 2rem;
-}
-
-.header-info {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.library-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background-color: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-
-.day-navigation {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 3rem;
-}
-
-.error {
-  color: var(--ui-text-muted);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  border: 2px dashed var(--ui-border);
-  border-radius: 8px;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.empty-state h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-}
-
-.empty-state > p {
-  margin: 0 0 1.5rem;
-  color: var(--ui-text-muted);
-}
-
-.available-languages {
-  margin-top: 1.5rem;
-}
-
-.available-languages > p {
-  margin: 0 0 0.75rem;
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-
-.language-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.language-chip {
-  display: inline-block;
-  padding: 0.375rem 0.75rem;
-  background-color: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  border-radius: 9999px;
-  font-size: 0.875rem;
-}
-
-.content-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.content-display {
-  padding: 2rem;
-  background-color: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  min-height: 400px;
-}
-
-.no-content {
-  text-align: center;
-  padding: 3rem;
-  color: var(--ui-text-muted);
-}
-
-.no-content p {
-  margin: 0;
-}
-
-/* Add some spacing for the rich text content */
-:deep(.rich-text-viewer) {
-  line-height: 1.7;
-}
-</style>

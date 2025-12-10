@@ -21,10 +21,9 @@
 
         <div class="start-date-section">
           <UFormField label="Start Date" required>
-            <input
+            <UInput
               type="date"
               v-model="globalStartDate"
-              class="date-input"
             />
           </UFormField>
 

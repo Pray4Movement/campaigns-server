@@ -4,13 +4,13 @@
       <NuxtLink :to="`/admin/libraries/${libraryId}/days/${dayNumber}`" class="back-link">
         ← Back to Day {{ dayNumber }}
       </NuxtLink>
-      <div class="header-actions">
-        <button @click="cancel" class="btn-secondary">
+      <div class="flex gap-2">
+        <UButton @click="cancel" variant="outline">
           Cancel
-        </button>
-        <button @click="saveContent" class="btn-primary" :disabled="saving || !isValid">
-          {{ saving ? 'Saving...' : 'Save' }}
-        </button>
+        </UButton>
+        <UButton @click="saveContent" :loading="saving" :disabled="!isValid">
+          Save
+        </UButton>
       </div>
     </div>
 

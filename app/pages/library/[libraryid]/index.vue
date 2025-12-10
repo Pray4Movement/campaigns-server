@@ -1,53 +1,59 @@
 <template>
-  <div class="library-calendar-page">
-    <div class="container">
-      <div class="page-header">
+  <div class="min-h-screen flex flex-col">
+    <div class="max-w-4xl mx-auto px-4 w-full">
+      <div class="py-8 mb-8">
         <div>
-          <h1 v-if="library" class="library-name">{{ library.name }}</h1>
-          <p v-if="library && library.description" class="library-description">{{ library.description }}</p>
+          <h1 v-if="library" class="text-3xl font-bold mb-2">{{ library.name }}</h1>
+          <p v-if="library && library.description" class="text-lg text-[var(--ui-text-muted)]">{{ library.description }}</p>
         </div>
       </div>
 
-      <div v-if="loading" class="loading">Loading library content...</div>
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <UIcon name="i-lucide-loader" class="w-6 h-6 animate-spin mr-2" />
+        <span>Loading library content...</span>
+      </div>
 
-      <div v-else-if="error" class="error">{{ error }}</div>
+      <UAlert v-else-if="error" color="error" :title="error" class="mb-6" />
 
-      <div v-else class="content-view">
+      <div v-else>
         <!-- Stats Bar -->
-        <div class="stats-bar">
-          <div class="stats">
-            <span>Total Days: {{ dayRange.maxDay || 0 }}</span>
-          </div>
+        <div class="flex justify-end items-center mb-6 p-4 bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)] rounded-lg">
+          <span class="text-sm text-[var(--ui-text-muted)]">Total Days: {{ dayRange.maxDay || 0 }}</span>
         </div>
 
         <!-- Calendar View -->
-        <div class="calendar-container">
-          <div class="calendar-header">
-            <h3>Content Calendar - {{ getLanguageName(locale) }}</h3>
-            <div class="legend">
-              <span class="legend-item">
-                <span class="indicator complete"></span> Has content
-              </span>
-              <span class="legend-item">
-                <span class="indicator empty"></span> No content
-              </span>
+        <UCard>
+          <template #header>
+            <div class="flex justify-between items-center flex-wrap gap-4">
+              <h3 class="font-semibold">Content Calendar - {{ getLanguageName(locale) }}</h3>
+              <div class="flex gap-4 text-sm">
+                <span class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-green-500 border border-green-600"></span>
+                  Has content
+                </span>
+                <span class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]"></span>
+                  No content
+                </span>
+              </div>
             </div>
-          </div>
+          </template>
 
-          <div class="days-grid">
-            <button
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 mb-6">
+            <UButton
               v-for="day in displayDays"
               :key="day"
               @click="selectDay(day)"
-              class="day-cell"
-              :class="getDayStatus(day)"
+              :variant="getDayStatus(day) === 'complete' ? 'solid' : 'outline'"
+              :color="getDayStatus(day) === 'complete' ? 'success' : 'neutral'"
               :title="getDayTooltip(day)"
+              class="aspect-square !p-0 justify-center"
             >
               {{ day }}
-            </button>
+            </UButton>
           </div>
 
-          <div class="pagination-controls">
+          <div class="flex justify-center items-center gap-4">
             <UButton
               v-if="currentPage > 1"
               @click="previousPage"
@@ -56,7 +62,7 @@
             >
               Previous
             </UButton>
-            <span class="page-info">
+            <span class="text-sm text-[var(--ui-text-muted)]">
               Days {{ startDay }}-{{ endDay }}
             </span>
             <UButton
@@ -67,8 +73,7 @@
               Next
             </UButton>
           </div>
-        </div>
-
+        </UCard>
       </div>
     </div>
   </div>
@@ -213,150 +218,3 @@ watch(locale, async () => {
   // Calendar view will automatically update based on the computed getDayStatus
 })
 </script>
-
-<style scoped>
-.library-calendar-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.page-header {
-  padding: 2rem 0 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.library-name {
-  margin: 0 0 0.5rem;
-  font-size: 2rem;
-}
-
-.library-description {
-  margin: 0;
-  color: var(--ui-text-muted);
-  font-size: 1.125rem;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error {
-  color: var(--ui-text-muted);
-}
-
-.stats-bar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-}
-
-.stats {
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-
-.calendar-container {
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  padding: 1.5rem;
-  background-color: var(--ui-bg);
-}
-
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.calendar-header h3 {
-  margin: 0;
-}
-
-.legend {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.indicator {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  border: 1px solid var(--ui-border);
-}
-
-.indicator.complete {
-  background-color: #22c55e;
-}
-
-.indicator.empty {
-  background-color: var(--ui-bg-elevated);
-}
-
-.days-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.day-cell {
-  aspect-ratio: 1;
-  border: 1px solid var(--ui-border);
-  border-radius: 6px;
-  background-color: var(--ui-bg-elevated);
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.day-cell:hover {
-  border-color: var(--text);
-  transform: scale(1.05);
-}
-
-.day-cell.complete {
-  background-color: #22c55e;
-  color: white;
-  border-color: #16a34a;
-}
-
-.day-cell.empty {
-  background-color: var(--ui-bg-elevated);
-}
-
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-}
-
-.page-info {
-  font-size: 0.875rem;
-  color: var(--ui-text-muted);
-}
-</style>

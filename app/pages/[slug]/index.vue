@@ -1,217 +1,199 @@
 <template>
-  <div class="campaign-landing">
-    <div v-if="pending" class="loading">
-      <div class="spinner"></div>
+  <div class="min-h-[calc(100vh-200px)]">
+    <div v-if="pending" class="flex flex-col items-center justify-center min-h-[50vh] text-center p-8">
+      <UIcon name="i-lucide-loader" class="w-10 h-10 animate-spin mb-4" />
       <p>{{ $t('campaign.loading') }}</p>
     </div>
 
-    <div v-else-if="error" class="error-container">
-      <h2>{{ $t('campaign.notFound.title') }}</h2>
-      <p>{{ $t('campaign.notFound.message') }}</p>
-      <NuxtLink to="/" class="btn-primary">{{ $t('campaign.notFound.goHome') }}</NuxtLink>
+    <div v-else-if="error" class="flex flex-col items-center justify-center min-h-[50vh] text-center p-8">
+      <h2 class="text-2xl font-bold mb-4">{{ $t('campaign.notFound.title') }}</h2>
+      <p class="text-[var(--ui-text-muted)] mb-6">{{ $t('campaign.notFound.message') }}</p>
+      <UButton to="/">{{ $t('campaign.notFound.goHome') }}</UButton>
     </div>
 
     <div v-else-if="campaign" class="campaign-content">
       <!-- Hero Section -->
-      <section class="hero">
-        <div class="container">
-          <p class="campaign-description">{{ campaign.description }}</p>
+      <section class="py-8 text-center">
+        <div class="max-w-3xl mx-auto px-4">
+          <p class="text-xl text-[var(--ui-text-muted)] leading-relaxed">{{ campaign.description }}</p>
         </div>
       </section>
 
       <!-- Prayer Signup Section -->
-      <section class="signup-section">
-        <div class="container">
-          <div class="card">
-            <h2>{{ $t('campaign.signup.title') }}</h2>
-            <p class="section-description">
+      <section class="py-12">
+        <div class="max-w-3xl mx-auto px-4">
+          <UCard>
+            <template #header>
+              <h2 class="text-2xl font-bold text-center">{{ $t('campaign.signup.title') }}</h2>
+            </template>
+
+            <p class="text-center text-[var(--ui-text-muted)] mb-8">
               {{ $t('campaign.signup.description') }}
             </p>
 
-            <form @submit.prevent="handleSignup" class="signup-form">
+            <form @submit.prevent="handleSignup" class="max-w-md mx-auto space-y-6">
               <!-- Name Field -->
-              <div class="form-group">
-                <label for="name">{{ $t('campaign.signup.form.name.label') }}</label>
-                <input
-                  id="name"
+              <UFormField :label="$t('campaign.signup.form.name.label')" required>
+                <UInput
                   v-model="signupForm.name"
                   type="text"
                   required
                   :placeholder="$t('campaign.signup.form.name.placeholder')"
-                  class="form-input"
                 />
-              </div>
+              </UFormField>
 
               <!-- Delivery Method -->
-              <div class="form-group">
-                <label for="delivery_method">{{ $t('campaign.signup.form.deliveryMethod.label') }}</label>
-                <select
-                  id="delivery_method"
+              <UFormField :label="$t('campaign.signup.form.deliveryMethod.label')" required>
+                <USelect
                   v-model="signupForm.delivery_method"
+                  :items="deliveryMethodOptions"
+                  :placeholder="$t('campaign.signup.form.deliveryMethod.placeholder')"
                   required
-                  class="form-select"
-                >
-                  <option value="">{{ $t('campaign.signup.form.deliveryMethod.placeholder') }}</option>
-                  <option value="email">{{ $t('campaign.signup.form.deliveryMethod.email') }}</option>
-                  <option value="whatsapp">{{ $t('campaign.signup.form.deliveryMethod.whatsapp') }}</option>
-                  <option value="app">{{ $t('campaign.signup.form.deliveryMethod.app') }}</option>
-                </select>
-              </div>
+                />
+              </UFormField>
 
               <!-- Email Field (conditional) -->
-              <div v-if="signupForm.delivery_method === 'email'" class="form-group">
-                <label for="email">{{ $t('campaign.signup.form.email.label') }}</label>
-                <input
-                  id="email"
+              <UFormField v-if="signupForm.delivery_method === 'email'" :label="$t('campaign.signup.form.email.label')" required>
+                <UInput
                   v-model="signupForm.email"
                   type="email"
                   required
                   :placeholder="$t('campaign.signup.form.email.placeholder')"
-                  class="form-input"
                 />
-              </div>
+              </UFormField>
 
               <!-- Phone Field (conditional) -->
-              <div v-if="signupForm.delivery_method === 'whatsapp'" class="form-group">
-                <label for="phone">{{ $t('campaign.signup.form.phone.label') }}</label>
+              <UFormField v-if="signupForm.delivery_method === 'whatsapp'" :label="$t('campaign.signup.form.phone.label')" required>
                 <input
                   ref="phoneInput"
                   id="phone"
                   type="tel"
                   required
-                  class="form-input"
+                  class="w-full px-3 py-2 border border-[var(--ui-border)] rounded-md bg-[var(--ui-bg)] text-[var(--ui-text)] focus:outline-none focus:border-[var(--ui-primary)]"
                 />
-                <small class="form-hint">{{ $t('campaign.signup.form.phone.hint') }}</small>
-              </div>
+                <template #hint>
+                  {{ $t('campaign.signup.form.phone.hint') }}
+                </template>
+              </UFormField>
 
               <!-- Frequency -->
-              <div class="form-group">
-                <label for="frequency">{{ $t('campaign.signup.form.frequency.label') }}</label>
-                <select
-                  id="frequency"
+              <UFormField :label="$t('campaign.signup.form.frequency.label')" required>
+                <USelect
                   v-model="signupForm.frequency"
+                  :items="frequencyOptions"
                   required
-                  class="form-select"
-                >
-                  <option value="daily">{{ $t('campaign.signup.form.frequency.daily') }}</option>
-                  <option value="weekly">{{ $t('campaign.signup.form.frequency.weekly') }}</option>
-                  <option value="custom">{{ $t('campaign.signup.form.frequency.custom') }}</option>
-                </select>
-              </div>
+                />
+              </UFormField>
 
               <!-- Days of Week (for weekly frequency) -->
-              <div v-if="signupForm.frequency === 'weekly'" class="form-group">
-                <label>{{ $t('campaign.signup.form.daysOfWeek.label') }}</label>
-                <div class="days-grid">
+              <UFormField v-if="signupForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')">
+                <div class="grid grid-cols-7 gap-1">
                   <label
                     v-for="day in translatedDaysOfWeek"
                     :key="day.value"
-                    class="day-checkbox"
+                    class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
+                    :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': signupForm.days_of_week.includes(day.value) }"
                   >
-                    <input
-                      v-model="signupForm.days_of_week"
-                      type="checkbox"
-                      :value="day.value"
-                      class="checkbox-input"
+                    <UCheckbox
+                      :model-value="signupForm.days_of_week.includes(day.value)"
+                      @update:model-value="toggleDayOfWeek(day.value)"
                     />
-                    <span class="day-label">{{ day.label }}</span>
+                    <span class="text-xs font-medium">{{ day.label }}</span>
                   </label>
                 </div>
-                <small v-if="signupForm.days_of_week.length === 0" class="form-hint error-hint">
-                  {{ $t('campaign.signup.form.daysOfWeek.error') }}
-                </small>
-              </div>
+                <template #hint>
+                  <span v-if="signupForm.days_of_week.length === 0" class="text-[var(--ui-text-muted)]">
+                    {{ $t('campaign.signup.form.daysOfWeek.error') }}
+                  </span>
+                </template>
+              </UFormField>
 
               <!-- Time Picker -->
-              <div class="form-group">
-                <label for="reminder_time">{{ $t('campaign.signup.form.time.label') }}</label>
-                <input
-                  id="reminder_time"
+              <UFormField :label="$t('campaign.signup.form.time.label')" required>
+                <UInput
                   v-model="signupForm.reminder_time"
                   type="time"
                   required
-                  class="form-input"
                 />
-                <small class="form-hint">{{ $t('campaign.signup.form.time.hint') }}</small>
-              </div>
+                <template #hint>
+                  {{ $t('campaign.signup.form.time.hint') }}
+                </template>
+              </UFormField>
 
               <!-- Submit Button -->
-              <button
+              <UButton
                 type="submit"
-                class="btn-grey btn-large btn-submit"
-                :disabled="submitting"
+                size="lg"
+                block
+                :loading="submitting"
               >
                 {{ submitting ? $t('campaign.signup.form.submitting') : $t('campaign.signup.form.submit') }}
-              </button>
+              </UButton>
 
               <!-- Success/Error Messages -->
-              <div v-if="signupSuccess" class="message message-success">
-                {{ $t('campaign.signup.success') }}
-              </div>
-              <div v-if="signupError" class="message message-error">
-                {{ signupError }}
-              </div>
+              <UAlert v-if="signupSuccess" color="success" :title="$t('campaign.signup.success')" />
+              <UAlert v-if="signupError" color="error" :title="signupError" />
             </form>
-          </div>
+          </UCard>
         </div>
       </section>
 
       <!-- Prayer Fuel Link Section -->
-      <section class="prayer-fuel-section">
-        <div class="container">
-          <div class="card">
-            <h2>{{ $t('campaign.prayerFuel.title') }}</h2>
-            <p class="section-description">{{ $t('campaign.prayerFuel.description') }}</p>
-            <NuxtLink
+      <section class="py-12">
+        <div class="max-w-3xl mx-auto px-4">
+          <UCard class="text-center">
+            <h2 class="text-2xl font-bold mb-3">{{ $t('campaign.prayerFuel.title') }}</h2>
+            <p class="text-[var(--ui-text-muted)] mb-6">{{ $t('campaign.prayerFuel.description') }}</p>
+            <UButton
               :to="localePath(`/${campaign.slug}/prayer-fuel`)"
-              class="btn-grey btn-large"
+              size="lg"
+              variant="outline"
             >
               {{ $t('campaign.prayerFuel.button') }}
-            </NuxtLink>
-          </div>
+            </UButton>
+          </UCard>
         </div>
       </section>
 
       <!-- Mobile App Links Section -->
-      <section class="app-links-section">
-        <div class="container">
-          <div class="card">
-            <h2>{{ $t('campaign.mobileApp.title') }}</h2>
-            <p class="section-description">
+      <section class="py-12">
+        <div class="max-w-3xl mx-auto px-4">
+          <UCard class="text-center">
+            <h2 class="text-2xl font-bold mb-3">{{ $t('campaign.mobileApp.title') }}</h2>
+            <p class="text-[var(--ui-text-muted)] mb-6">
               {{ $t('campaign.mobileApp.description') }}
             </p>
 
-            <div class="app-buttons">
-              <a href="#" class="btn-outline" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
-                <div class="app-button-content">
-                  <span class="app-button-label">{{ $t('campaign.mobileApp.appStore.label') }}</span>
-                  <span class="app-button-store">{{ $t('campaign.mobileApp.appStore.store') }}</span>
+            <div class="flex gap-4 justify-center flex-wrap">
+              <UButton href="#" variant="outline" size="lg" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
+                <div class="flex flex-col items-start text-left min-w-[140px]">
+                  <span class="text-xs opacity-80">{{ $t('campaign.mobileApp.appStore.label') }}</span>
+                  <span class="text-lg font-semibold">{{ $t('campaign.mobileApp.appStore.store') }}</span>
                 </div>
-              </a>
-              <a href="#" class="btn-outline" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
-                <div class="app-button-content">
-                  <span class="app-button-label">{{ $t('campaign.mobileApp.googlePlay.label') }}</span>
-                  <span class="app-button-store">{{ $t('campaign.mobileApp.googlePlay.store') }}</span>
+              </UButton>
+              <UButton href="#" variant="outline" size="lg" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
+                <div class="flex flex-col items-start text-left min-w-[140px]">
+                  <span class="text-xs opacity-80">{{ $t('campaign.mobileApp.googlePlay.label') }}</span>
+                  <span class="text-lg font-semibold">{{ $t('campaign.mobileApp.googlePlay.store') }}</span>
                 </div>
-              </a>
+              </UButton>
             </div>
-          </div>
+          </UCard>
         </div>
       </section>
 
       <!-- Email Verification Modal -->
       <UModal v-model:open="showVerificationModal">
         <template #content>
-          <div class="verification-modal">
-            <div class="verification-header">
-              <UIcon name="i-lucide-mail" class="verification-icon" />
-              <h2 class="verification-title">{{ $t('campaign.signup.modal.title') }}</h2>
+          <div class="p-8 text-center">
+            <div class="flex items-center justify-center gap-3 mb-6">
+              <UIcon name="i-lucide-mail" class="w-10 h-10 text-[var(--ui-text)] animate-pulse" />
+              <h2 class="text-2xl font-semibold">{{ $t('campaign.signup.modal.title') }}</h2>
             </div>
-            <p class="verification-message">{{ $t('campaign.signup.modal.message') }}</p>
-            <p class="verification-email">{{ verificationEmail }}</p>
-            <p class="verification-hint">{{ $t('campaign.signup.modal.hint') }}</p>
+            <p class="text-[var(--ui-text-muted)] mb-2">{{ $t('campaign.signup.modal.message') }}</p>
+            <p class="text-lg font-semibold mb-4 break-all">{{ verificationEmail }}</p>
+            <p class="text-sm text-[var(--ui-text-muted)] mb-8">{{ $t('campaign.signup.modal.hint') }}</p>
             <UButton
-              class="verification-button"
               size="lg"
               @click="closeVerificationModal"
             >
@@ -256,6 +238,20 @@ watch(campaign, (newCampaign) => {
 const phoneInput = ref<HTMLInputElement | null>(null)
 let iti: Iti | null = null
 
+// Delivery method options
+const deliveryMethodOptions = computed(() => [
+  { value: 'email', label: t('campaign.signup.form.deliveryMethod.email') },
+  { value: 'whatsapp', label: t('campaign.signup.form.deliveryMethod.whatsapp') },
+  { value: 'app', label: t('campaign.signup.form.deliveryMethod.app') }
+])
+
+// Frequency options
+const frequencyOptions = computed(() => [
+  { value: 'daily', label: t('campaign.signup.form.frequency.daily') },
+  { value: 'weekly', label: t('campaign.signup.form.frequency.weekly') },
+  { value: 'custom', label: t('campaign.signup.form.frequency.custom') }
+])
+
 // Days of week for weekly frequency (translated)
 const translatedDaysOfWeek = computed(() => [
   { value: 0, label: t('campaign.signup.form.daysOfWeek.days.sun') },
@@ -286,6 +282,16 @@ const signupError = ref('')
 // Email verification modal state
 const showVerificationModal = ref(false)
 const verificationEmail = ref('')
+
+// Toggle day of week selection
+function toggleDayOfWeek(day: number) {
+  const index = signupForm.value.days_of_week.indexOf(day)
+  if (index === -1) {
+    signupForm.value.days_of_week.push(day)
+  } else {
+    signupForm.value.days_of_week.splice(index, 1)
+  }
+}
 
 // Reset form helper
 function resetForm() {
@@ -415,438 +421,25 @@ useHead(() => ({
 </script>
 
 <style scoped>
-.campaign-landing {
-  min-height: calc(100vh - 200px);
-}
-
-.loading,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  text-align: center;
-  padding: 2rem;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--border);
-  border-top: 4px solid var(--text);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-container h2 {
-  margin-bottom: 1rem;
-}
-
-.error-container p {
-  margin-bottom: 1.5rem;
-  color: var(--text-muted, #666);
-}
-
-/* Container */
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-/* Hero Section */
-.hero {
-  padding: 2rem 0 1rem;
-  text-align: center;
-}
-
-.campaign-description {
-  font-size: 1.25rem;
-  color: var(--text-muted, #666);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* Sections */
-section {
-  padding: 3rem 0;
-}
-
-.card {
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 2rem;
-  text-align: center;
-}
-
-.card h2 {
-  font-size: 1.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.section-description {
-  color: var(--text-muted, #666);
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-/* Buttons */
-/* Solid button - for primary actions */
-.btn-solid {
-  display: inline-block;
-  background: var(--text);
-  color: var(--bg);
-  border: 2px solid var(--text);
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.btn-solid:hover {
-  opacity: 0.85;
-  transform: translateY(-1px);
-}
-
-/* Outline button - for secondary actions */
-.btn-outline {
-  display: inline-block;
-  background: transparent;
-  color: var(--text);
-  border: 2px solid var(--text);
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.btn-outline:hover {
-  background: var(--text);
-  color: var(--bg);
-  transform: translateY(-1px);
-}
-
-/* Ghost button - for tertiary actions */
-.btn-ghost {
-  display: inline-block;
-  background: transparent;
-  color: var(--text-muted);
-  border: 2px solid transparent;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.btn-ghost:hover {
-  color: var(--text);
-  border-color: var(--border);
-  transform: translateY(-1px);
-}
-
-/* Grey button - charcoal with white text */
-.btn-grey {
-  display: inline-block;
-  background: #555;
-  color: white;
-  border: 2px solid #555;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.btn-grey:hover {
-  background: #444;
-  border-color: #444;
-  transform: translateY(-1px);
-}
-
-/* Legacy support */
-.btn-primary {
-  display: inline-block;
-  background: var(--text);
-  color: var(--bg);
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: opacity 0.2s;
-}
-
-.btn-primary:hover {
-  opacity: 0.85;
-}
-
-.btn-large {
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-}
-
-/* Signup Form */
-.signup-form {
-  max-width: 500px;
-  margin: 0 auto;
-  text-align: left;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.form-input,
-.form-select {
+/* intl-tel-input styling overrides for theme compatibility */
+:deep(.iti) {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 1rem;
-  transition: border-color 0.2s;
 }
 
-.form-input:focus,
-.form-select:focus {
-  outline: none;
-  border-color: var(--text);
+:deep(.iti__selected-dial-code) {
+  color: var(--ui-text);
 }
 
-.form-select {
-  cursor: pointer;
+:deep(.iti__country-list) {
+  background-color: var(--ui-bg);
+  border-color: var(--ui-border);
 }
 
-.form-hint {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: var(--text-muted, #666);
+:deep(.iti__country:hover) {
+  background-color: var(--ui-bg-elevated);
 }
 
-.form-hint.error-hint {
-  color: var(--text);
-  font-weight: 500;
-}
-
-/* Days of Week Checkboxes */
-.days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.day-checkbox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.75rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--bg);
-}
-
-.day-checkbox:hover {
-  border-color: var(--text-muted);
-  background: var(--bg-soft);
-}
-
-.day-checkbox:has(.checkbox-input:checked) {
-  border-color: var(--text);
-  background: var(--bg-soft);
-}
-
-.checkbox-input {
-  cursor: pointer;
-}
-
-.day-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  user-select: none;
-}
-
-.btn-submit {
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Messages */
-.message {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border-radius: 6px;
-  text-align: center;
-  font-weight: 500;
-}
-
-.message-success {
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.message-error {
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-/* App Links */
-.app-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-outline .app-button-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-width: 140px;
-}
-
-.btn-outline .app-button-label {
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-
-.btn-outline .app-button-store {
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-/* Email Verification Modal */
-.verification-modal {
-  padding: 3rem 2rem;
-  text-align: center;
-}
-
-.verification-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.verification-icon {
-  font-size: 2.5rem;
-  color: var(--text);
-  flex-shrink: 0;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
-}
-
-.verification-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--text);
-}
-
-.verification-message {
-  font-size: 1rem;
-  color: var(--text-muted, #666);
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-}
-
-.verification-email {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 1rem;
-  word-break: break-all;
-}
-
-.verification-hint {
-  font-size: 0.875rem;
-  color: var(--text-muted, #666);
-  margin-bottom: 2rem;
-}
-
-.verification-button {
-  min-width: 150px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .campaign-description {
-    font-size: 1rem;
-  }
-
-  .card {
-    padding: 1.5rem;
-  }
-
-  .card h2 {
-    font-size: 1.5rem;
-  }
-
-  section {
-    padding: 2rem 0;
-  }
-
-  .days-grid {
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.25rem;
-  }
-
-  .day-checkbox {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .day-label {
-    font-size: 0.75rem;
-  }
-
-  .verification-modal {
-    padding: 2rem 1.5rem;
-  }
-
-  .verification-title {
-    font-size: 1.5rem;
-  }
+:deep(.iti__country.iti__highlight) {
+  background-color: var(--ui-bg-elevated);
 }
 </style>

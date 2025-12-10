@@ -1,77 +1,85 @@
 <template>
-  <div class="prayer-fuel-page">
-    <div v-if="pending" class="loading">
-      <div class="spinner"></div>
+  <div class="min-h-screen flex flex-col">
+    <div v-if="pending" class="flex flex-col items-center justify-center min-h-[50vh] text-center p-8">
+      <UIcon name="i-lucide-loader" class="w-10 h-10 animate-spin mb-4" />
       <p>{{ $t('prayerFuel.loading') }}</p>
     </div>
 
-    <div v-else-if="error" class="error-container">
-      <h2>{{ $t('prayerFuel.error.title') }}</h2>
-      <p>{{ error }}</p>
-      <NuxtLink :to="localePath(`/${slug}`)" class="btn-primary">{{ $t('prayerFuel.error.backToCampaign') }}</NuxtLink>
+    <div v-else-if="error" class="flex flex-col items-center justify-center min-h-[50vh] text-center p-8">
+      <h2 class="text-2xl font-bold mb-4">{{ $t('prayerFuel.error.title') }}</h2>
+      <p class="text-[var(--ui-text-muted)] mb-6">{{ error }}</p>
+      <UButton :to="localePath(`/${slug}`)">{{ $t('prayerFuel.error.backToCampaign') }}</UButton>
     </div>
 
-    <div v-else-if="data" class="prayer-fuel-content">
+    <div v-else-if="data" class="flex flex-col flex-1">
       <!-- Campaign Header -->
-      <header class="prayer-header">
-        <div class="container">
-          <NuxtLink :to="localePath(`/${slug}`)" class="back-link">← {{ $t('prayerFuel.backTo', { campaign: data.campaign.title }) }}</NuxtLink>
-          <h1 class="page-title">{{ $t('prayerFuel.title') }}</h1>
-          <p class="prayer-date">{{ formatDate(data.date) }}</p>
+      <header class="border-b border-[var(--ui-border)] py-8 px-4">
+        <div class="max-w-4xl mx-auto">
+          <NuxtLink :to="localePath(`/${slug}`)" class="text-sm text-[var(--ui-text-muted)] hover:text-[var(--ui-text)] transition-colors mb-4 inline-block">
+            ← {{ $t('prayerFuel.backTo', { campaign: data.campaign.title }) }}
+          </NuxtLink>
+          <h1 class="text-3xl font-bold mb-2">{{ $t('prayerFuel.title') }}</h1>
+          <p class="text-[var(--ui-text-muted)]">{{ formatDate(data.date) }}</p>
         </div>
       </header>
 
       <!-- Content or No Content Message -->
-      <main class="prayer-main">
-        <div class="container">
-          <div v-if="data.hasContent" class="prayer-content-wrapper">
+      <main class="flex-1 py-8 px-4">
+        <div class="max-w-4xl mx-auto">
+          <div v-if="data.hasContent">
             <!-- Loop through all content items from different libraries -->
-            <div v-for="(contentItem, index) in data.content" :key="contentItem.id" class="content-section">
-              <div v-if="data.content.length > 1" class="content-divider">
-                <span class="content-number">{{ index + 1 }}</span>
+            <div v-for="(contentItem, index) in data.content" :key="contentItem.id" class="mb-12 last:mb-0">
+              <div v-if="data.content.length > 1" class="flex items-center justify-center my-12 relative">
+                <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
+                <span class="inline-flex items-center justify-center w-8 h-8 mx-4 bg-[var(--ui-bg)] border-2 border-[var(--ui-border)] rounded-full text-sm font-semibold text-[var(--ui-text-muted)]">
+                  {{ index + 1 }}
+                </span>
+                <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
               </div>
-              <h2 v-if="contentItem.title" class="content-title">{{ contentItem.title }}</h2>
+              <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8 text-center">{{ contentItem.title }}</h2>
               <RichTextViewer :content="contentItem.content_json" :item-id="String(contentItem.id)" />
             </div>
           </div>
 
-          <div v-else class="no-content">
-            <div class="no-content-icon">📖</div>
-            <h2>{{ $t('prayerFuel.noContent.title') }}</h2>
-            <p>{{ $t('prayerFuel.noContent.message') }}</p>
+          <div v-else class="text-center py-16">
+            <div class="text-6xl mb-4">📖</div>
+            <h2 class="text-xl font-bold mb-4">{{ $t('prayerFuel.noContent.title') }}</h2>
+            <p class="text-[var(--ui-text-muted)] text-lg">{{ $t('prayerFuel.noContent.message') }}</p>
           </div>
         </div>
       </main>
 
       <!-- I Prayed Button (only show if content exists) -->
-      <footer v-if="data.hasContent" class="prayer-footer">
-        <div class="container">
-          <button
+      <footer v-if="data.hasContent" class="border-t border-[var(--ui-border)] py-8 px-4 bg-[var(--ui-bg-elevated)] text-center">
+        <div class="max-w-4xl mx-auto">
+          <UButton
             @click="markAsPrayed"
-            :disabled="prayedMarked || submitting"
-            class="btn-prayed"
+            :disabled="prayedMarked"
+            :loading="submitting"
+            size="xl"
+            class="min-w-[200px]"
           >
             {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.iPrayed') }}
-          </button>
-          <p v-if="prayedMarked" class="prayed-message">
+          </UButton>
+          <p v-if="prayedMarked" class="mt-4 text-sm text-[var(--ui-text-muted)]">
             {{ $t('prayerFuel.thankYou') }}
           </p>
         </div>
       </footer>
 
       <!-- Past Prayer Fuel -->
-      <section v-if="pastContent && pastContent.content.length > 0" class="past-prayers">
-        <div class="container">
-          <h2 class="past-prayers-title">{{ $t('prayerFuel.pastPrayers.title') }}</h2>
-          <div class="past-prayers-list">
+      <section v-if="pastContent && pastContent.content.length > 0" class="bg-[var(--ui-bg-elevated)] border-t border-[var(--ui-border)] py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-xl font-bold mb-6 text-center">{{ $t('prayerFuel.pastPrayers.title') }}</h2>
+          <div class="flex flex-col gap-3 max-w-2xl mx-auto">
             <NuxtLink
               v-for="item in pastContent.content"
               :key="item.id"
               :to="localePath(`/${slug}/prayer-fuel/${item.content_date}`)"
-              class="past-prayer-item"
+              class="flex justify-between items-center gap-4 p-4 bg-[var(--ui-bg)] border border-[var(--ui-border)] rounded-lg no-underline text-[var(--ui-text)] transition-all hover:border-[var(--ui-text-muted)] hover:translate-x-1"
             >
-              <span class="past-prayer-date">{{ formatPastDate(item.content_date) }}</span>
-              <span class="past-prayer-title">{{ item.title }}</span>
+              <span class="text-sm text-[var(--ui-text-muted)] font-medium min-w-[100px]">{{ formatPastDate(item.content_date) }}</span>
+              <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{ item.title }}</span>
             </NuxtLink>
           </div>
         </div>
@@ -195,7 +203,7 @@ async function markAsPrayed() {
     toast.add({
       title: 'Error',
       description: t('prayerFuel.error.recordFailed'),
-      color: 'red'
+      color: 'error'
     })
   } finally {
     submitting.value = false
@@ -214,294 +222,3 @@ onMounted(() => {
   pageOpenTime.value = Date.now()
 })
 </script>
-
-<style scoped>
-.prayer-fuel-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.loading,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  text-align: center;
-  padding: 2rem;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--border);
-  border-top: 4px solid var(--text);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-container h2 {
-  margin-bottom: 1rem;
-}
-
-.error-container p {
-  margin-bottom: 1.5rem;
-  color: var(--text-muted, #666);
-}
-
-/* Container */
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-/* Header */
-.prayer-header {
-  border-bottom: 1px solid var(--border);
-  padding: 2rem 0 1.5rem;
-}
-
-.back-link {
-  display: inline-block;
-  color: var(--text-muted, #666);
-  text-decoration: none;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-  transition: color 0.2s;
-}
-
-.back-link:hover {
-  color: var(--text);
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0 0 0.5rem;
-}
-
-.prayer-date {
-  color: var(--text-muted, #666);
-  margin: 0;
-  font-size: 1rem;
-}
-
-/* Main Content */
-.prayer-main {
-  flex: 1;
-  padding: 2rem 0;
-}
-
-.content-section {
-  margin-bottom: 3rem;
-}
-
-.content-section:last-child {
-  margin-bottom: 0;
-}
-
-.content-divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 3rem 0 2rem;
-  position: relative;
-}
-
-.content-divider::before,
-.content-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-.content-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin: 0 1rem;
-  background: var(--bg);
-  border: 2px solid var(--border);
-  border-radius: 50%;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-muted, #666);
-}
-
-.content-title {
-  font-size: 1.75rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-/* No Content */
-.no-content {
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
-.no-content-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.no-content h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.no-content p {
-  color: var(--text-muted, #666);
-  font-size: 1.125rem;
-}
-
-/* Footer with Button */
-.prayer-footer {
-  border-top: 1px solid var(--border);
-  padding: 2rem 0;
-  background: var(--bg-soft);
-  text-align: center;
-}
-
-.btn-prayed {
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 1rem 3rem;
-  border-radius: 8px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  min-width: 200px;
-}
-
-.btn-prayed:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.btn-prayed:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-prayed:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.prayed-message {
-  margin-top: 1rem;
-  color: var(--text-muted, #666);
-  font-size: 0.875rem;
-}
-
-/* Past Prayers */
-.past-prayers {
-  background-color: var(--ui-bg-elevated);
-  border-top: 1px solid var(--border);
-  padding: 3rem 0;
-}
-
-.past-prayers-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0 0 1.5rem;
-  text-align: center;
-}
-
-.past-prayers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.past-prayer-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.2s;
-}
-
-.past-prayer-item:hover {
-  border-color: var(--text-muted);
-  transform: translateX(4px);
-}
-
-.past-prayer-date {
-  font-size: 0.875rem;
-  color: var(--text-muted, #666);
-  font-weight: 500;
-  flex-shrink: 0;
-  min-width: 100px;
-}
-
-.past-prayer-title {
-  flex: 1;
-  font-size: 1rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Buttons */
-.btn-primary {
-  display: inline-block;
-  background: var(--text);
-  color: var(--bg);
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: opacity 0.2s;
-}
-
-.btn-primary:hover {
-  opacity: 0.85;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  .content-title {
-    font-size: 1.5rem;
-  }
-
-  .btn-prayed {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .prayer-header,
-  .prayer-main,
-  .prayer-footer {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-</style>

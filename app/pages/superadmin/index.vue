@@ -1,46 +1,42 @@
 <template>
-  <div class="superadmin-container">
-    <h1>Superadmin Panel</h1>
+  <div class="max-w-6xl">
+    <h1 class="text-2xl font-bold mb-8">Superadmin Panel</h1>
 
-    <div class="tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        @click="activeTab = tab.id"
-        :class="['tab-btn', { active: activeTab === tab.id }]"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
+    <UTabs v-model="activeTab" :items="tabs" class="mb-8">
+      <template #content="{ item }">
+        <!-- Backups Tab -->
+        <div v-if="item.value === 'backups'" class="py-6">
+          <h2 class="text-xl font-semibold mb-2">Database Backups</h2>
+          <p class="text-[var(--ui-text-muted)] mb-6">Manually trigger a database backup. Backups are automatically stored in S3.</p>
 
-    <div class="tab-content">
-      <!-- Backups Tab -->
-      <div v-if="activeTab === 'backups'" class="tab-panel">
-        <h2>Database Backups</h2>
-        <p>Manually trigger a database backup. Backups are automatically stored in S3.</p>
+          <UButton
+            @click="createBackup"
+            :loading="isCreatingBackup"
+            variant="outline"
+          >
+            {{ isCreatingBackup ? 'Creating Backup...' : 'Create Manual Backup' }}
+          </UButton>
 
-        <button
-          @click="createBackup"
-          :disabled="isCreatingBackup"
-          class="backup-btn"
-        >
-          {{ isCreatingBackup ? 'Creating Backup...' : 'Create Manual Backup' }}
-        </button>
+          <UAlert
+            v-if="backupMessage"
+            :color="backupMessage.type === 'success' ? 'success' : 'error'"
+            :title="backupMessage.text"
+            class="mt-4"
+          />
 
-        <div v-if="backupMessage" :class="['message', backupMessage.type]">
-          {{ backupMessage.text }}
+          <UCard v-if="lastBackup" class="mt-6">
+            <template #header>
+              <h3 class="font-semibold">Last Backup Details</h3>
+            </template>
+            <div class="space-y-2">
+              <p><strong>Filename:</strong> {{ lastBackup.filename }}</p>
+              <p><strong>Size:</strong> {{ formatBytes(lastBackup.size) }}</p>
+              <p><strong>Location:</strong> {{ lastBackup.location }}</p>
+            </div>
+          </UCard>
         </div>
-
-        <div v-if="lastBackup" class="backup-info">
-          <h3>Last Backup Details</h3>
-          <p><strong>Filename:</strong> {{ lastBackup.filename }}</p>
-          <p><strong>Size:</strong> {{ formatBytes(lastBackup.size) }}</p>
-          <p><strong>Location:</strong> {{ lastBackup.location }}</p>
-        </div>
-      </div>
-
-      <!-- Additional tabs can be added here -->
-    </div>
+      </template>
+    </UTabs>
   </div>
 </template>
 
@@ -51,7 +47,7 @@ definePageMeta({
 })
 
 const tabs = [
-  { id: 'backups', label: 'Backups' },
+  { label: 'Backups', value: 'backups' },
   // Add more tabs here as needed
 ]
 
@@ -94,112 +90,3 @@ function formatBytes(bytes: number): string {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 </script>
-
-<style scoped>
-.superadmin-container {
-  max-width: 1200px;
-}
-
-h1 {
-  margin: 0 0 2rem;
-  font-size: 2rem;
-}
-
-.tabs {
-  display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid var(--ui-border);
-  margin-bottom: 2rem;
-}
-
-.tab-btn {
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-size: 1rem;
-  color: var(--ui-text-muted);
-  transition: all 0.2s;
-}
-
-.tab-btn:hover {
-  color: var(--text);
-}
-
-.tab-btn.active {
-  color: var(--text);
-  border-bottom-color: var(--text);
-}
-
-.tab-panel h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-}
-
-.tab-panel p {
-  margin: 0 0 1.5rem;
-  color: var(--ui-text-muted);
-}
-
-.backup-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--ui-bg);
-  color: var(--text);
-  border: 2px solid var(--text);
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.backup-btn:hover:not(:disabled) {
-  background-color: var(--text);
-  color: var(--background);
-}
-
-.backup-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.message {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 4px;
-  border: 1px solid;
-}
-
-.message.success {
-  background-color: var(--ui-bg-elevated);
-  border-color: var(--ui-border);
-}
-
-.message.error {
-  background-color: var(--ui-bg-elevated);
-  border-color: var(--text);
-}
-
-.backup-info {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background-color: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  border-radius: 4px;
-}
-
-.backup-info h3 {
-  margin: 0 0 1rem;
-  font-size: 1.25rem;
-}
-
-.backup-info p {
-  margin: 0.5rem 0;
-  color: var(--text);
-}
-
-.backup-info strong {
-  font-weight: 600;
-}
-</style>

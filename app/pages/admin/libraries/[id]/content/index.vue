@@ -47,16 +47,17 @@
         </div>
 
         <div class="days-grid">
-          <button
+          <UButton
             v-for="day in displayDays"
             :key="day"
             @click="selectDay(day)"
-            class="day-cell"
-            :class="getDayStatus(day)"
+            :variant="getDayVariant(day)"
+            :color="getDayColor(day)"
             :title="getDayTooltip(day)"
+            class="aspect-square !p-0 justify-center"
           >
             {{ day }}
-          </button>
+          </UButton>
         </div>
 
         <div class="pagination-controls">
@@ -185,7 +186,7 @@ async function loadContent() {
   }
 }
 
-function getDayStatus(day: number): string {
+function getDayStatus(day: number): 'complete' | 'partial' | 'empty' {
   const content = dayContentMap.value.get(day)
 
   if (!content || content.length === 0) {
@@ -207,6 +208,18 @@ function getDayStatus(day: number): string {
   }
 
   return 'empty'
+}
+
+function getDayVariant(day: number): 'solid' | 'outline' {
+  const status = getDayStatus(day)
+  return status === 'empty' ? 'outline' : 'solid'
+}
+
+function getDayColor(day: number): 'success' | 'warning' | 'neutral' {
+  const status = getDayStatus(day)
+  if (status === 'complete') return 'success'
+  if (status === 'partial') return 'warning'
+  return 'neutral'
 }
 
 function getDayTooltip(day: number): string {

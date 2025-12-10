@@ -1,258 +1,228 @@
 <template>
-  <div class="users-page">
-    <div class="page-header">
-      <h1>User Management</h1>
-      <button @click="showInviteModal = true" class="btn-primary">
+  <div class="max-w-6xl">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-2xl font-bold">User Management</h1>
+      <UButton @click="showInviteModal = true" icon="i-lucide-user-plus">
         Invite User
-      </button>
-    </div>
-
-    <!-- Success Toast -->
-    <div v-if="successMessage" class="toast toast-success">
-      {{ successMessage }}
+      </UButton>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <UIcon name="i-lucide-loader" class="w-6 h-6 animate-spin" />
+      <span class="ml-2">Loading...</span>
+    </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="error">{{ error }}</div>
+    <UAlert v-else-if="error" color="error" :title="error" class="mb-6" />
 
     <!-- Content -->
-    <div v-else class="content">
+    <div v-else class="flex flex-col gap-8">
       <!-- Users Section -->
-      <section class="section">
-        <h2>Active Users</h2>
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Active Users</h2>
 
-        <div v-if="users.length === 0" class="empty-state">
+        <div v-if="users.length === 0" class="text-center py-8 text-[var(--ui-text-muted)] border border-dashed border-[var(--ui-border)] rounded-lg">
           No users found
         </div>
 
-        <table v-else class="data-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Display Name</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Campaigns</th>
-              <th>Joined</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in users" :key="user.id">
-              <td>{{ user.email }}</td>
-              <td>{{ user.display_name || '—' }}</td>
-              <td>
-                <select
-                  v-if="availableRoles.length > 0"
-                  :value="user.role?.name || ''"
-                  @change="(e) => updateUserRole(user.id, (e.target as HTMLSelectElement).value || null)"
-                  class="role-select"
-                >
-                  <option value="">No Role</option>
-                  <option
-                    v-for="role in availableRoles"
-                    :key="role.name"
-                    :value="role.name"
-                  >
-                    {{ formatRoleName(role.name) }}
-                  </option>
-                </select>
-                <span v-else>{{ user.role ? formatRoleName(user.role.name) : 'No role' }}</span>
-              </td>
-              <td>
-                <span class="badge" :class="{ verified: user.verified, unverified: !user.verified }">
-                  {{ user.verified ? 'Verified' : 'Unverified' }}
-                </span>
-              </td>
-              <td>
-                <button
-                  v-if="user.role?.name === 'campaign_editor'"
-                  @click="openCampaignModal(user)"
-                  class="btn-small btn-secondary"
-                >
-                  Manage
-                </button>
-                <span v-else class="text-muted">—</span>
-              </td>
-              <td>{{ formatDate(user.created_at) }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <UTable v-else :data="users" :columns="userColumns">
+          <template #email-cell="{ row }">
+            {{ row.original.email }}
+          </template>
+          <template #display_name-cell="{ row }">
+            {{ row.original.display_name || '—' }}
+          </template>
+          <template #role-cell="{ row }">
+            <USelect
+              v-if="availableRoles.length > 0"
+              :model-value="row.original.role?.name || ''"
+              @update:model-value="(val) => updateUserRole(row.original.id, val || null)"
+              :items="roleOptions"
+              class="w-40"
+              size="sm"
+            />
+            <span v-else>{{ row.original.role ? formatRoleName(row.original.role.name) : 'No role' }}</span>
+          </template>
+          <template #status-cell="{ row }">
+            <UBadge :color="row.original.verified ? 'success' : 'neutral'" variant="subtle">
+              {{ row.original.verified ? 'Verified' : 'Unverified' }}
+            </UBadge>
+          </template>
+          <template #campaigns-cell="{ row }">
+            <UButton
+              v-if="row.original.role?.name === 'campaign_editor'"
+              @click="openCampaignModal(row.original)"
+              variant="outline"
+              size="xs"
+            >
+              Manage
+            </UButton>
+            <span v-else class="text-[var(--ui-text-muted)]">—</span>
+          </template>
+          <template #created_at-cell="{ row }">
+            {{ formatDate(row.original.created_at) }}
+          </template>
+        </UTable>
       </section>
 
       <!-- Invitations Section -->
-      <section class="section">
-        <h2>Invitations</h2>
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Invitations</h2>
 
-        <div v-if="pendingInvitations.length === 0" class="empty-state">
+        <div v-if="pendingInvitations.length === 0" class="text-center py-8 text-[var(--ui-text-muted)] border border-dashed border-[var(--ui-border)] rounded-lg">
           No pending invitations
         </div>
 
-        <table v-else class="data-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Invited By</th>
-              <th>Status</th>
-              <th>Expires</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="invitation in pendingInvitations" :key="invitation.id">
-              <td>{{ invitation.email }}</td>
-              <td>{{ invitation.inviter_name || invitation.inviter_email }}</td>
-              <td>
-                <span class="badge" :class="invitation.status">
-                  {{ invitation.status }}
-                </span>
-              </td>
-              <td>{{ formatDateTime(invitation.expires_at) }}</td>
-              <td class="actions">
-                <button
-                  @click="resendInvitation(invitation.id)"
-                  class="btn-small btn-secondary"
-                  :disabled="invitation.status !== 'pending'"
-                >
-                  Resend
-                </button>
-                <button
-                  @click="revokeInvitation(invitation.id)"
-                  class="btn-small btn-danger"
-                  :disabled="invitation.status !== 'pending'"
-                >
-                  Revoke
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <UTable v-else :data="pendingInvitations" :columns="invitationColumns">
+          <template #email-cell="{ row }">
+            {{ row.original.email }}
+          </template>
+          <template #inviter-cell="{ row }">
+            {{ row.original.inviter_name || row.original.inviter_email }}
+          </template>
+          <template #status-cell="{ row }">
+            <UBadge :color="getStatusColor(row.original.status)" variant="subtle">
+              {{ row.original.status }}
+            </UBadge>
+          </template>
+          <template #expires_at-cell="{ row }">
+            {{ formatDateTime(row.original.expires_at) }}
+          </template>
+          <template #actions-cell="{ row }">
+            <div class="flex gap-2">
+              <UButton
+                @click="resendInvitation(row.original.id)"
+                variant="outline"
+                size="xs"
+                :disabled="row.original.status !== 'pending'"
+              >
+                Resend
+              </UButton>
+              <UButton
+                @click="revokeInvitation(row.original.id)"
+                color="error"
+                variant="outline"
+                size="xs"
+                :disabled="row.original.status !== 'pending'"
+              >
+                Revoke
+              </UButton>
+            </div>
+          </template>
+        </UTable>
       </section>
     </div>
 
     <!-- Manage Campaigns Modal -->
-    <div v-if="showCampaignModal" class="modal-overlay" @click.self="closeCampaignModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Manage Campaign Access</h2>
-          <button @click="closeCampaignModal" class="close-btn">&times;</button>
-        </div>
+    <UModal v-model:open="showCampaignModal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <div class="flex justify-between items-center">
+              <h2 class="text-lg font-semibold">Manage Campaign Access</h2>
+              <UButton @click="closeCampaignModal" variant="ghost" icon="i-lucide-x" size="sm" />
+            </div>
+          </template>
 
-        <div class="modal-body">
-          <p class="modal-intro">
+          <p class="mb-4">
             Select which campaigns <strong>{{ selectedUser?.display_name || selectedUser?.email }}</strong> can access:
           </p>
 
-          <div v-if="campaignModalLoading" class="loading">Loading campaigns...</div>
-
-          <div v-else-if="campaignModalError" class="error-message">
-            {{ campaignModalError }}
+          <div v-if="campaignModalLoading" class="flex items-center justify-center py-8">
+            <UIcon name="i-lucide-loader" class="w-5 h-5 animate-spin" />
+            <span class="ml-2">Loading campaigns...</span>
           </div>
 
-          <div v-else class="campaigns-list">
+          <UAlert v-else-if="campaignModalError" color="error" :title="campaignModalError" class="mb-4" />
+
+          <div v-else class="max-h-96 overflow-y-auto space-y-2 p-2 border border-[var(--ui-border)] rounded-lg">
             <label
               v-for="campaign in availableCampaigns"
               :key="campaign.id"
-              class="campaign-checkbox"
+              class="flex items-center gap-3 p-3 border border-[var(--ui-border)] rounded-lg cursor-pointer hover:bg-[var(--ui-bg-elevated)] transition-colors"
             >
-              <input
-                type="checkbox"
-                :checked="campaign.hasAccess"
-                @change="toggleCampaignAccess(campaign.id)"
+              <UCheckbox
+                :model-value="campaign.hasAccess"
+                @update:model-value="toggleCampaignAccess(campaign.id)"
               />
-              <span class="campaign-info">
+              <div class="flex flex-col flex-1">
                 <strong>{{ campaign.title }}</strong>
-                <span class="campaign-slug">{{ campaign.slug }}</span>
-              </span>
+                <span class="text-sm text-[var(--ui-text-muted)]">{{ campaign.slug }}</span>
+              </div>
             </label>
 
-            <div v-if="availableCampaigns.length === 0" class="empty-state">
+            <div v-if="availableCampaigns.length === 0" class="text-center py-4 text-[var(--ui-text-muted)]">
               No campaigns available
             </div>
           </div>
 
-          <div v-if="campaignModalSuccess" class="success-message">
-            Campaign access updated successfully!
-          </div>
+          <UAlert v-if="campaignModalSuccess" color="success" title="Campaign access updated successfully!" class="mt-4" />
 
-          <div class="modal-actions">
-            <button type="button" @click="closeCampaignModal" class="btn-secondary">
-              Cancel
-            </button>
-            <button
-              type="button"
-              @click="saveCampaignAccess"
-              class="btn-primary"
-              :disabled="campaignModalSubmitting"
-            >
-              {{ campaignModalSubmitting ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          <template #footer>
+            <div class="flex justify-end gap-2">
+              <UButton @click="closeCampaignModal" variant="outline">
+                Cancel
+              </UButton>
+              <UButton
+                @click="saveCampaignAccess"
+                :loading="campaignModalSubmitting"
+              >
+                Save Changes
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
 
     <!-- Invite User Modal -->
-    <div v-if="showInviteModal" class="modal-overlay" @click.self="showInviteModal = false">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Invite User</h2>
-          <button @click="showInviteModal = false" class="close-btn">&times;</button>
-        </div>
+    <UModal v-model:open="showInviteModal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <div class="flex justify-between items-center">
+              <h2 class="text-lg font-semibold">Invite User</h2>
+              <UButton @click="showInviteModal = false" variant="ghost" icon="i-lucide-x" size="sm" />
+            </div>
+          </template>
 
-        <form @submit.prevent="handleInvite" class="modal-body">
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input
-              id="email"
-              v-model="inviteForm.email"
-              type="email"
-              required
-              placeholder="user@example.com"
-              class="form-input"
-            />
-          </div>
+          <form @submit.prevent="handleInvite" class="space-y-4">
+            <UFormField label="Email Address" required>
+              <UInput
+                v-model="inviteForm.email"
+                type="email"
+                required
+                placeholder="user@example.com"
+              />
+            </UFormField>
 
-          <div class="form-group">
-            <label for="role">Role</label>
-            <select
-              id="role"
-              v-model="inviteForm.role"
-              class="form-input"
-            >
-              <option :value="null">No Role (must be assigned later)</option>
-              <option
-                v-for="role in availableRoles"
-                :key="role.name"
-                :value="role.name"
-              >
-                {{ formatRoleName(role.name) }} - {{ role.description }}
-              </option>
-            </select>
-            <small class="form-hint">Select the role for this user. Invitation will expire in 7 days.</small>
-          </div>
+            <UFormField label="Role">
+              <USelect
+                v-model="inviteForm.role"
+                :items="inviteRoleOptions"
+                placeholder="Select a role"
+              />
+              <template #hint>
+                Select the role for this user. Invitation will expire in 7 days.
+              </template>
+            </UFormField>
 
-          <div v-if="inviteError" class="error-message">
-            {{ inviteError }}
-          </div>
+            <UAlert v-if="inviteError" color="error" :title="inviteError" />
+            <UAlert v-if="inviteSuccess" color="success" title="Invitation sent successfully!" />
 
-          <div v-if="inviteSuccess" class="success-message">
-            Invitation sent successfully!
-          </div>
-
-          <div class="modal-actions">
-            <button type="button" @click="showInviteModal = false" class="btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" class="btn-primary" :disabled="inviteSubmitting">
-              {{ inviteSubmitting ? 'Sending...' : 'Send Invitation' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            <div class="flex justify-end gap-2 pt-4">
+              <UButton @click="showInviteModal = false" variant="outline" type="button">
+                Cancel
+              </UButton>
+              <UButton type="submit" :loading="inviteSubmitting">
+                Send Invitation
+              </UButton>
+            </div>
+          </form>
+        </UCard>
+      </template>
+    </UModal>
 
     <!-- Resend Invitation Confirmation Modal -->
     <ConfirmModal
@@ -339,7 +309,6 @@ const inviteForm = ref({
 const inviteSubmitting = ref(false)
 const inviteError = ref('')
 const inviteSuccess = ref(false)
-const successMessage = ref('')
 
 // Campaign modal state
 const showCampaignModal = ref(false)
@@ -361,6 +330,41 @@ const revoking = ref(false)
 // Toast
 const toast = useToast()
 
+// Table columns
+const userColumns = [
+  { accessorKey: 'email', header: 'Email' },
+  { accessorKey: 'display_name', header: 'Display Name' },
+  { accessorKey: 'role', header: 'Role' },
+  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'campaigns', header: 'Campaigns' },
+  { accessorKey: 'created_at', header: 'Joined' }
+]
+
+const invitationColumns = [
+  { accessorKey: 'email', header: 'Email' },
+  { accessorKey: 'inviter', header: 'Invited By' },
+  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'expires_at', header: 'Expires' },
+  { accessorKey: 'actions', header: 'Actions' }
+]
+
+// Computed role options for select
+const roleOptions = computed(() => [
+  { value: '', label: 'No Role' },
+  ...availableRoles.value.map(role => ({
+    value: role.name,
+    label: formatRoleName(role.name)
+  }))
+])
+
+const inviteRoleOptions = computed(() => [
+  { value: null, label: 'No Role (must be assigned later)' },
+  ...availableRoles.value.map(role => ({
+    value: role.name,
+    label: `${formatRoleName(role.name)} - ${role.description}`
+  }))
+])
+
 const pendingInvitations = computed(() => {
   return allInvitations.value.filter(inv => {
     if (inv.status !== 'pending') return false
@@ -377,6 +381,16 @@ function formatRoleName(roleName: string): string {
     'campaign_editor': 'Campaign Editor'
   }
   return roleDisplayNames[roleName] || roleName
+}
+
+function getStatusColor(status: string): 'success' | 'warning' | 'error' | 'neutral' {
+  switch (status) {
+    case 'accepted': return 'success'
+    case 'pending': return 'warning'
+    case 'expired':
+    case 'revoked': return 'neutral'
+    default: return 'neutral'
+  }
 }
 
 async function loadData() {
@@ -444,11 +458,11 @@ async function updateUserRole(userId: number, roleName: string | null) {
       }
     })
 
-    // Show success message
-    successMessage.value = response.message || 'Role updated successfully'
-    setTimeout(() => {
-      successMessage.value = ''
-    }, 3000)
+    toast.add({
+      title: 'Success',
+      description: response.message || 'Role updated successfully',
+      color: 'success'
+    })
 
     // Reload users to show updated role
     await loadData()
@@ -456,7 +470,7 @@ async function updateUserRole(userId: number, roleName: string | null) {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to update user role',
-      color: 'red'
+      color: 'error'
     })
     // Reload to reset the dropdown
     await loadData()
@@ -480,7 +494,7 @@ async function confirmResendInvitation() {
     toast.add({
       title: 'Success',
       description: 'Invitation resent successfully',
-      color: 'green'
+      color: 'success'
     })
 
     showResendConfirm.value = false
@@ -489,7 +503,7 @@ async function confirmResendInvitation() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to resend invitation',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     resending.value = false
@@ -518,7 +532,7 @@ async function confirmRevokeInvitation() {
     toast.add({
       title: 'Success',
       description: 'Invitation revoked successfully',
-      color: 'green'
+      color: 'success'
     })
 
     showRevokeConfirm.value = false
@@ -530,7 +544,7 @@ async function confirmRevokeInvitation() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to revoke invitation',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     revoking.value = false
@@ -595,10 +609,11 @@ async function saveCampaignAccess() {
     })
 
     campaignModalSuccess.value = true
-    successMessage.value = 'Campaign access updated successfully'
-    setTimeout(() => {
-      successMessage.value = ''
-    }, 3000)
+    toast.add({
+      title: 'Success',
+      description: 'Campaign access updated successfully',
+      color: 'success'
+    })
 
     // Close modal after a delay
     setTimeout(() => {
@@ -623,408 +638,3 @@ onMounted(() => {
   loadData()
 })
 </script>
-
-<style scoped>
-.users-page {
-  max-width: 1200px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-.loading,
-.error {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error {
-  color: var(--text-muted);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
-
-.section h2 {
-  margin: 0 0 1rem;
-  font-size: 1.25rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-muted);
-  border: 1px dashed var(--border);
-  border-radius: 8px;
-}
-
-/* Table Styles */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.data-table thead {
-  background-color: var(--bg-soft);
-}
-
-.data-table th,
-.data-table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.data-table th {
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.data-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.data-table tbody tr:hover {
-  background-color: var(--bg-soft);
-}
-
-/* Badges */
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  margin-right: 0.5rem;
-}
-
-.badge.verified {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.badge.unverified {
-  background-color: var(--bg-soft);
-  border: 1px solid var(--border);
-}
-
-.badge.superadmin {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.badge.pending {
-  background-color: var(--bg-soft);
-  border: 1px solid var(--border);
-}
-
-.badge.accepted {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.badge.expired,
-.badge.revoked {
-  background-color: var(--bg-soft);
-  border: 1px solid var(--border);
-  opacity: 0.6;
-}
-
-/* Actions */
-.actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* Buttons */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.btn-small {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-primary {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: var(--bg-soft);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg);
-}
-
-.btn-danger {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-.btn-danger:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-small {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-
-.btn-small:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background-color: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--text);
-  padding: 0;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-btn:hover {
-  opacity: 0.7;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background-color: var(--bg);
-  color: var(--text);
-  font-size: 1rem;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--text);
-}
-
-.form-hint {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.error-message {
-  padding: 0.75rem;
-  background-color: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  margin-bottom: 1rem;
-}
-
-.success-message {
-  padding: 0.75rem;
-  background-color: var(--text);
-  color: var(--bg);
-  border-radius: 6px;
-  margin-bottom: 1rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-/* Role Select */
-.role-select {
-  padding: 0.375rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background-color: var(--bg);
-  color: var(--text);
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.role-select:hover {
-  border-color: var(--text);
-}
-
-.role-select:focus {
-  outline: none;
-  border-color: var(--text);
-}
-
-/* Toast Notification */
-.toast {
-  position: fixed;
-  top: 2rem;
-  right: 2rem;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  z-index: 9999;
-  animation: slideIn 0.3s ease-out;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.toast-success {
-  background-color: var(--text);
-  color: var(--bg);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* Campaign Modal */
-.modal-intro {
-  margin-bottom: 1.5rem;
-  color: var(--text);
-}
-
-.campaigns-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-}
-
-.campaign-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.campaign-checkbox:hover {
-  background-color: var(--bg-soft);
-}
-
-.campaign-checkbox input[type="checkbox"] {
-  width: 1.25rem;
-  height: 1.25rem;
-  cursor: pointer;
-}
-
-.campaign-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.campaign-slug {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.text-muted {
-  color: var(--text-muted);
-}
-</style>

@@ -1,97 +1,86 @@
 <template>
-  <div class="accept-invitation-page">
-    <div class="container">
-      <div class="card">
+  <div class="min-h-[calc(100vh-200px)] flex items-center justify-center p-8">
+    <div class="w-full max-w-md">
+      <UCard>
         <!-- Loading State -->
-        <div v-if="validating" class="loading">
-          <div class="spinner"></div>
-          <p>Validating invitation...</p>
+        <div v-if="validating" class="text-center py-8">
+          <UIcon name="i-lucide-loader" class="w-10 h-10 animate-spin mx-auto mb-4" />
+          <p class="text-[var(--ui-text-muted)]">Validating invitation...</p>
         </div>
 
         <!-- Invalid Invitation -->
-        <div v-else-if="!invitationValid" class="error-state">
-          <h2>Invalid Invitation</h2>
-          <p>{{ validationError }}</p>
-          <NuxtLink to="/login" class="btn-primary">Go to Login</NuxtLink>
+        <div v-else-if="!invitationValid" class="text-center py-8">
+          <h2 class="text-2xl font-bold mb-4">Invalid Invitation</h2>
+          <p class="text-[var(--ui-text-muted)] mb-6">{{ validationError }}</p>
+          <UButton to="/login">Go to Login</UButton>
         </div>
 
         <!-- Valid Invitation - Show Form -->
         <div v-else>
-          <h1>Accept Invitation</h1>
-          <p class="subtitle">Create your account to get started</p>
+          <h1 class="text-2xl font-bold text-center mb-2">Accept Invitation</h1>
+          <p class="text-center text-[var(--ui-text-muted)] mb-8">Create your account to get started</p>
 
-          <form @submit.prevent="handleAccept" class="accept-form">
+          <form @submit.prevent="handleAccept" class="space-y-6">
             <!-- Email (read-only) -->
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input
-                id="email"
+            <UFormField label="Email">
+              <UInput
                 v-model="invitation.email"
                 type="email"
                 readonly
                 disabled
-                class="form-input"
               />
-            </div>
+            </UFormField>
 
             <!-- Display Name -->
-            <div class="form-group">
-              <label for="display_name">Display Name</label>
-              <input
-                id="display_name"
+            <UFormField label="Display Name" required>
+              <UInput
                 v-model="acceptForm.display_name"
                 type="text"
                 required
                 placeholder="Enter your name"
-                class="form-input"
               />
-            </div>
+            </UFormField>
 
             <!-- Password -->
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input
-                id="password"
+            <UFormField label="Password" required>
+              <UInput
                 v-model="acceptForm.password"
                 type="password"
                 required
                 minlength="8"
                 placeholder="At least 8 characters"
-                class="form-input"
               />
-              <small class="form-hint">Must be at least 8 characters long</small>
-            </div>
+              <template #hint>
+                Must be at least 8 characters long
+              </template>
+            </UFormField>
 
             <!-- Confirm Password -->
-            <div class="form-group">
-              <label for="confirm_password">Confirm Password</label>
-              <input
-                id="confirm_password"
+            <UFormField label="Confirm Password" required>
+              <UInput
                 v-model="acceptForm.confirm_password"
                 type="password"
                 required
                 minlength="8"
                 placeholder="Re-enter your password"
-                class="form-input"
               />
-            </div>
+            </UFormField>
 
             <!-- Error Message -->
-            <div v-if="acceptError" class="error-message">
-              {{ acceptError }}
-            </div>
+            <UAlert v-if="acceptError" color="error" :title="acceptError" />
 
             <!-- Submit Button -->
-            <button
+            <UButton
               type="submit"
-              class="btn-primary btn-full"
-              :disabled="submitting"
+              size="lg"
+              block
+              :loading="submitting"
             >
               {{ submitting ? 'Creating Account...' : 'Create Account' }}
-            </button>
+            </UButton>
           </form>
         </div>
-      </div>
+      </UCard>
     </div>
   </div>
 </template>
@@ -207,173 +196,3 @@ useHead({
   title: `Accept Invitation - ${config.public.appName || 'Base'}`
 })
 </script>
-
-<style scoped>
-.accept-invitation-page {
-  min-height: calc(100vh - 200px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
-}
-
-.container {
-  width: 100%;
-  max-width: 500px;
-}
-
-.card {
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 2rem;
-}
-
-/* Loading State */
-.loading {
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--border);
-  border-top: 4px solid var(--text);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading p {
-  color: var(--text-muted);
-}
-
-/* Error State */
-.error-state {
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.error-state h2 {
-  margin: 0 0 1rem;
-  color: var(--text);
-}
-
-.error-state p {
-  margin: 0 0 1.5rem;
-  color: var(--text-muted);
-}
-
-/* Form */
-h1 {
-  margin: 0 0 0.5rem;
-  font-size: 2rem;
-  text-align: center;
-}
-
-.subtitle {
-  text-align: center;
-  color: var(--text-muted);
-  margin: 0 0 2rem;
-}
-
-.accept-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background-color: var(--bg);
-  color: var(--text);
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--text);
-}
-
-.form-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: var(--bg-soft);
-}
-
-.form-hint {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.error-message {
-  padding: 0.75rem;
-  background-color: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-size: 0.875rem;
-}
-
-/* Buttons */
-.btn-primary {
-  display: inline-block;
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  text-align: center;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-full {
-  width: 100%;
-  padding: 1rem;
-  font-size: 1rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  h1 {
-    font-size: 1.5rem;
-  }
-
-  .card {
-    padding: 1.5rem;
-  }
-}
-</style>
