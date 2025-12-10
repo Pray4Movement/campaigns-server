@@ -18,25 +18,25 @@ export async function sendInvitationEmail(
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>You've been invited to ${appName}</title>
     </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #000000; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="background: #000000; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
         <h1 style="margin: 0; font-size: 28px; font-weight: 500;">You've been invited!</h1>
         <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">Join ${appName} as an administrator</p>
       </div>
 
-      <div style="background: #ffffff; border: 2px solid #000000; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #000000; margin-top: 0; font-weight: 500;">Hello!</h2>
-        <p style="font-size: 16px; margin: 20px 0; color: #000000;">
+      <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
+        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">Hello!</h2>
+        <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
           <strong>${invitedBy}</strong> has invited you to join <strong>${appName}</strong> as an administrator.
         </p>
 
-        <p style="font-size: 16px; margin: 20px 0; color: #000000;">
+        <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
           Click the button below to accept your invitation and set up your account:
         </p>
 
         <div style="text-align: center; margin: 30px 0;">
           <a href="${invitationUrl}" style="
-            background: #000000;
+            background: #3B463D;
             color: #ffffff;
             padding: 15px 30px;
             text-decoration: none;
@@ -45,7 +45,7 @@ export async function sendInvitationEmail(
             font-size: 16px;
             display: inline-block;
             text-align: center;
-            border: 2px solid #000000;
+            border: 2px solid #3B463D;
           ">Accept Invitation</a>
         </div>
 
