@@ -37,6 +37,14 @@
       "title": "Join the Prayer Movement",
       "description": "Commit to praying daily and receive helpful reminders via email, WhatsApp, or mobile app.",
       "success": "✓ Welcome! You've joined the prayer movement. You'll receive your first prayer prompt soon.",
+      "successEmail": "✓ Almost there! Please check your email and click the verification link to complete your signup.",
+      "checkSpam": "Don't see the email? Check your spam folder.",
+      "modal": {
+        "title": "Check Your Email",
+        "message": "We've sent a verification link to:",
+        "hint": "Click the link in the email to complete your signup. Don't forget to check your spam folder.",
+        "button": "Got It"
+      },
       "form": {
         "name": {
           "label": "Name",
@@ -106,6 +114,20 @@
         "store": "Google Play",
         "ariaLabel": "Get it on Google Play"
       }
+    },
+    "verify": {
+      "pageTitle": "Verify Email",
+      "verifying": "Verifying your email...",
+      "success": {
+        "title": "Email Verified!",
+        "message": "Your email has been verified successfully. You will now receive prayer reminders for {campaign}."
+      },
+      "error": {
+        "title": "Verification Failed",
+        "generic": "Unable to verify your email. This link may have already been used or has expired."
+      },
+      "backToCampaign": "Back to Campaign",
+      "startPraying": "Start Praying"
     }
   },
   "prayerFuel": {

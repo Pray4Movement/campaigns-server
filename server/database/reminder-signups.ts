@@ -13,6 +13,10 @@ export interface ReminderSignup {
   days_of_week: string | null // JSON string array for weekly frequency
   time_preference: string
   status: 'active' | 'inactive' | 'unsubscribed'
+  email_verified: boolean
+  verification_token: string | null
+  verification_token_expires_at: string | null
+  verified_at: string | null
   created_at: string
   updated_at: string
 }
@@ -149,6 +153,73 @@ class ReminderSignupService {
     `)
     const result = await stmt.get(campaignId) as { count: number }
     return result.count
+  }
+
+  // Generate verification token for a signup (24 hour expiry)
+  async generateVerificationToken(signupId: number): Promise<string> {
+    const token = randomUUID()
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+    const stmt = this.db.prepare(`
+      UPDATE reminder_signups
+      SET verification_token = ?, verification_token_expires_at = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    await stmt.run(token, expiresAt, signupId)
+
+    return token
+  }
+
+  // Get signup by verification token
+  async getSignupByVerificationToken(token: string): Promise<ReminderSignup | null> {
+    const stmt = this.db.prepare('SELECT * FROM reminder_signups WHERE verification_token = ?')
+    return await stmt.get(token) as ReminderSignup | null
+  }
+
+  // Check if verification token is expired
+  isTokenExpired(signup: ReminderSignup): boolean {
+    if (!signup.verification_token_expires_at) return true
+    return new Date(signup.verification_token_expires_at) < new Date()
+  }
+
+  // Verify signup by token
+  async verifyByToken(token: string): Promise<{ success: boolean; signup?: ReminderSignup; error?: string }> {
+    const signup = await this.getSignupByVerificationToken(token)
+
+    if (!signup) {
+      return { success: false, error: 'Invalid verification token' }
+    }
+
+    if (this.isTokenExpired(signup)) {
+      return { success: false, error: 'Verification token has expired' }
+    }
+
+    if (signup.email_verified) {
+      return { success: true, signup, error: 'Email already verified' }
+    }
+
+    // Mark as verified and clear token
+    const stmt = this.db.prepare(`
+      UPDATE reminder_signups
+      SET email_verified = true,
+          verified_at = CURRENT_TIMESTAMP,
+          verification_token = NULL,
+          verification_token_expires_at = NULL,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    await stmt.run(signup.id)
+
+    return { success: true, signup: (await this.getSignupById(signup.id))! }
+  }
+
+  // Regenerate verification token (for resend functionality)
+  async regenerateVerificationToken(signupId: number): Promise<string | null> {
+    const signup = await this.getSignupById(signupId)
+    if (!signup || signup.email_verified) {
+      return null
+    }
+    return this.generateVerificationToken(signupId)
   }
 }
 

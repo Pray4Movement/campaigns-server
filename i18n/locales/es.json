@@ -37,6 +37,14 @@
       "title": "Únase al Movimiento de Oración",
       "description": "Comprométase a orar diariamente y reciba recordatorios útiles por correo electrónico, WhatsApp o aplicación móvil.",
       "success": "✓ ¡Bienvenido! Se ha unido al movimiento de oración. Recibirá su primera invitación a orar pronto.",
+      "successEmail": "✓ ¡Casi listo! Por favor revise su correo electrónico y haga clic en el enlace de verificación para completar su registro.",
+      "checkSpam": "¿No ve el correo? Revise su carpeta de spam.",
+      "modal": {
+        "title": "Revise su Correo",
+        "message": "Hemos enviado un enlace de verificación a:",
+        "hint": "Haga clic en el enlace del correo para completar su registro. No olvide revisar su carpeta de spam.",
+        "button": "Entendido"
+      },
       "form": {
         "name": {
           "label": "Nombre",
@@ -106,6 +114,20 @@
         "store": "Google Play",
         "ariaLabel": "Disponible en Google Play"
       }
+    },
+    "verify": {
+      "pageTitle": "Verificar Correo",
+      "verifying": "Verificando su correo electrónico...",
+      "success": {
+        "title": "¡Correo Verificado!",
+        "message": "Su correo electrónico ha sido verificado exitosamente. Ahora recibirá recordatorios de oración para {campaign}."
+      },
+      "error": {
+        "title": "Verificación Fallida",
+        "generic": "No se pudo verificar su correo electrónico. Este enlace puede haber sido usado o expirado."
+      },
+      "backToCampaign": "Volver a la Campaña",
+      "startPraying": "Empezar a Orar"
     }
   },
   "prayerFuel": {

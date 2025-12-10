@@ -198,6 +198,28 @@
           </div>
         </div>
       </section>
+
+      <!-- Email Verification Modal -->
+      <UModal v-model:open="showVerificationModal">
+        <template #content>
+          <div class="verification-modal">
+            <div class="verification-header">
+              <UIcon name="i-lucide-mail" class="verification-icon" />
+              <h2 class="verification-title">{{ $t('campaign.signup.modal.title') }}</h2>
+            </div>
+            <p class="verification-message">{{ $t('campaign.signup.modal.message') }}</p>
+            <p class="verification-email">{{ verificationEmail }}</p>
+            <p class="verification-hint">{{ $t('campaign.signup.modal.hint') }}</p>
+            <UButton
+              class="verification-button"
+              size="lg"
+              @click="closeVerificationModal"
+            >
+              {{ $t('campaign.signup.modal.button') }}
+            </UButton>
+          </div>
+        </template>
+      </UModal>
     </div>
   </div>
 </template>
@@ -258,7 +280,35 @@ const signupForm = ref({
 
 const submitting = ref(false)
 const signupSuccess = ref(false)
+const signupRequiresVerification = ref(false)
 const signupError = ref('')
+
+// Email verification modal state
+const showVerificationModal = ref(false)
+const verificationEmail = ref('')
+
+// Reset form helper
+function resetForm() {
+  signupForm.value = {
+    name: '',
+    delivery_method: '',
+    email: '',
+    phone: '',
+    frequency: 'daily',
+    days_of_week: [],
+    reminder_time: '09:00'
+  }
+  if (iti) {
+    iti.setNumber('')
+  }
+  signupRequiresVerification.value = false
+}
+
+// Close verification modal
+function closeVerificationModal() {
+  showVerificationModal.value = false
+  verificationEmail.value = ''
+}
 
 // Handle form submission
 async function handleSignup() {
@@ -280,6 +330,7 @@ async function handleSignup() {
 
   submitting.value = true
   signupSuccess.value = false
+  signupRequiresVerification.value = false
   signupError.value = ''
 
   try {
@@ -297,24 +348,23 @@ async function handleSignup() {
     })
 
     console.log('Signup successful:', response)
-    signupSuccess.value = true
+    signupRequiresVerification.value = response.requires_verification || false
 
-    // Reset form after success
-    setTimeout(() => {
-      signupForm.value = {
-        name: '',
-        delivery_method: '',
-        email: '',
-        phone: '',
-        frequency: 'daily',
-        days_of_week: [],
-        reminder_time: '09:00'
-      }
-      if (iti) {
-        iti.setNumber('')
-      }
-      signupSuccess.value = false
-    }, 5000)
+    // For email signups, show verification modal
+    if (signupRequiresVerification.value) {
+      verificationEmail.value = signupForm.value.email
+      showVerificationModal.value = true
+      // Reset form immediately for email signups
+      resetForm()
+    } else {
+      // For non-email signups, show inline success message
+      signupSuccess.value = true
+      // Reset form after success
+      setTimeout(() => {
+        resetForm()
+        signupSuccess.value = false
+      }, 5000)
+    }
   } catch (err: any) {
     signupError.value = err.data?.statusMessage || err.message || t('campaign.signup.errors.failed')
   } finally {
@@ -696,6 +746,70 @@ section {
   font-weight: 600;
 }
 
+/* Email Verification Modal */
+.verification-modal {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.verification-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.verification-icon {
+  font-size: 2.5rem;
+  color: var(--text);
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.verification-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.verification-message {
+  font-size: 1rem;
+  color: var(--text-muted, #666);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.verification-email {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1rem;
+  word-break: break-all;
+}
+
+.verification-hint {
+  font-size: 0.875rem;
+  color: var(--text-muted, #666);
+  margin-bottom: 2rem;
+}
+
+.verification-button {
+  min-width: 150px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .campaign-description {
@@ -725,6 +839,14 @@ section {
 
   .day-label {
     font-size: 0.75rem;
+  }
+
+  .verification-modal {
+    padding: 2rem 1.5rem;
+  }
+
+  .verification-title {
+    font-size: 1.5rem;
   }
 }
 </style>

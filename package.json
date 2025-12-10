@@ -3,8 +3,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
+    "migrate": "sh -c 'node node_modules/.c12/github_corsacca_nuxt_*/scripts/migrate.mjs",
+    "build": "npm run migrate && nuxt build",
+    "dev": "npm run migrate && nuxt dev",
     "dev:mail": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",

@@ -1,5 +1,6 @@
 import { campaignService } from '#server/database/campaigns'
 import { reminderSignupService } from '#server/database/reminder-signups'
+import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -85,10 +86,34 @@ export default defineEventHandler(async (event) => {
       time_preference: body.reminder_time
     })
 
-    // Return success with tracking ID
+    // For email delivery, send verification email
+    if (body.delivery_method === 'email') {
+      const token = await reminderSignupService.generateVerificationToken(signup.id)
+      const emailSent = await sendSignupVerificationEmail(
+        body.email,
+        token,
+        slug,
+        campaign.title,
+        body.name
+      )
+
+      if (!emailSent) {
+        console.error('Failed to send verification email for signup:', signup.id)
+      }
+
+      return {
+        success: true,
+        tracking_id: signup.tracking_id,
+        requires_verification: true,
+        message: 'Please check your email to verify your subscription'
+      }
+    }
+
+    // For non-email delivery, no verification needed
     return {
       success: true,
       tracking_id: signup.tracking_id,
+      requires_verification: false,
       message: 'Successfully signed up for prayer reminders'
     }
   } catch (error: any) {

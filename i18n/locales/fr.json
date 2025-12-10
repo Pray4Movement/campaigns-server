@@ -37,6 +37,14 @@
       "title": "Rejoignez le Mouvement de Prière",
       "description": "Engagez-vous à prier quotidiennement et recevez des rappels utiles par e-mail, WhatsApp ou application mobile.",
       "success": "✓ Bienvenue ! Vous avez rejoint le mouvement de prière. Vous recevrez bientôt votre première invitation à la prière.",
+      "successEmail": "✓ Presque terminé ! Veuillez vérifier votre e-mail et cliquer sur le lien de vérification pour finaliser votre inscription.",
+      "checkSpam": "Vous ne voyez pas l'e-mail ? Vérifiez votre dossier spam.",
+      "modal": {
+        "title": "Vérifiez vos E-mails",
+        "message": "Nous avons envoyé un lien de vérification à :",
+        "hint": "Cliquez sur le lien dans l'e-mail pour finaliser votre inscription. N'oubliez pas de vérifier votre dossier spam.",
+        "button": "Compris"
+      },
       "form": {
         "name": {
           "label": "Nom",
@@ -106,6 +114,20 @@
         "store": "Google Play",
         "ariaLabel": "Disponible sur Google Play"
       }
+    },
+    "verify": {
+      "pageTitle": "Vérifier l'E-mail",
+      "verifying": "Vérification de votre e-mail...",
+      "success": {
+        "title": "E-mail Vérifié !",
+        "message": "Votre e-mail a été vérifié avec succès. Vous recevrez désormais des rappels de prière pour {campaign}."
+      },
+      "error": {
+        "title": "Échec de la Vérification",
+        "generic": "Impossible de vérifier votre e-mail. Ce lien a peut-être déjà été utilisé ou a expiré."
+      },
+      "backToCampaign": "Retour à la Campagne",
+      "startPraying": "Commencer à Prier"
     }
   },
   "prayerFuel": {
