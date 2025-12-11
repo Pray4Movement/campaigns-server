@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
         frequency = ?,
         time_preference = ?,
         status = ?,
-        updated_at = datetime('now')
+        updated_at = NOW()
       WHERE id = ?
     `).run(
       name,
