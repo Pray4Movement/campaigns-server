@@ -124,6 +124,7 @@ async function processReminders() {
             campaignTitle: subscription.campaign_title,
             campaignSlug: subscription.campaign_slug,
             trackingId: subscription.subscriber_tracking_id,
+            profileId: subscription.subscriber_profile_id,
             subscriptionId: subscription.id,
             prayerDuration: subscription.prayer_duration,
             prayerContent: prayerContent.length > 0 ? prayerContent : null

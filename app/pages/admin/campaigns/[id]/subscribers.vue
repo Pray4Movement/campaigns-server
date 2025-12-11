@@ -76,7 +76,18 @@
         <div v-else class="details-content">
           <div class="details-header">
             <h2>{{ selectedSubscriber.name }}</h2>
-            <UButton @click="openDeleteModal" color="neutral" variant="outline">Delete</UButton>
+            <div class="header-actions">
+              <UButton
+                @click="sendReminder"
+                :loading="sendingReminder"
+                :disabled="selectedSubscriber.delivery_method !== 'email'"
+                color="neutral"
+                variant="outline"
+              >
+                Send Reminder
+              </UButton>
+              <UButton @click="openDeleteModal" color="neutral" variant="outline">Delete</UButton>
+            </div>
           </div>
 
           <form @submit.prevent="saveSubscriber" class="details-form">
@@ -305,6 +316,7 @@ interface Subscriber {
   next_reminder_utc: string | null
   status: 'active' | 'unsubscribed'
   tracking_id: string
+  profile_id: string
   created_at: string
   updated_at: string
 }
@@ -331,6 +343,9 @@ const filterMethod = ref('')
 const showDeleteModal = ref(false)
 const subscriberToDelete = ref<Subscriber | null>(null)
 const deleting = ref(false)
+
+// Send reminder state
+const sendingReminder = ref(false)
 
 // Email history state
 interface EmailSent {
@@ -590,7 +605,7 @@ function formatDuration(minutes: number | null): string {
 
 function getProfileUrl(subscriber: Subscriber): string {
   const baseUrl = window.location.origin
-  return `${baseUrl}/${campaign.value?.slug}/profile?id=${subscriber.tracking_id}`
+  return `${baseUrl}/${campaign.value?.slug}/profile?id=${subscriber.profile_id}`
 }
 
 async function copyProfileLink(subscriber: Subscriber) {
@@ -608,6 +623,31 @@ async function copyProfileLink(subscriber: Subscriber) {
       description: 'Failed to copy link',
       color: 'error'
     })
+  }
+}
+
+async function sendReminder() {
+  if (!selectedSubscriber.value || sendingReminder.value) return
+
+  try {
+    sendingReminder.value = true
+    await $fetch(`/api/admin/subscribers/${selectedSubscriber.value.id}/send-reminder`, {
+      method: 'POST'
+    })
+
+    toast.add({
+      title: 'Reminder Sent',
+      description: `Prayer reminder email sent to ${selectedSubscriber.value.email}`,
+      color: 'success'
+    })
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to send reminder',
+      color: 'error'
+    })
+  } finally {
+    sendingReminder.value = false
   }
 }
 
@@ -817,6 +857,11 @@ onMounted(() => {
 
 .details-header h2 {
   margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .details-form {

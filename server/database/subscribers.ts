@@ -5,6 +5,7 @@ import { contactMethodService } from './contact-methods'
 export interface Subscriber {
   id: number
   tracking_id: string
+  profile_id: string
   name: string
   created_at: string
   updated_at: string
@@ -24,13 +25,14 @@ class SubscriberService {
 
   async createSubscriber(name: string): Promise<Subscriber> {
     const tracking_id = randomUUID()
+    const profile_id = randomUUID()
 
     const stmt = this.db.prepare(`
-      INSERT INTO subscribers (tracking_id, name)
-      VALUES (?, ?)
+      INSERT INTO subscribers (tracking_id, profile_id, name)
+      VALUES (?, ?, ?)
     `)
 
-    const result = await stmt.run(tracking_id, name)
+    const result = await stmt.run(tracking_id, profile_id, name)
     return (await this.getSubscriberById(result.lastInsertRowid as number))!
   }
 
@@ -42,6 +44,11 @@ class SubscriberService {
   async getSubscriberByTrackingId(trackingId: string): Promise<Subscriber | null> {
     const stmt = this.db.prepare('SELECT * FROM subscribers WHERE tracking_id = ?')
     return await stmt.get(trackingId) as Subscriber | null
+  }
+
+  async getSubscriberByProfileId(profileId: string): Promise<Subscriber | null> {
+    const stmt = this.db.prepare('SELECT * FROM subscribers WHERE profile_id = ?')
+    return await stmt.get(profileId) as Subscriber | null
   }
 
   async getSubscriberWithContacts(trackingId: string): Promise<SubscriberWithContacts | null> {

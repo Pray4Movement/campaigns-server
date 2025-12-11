@@ -66,6 +66,7 @@ This project consumes the base layer defined here: https://github.com/corsacca/n
 - CSS custom properties for theme variables
 - Theme toggle button in top-right corner
 - LocalStorage persistence and system preference detection
+- USE tailwind
 
 ## Styling Options
 

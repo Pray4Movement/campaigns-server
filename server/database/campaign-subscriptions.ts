@@ -23,11 +23,13 @@ export interface CampaignSubscriptionWithDetails extends CampaignSubscription {
   campaign_slug: string
   subscriber_name: string
   subscriber_tracking_id: string
+  subscriber_profile_id: string
 }
 
 export interface SubscriptionDueForReminder extends CampaignSubscription {
   subscriber_name: string
   subscriber_tracking_id: string
+  subscriber_profile_id: string
   email_value: string
   email_verified: boolean
   campaign_slug: string
@@ -151,7 +153,8 @@ class CampaignSubscriptionService {
         c.title as campaign_title,
         c.slug as campaign_slug,
         s.name as subscriber_name,
-        s.tracking_id as subscriber_tracking_id
+        s.tracking_id as subscriber_tracking_id,
+        s.profile_id as subscriber_profile_id
       FROM campaign_subscriptions cs
       JOIN campaigns c ON c.id = cs.campaign_id
       JOIN subscribers s ON s.id = cs.subscriber_id
@@ -178,7 +181,8 @@ class CampaignSubscriptionService {
         c.title as campaign_title,
         c.slug as campaign_slug,
         s.name as subscriber_name,
-        s.tracking_id as subscriber_tracking_id
+        s.tracking_id as subscriber_tracking_id,
+        s.profile_id as subscriber_profile_id
       FROM campaign_subscriptions cs
       JOIN campaigns c ON c.id = cs.campaign_id
       JOIN subscribers s ON s.id = cs.subscriber_id
@@ -344,6 +348,7 @@ class CampaignSubscriptionService {
         cs.*,
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
+        s.profile_id as subscriber_profile_id,
         cm.value as email_value,
         cm.verified as email_verified,
         c.slug as campaign_slug,

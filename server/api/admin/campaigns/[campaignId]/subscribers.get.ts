@@ -42,6 +42,7 @@ export default defineEventHandler(async (event) => {
           // Subscriber info
           name: sub.subscriber_name,
           tracking_id: sub.subscriber_tracking_id,
+          profile_id: sub.subscriber_profile_id,
           // Contact info
           email: emailContact?.value || '',
           email_verified: emailContact?.verified || false,

@@ -4,6 +4,7 @@ export interface PrayerReminderEmailData {
   campaignTitle: string
   campaignSlug: string
   trackingId: string
+  profileId: string
   subscriptionId: number
   prayerDuration: number
   prayerContent: Array<{
@@ -157,9 +158,9 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const appName = config.appName || 'Prayer Tools'
 
-  const unsubscribeUrl = `${baseUrl}/${data.campaignSlug}/unsubscribe?id=${data.trackingId}&sid=${data.subscriptionId}`
-  const profileUrl = `${baseUrl}/${data.campaignSlug}/profile?id=${data.trackingId}`
-  const prayerFuelUrl = `${baseUrl}/${data.campaignSlug}/prayer-fuel`
+  const unsubscribeUrl = `${baseUrl}/${data.campaignSlug}/unsubscribe?id=${data.profileId}&sid=${data.subscriptionId}`
+  const profileUrl = `${baseUrl}/${data.campaignSlug}/profile?id=${data.profileId}`
+  const prayerFuelUrl = `${baseUrl}/${data.campaignSlug}/prayer-fuel?uid=${data.trackingId}`
 
   // Build content HTML - just a reminder with link to prayer fuel
   const contentHtml = `

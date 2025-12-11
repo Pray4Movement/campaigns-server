@@ -7,7 +7,7 @@ import { sendSignupVerificationEmail } from '#server/utils/signup-verification-e
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   const body = await readBody(event)
-  const trackingId = body.tracking_id as string
+  const profileId = body.profile_id as string
 
   if (!slug) {
     throw createError({
@@ -16,10 +16,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!trackingId) {
+  if (!profileId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Tracking ID is required'
+      statusMessage: 'Profile ID is required'
     })
   }
 
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get the subscriber
-  const subscriber = await subscriberService.getSubscriberByTrackingId(trackingId)
+  const subscriber = await subscriberService.getSubscriberByProfileId(profileId)
 
   if (!subscriber) {
     throw createError({
@@ -189,7 +189,7 @@ export default defineEventHandler(async (event) => {
     email_changed: emailChanged,
     subscriber: {
       id: updatedSubscriber?.id,
-      tracking_id: updatedSubscriber?.tracking_id,
+      profile_id: updatedSubscriber?.profile_id,
       name: updatedSubscriber?.name || subscriber.name,
       email: updatedEmail?.value || '',
       email_verified: updatedEmail?.verified || false

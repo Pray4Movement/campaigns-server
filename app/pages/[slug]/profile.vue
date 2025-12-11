@@ -302,14 +302,14 @@ definePageMeta({
 
 const route = useRoute()
 const slug = route.params.slug as string
-const trackingId = route.query.id as string
+const profileId = route.query.id as string
 const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
 
 // Fetch subscriber profile
 const { data, pending, error, refresh } = await useFetch(`/api/campaigns/${slug}/profile`, {
-  query: { id: trackingId }
+  query: { id: profileId }
 })
 
 // Global form state (name, email)
@@ -431,7 +431,7 @@ async function saveGlobalSettings() {
     const response = await $fetch(`/api/campaigns/${slug}/profile`, {
       method: 'PUT',
       body: {
-        tracking_id: trackingId,
+        profile_id: profileId,
         name: globalForm.value.name,
         email: globalForm.value.email
       }
@@ -472,7 +472,7 @@ async function saveReminder(reminder: any, campaignGroup: any) {
     await $fetch(`/api/campaigns/${campaignGroup.slug}/profile`, {
       method: 'PUT',
       body: {
-        tracking_id: trackingId,
+        profile_id: profileId,
         subscription_id: reminder.id,
         frequency: reminderForm.value.frequency,
         days_of_week: reminderForm.value.days_of_week,
@@ -507,7 +507,7 @@ async function confirmDeleteReminder(reminder: any, campaignGroup: any) {
   try {
     await $fetch(`/api/campaigns/${campaignGroup.slug}/reminder/${reminder.id}`, {
       method: 'DELETE',
-      query: { id: trackingId }
+      query: { id: profileId }
     })
 
     toast.add({
@@ -528,7 +528,7 @@ async function resubscribeReminder(reminder: any, campaignGroup: any) {
   try {
     await $fetch(`/api/campaigns/${campaignGroup.slug}/resubscribe`, {
       method: 'POST',
-      body: { tracking_id: trackingId, subscription_id: reminder.id }
+      body: { profile_id: profileId, subscription_id: reminder.id }
     })
 
     toast.add({

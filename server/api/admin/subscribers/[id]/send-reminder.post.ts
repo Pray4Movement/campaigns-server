@@ -1,0 +1,109 @@
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { subscriberService } from '#server/database/subscribers'
+import { contactMethodService } from '#server/database/contact-methods'
+import { campaignService } from '#server/database/campaigns'
+import { sendPrayerReminderEmail } from '#server/utils/prayer-reminder-email'
+
+export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
+
+  const subscriptionId = getRouterParam(event, 'id')
+
+  if (!subscriptionId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Subscription ID is required'
+    })
+  }
+
+  try {
+    // Get the subscription
+    const subscription = await campaignSubscriptionService.getById(parseInt(subscriptionId))
+
+    if (!subscription) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Subscription not found'
+      })
+    }
+
+    // Only email delivery method is supported for now
+    if (subscription.delivery_method !== 'email') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Manual reminders are only supported for email subscriptions'
+      })
+    }
+
+    // Get subscriber info
+    const subscriber = await subscriberService.getSubscriberById(subscription.subscriber_id)
+
+    if (!subscriber) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Subscriber not found'
+      })
+    }
+
+    // Get email contact
+    const contacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
+    const emailContact = contacts.find(c => c.type === 'email')
+
+    if (!emailContact?.value) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Subscriber does not have an email address'
+      })
+    }
+
+    if (!emailContact.verified) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Subscriber email is not verified'
+      })
+    }
+
+    // Get campaign info
+    const campaign = await campaignService.getCampaignById(subscription.campaign_id)
+
+    if (!campaign) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Campaign not found'
+      })
+    }
+
+    // Send the reminder email
+    const success = await sendPrayerReminderEmail({
+      to: emailContact.value,
+      subscriberName: subscriber.name,
+      campaignTitle: campaign.title,
+      campaignSlug: campaign.slug,
+      trackingId: subscriber.tracking_id,
+      profileId: subscriber.profile_id,
+      subscriptionId: subscription.id,
+      prayerDuration: subscription.prayer_duration || 10,
+      prayerContent: null
+    })
+
+    if (!success) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Failed to send reminder email'
+      })
+    }
+
+    return {
+      success: true,
+      message: `Reminder email sent to ${emailContact.value}`
+    }
+  } catch (error: any) {
+    if (error.statusCode) throw error
+
+    console.error('Error sending reminder:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to send reminder'
+    })
+  }
+})

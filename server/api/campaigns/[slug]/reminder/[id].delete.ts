@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   const reminderId = getRouterParam(event, 'id')
   const query = getQuery(event)
-  const trackingId = query.id as string
+  const profileId = query.id as string
 
   if (!slug) {
     throw createError({
@@ -22,10 +22,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!trackingId) {
+  if (!profileId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Tracking ID is required'
+      statusMessage: 'Profile ID is required'
     })
   }
 
@@ -39,8 +39,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the subscriber by tracking ID
-  const subscriber = await subscriberService.getSubscriberByTrackingId(trackingId)
+  // Get the subscriber by profile ID
+  const subscriber = await subscriberService.getSubscriberByProfileId(profileId)
 
   if (!subscriber) {
     throw createError({

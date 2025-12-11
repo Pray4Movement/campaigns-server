@@ -5,7 +5,7 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   const body = await readBody(event)
-  const trackingId = body.tracking_id as string
+  const profileId = body.profile_id as string
 
   if (!slug) {
     throw createError({
@@ -14,10 +14,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!trackingId) {
+  if (!profileId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Tracking ID is required'
+      statusMessage: 'Profile ID is required'
     })
   }
 
@@ -31,8 +31,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the subscriber by tracking ID
-  const subscriber = await subscriberService.getSubscriberByTrackingId(trackingId)
+  // Get the subscriber by profile ID
+  const subscriber = await subscriberService.getSubscriberByProfileId(profileId)
 
   if (!subscriber) {
     throw createError({

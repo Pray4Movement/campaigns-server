@@ -99,14 +99,14 @@ definePageMeta({
 
 const route = useRoute()
 const slug = route.params.slug as string
-const trackingId = route.query.id as string
+const profileId = route.query.id as string
 const subscriptionId = route.query.sid as string | undefined
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 // Call the unsubscribe API
 const { data, pending, error } = await useFetch(`/api/campaigns/${slug}/unsubscribe`, {
-  query: { id: trackingId, sid: subscriptionId }
+  query: { id: profileId, sid: subscriptionId }
 })
 
 // Resubscribe state
@@ -134,7 +134,7 @@ async function unsubscribeReminder(reminderId: number) {
   try {
     unsubscribingId.value = reminderId
     await $fetch(`/api/campaigns/${slug}/unsubscribe`, {
-      query: { id: trackingId, sid: reminderId }
+      query: { id: profileId, sid: reminderId }
     })
     // Remove from list
     if (data.value?.other_reminders) {
@@ -155,7 +155,7 @@ async function unsubscribeAll() {
     // Unsubscribe from each remaining reminder
     for (const reminder of data.value.other_reminders) {
       await $fetch(`/api/campaigns/${slug}/unsubscribe`, {
-        query: { id: trackingId, sid: reminder.id }
+        query: { id: profileId, sid: reminder.id }
       })
     }
     data.value.other_reminders = []
@@ -171,7 +171,7 @@ async function resubscribe() {
     resubscribing.value = true
     await $fetch(`/api/campaigns/${slug}/resubscribe`, {
       method: 'POST',
-      body: { tracking_id: trackingId }
+      body: { profile_id: profileId }
     })
     resubscribed.value = true
   } catch (err: any) {
