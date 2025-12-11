@@ -169,6 +169,19 @@
               </div>
 
               <div class="info-row">
+                <span class="label">Profile Link:</span>
+                <div class="profile-link-container">
+                  <span class="value profile-link-text">{{ getProfileUrl(selectedSubscriber) }}</span>
+                  <UButton
+                    size="xs"
+                    variant="ghost"
+                    icon="i-lucide-copy"
+                    @click="copyProfileLink(selectedSubscriber)"
+                  />
+                </div>
+              </div>
+
+              <div class="info-row">
                 <span class="label">Subscribed:</span>
                 <span class="value">{{ formatDateTime(selectedSubscriber.created_at) }}</span>
               </div>
@@ -490,6 +503,29 @@ function formatDuration(minutes: number | null): string {
   return `${minutes} min`
 }
 
+function getProfileUrl(subscriber: Subscriber): string {
+  const baseUrl = window.location.origin
+  return `${baseUrl}/${campaign.value?.slug}/profile?id=${subscriber.tracking_id}`
+}
+
+async function copyProfileLink(subscriber: Subscriber) {
+  const url = getProfileUrl(subscriber)
+  try {
+    await navigator.clipboard.writeText(url)
+    toast.add({
+      title: 'Copied!',
+      description: 'Profile link copied to clipboard',
+      color: 'success'
+    })
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to copy link',
+      color: 'error'
+    })
+  }
+}
+
 onMounted(() => {
   loadData()
 })
@@ -740,5 +776,19 @@ onMounted(() => {
 .email-time {
   color: var(--ui-text-muted);
   font-size: 0.75rem;
+}
+
+.profile-link-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-link-text {
+  font-size: 0.75rem;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

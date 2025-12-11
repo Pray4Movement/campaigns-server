@@ -304,6 +304,93 @@ class ReminderSignupService {
 
     await this.updateNextReminderUtc(signupId, nextUtc)
   }
+
+  // Update subscriber preferences from profile page
+  async updateSubscriberPreferences(signupId: number, updates: {
+    name?: string
+    email?: string
+    frequency?: string
+    days_of_week?: number[]
+    time_preference?: string
+    timezone?: string
+    prayer_duration?: number
+  }): Promise<{ signup: ReminderSignup | null; emailChanged: boolean }> {
+    const signup = await this.getSignupById(signupId)
+    if (!signup) return { signup: null, emailChanged: false }
+
+    const emailChanged = updates.email !== undefined && updates.email !== signup.email
+    const scheduleChanged = (
+      updates.time_preference !== undefined ||
+      updates.timezone !== undefined ||
+      updates.frequency !== undefined ||
+      updates.days_of_week !== undefined
+    )
+
+    // Build dynamic update query
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (updates.name !== undefined) {
+      fields.push('name = ?')
+      values.push(updates.name)
+    }
+    if (updates.email !== undefined) {
+      fields.push('email = ?')
+      values.push(updates.email)
+    }
+    if (updates.frequency !== undefined) {
+      fields.push('frequency = ?')
+      values.push(updates.frequency)
+    }
+    if (updates.days_of_week !== undefined) {
+      fields.push('days_of_week = ?')
+      values.push(JSON.stringify(updates.days_of_week))
+    }
+    if (updates.time_preference !== undefined) {
+      fields.push('time_preference = ?')
+      values.push(updates.time_preference)
+    }
+    if (updates.timezone !== undefined) {
+      fields.push('timezone = ?')
+      values.push(updates.timezone)
+    }
+    if (updates.prayer_duration !== undefined) {
+      fields.push('prayer_duration = ?')
+      values.push(updates.prayer_duration)
+    }
+
+    // If email changed, reset verification
+    if (emailChanged) {
+      fields.push('email_verified = ?')
+      values.push(false)
+      fields.push('verified_at = ?')
+      values.push(null)
+    }
+
+    if (fields.length === 0) {
+      return { signup, emailChanged: false }
+    }
+
+    fields.push('updated_at = CURRENT_TIMESTAMP')
+    values.push(signupId)
+
+    const stmt = this.db.prepare(`
+      UPDATE reminder_signups
+      SET ${fields.join(', ')}
+      WHERE id = ?
+    `)
+    await stmt.run(...values)
+
+    // Recalculate next reminder if schedule changed
+    if (scheduleChanged) {
+      await this.setInitialNextReminder(signupId)
+    }
+
+    return {
+      signup: await this.getSignupById(signupId),
+      emailChanged
+    }
+  }
 }
 
 export const reminderSignupService = new ReminderSignupService()

@@ -157,6 +157,7 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
   const appName = config.appName || 'Prayer Tools'
 
   const unsubscribeUrl = `${baseUrl}/${data.campaignSlug}/unsubscribe?id=${data.trackingId}`
+  const profileUrl = `${baseUrl}/${data.campaignSlug}/profile?id=${data.trackingId}`
   const prayerFuelUrl = `${baseUrl}/${data.campaignSlug}/prayer-fuel`
 
   // Build content HTML - just a reminder with link to prayer fuel
@@ -204,7 +205,9 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
       <div style="text-align: center; margin-top: 20px; padding: 20px; color: #666666; font-size: 12px;">
         <p style="margin: 0 0 10px;">This is an automated prayer reminder from ${appName}.</p>
         <p style="margin: 0;">
-          <a href="${unsubscribeUrl}" style="color: #666666; text-decoration: underline;">Unsubscribe from these reminders</a>
+          <a href="${profileUrl}" style="color: #666666; text-decoration: underline;">Manage Preferences</a>
+          &nbsp;|&nbsp;
+          <a href="${unsubscribeUrl}" style="color: #666666; text-decoration: underline;">Unsubscribe</a>
         </p>
       </div>
     </body>
@@ -219,6 +222,7 @@ Hello ${data.subscriberName}!
 ${contentText}
 ---
 This is an automated prayer reminder from ${appName}.
+Manage Preferences: ${profileUrl}
 Unsubscribe: ${unsubscribeUrl}
   `.trim()
 

@@ -165,6 +165,27 @@
         "message": "Something went wrong. Please try again.",
         "goHome": "Go Home"
       }
+    },
+    "profile": {
+      "pageTitle": "Manage Preferences",
+      "title": "Reminder Settings",
+      "greeting": "Hi {name}, manage your prayer reminder preferences below.",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "success": "Your preferences have been updated.",
+      "emailChanged": "We've sent a verification email to your new address. Please verify to continue receiving reminders.",
+      "emailNotVerified": "Your email is not verified. Please check your inbox for the verification link to receive reminders.",
+      "emailHint": "Changing your email will require re-verification.",
+      "sections": {
+        "account": "Account",
+        "schedule": "Reminder Schedule",
+        "prayer": "Prayer Preferences"
+      },
+      "error": {
+        "title": "Error",
+        "notFound": "Subscription not found.",
+        "failed": "Failed to save changes. Please try again."
+      }
     }
   },
   "prayerFuel": {
