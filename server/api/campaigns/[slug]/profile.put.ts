@@ -31,8 +31,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the signup
+  // Get the signup (need full record for change tracking)
   const signup = await reminderSignupService.getSignupByTrackingId(trackingId)
+  const originalSignup = signup ? { ...signup } : null
 
   if (!signup) {
     throw createError({
@@ -124,6 +125,45 @@ export default defineEventHandler(async (event) => {
       campaign.title,
       updatedSignup.name
     )
+  }
+
+  // Log activity for profile changes
+  if (originalSignup) {
+    const changes: Record<string, { from: any; to: any }> = {}
+
+    if (updates.name !== undefined && updates.name !== originalSignup.name) {
+      changes.name = { from: originalSignup.name, to: updates.name }
+    }
+    if (updates.email !== undefined && updates.email !== originalSignup.email) {
+      changes.email = { from: originalSignup.email, to: updates.email }
+    }
+    if (updates.frequency !== undefined && updates.frequency !== originalSignup.frequency) {
+      changes.frequency = { from: originalSignup.frequency, to: updates.frequency }
+    }
+    if (updates.time_preference !== undefined && updates.time_preference !== originalSignup.time_preference) {
+      changes.time_preference = { from: originalSignup.time_preference, to: updates.time_preference }
+    }
+    if (updates.timezone !== undefined && updates.timezone !== originalSignup.timezone) {
+      changes.timezone = { from: originalSignup.timezone, to: updates.timezone }
+    }
+    if (updates.prayer_duration !== undefined && updates.prayer_duration !== originalSignup.prayer_duration) {
+      changes.prayer_duration = { from: originalSignup.prayer_duration, to: updates.prayer_duration }
+    }
+    if (updates.days_of_week !== undefined) {
+      const oldDays = originalSignup.days_of_week ? JSON.parse(originalSignup.days_of_week) : []
+      const newDays = updates.days_of_week
+      if (JSON.stringify(oldDays) !== JSON.stringify(newDays)) {
+        changes.days_of_week = { from: oldDays, to: newDays }
+      }
+    }
+
+    if (Object.keys(changes).length > 0) {
+      logUpdate('reminder_signups', String(signup.id), undefined, {
+        changes,
+        source: 'self_service',
+        subscriberName: updatedSignup.name
+      })
+    }
   }
 
   return {

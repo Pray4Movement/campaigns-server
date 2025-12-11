@@ -208,6 +208,48 @@
               </div>
             </div>
 
+            <div class="form-section">
+              <h3>Activity Log</h3>
+              <div v-if="loadingActivity" class="activity-loading">
+                Loading...
+              </div>
+              <div v-else-if="activityLog.length === 0" class="activity-empty">
+                No activity recorded yet
+              </div>
+              <div v-else class="activity-list">
+                <div v-for="activity in activityLog" :key="activity.id" class="activity-item">
+                  <div class="activity-header">
+                    <UBadge
+                      :label="formatEventType(activity.eventType)"
+                      :color="getEventColor(activity.eventType)"
+                      size="xs"
+                    />
+                    <span class="activity-time">{{ formatTimestamp(activity.timestamp) }}</span>
+                  </div>
+                  <div class="activity-user">
+                    <template v-if="activity.metadata?.source === 'self_service'">
+                      by subscriber (self-service)
+                    </template>
+                    <template v-else-if="activity.userName">
+                      by {{ activity.userName }}
+                    </template>
+                  </div>
+                  <div v-if="activity.metadata?.changes" class="activity-changes">
+                    <div
+                      v-for="(change, field) in activity.metadata.changes"
+                      :key="field"
+                      class="change-item"
+                    >
+                      <span class="change-field">{{ formatFieldName(field as string) }}:</span>
+                      <span class="change-from">{{ formatValue(change.from) }}</span>
+                      <span class="change-arrow">→</span>
+                      <span class="change-to">{{ formatValue(change.to) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="form-actions">
               <UButton type="button" @click="resetForm" variant="outline">Reset</UButton>
               <UButton type="submit" :disabled="saving">
@@ -292,6 +334,22 @@ interface EmailSent {
 const emailHistory = ref<EmailSent[]>([])
 const loadingEmailHistory = ref(false)
 
+// Activity log state
+interface ActivityLogEntry {
+  id: string
+  timestamp: number
+  eventType: string
+  tableName: string
+  userId: string | null
+  userName: string | null
+  metadata: {
+    changes?: Record<string, { from: any; to: any }>
+    deletedRecord?: Record<string, any>
+  }
+}
+const activityLog = ref<ActivityLogEntry[]>([])
+const loadingActivity = ref(false)
+
 // Toast
 const toast = useToast()
 
@@ -375,8 +433,11 @@ async function selectSubscriber(subscriber: Subscriber) {
     status: subscriber.status
   }
 
-  // Load email history for this subscriber
-  await loadEmailHistory(subscriber.id)
+  // Load email history and activity for this subscriber
+  await Promise.all([
+    loadEmailHistory(subscriber.id),
+    loadActivity(subscriber.id)
+  ])
 }
 
 async function loadEmailHistory(subscriberId: number) {
@@ -389,6 +450,19 @@ async function loadEmailHistory(subscriberId: number) {
     emailHistory.value = []
   } finally {
     loadingEmailHistory.value = false
+  }
+}
+
+async function loadActivity(subscriberId: number) {
+  try {
+    loadingActivity.value = true
+    const response = await $fetch<{ activities: ActivityLogEntry[] }>(`/api/admin/subscribers/${subscriberId}/activity`)
+    activityLog.value = response.activities
+  } catch (err: any) {
+    console.error('Failed to load activity:', err)
+    activityLog.value = []
+  } finally {
+    loadingActivity.value = false
   }
 }
 
@@ -418,6 +492,9 @@ async function saveSubscriber() {
       description: 'Subscriber updated successfully',
       color: 'green'
     })
+
+    // Refresh activity log to show the new update
+    await loadActivity(selectedSubscriber.value.id)
   } catch (err: any) {
     toast.add({
       title: 'Error',
@@ -524,6 +601,52 @@ async function copyProfileLink(subscriber: Subscriber) {
       color: 'error'
     })
   }
+}
+
+// Activity log formatting functions
+function formatTimestamp(timestamp: number): string {
+  return new Date(timestamp).toLocaleString()
+}
+
+function formatEventType(eventType: string): string {
+  const types: Record<string, string> = {
+    'CREATE': 'Created',
+    'UPDATE': 'Updated',
+    'DELETE': 'Deleted'
+  }
+  return types[eventType] || eventType
+}
+
+function getEventColor(eventType: string): 'success' | 'warning' | 'error' | 'neutral' {
+  const colors: Record<string, 'success' | 'warning' | 'error' | 'neutral'> = {
+    'CREATE': 'success',
+    'UPDATE': 'warning',
+    'DELETE': 'error'
+  }
+  return colors[eventType] || 'neutral'
+}
+
+function formatFieldName(field: string): string {
+  const names: Record<string, string> = {
+    'name': 'Name',
+    'email': 'Email',
+    'phone': 'Phone',
+    'frequency': 'Frequency',
+    'time_preference': 'Time',
+    'status': 'Status',
+    'delivery_method': 'Delivery Method',
+    'prayer_duration': 'Prayer Duration',
+    'timezone': 'Timezone',
+    'days_of_week': 'Days of Week'
+  }
+  return names[field] || field.replace(/_/g, ' ')
+}
+
+function formatValue(value: any): string {
+  if (value === null || value === undefined || value === '') {
+    return '(empty)'
+  }
+  return String(value)
 }
 
 onMounted(() => {
@@ -790,5 +913,85 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Activity Log Styles */
+.activity-loading,
+.activity-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+}
+
+.activity-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+}
+
+.activity-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.activity-time {
+  color: var(--ui-text-muted);
+  font-size: 0.75rem;
+}
+
+.activity-user {
+  color: var(--ui-text-muted);
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.activity-changes {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--ui-bg);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+.change-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem 0;
+}
+
+.change-field {
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.change-from {
+  color: var(--ui-text-muted);
+  text-decoration: line-through;
+}
+
+.change-arrow {
+  color: var(--ui-text-muted);
+  margin: 0 0.25rem;
+}
+
+.change-to {
+  font-weight: 500;
 }
 </style>

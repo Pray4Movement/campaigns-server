@@ -25,8 +25,20 @@ export default defineEventHandler(async (event) => {
   const db = getDatabase()
 
   try {
-    // Check if subscriber exists
-    const existing = db.prepare('SELECT id FROM reminder_signups WHERE id = ?').get(subscriberId)
+    // Get current subscriber data before update to track changes
+    const existing = await db.prepare(`
+      SELECT id, name, email, phone, frequency, time_preference, status
+      FROM reminder_signups WHERE id = ?
+    `).get(subscriberId) as {
+      id: number
+      name: string
+      email: string | null
+      phone: string | null
+      frequency: string | null
+      time_preference: string | null
+      status: string
+    } | undefined
+
     if (!existing) {
       throw createError({
         statusCode: 404,
@@ -34,8 +46,26 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Build changes object
+    const changes: Record<string, { from: any; to: any }> = {}
+    const newValues = {
+      name,
+      email: email || null,
+      phone: phone || null,
+      frequency: frequency || null,
+      time_preference: time_preference || null,
+      status: status || 'active'
+    }
+
+    for (const [key, newValue] of Object.entries(newValues)) {
+      const oldValue = existing[key as keyof typeof existing]
+      if (oldValue !== newValue) {
+        changes[key] = { from: oldValue, to: newValue }
+      }
+    }
+
     // Update subscriber
-    db.prepare(`
+    await db.prepare(`
       UPDATE reminder_signups
       SET
         name = ?,
@@ -56,8 +86,13 @@ export default defineEventHandler(async (event) => {
       subscriberId
     )
 
+    // Log the update with field changes if any changes were made
+    if (Object.keys(changes).length > 0) {
+      logUpdate('reminder_signups', subscriberId, event, { changes })
+    }
+
     // Get updated subscriber
-    const subscriber = db.prepare(`
+    const subscriber = await db.prepare(`
       SELECT
         id,
         campaign_id,

@@ -15,8 +15,19 @@ export default defineEventHandler(async (event) => {
   const db = getDatabase()
 
   try {
-    // Check if subscriber exists
-    const existing = db.prepare('SELECT id FROM reminder_signups WHERE id = ?').get(subscriberId)
+    // Get subscriber data before deletion for logging
+    const existing = await db.prepare(`
+      SELECT id, name, email, phone, delivery_method, status
+      FROM reminder_signups WHERE id = ?
+    `).get(subscriberId) as {
+      id: number
+      name: string
+      email: string | null
+      phone: string | null
+      delivery_method: string
+      status: string
+    } | undefined
+
     if (!existing) {
       throw createError({
         statusCode: 404,
@@ -25,7 +36,18 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete subscriber
-    db.prepare('DELETE FROM reminder_signups WHERE id = ?').run(subscriberId)
+    await db.prepare('DELETE FROM reminder_signups WHERE id = ?').run(subscriberId)
+
+    // Log the deletion with subscriber details
+    logDelete('reminder_signups', subscriberId, event, {
+      deletedRecord: {
+        name: existing.name,
+        email: existing.email,
+        phone: existing.phone,
+        delivery_method: existing.delivery_method,
+        status: existing.status
+      }
+    })
 
     return {
       success: true
