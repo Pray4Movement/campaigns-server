@@ -84,8 +84,13 @@
           }
         },
         "time": {
-          "label": "Preferred Time",
-          "hint": "Your local time"
+          "label": "Reminder Time",
+          "hint": "When would you like to receive your prayer reminder?"
+        },
+        "timezone": {
+          "label": "Your Timezone",
+          "hint": "Auto-detected from your browser",
+          "searchPlaceholder": "Search timezones..."
         },
         "duration": {
           "label": "Prayer Duration",
@@ -135,6 +140,31 @@
       },
       "backToCampaign": "Back to Campaign",
       "startPraying": "Start Praying"
+    },
+    "unsubscribe": {
+      "pageTitle": "Unsubscribe",
+      "processing": "Processing your request...",
+      "success": {
+        "title": "Unsubscribed",
+        "message": "You have been unsubscribed from prayer reminders.",
+        "campaign": "Campaign: {title}",
+        "resubscribe": "Re-subscribe",
+        "resubscribing": "Re-subscribing..."
+      },
+      "alreadyDone": {
+        "title": "Already Unsubscribed",
+        "message": "You have already been unsubscribed from these prayer reminders."
+      },
+      "resubscribed": {
+        "title": "Welcome Back!",
+        "message": "You have been resubscribed to prayer reminders. You'll receive your next reminder at your scheduled time.",
+        "viewCampaign": "View Campaign"
+      },
+      "error": {
+        "title": "Error",
+        "message": "Something went wrong. Please try again.",
+        "goHome": "Go Home"
+      }
     }
   },
   "prayerFuel": {

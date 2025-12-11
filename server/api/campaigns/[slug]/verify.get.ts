@@ -48,6 +48,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Set the initial next reminder time now that email is verified
+  if (result.signup) {
+    await reminderSignupService.setInitialNextReminder(result.signup.id)
+  }
+
   return {
     success: true,
     message: 'Email verified successfully',

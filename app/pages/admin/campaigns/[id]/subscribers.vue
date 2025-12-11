@@ -142,6 +142,14 @@
                 />
               </UFormField>
 
+              <UFormField v-if="selectedSubscriber?.timezone" label="Timezone">
+                <div class="timezone-display">{{ selectedSubscriber.timezone }}</div>
+              </UFormField>
+
+              <UFormField v-if="selectedSubscriber?.next_reminder_utc" label="Next Reminder">
+                <div class="next-reminder-display">{{ formatDateTime(selectedSubscriber.next_reminder_utc) }}</div>
+              </UFormField>
+
               <UFormField label="Status">
                 <USelect
                   v-model="editForm.status"
@@ -168,6 +176,22 @@
               <div class="info-row">
                 <span class="label">Last Updated:</span>
                 <span class="value">{{ formatDateTime(selectedSubscriber.updated_at) }}</span>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Email History</h3>
+              <div v-if="loadingEmailHistory" class="email-history-loading">
+                Loading...
+              </div>
+              <div v-else-if="emailHistory.length === 0" class="email-history-empty">
+                No emails sent yet
+              </div>
+              <div v-else class="email-history-list">
+                <div v-for="sent in emailHistory" :key="sent.id" class="email-history-item">
+                  <span class="email-date">{{ sent.sent_date }}</span>
+                  <span class="email-time">{{ formatDateTime(sent.sent_at) }}</span>
+                </div>
               </div>
             </div>
 
@@ -214,6 +238,8 @@ interface Subscriber {
   days_of_week: string | null
   time_preference: string
   prayer_duration: number | null
+  timezone: string | null
+  next_reminder_utc: string | null
   status: 'active' | 'unsubscribed'
   tracking_id: string
   created_at: string
@@ -242,6 +268,16 @@ const filterMethod = ref('')
 const showDeleteModal = ref(false)
 const subscriberToDelete = ref<Subscriber | null>(null)
 const deleting = ref(false)
+
+// Email history state
+interface EmailSent {
+  id: number
+  signup_id: number
+  sent_date: string
+  sent_at: string
+}
+const emailHistory = ref<EmailSent[]>([])
+const loadingEmailHistory = ref(false)
 
 // Toast
 const toast = useToast()
@@ -314,7 +350,7 @@ async function loadData() {
   }
 }
 
-function selectSubscriber(subscriber: Subscriber) {
+async function selectSubscriber(subscriber: Subscriber) {
   selectedSubscriber.value = subscriber
   editForm.value = {
     name: subscriber.name,
@@ -324,6 +360,22 @@ function selectSubscriber(subscriber: Subscriber) {
     frequency: subscriber.frequency,
     time_preference: subscriber.time_preference,
     status: subscriber.status
+  }
+
+  // Load email history for this subscriber
+  await loadEmailHistory(subscriber.id)
+}
+
+async function loadEmailHistory(subscriberId: number) {
+  try {
+    loadingEmailHistory.value = true
+    const response = await $fetch<{ history: EmailSent[] }>(`/api/admin/subscribers/${subscriberId}/email-history`)
+    emailHistory.value = response.history
+  } catch (err: any) {
+    console.error('Failed to load email history:', err)
+    emailHistory.value = []
+  } finally {
+    loadingEmailHistory.value = false
   }
 }
 
@@ -641,11 +693,52 @@ onMounted(() => {
 }
 
 .days-display,
-.duration-display {
+.duration-display,
+.timezone-display,
+.next-reminder-display {
   padding: 0.5rem 0.75rem;
   background-color: var(--ui-bg);
   border: 1px solid var(--ui-border);
   border-radius: 6px;
   font-size: 0.875rem;
+}
+
+.email-history-loading,
+.email-history-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+}
+
+.email-history-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+}
+
+.email-history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--ui-border);
+  font-size: 0.875rem;
+}
+
+.email-history-item:last-child {
+  border-bottom: none;
+}
+
+.email-date {
+  font-weight: 500;
+}
+
+.email-time {
+  color: var(--ui-text-muted);
+  font-size: 0.75rem;
 }
 </style>

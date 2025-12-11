@@ -1,6 +1,7 @@
 import { campaignService } from '#server/database/campaigns'
 import { reminderSignupService } from '#server/database/reminder-signups'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
+import { isValidTimezone } from '#server/utils/next-reminder-calculator'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -73,6 +74,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Validate and normalize timezone (default to UTC if invalid or missing)
+  const timezone = body.timezone && isValidTimezone(body.timezone) ? body.timezone : 'UTC'
+
   try {
     // Create the signup
     const signup = await reminderSignupService.createSignup({
@@ -84,7 +88,8 @@ export default defineEventHandler(async (event) => {
       frequency: body.frequency,
       days_of_week: body.days_of_week,
       time_preference: body.reminder_time,
-      prayer_duration: body.prayer_duration
+      prayer_duration: body.prayer_duration,
+      timezone
     })
 
     // For email delivery, send verification email
