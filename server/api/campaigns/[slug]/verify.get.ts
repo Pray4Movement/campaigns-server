@@ -1,5 +1,8 @@
 import { campaignService } from '#server/database/campaigns'
-import { reminderSignupService } from '#server/database/reminder-signups'
+import { contactMethodService } from '#server/database/contact-methods'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { subscriberService } from '#server/database/subscribers'
+import { sendWelcomeEmail } from '#server/utils/welcome-email'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -30,8 +33,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify the token
-  const result = await reminderSignupService.verifyByToken(token)
+  // Verify the token (now at contact method level)
+  const result = await contactMethodService.verifyByToken(token)
 
   if (!result.success) {
     throw createError({
@@ -40,17 +43,23 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify the signup belongs to this campaign
-  if (result.signup && result.signup.campaign_id !== campaign.id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid verification link for this campaign'
-    })
-  }
+  // Set initial next reminder for all email subscriptions of this subscriber
+  if (result.contactMethod) {
+    await campaignSubscriptionService.setNextRemindersForSubscriber(result.contactMethod.subscriber_id)
 
-  // Set the initial next reminder time now that email is verified
-  if (result.signup) {
-    await reminderSignupService.setInitialNextReminder(result.signup.id)
+    // Send welcome email (only if this was a new verification, not already verified)
+    if (result.error !== 'Already verified') {
+      const subscriber = await subscriberService.getSubscriberById(result.contactMethod.subscriber_id)
+      if (subscriber) {
+        sendWelcomeEmail(
+          result.contactMethod.value,
+          subscriber.name,
+          campaign.title,
+          slug,
+          subscriber.tracking_id
+        ).catch(err => console.error('Failed to send welcome email:', err))
+      }
+    }
   }
 
   return {

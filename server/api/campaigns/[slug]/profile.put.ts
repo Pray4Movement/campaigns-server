@@ -1,5 +1,7 @@
 import { campaignService } from '#server/database/campaigns'
-import { reminderSignupService } from '#server/database/reminder-signups'
+import { subscriberService } from '#server/database/subscribers'
+import { contactMethodService } from '#server/database/contact-methods'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 
 export default defineEventHandler(async (event) => {
@@ -31,26 +33,34 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the signup (need full record for change tracking)
-  const signup = await reminderSignupService.getSignupByTrackingId(trackingId)
-  const originalSignup = signup ? { ...signup } : null
+  // Get the subscriber
+  const subscriber = await subscriberService.getSubscriberByTrackingId(trackingId)
 
-  if (!signup) {
+  if (!subscriber) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Subscription not found'
     })
   }
 
-  // Verify signup belongs to this campaign
-  if (signup.campaign_id !== campaign.id) {
+  // Get subscriber's subscription for this campaign
+  const subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+    subscriber.id,
+    campaign.id
+  )
+
+  if (!subscription) {
     throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid link for this campaign'
+      statusCode: 404,
+      statusMessage: 'You are not subscribed to this campaign'
     })
   }
 
-  // Validate required fields
+  // Get current email contact
+  const contacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
+  const currentEmail = contacts.find(c => c.type === 'email')
+
+  // Validation
   if (body.name !== undefined && typeof body.name !== 'string') {
     throw createError({
       statusCode: 400,
@@ -83,10 +93,57 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Build updates object
-  const updates: {
-    name?: string
-    email?: string
+  let emailChanged = false
+  let newEmailContact = currentEmail
+
+  // Handle global subscriber updates (name)
+  if (body.name !== undefined && body.name.trim() !== subscriber.name) {
+    await subscriberService.updateSubscriber(subscriber.id, { name: body.name.trim() })
+  }
+
+  // Handle email change (global - affects all subscriptions)
+  if (body.email !== undefined) {
+    const newEmail = body.email.trim().toLowerCase()
+    const oldEmail = currentEmail?.value?.toLowerCase()
+
+    if (newEmail !== oldEmail) {
+      // Check if new email already exists for another subscriber
+      const existingContact = await contactMethodService.getByValue('email', newEmail)
+      if (existingContact && existingContact.subscriber_id !== subscriber.id) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'This email is already in use by another subscriber'
+        })
+      }
+
+      if (currentEmail) {
+        // Update existing email contact (resets verification)
+        await contactMethodService.updateContactMethod(currentEmail.id, { value: newEmail })
+        newEmailContact = await contactMethodService.getById(currentEmail.id)
+      } else {
+        // Create new email contact
+        newEmailContact = await contactMethodService.addContactMethod(subscriber.id, 'email', newEmail)
+      }
+
+      emailChanged = true
+
+      // Send verification email
+      if (newEmailContact) {
+        const verificationToken = await contactMethodService.generateVerificationToken(newEmailContact.id)
+        await sendSignupVerificationEmail(
+          newEmail,
+          verificationToken,
+          slug,
+          campaign.title,
+          body.name?.trim() || subscriber.name
+        )
+      }
+    }
+  }
+
+  // Handle subscription-specific updates
+  const subscriptionUpdates: {
+    delivery_method?: 'email' | 'whatsapp' | 'app'
     frequency?: string
     days_of_week?: number[]
     time_preference?: string
@@ -94,91 +151,45 @@ export default defineEventHandler(async (event) => {
     prayer_duration?: number
   } = {}
 
-  if (body.name !== undefined) updates.name = body.name.trim()
-  if (body.email !== undefined) updates.email = body.email.trim().toLowerCase()
-  if (body.frequency !== undefined) updates.frequency = body.frequency
-  if (body.days_of_week !== undefined) updates.days_of_week = body.days_of_week
-  if (body.time_preference !== undefined) updates.time_preference = body.time_preference
-  if (body.timezone !== undefined) updates.timezone = body.timezone
-  if (body.prayer_duration !== undefined) updates.prayer_duration = body.prayer_duration
+  if (body.delivery_method !== undefined) subscriptionUpdates.delivery_method = body.delivery_method
+  if (body.frequency !== undefined) subscriptionUpdates.frequency = body.frequency
+  if (body.days_of_week !== undefined) subscriptionUpdates.days_of_week = body.days_of_week
+  if (body.time_preference !== undefined) subscriptionUpdates.time_preference = body.time_preference
+  if (body.timezone !== undefined) subscriptionUpdates.timezone = body.timezone
+  if (body.prayer_duration !== undefined) subscriptionUpdates.prayer_duration = body.prayer_duration
 
-  // Update the subscriber
-  const { signup: updatedSignup, emailChanged } = await reminderSignupService.updateSubscriberPreferences(
-    signup.id,
-    updates
-  )
-
-  if (!updatedSignup) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to update preferences'
-    })
+  let updatedSubscription = subscription
+  if (Object.keys(subscriptionUpdates).length > 0) {
+    updatedSubscription = await campaignSubscriptionService.updateSubscription(
+      subscription.id,
+      subscriptionUpdates
+    ) || subscription
   }
 
-  // If email changed, send verification email to new address
-  if (emailChanged && updates.email) {
-    const verificationToken = await reminderSignupService.generateVerificationToken(signup.id)
-    await sendSignupVerificationEmail(
-      updates.email,
-      verificationToken,
-      slug,
-      campaign.title,
-      updatedSignup.name
-    )
-  }
-
-  // Log activity for profile changes
-  if (originalSignup) {
-    const changes: Record<string, { from: any; to: any }> = {}
-
-    if (updates.name !== undefined && updates.name !== originalSignup.name) {
-      changes.name = { from: originalSignup.name, to: updates.name }
-    }
-    if (updates.email !== undefined && updates.email !== originalSignup.email) {
-      changes.email = { from: originalSignup.email, to: updates.email }
-    }
-    if (updates.frequency !== undefined && updates.frequency !== originalSignup.frequency) {
-      changes.frequency = { from: originalSignup.frequency, to: updates.frequency }
-    }
-    if (updates.time_preference !== undefined && updates.time_preference !== originalSignup.time_preference) {
-      changes.time_preference = { from: originalSignup.time_preference, to: updates.time_preference }
-    }
-    if (updates.timezone !== undefined && updates.timezone !== originalSignup.timezone) {
-      changes.timezone = { from: originalSignup.timezone, to: updates.timezone }
-    }
-    if (updates.prayer_duration !== undefined && updates.prayer_duration !== originalSignup.prayer_duration) {
-      changes.prayer_duration = { from: originalSignup.prayer_duration, to: updates.prayer_duration }
-    }
-    if (updates.days_of_week !== undefined) {
-      const oldDays = originalSignup.days_of_week ? JSON.parse(originalSignup.days_of_week) : []
-      const newDays = updates.days_of_week
-      if (JSON.stringify(oldDays) !== JSON.stringify(newDays)) {
-        changes.days_of_week = { from: oldDays, to: newDays }
-      }
-    }
-
-    if (Object.keys(changes).length > 0) {
-      logUpdate('reminder_signups', String(signup.id), undefined, {
-        changes,
-        source: 'self_service',
-        subscriberName: updatedSignup.name
-      })
-    }
-  }
+  // Get updated subscriber info
+  const updatedSubscriber = await subscriberService.getSubscriberById(subscriber.id)
+  const updatedContacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
+  const updatedEmail = updatedContacts.find(c => c.type === 'email')
 
   return {
     success: true,
     email_changed: emailChanged,
     subscriber: {
-      name: updatedSignup.name,
-      email: updatedSignup.email,
-      frequency: updatedSignup.frequency,
-      days_of_week: updatedSignup.days_of_week ? JSON.parse(updatedSignup.days_of_week) : [],
-      time_preference: updatedSignup.time_preference,
-      timezone: updatedSignup.timezone,
-      prayer_duration: updatedSignup.prayer_duration,
-      status: updatedSignup.status,
-      email_verified: updatedSignup.email_verified
+      id: updatedSubscriber?.id,
+      tracking_id: updatedSubscriber?.tracking_id,
+      name: updatedSubscriber?.name || subscriber.name,
+      email: updatedEmail?.value || '',
+      email_verified: updatedEmail?.verified || false
+    },
+    currentSubscription: {
+      id: updatedSubscription.id,
+      delivery_method: updatedSubscription.delivery_method,
+      frequency: updatedSubscription.frequency,
+      days_of_week: updatedSubscription.days_of_week ? JSON.parse(updatedSubscription.days_of_week) : [],
+      time_preference: updatedSubscription.time_preference,
+      timezone: updatedSubscription.timezone,
+      prayer_duration: updatedSubscription.prayer_duration,
+      status: updatedSubscription.status
     }
   }
 })

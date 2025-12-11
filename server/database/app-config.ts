@@ -37,7 +37,7 @@ export class AppConfigService {
       // Update existing
       const stmt = this.db.prepare(`
         UPDATE app_config
-        SET value = ?, updated_at = CURRENT_TIMESTAMP
+        SET value = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
         WHERE key = ?
       `)
       await stmt.run(valueString, key)

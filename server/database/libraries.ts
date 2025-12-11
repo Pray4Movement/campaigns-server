@@ -106,7 +106,7 @@ export class LibraryService {
       return library
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP')
+    updates.push("updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")
     values.push(id)
 
     const stmt = this.db.prepare(`

@@ -378,7 +378,7 @@ function resetForm() {
     frequency: 'daily',
     days_of_week: [],
     reminder_time: '09:00',
-    prayer_duration: 5
+    prayer_duration: 10
   }
   signupRequiresVerification.value = false
 }

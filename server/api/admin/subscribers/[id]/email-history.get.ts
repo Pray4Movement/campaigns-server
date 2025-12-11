@@ -1,5 +1,5 @@
 import { reminderSentService } from '#server/database/reminder-sent'
-import { reminderSignupService } from '#server/database/reminder-signups'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -7,23 +7,23 @@ export default defineEventHandler(async (event) => {
   if (!id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Subscriber ID is required'
+      statusMessage: 'Subscription ID is required'
     })
   }
 
-  const subscriberId = parseInt(id)
+  const subscriptionId = parseInt(id)
 
-  // Verify subscriber exists
-  const subscriber = await reminderSignupService.getSignupById(subscriberId)
-  if (!subscriber) {
+  // Verify subscription exists
+  const subscription = await campaignSubscriptionService.getById(subscriptionId)
+  if (!subscription) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Subscriber not found'
+      statusMessage: 'Subscription not found'
     })
   }
 
-  // Get email history
-  const history = await reminderSentService.getSentHistory(subscriberId, 50)
+  // Get email history for this subscription
+  const history = await reminderSentService.getSentHistory(subscriptionId, 50)
 
   return {
     history

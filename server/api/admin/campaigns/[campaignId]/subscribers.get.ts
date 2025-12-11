@@ -1,5 +1,6 @@
-import { getDatabase } from '#server/database/db'
 import { campaignService } from '#server/database/campaigns'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { contactMethodService } from '#server/database/contact-methods'
 
 export default defineEventHandler(async (event) => {
   const user = requireAuth(event)
@@ -21,33 +22,46 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const db = getDatabase()
-
   try {
-    // Get all subscribers for this campaign
-    const subscribers = await db.prepare(`
-      SELECT
-        id,
-        campaign_id,
-        name,
-        email,
-        phone,
-        delivery_method,
-        frequency,
-        days_of_week,
-        time_preference,
-        prayer_duration,
-        status,
-        tracking_id,
-        created_at,
-        updated_at
-      FROM reminder_signups
-      WHERE campaign_id = ?
-      ORDER BY created_at DESC
-    `).all(campaignId)
+    // Get all subscriptions for this campaign with subscriber details
+    const subscriptions = await campaignSubscriptionService.getCampaignSubscriptions(parseInt(campaignId))
+
+    // Enrich with contact info
+    const subscribersWithContacts = await Promise.all(
+      subscriptions.map(async (sub) => {
+        const contacts = await contactMethodService.getSubscriberContactMethods(sub.subscriber_id)
+        const emailContact = contacts.find(c => c.type === 'email')
+        const phoneContact = contacts.find(c => c.type === 'phone')
+
+        return {
+          // Subscription info (using id for backwards compat with admin UI)
+          id: sub.id,
+          subscription_id: sub.id,
+          campaign_id: sub.campaign_id,
+          subscriber_id: sub.subscriber_id,
+          // Subscriber info
+          name: sub.subscriber_name,
+          tracking_id: sub.subscriber_tracking_id,
+          // Contact info
+          email: emailContact?.value || '',
+          email_verified: emailContact?.verified || false,
+          phone: phoneContact?.value || '',
+          // Subscription settings
+          delivery_method: sub.delivery_method,
+          frequency: sub.frequency,
+          days_of_week: sub.days_of_week,
+          time_preference: sub.time_preference,
+          timezone: sub.timezone,
+          prayer_duration: sub.prayer_duration,
+          status: sub.status,
+          created_at: sub.created_at,
+          updated_at: sub.updated_at
+        }
+      })
+    )
 
     return {
-      subscribers
+      subscribers: subscribersWithContacts
     }
   } catch (error) {
     console.error('Error fetching subscribers:', error)

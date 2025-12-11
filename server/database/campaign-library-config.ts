@@ -114,7 +114,7 @@ export class CampaignLibraryConfigService {
       return config
     }
 
-    updates.push('updated_at = CURRENT_TIMESTAMP')
+    updates.push("updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")
     values.push(id)
 
     const stmt = this.db.prepare(`
@@ -146,7 +146,7 @@ export class CampaignLibraryConfigService {
     for (const { library_id, order_index } of libraryOrders) {
       const stmt = this.db.prepare(`
         UPDATE campaign_library_config
-        SET order_index = ?, updated_at = CURRENT_TIMESTAMP
+        SET order_index = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
         WHERE campaign_id = ? AND library_id = ?
       `)
       await stmt.run(order_index, campaignId, library_id)

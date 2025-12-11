@@ -1,4 +1,4 @@
-import { reminderSignupService } from '../database/reminder-signups'
+import { campaignSubscriptionService } from '../database/campaign-subscriptions'
 import { reminderSentService } from '../database/reminder-sent'
 import { campaignService } from '../database/campaigns'
 import { prayerContentService } from '../database/prayer-content'
@@ -71,31 +71,31 @@ export default defineNitroPlugin((nitroApp) => {
 async function processReminders() {
   const todayDate = new Date().toISOString().split('T')[0]
 
-  // Get all signups that are due for a reminder
-  const dueSignups = await reminderSignupService.getSignupsDueForReminder()
+  // Get all subscriptions that are due for a reminder (with verified email)
+  const dueSubscriptions = await campaignSubscriptionService.getSubscriptionsDueForReminder()
 
-  if (dueSignups.length === 0) {
+  if (dueSubscriptions.length === 0) {
     return
   }
 
-  console.log(`📧 Processing ${dueSignups.length} reminder(s)...`)
+  console.log(`📧 Processing ${dueSubscriptions.length} reminder(s)...`)
 
-  // Group signups by campaign_id for efficient content fetching
-  const signupsByCampaign = new Map<number, typeof dueSignups>()
-  for (const signup of dueSignups) {
-    if (!signupsByCampaign.has(signup.campaign_id)) {
-      signupsByCampaign.set(signup.campaign_id, [])
+  // Group subscriptions by campaign_id for efficient content fetching
+  const subscriptionsByCampaign = new Map<number, typeof dueSubscriptions>()
+  for (const subscription of dueSubscriptions) {
+    if (!subscriptionsByCampaign.has(subscription.campaign_id)) {
+      subscriptionsByCampaign.set(subscription.campaign_id, [])
     }
-    signupsByCampaign.get(signup.campaign_id)!.push(signup)
+    subscriptionsByCampaign.get(subscription.campaign_id)!.push(subscription)
   }
 
-  // Process each campaign's signups
-  for (const [campaignId, signups] of signupsByCampaign) {
+  // Process each campaign's subscriptions
+  for (const [campaignId, subscriptions] of subscriptionsByCampaign) {
     try {
       // Get campaign info
       const campaign = await campaignService.getCampaignById(campaignId)
       if (!campaign) {
-        console.error(`Campaign ${campaignId} not found, skipping ${signups.length} signups`)
+        console.error(`Campaign ${campaignId} not found, skipping ${subscriptions.length} subscriptions`)
         continue
       }
 
@@ -106,39 +106,39 @@ async function processReminders() {
         campaign.default_language || 'en'
       )
 
-      // Send reminder to each signup
-      for (const signup of signups) {
+      // Send reminder to each subscription
+      for (const subscription of subscriptions) {
         try {
           // Check if we already sent today (double-check to prevent duplicates)
-          const alreadySent = await reminderSentService.wasSent(signup.id, todayDate)
+          const alreadySent = await reminderSentService.wasSent(subscription.id, todayDate)
           if (alreadySent) {
             // Update next reminder time anyway
-            await reminderSignupService.setNextReminderAfterSend(signup.id)
+            await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
             continue
           }
 
           // Send the email
           const emailSent = await sendPrayerReminderEmail({
-            to: signup.email,
-            subscriberName: signup.name,
-            campaignTitle: campaign.title,
-            campaignSlug: campaign.slug,
-            trackingId: signup.tracking_id,
-            prayerDuration: signup.prayer_duration,
+            to: subscription.email_value,
+            subscriberName: subscription.subscriber_name,
+            campaignTitle: subscription.campaign_title,
+            campaignSlug: subscription.campaign_slug,
+            trackingId: subscription.subscriber_tracking_id,
+            prayerDuration: subscription.prayer_duration,
             prayerContent: prayerContent.length > 0 ? prayerContent : null
           })
 
           if (emailSent) {
             // Record that we sent this reminder
-            await reminderSentService.recordSent(signup.id, todayDate)
+            await reminderSentService.recordSent(subscription.id, todayDate)
             // Update next reminder time
-            await reminderSignupService.setNextReminderAfterSend(signup.id)
-            console.log(`  ✅ Sent reminder to ${signup.email} for ${campaign.title}`)
+            await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
+            console.log(`  ✅ Sent reminder to ${subscription.email_value} for ${subscription.campaign_title}`)
           } else {
-            console.error(`  ❌ Failed to send reminder to ${signup.email}`)
+            console.error(`  ❌ Failed to send reminder to ${subscription.email_value}`)
           }
         } catch (error: any) {
-          console.error(`  ❌ Error processing signup ${signup.id}:`, error.message)
+          console.error(`  ❌ Error processing subscription ${subscription.id}:`, error.message)
         }
       }
     } catch (error: any) {

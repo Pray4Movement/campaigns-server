@@ -128,7 +128,7 @@ class ReminderSignupService {
   async updateSignupStatus(id: number, status: 'active' | 'inactive' | 'unsubscribed'): Promise<ReminderSignup | null> {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
-      SET status = ?, updated_at = CURRENT_TIMESTAMP
+      SET status = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
     await stmt.run(status, id)
@@ -139,7 +139,7 @@ class ReminderSignupService {
   async unsubscribeByTrackingId(tracking_id: string): Promise<boolean> {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
-      SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP
+      SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE tracking_id = ?
     `)
     const result = await stmt.run(tracking_id)
@@ -150,7 +150,7 @@ class ReminderSignupService {
   async resubscribe(signupId: number): Promise<boolean> {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
-      SET status = 'active', updated_at = CURRENT_TIMESTAMP
+      SET status = 'active', updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
     const result = await stmt.run(signupId)
@@ -188,7 +188,7 @@ class ReminderSignupService {
 
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
-      SET verification_token = ?, verification_token_expires_at = ?, updated_at = CURRENT_TIMESTAMP
+      SET verification_token = ?, verification_token_expires_at = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
     await stmt.run(token, expiresAt, signupId)
@@ -228,10 +228,10 @@ class ReminderSignupService {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
       SET email_verified = true,
-          verified_at = CURRENT_TIMESTAMP,
+          verified_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
           verification_token = NULL,
           verification_token_expires_at = NULL,
-          updated_at = CURRENT_TIMESTAMP
+          updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
     await stmt.run(signup.id)
@@ -252,7 +252,7 @@ class ReminderSignupService {
   async getSignupsDueForReminder(): Promise<ReminderSignup[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM reminder_signups
-      WHERE next_reminder_utc <= CURRENT_TIMESTAMP
+      WHERE next_reminder_utc <= CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
         AND status = 'active'
         AND email_verified = true
         AND delivery_method = 'email'
@@ -265,7 +265,7 @@ class ReminderSignupService {
   async updateNextReminderUtc(signupId: number, nextUtc: Date): Promise<void> {
     const stmt = this.db.prepare(`
       UPDATE reminder_signups
-      SET next_reminder_utc = ?, updated_at = CURRENT_TIMESTAMP
+      SET next_reminder_utc = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
     await stmt.run(nextUtc.toISOString(), signupId)
@@ -371,7 +371,7 @@ class ReminderSignupService {
       return { signup, emailChanged: false }
     }
 
-    fields.push('updated_at = CURRENT_TIMESTAMP')
+    fields.push("updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")
     values.push(signupId)
 
     const stmt = this.db.prepare(`

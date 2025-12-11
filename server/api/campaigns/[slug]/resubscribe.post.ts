@@ -1,5 +1,6 @@
 import { campaignService } from '#server/database/campaigns'
-import { reminderSignupService } from '#server/database/reminder-signups'
+import { subscriberService } from '#server/database/subscribers'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -30,25 +31,31 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the signup to verify it belongs to this campaign
-  const signup = await reminderSignupService.getSignupByTrackingId(trackingId)
+  // Get the subscriber by tracking ID
+  const subscriber = await subscriberService.getSubscriberByTrackingId(trackingId)
 
-  if (!signup) {
+  if (!subscriber) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Subscription not found'
     })
   }
 
-  if (signup.campaign_id !== campaign.id) {
+  // Get the subscription for this campaign
+  const subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+    subscriber.id,
+    campaign.id
+  )
+
+  if (!subscription) {
     throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid link for this campaign'
+      statusCode: 404,
+      statusMessage: 'You are not subscribed to this campaign'
     })
   }
 
   // Check if already active
-  if (signup.status === 'active') {
+  if (subscription.status === 'active') {
     return {
       success: true,
       message: 'Subscription is already active',
@@ -59,7 +66,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Reactivate the subscription
-  const result = await reminderSignupService.resubscribe(signup.id)
+  const result = await campaignSubscriptionService.resubscribe(subscription.id)
 
   if (!result) {
     throw createError({

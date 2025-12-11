@@ -1,5 +1,6 @@
 import { campaignService } from '#server/database/campaigns'
-import { reminderSignupService } from '#server/database/reminder-signups'
+import { subscriberService } from '#server/database/subscribers'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -30,25 +31,31 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the signup to verify it belongs to this campaign
-  const signup = await reminderSignupService.getSignupByTrackingId(trackingId)
+  // Get the subscriber by tracking ID
+  const subscriber = await subscriberService.getSubscriberByTrackingId(trackingId)
 
-  if (!signup) {
+  if (!subscriber) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Subscription not found'
     })
   }
 
-  if (signup.campaign_id !== campaign.id) {
+  // Get the subscription for this campaign
+  const subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+    subscriber.id,
+    campaign.id
+  )
+
+  if (!subscription) {
     throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid unsubscribe link for this campaign'
+      statusCode: 404,
+      statusMessage: 'You are not subscribed to this campaign'
     })
   }
 
   // Check if already unsubscribed
-  if (signup.status === 'unsubscribed') {
+  if (subscription.status === 'unsubscribed') {
     return {
       success: true,
       message: 'You have already been unsubscribed',
@@ -58,8 +65,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Unsubscribe the user
-  const result = await reminderSignupService.unsubscribeByTrackingId(trackingId)
+  // Unsubscribe from this campaign
+  const result = await campaignSubscriptionService.unsubscribe(subscription.id)
 
   if (!result) {
     throw createError({

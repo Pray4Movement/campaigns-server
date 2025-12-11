@@ -181,6 +181,16 @@
         "schedule": "Reminder Schedule",
         "prayer": "Prayer Preferences"
       },
+      "subscriptions": "Your Subscriptions",
+      "saveAccount": "Save Account",
+      "unsubscribed": "Unsubscribed",
+      "current": "Current",
+      "viewCampaign": "View Campaign",
+      "unsubscribeButton": "Unsubscribe",
+      "resubscribeButton": "Re-subscribe",
+      "unsubscribeConfirm": "Are you sure you want to unsubscribe from {campaign}?",
+      "unsubscribeSuccess": "You have been unsubscribed.",
+      "resubscribeSuccess": "You have been re-subscribed.",
       "error": {
         "title": "Error",
         "notFound": "Subscription not found.",
@@ -228,6 +238,7 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "minutes": "min"
   }
 }
