@@ -155,6 +155,7 @@
         "title": "Already Unsubscribed",
         "message": "You have already been unsubscribed from this reminder."
       },
+      "unsubscribedFromCampaign": "You have been unsubscribed from all {campaign} reminders.",
       "resubscribed": {
         "title": "Welcome Back!",
         "message": "You have been resubscribed to prayer reminders. You'll receive your next reminder at your scheduled time.",

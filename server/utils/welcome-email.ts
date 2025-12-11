@@ -8,7 +8,7 @@ export async function sendWelcomeEmail(
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const campaignUrl = `${baseUrl}/${campaignSlug}`
-  const profileUrl = `${baseUrl}/${campaignSlug}/profile?id=${trackingId}`
+  const profileUrl = `${baseUrl}/profile?slug=${campaignSlug}&id=${trackingId}`
 
   const html = `
     <!DOCTYPE html>

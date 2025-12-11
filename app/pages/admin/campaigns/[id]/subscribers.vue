@@ -605,7 +605,7 @@ function formatDuration(minutes: number | null): string {
 
 function getProfileUrl(subscriber: Subscriber): string {
   const baseUrl = window.location.origin
-  return `${baseUrl}/${campaign.value?.slug}/profile?id=${subscriber.profile_id}`
+  return `${baseUrl}/profile?slug=${campaign.value?.slug}&id=${subscriber.profile_id}`
 }
 
 async function copyProfileLink(subscriber: Subscriber) {

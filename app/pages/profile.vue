@@ -301,7 +301,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const slug = route.params.slug as string
+const slug = route.query.slug as string
 const profileId = route.query.id as string
 const { t } = useI18n()
 const localePath = useLocalePath()
