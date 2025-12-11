@@ -47,12 +47,20 @@
               {{ subscriber.email || subscriber.phone }}
             </div>
             <div class="subscriber-meta">
-              <UBadge
-                :label="subscriber.delivery_method"
-                :variant="subscriber.delivery_method === 'email' ? 'solid' : 'outline'"
-                :color="subscriber.delivery_method === 'email' ? 'primary' : 'neutral'"
-                size="xs"
-              />
+              <div class="meta-badges">
+                <UBadge
+                  :label="subscriber.delivery_method"
+                  :variant="subscriber.delivery_method === 'email' ? 'solid' : 'outline'"
+                  :color="subscriber.delivery_method === 'email' ? 'primary' : 'neutral'"
+                  size="xs"
+                />
+                <UBadge
+                  :label="subscriber.status"
+                  variant="outline"
+                  :color="subscriber.status === 'active' ? 'neutral' : 'error'"
+                  size="xs"
+                />
+              </div>
               <span class="date">{{ formatDate(subscriber.created_at) }}</span>
             </div>
           </div>
@@ -769,6 +777,11 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   font-size: 0.75rem;
+}
+
+.meta-badges {
+  display: flex;
+  gap: 0.375rem;
 }
 
 .date {
