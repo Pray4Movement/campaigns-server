@@ -91,164 +91,192 @@
         </div>
       </UCard>
 
-      <!-- Campaign Subscriptions -->
+      <!-- Campaign Subscriptions (grouped by campaign) -->
       <div class="space-y-4">
         <h2 class="text-lg font-semibold flex items-center gap-2">
           <UIcon name="i-lucide-bell" class="w-5 h-5" />
           {{ $t('campaign.profile.subscriptions') }}
         </h2>
 
-        <div v-for="subscription in data.subscriptions" :key="subscription.id" class="relative">
-          <UCard :class="{ 'opacity-60': subscription.status === 'unsubscribed' }">
+        <div v-for="campaignGroup in data.campaigns" :key="campaignGroup.id">
+          <UCard>
             <template #header>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <span class="font-medium">{{ subscription.campaign_title }}</span>
+                  <span class="font-medium">{{ campaignGroup.title }}</span>
                   <UBadge
-                    v-if="subscription.status === 'unsubscribed'"
-                    color="neutral"
-                    size="xs"
-                  >
-                    {{ $t('campaign.profile.unsubscribed') }}
-                  </UBadge>
-                  <UBadge
-                    v-else-if="subscription.campaign_id === data.campaign.id"
+                    v-if="campaignGroup.id === data.campaign.id"
                     color="primary"
                     size="xs"
                   >
                     {{ $t('campaign.profile.current') }}
                   </UBadge>
-                </div>
-                <UButton
-                  v-if="editingSubscription !== subscription.id"
-                  variant="ghost"
-                  size="xs"
-                  @click="startEditingSubscription(subscription)"
-                >
-                  <UIcon name="i-lucide-pencil" class="w-4 h-4" />
-                </UButton>
-              </div>
-            </template>
-
-            <!-- View Mode -->
-            <div v-if="editingSubscription !== subscription.id" class="text-sm space-y-2">
-              <div class="flex justify-between">
-                <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.frequency.label') }}:</span>
-                <span>{{ subscription.frequency === 'daily' ? $t('campaign.signup.form.frequency.daily') : $t('campaign.signup.form.frequency.weekly') }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.time.label') }}:</span>
-                <span>{{ subscription.time_preference }} ({{ subscription.timezone }})</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.duration.label') }}:</span>
-                <span>{{ subscription.prayer_duration }} {{ $t('common.minutes') }}</span>
-              </div>
-            </div>
-
-            <!-- Edit Mode -->
-            <div v-else class="space-y-4">
-              <UFormField :label="$t('campaign.signup.form.frequency.label')">
-                <USelect
-                  v-model="subscriptionForm.frequency"
-                  :items="frequencyOptions"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <UFormField v-if="subscriptionForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')">
-                <div class="grid grid-cols-7 gap-1 w-full">
-                  <label
-                    v-for="day in translatedDaysOfWeek"
-                    :key="day.value"
-                    class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
-                    :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': subscriptionForm.days_of_week.includes(day.value) }"
+                  <UBadge
+                    v-if="campaignGroup.reminders.length > 1"
+                    color="neutral"
+                    size="xs"
                   >
-                    <UCheckbox
-                      :model-value="subscriptionForm.days_of_week.includes(day.value)"
-                      @update:model-value="toggleDayOfWeek(day.value)"
-                    />
-                    <span class="text-xs font-medium">{{ day.label }}</span>
-                  </label>
+                    {{ campaignGroup.reminders.length }} {{ $t('campaign.profile.reminders') }}
+                  </UBadge>
                 </div>
-              </UFormField>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <UFormField :label="$t('campaign.signup.form.time.label')">
-                  <UInput
-                    v-model="subscriptionForm.time_preference"
-                    type="time"
-                    required
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField :label="$t('campaign.signup.form.timezone.label')">
-                  <USelectMenu
-                    v-model="subscriptionForm.timezone"
-                    :items="timezoneOptions"
-                    searchable
-                    :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
-                    class="w-full"
-                  />
-                </UFormField>
-              </div>
-
-              <UFormField :label="$t('campaign.signup.form.duration.label')">
-                <USelect
-                  v-model="subscriptionForm.prayer_duration"
-                  :items="durationOptions"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <div class="flex items-center justify-between pt-2">
-                <UButton
-                  variant="ghost"
-                  size="sm"
-                  @click="cancelEditingSubscription"
-                >
-                  {{ $t('common.cancel') }}
-                </UButton>
-                <UButton
-                  @click="saveSubscription(subscription)"
-                  :loading="savingSubscription === subscription.id"
-                  size="sm"
-                >
-                  {{ $t('campaign.profile.save') }}
-                </UButton>
-              </div>
-            </div>
-
-            <template #footer v-if="editingSubscription !== subscription.id">
-              <div class="flex justify-between items-center">
                 <NuxtLink
-                  :to="localePath(`/${subscription.campaign_slug}`)"
-                  class="text-sm text-[var(--ui-text-muted)] hover:underline"
+                  :to="localePath(`/${campaignGroup.slug}`)"
+                  class="text-xs text-[var(--ui-text-muted)] hover:underline"
                 >
                   {{ $t('campaign.profile.viewCampaign') }}
                 </NuxtLink>
-                <UButton
-                  v-if="subscription.status === 'active'"
-                  variant="ghost"
-                  color="error"
-                  size="xs"
-                  @click="confirmUnsubscribe(subscription)"
-                >
-                  {{ $t('campaign.profile.unsubscribeButton') }}
-                </UButton>
-                <UButton
-                  v-else
-                  variant="ghost"
-                  size="xs"
-                  @click="resubscribe(subscription)"
-                >
-                  {{ $t('campaign.profile.resubscribeButton') }}
-                </UButton>
               </div>
             </template>
+
+            <!-- Reminders list -->
+            <div class="space-y-4">
+              <div
+                v-for="(reminder, index) in campaignGroup.reminders"
+                :key="reminder.id"
+                class="p-4 border border-[var(--ui-border)] rounded-lg"
+                :class="{ 'opacity-60': reminder.status === 'unsubscribed' }"
+              >
+                <!-- Reminder header -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">{{ $t('campaign.profile.reminder') }} {{ index + 1 }}</span>
+                    <UBadge
+                      v-if="reminder.status === 'unsubscribed'"
+                      color="neutral"
+                      size="xs"
+                    >
+                      {{ $t('campaign.profile.unsubscribed') }}
+                    </UBadge>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <UButton
+                      v-if="editingReminder !== reminder.id"
+                      variant="ghost"
+                      size="xs"
+                      @click="startEditingReminder(reminder, campaignGroup)"
+                    >
+                      <UIcon name="i-lucide-pencil" class="w-4 h-4" />
+                    </UButton>
+                    <UButton
+                      v-if="reminder.status === 'active' && editingReminder !== reminder.id"
+                      variant="ghost"
+                      color="error"
+                      size="xs"
+                      @click="confirmDeleteReminder(reminder, campaignGroup)"
+                    >
+                      <UIcon name="i-lucide-trash-2" class="w-4 h-4" />
+                    </UButton>
+                  </div>
+                </div>
+
+                <!-- View Mode -->
+                <div v-if="editingReminder !== reminder.id" class="text-sm space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.frequency.label') }}:</span>
+                    <span>{{ reminder.frequency === 'daily' ? $t('campaign.signup.form.frequency.daily') : $t('campaign.signup.form.frequency.weekly') }}</span>
+                  </div>
+                  <div v-if="reminder.frequency === 'weekly'" class="flex justify-between">
+                    <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.daysOfWeek.label') }}:</span>
+                    <span>{{ formatDaysOfWeek(reminder.days_of_week) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.time.label') }}:</span>
+                    <span>{{ reminder.time_preference }} ({{ reminder.timezone }})</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-[var(--ui-text-muted)]">{{ $t('campaign.signup.form.duration.label') }}:</span>
+                    <span>{{ reminder.prayer_duration }} {{ $t('common.minutes') }}</span>
+                  </div>
+
+                  <!-- Resubscribe button for unsubscribed reminders -->
+                  <div v-if="reminder.status === 'unsubscribed'" class="pt-2">
+                    <UButton
+                      variant="outline"
+                      size="xs"
+                      @click="resubscribeReminder(reminder, campaignGroup)"
+                    >
+                      {{ $t('campaign.profile.resubscribeButton') }}
+                    </UButton>
+                  </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div v-else class="space-y-4">
+                  <UFormField :label="$t('campaign.signup.form.frequency.label')">
+                    <USelect
+                      v-model="reminderForm.frequency"
+                      :items="frequencyOptions"
+                      required
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UFormField v-if="reminderForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')">
+                    <div class="grid grid-cols-7 gap-1 w-full">
+                      <label
+                        v-for="day in translatedDaysOfWeek"
+                        :key="day.value"
+                        class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
+                        :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': reminderForm.days_of_week.includes(day.value) }"
+                      >
+                        <UCheckbox
+                          :model-value="reminderForm.days_of_week.includes(day.value)"
+                          @update:model-value="toggleDayOfWeek(day.value)"
+                        />
+                        <span class="text-xs font-medium">{{ day.label }}</span>
+                      </label>
+                    </div>
+                  </UFormField>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <UFormField :label="$t('campaign.signup.form.time.label')">
+                      <UInput
+                        v-model="reminderForm.time_preference"
+                        type="time"
+                        required
+                        class="w-full"
+                      />
+                    </UFormField>
+
+                    <UFormField :label="$t('campaign.signup.form.timezone.label')">
+                      <USelectMenu
+                        v-model="reminderForm.timezone"
+                        :items="timezoneOptions"
+                        searchable
+                        :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
+                        class="w-full"
+                      />
+                    </UFormField>
+                  </div>
+
+                  <UFormField :label="$t('campaign.signup.form.duration.label')">
+                    <USelect
+                      v-model="reminderForm.prayer_duration"
+                      :items="durationOptions"
+                      required
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <div class="flex items-center justify-between pt-2">
+                    <UButton
+                      variant="ghost"
+                      size="sm"
+                      @click="cancelEditingReminder"
+                    >
+                      {{ $t('common.cancel') }}
+                    </UButton>
+                    <UButton
+                      @click="saveReminder(reminder, campaignGroup)"
+                      :loading="savingReminder === reminder.id"
+                      size="sm"
+                    >
+                      {{ $t('campaign.profile.save') }}
+                    </UButton>
+                  </div>
+                </div>
+              </div>
+            </div>
           </UCard>
         </div>
       </div>
@@ -291,8 +319,8 @@ const globalForm = ref({
   email_verified: true
 })
 
-// Subscription form state (for editing individual subscriptions)
-const subscriptionForm = ref({
+// Reminder form state (for editing individual reminders)
+const reminderForm = ref({
   frequency: 'daily',
   days_of_week: [] as number[],
   time_preference: '09:00',
@@ -301,9 +329,10 @@ const subscriptionForm = ref({
 })
 
 // Edit state
-const editingSubscription = ref<number | null>(null)
+const editingReminder = ref<number | null>(null)
+const editingCampaignSlug = ref<string | null>(null)
 const savingGlobal = ref(false)
-const savingSubscription = ref<number | null>(null)
+const savingReminder = ref<number | null>(null)
 const saveSuccess = ref(false)
 const saveError = ref('')
 const successMessage = ref('')
@@ -363,27 +392,34 @@ const timezoneOptions = [
 ]
 
 function toggleDayOfWeek(day: number) {
-  const index = subscriptionForm.value.days_of_week.indexOf(day)
+  const index = reminderForm.value.days_of_week.indexOf(day)
   if (index === -1) {
-    subscriptionForm.value.days_of_week.push(day)
+    reminderForm.value.days_of_week.push(day)
   } else {
-    subscriptionForm.value.days_of_week.splice(index, 1)
+    reminderForm.value.days_of_week.splice(index, 1)
   }
 }
 
-function startEditingSubscription(subscription: any) {
-  editingSubscription.value = subscription.id
-  subscriptionForm.value = {
-    frequency: subscription.frequency,
-    days_of_week: subscription.days_of_week || [],
-    time_preference: subscription.time_preference,
-    timezone: subscription.timezone,
-    prayer_duration: subscription.prayer_duration
+function formatDaysOfWeek(days: number[]) {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  return days.map(d => dayNames[d]).join(', ')
+}
+
+function startEditingReminder(reminder: any, campaignGroup: any) {
+  editingReminder.value = reminder.id
+  editingCampaignSlug.value = campaignGroup.slug
+  reminderForm.value = {
+    frequency: reminder.frequency,
+    days_of_week: reminder.days_of_week || [],
+    time_preference: reminder.time_preference,
+    timezone: reminder.timezone,
+    prayer_duration: reminder.prayer_duration
   }
 }
 
-function cancelEditingSubscription() {
-  editingSubscription.value = null
+function cancelEditingReminder() {
+  editingReminder.value = null
+  editingCampaignSlug.value = null
 }
 
 async function saveGlobalSettings() {
@@ -422,32 +458,34 @@ async function saveGlobalSettings() {
   }
 }
 
-async function saveSubscription(subscription: any) {
-  if (subscriptionForm.value.frequency === 'weekly' && subscriptionForm.value.days_of_week.length === 0) {
+async function saveReminder(reminder: any, campaignGroup: any) {
+  if (reminderForm.value.frequency === 'weekly' && reminderForm.value.days_of_week.length === 0) {
     saveError.value = t('campaign.signup.form.daysOfWeek.error')
     return
   }
 
-  savingSubscription.value = subscription.id
+  savingReminder.value = reminder.id
   saveSuccess.value = false
   saveError.value = ''
 
   try {
-    await $fetch(`/api/campaigns/${subscription.campaign_slug}/profile`, {
+    await $fetch(`/api/campaigns/${campaignGroup.slug}/profile`, {
       method: 'PUT',
       body: {
         tracking_id: trackingId,
-        frequency: subscriptionForm.value.frequency,
-        days_of_week: subscriptionForm.value.days_of_week,
-        time_preference: subscriptionForm.value.time_preference,
-        timezone: subscriptionForm.value.timezone,
-        prayer_duration: subscriptionForm.value.prayer_duration
+        subscription_id: reminder.id,
+        frequency: reminderForm.value.frequency,
+        days_of_week: reminderForm.value.days_of_week,
+        time_preference: reminderForm.value.time_preference,
+        timezone: reminderForm.value.timezone,
+        prayer_duration: reminderForm.value.prayer_duration
       }
     })
 
     successMessage.value = t('campaign.profile.success')
     saveSuccess.value = true
-    editingSubscription.value = null
+    editingReminder.value = null
+    editingCampaignSlug.value = null
 
     toast.add({ title: successMessage.value, color: 'success' })
 
@@ -457,22 +495,23 @@ async function saveSubscription(subscription: any) {
   } catch (err: any) {
     saveError.value = err.data?.statusMessage || err.message || t('campaign.profile.error.failed')
   } finally {
-    savingSubscription.value = null
+    savingReminder.value = null
   }
 }
 
-async function confirmUnsubscribe(subscription: any) {
-  if (!confirm(t('campaign.profile.unsubscribeConfirm', { campaign: subscription.campaign_title }))) {
+async function confirmDeleteReminder(reminder: any, campaignGroup: any) {
+  if (!confirm(t('campaign.profile.deleteReminderConfirm'))) {
     return
   }
 
   try {
-    await $fetch(`/api/campaigns/${subscription.campaign_slug}/unsubscribe`, {
+    await $fetch(`/api/campaigns/${campaignGroup.slug}/reminder/${reminder.id}`, {
+      method: 'DELETE',
       query: { id: trackingId }
     })
 
     toast.add({
-      title: t('campaign.profile.unsubscribeSuccess'),
+      title: t('campaign.profile.deleteReminderSuccess'),
       color: 'success'
     })
 
@@ -485,11 +524,11 @@ async function confirmUnsubscribe(subscription: any) {
   }
 }
 
-async function resubscribe(subscription: any) {
+async function resubscribeReminder(reminder: any, campaignGroup: any) {
   try {
-    await $fetch(`/api/campaigns/${subscription.campaign_slug}/resubscribe`, {
+    await $fetch(`/api/campaigns/${campaignGroup.slug}/resubscribe`, {
       method: 'POST',
-      body: { tracking_id: trackingId }
+      body: { tracking_id: trackingId, subscription_id: reminder.id }
     })
 
     toast.add({

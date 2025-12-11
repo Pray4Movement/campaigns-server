@@ -42,7 +42,7 @@
       "modal": {
         "title": "Vérifiez vos E-mails",
         "message": "Nous avons envoyé un lien de vérification à :",
-        "hint": "Cliquez sur le lien dans l'e-mail pour finaliser votre inscription. N'oubliez pas de vérifier votre dossier spam.",
+        "hint": "Cliquez sur le lien dans l'e-mail pour finaliser votre inscription. N'oubliez pas de vérifier votre dossier spam. Si votre e-mail est déjà vérifié, vous recevrez un e-mail de confirmation.",
         "button": "Compris"
       },
       "form": {
@@ -135,6 +135,73 @@
       },
       "backToCampaign": "Retour à la Campagne",
       "startPraying": "Commencer à Prier"
+    },
+    "unsubscribe": {
+      "pageTitle": "Se Désabonner",
+      "processing": "Traitement de votre demande...",
+      "success": {
+        "title": "Désabonné",
+        "message": "Vous avez été désabonné de ce rappel.",
+        "campaign": "Campagne : {title}",
+        "resubscribe": "Se Réabonner",
+        "resubscribing": "Réabonnement..."
+      },
+      "alreadyDone": {
+        "title": "Déjà Désabonné",
+        "message": "Vous avez déjà été désabonné de ce rappel."
+      },
+      "resubscribed": {
+        "title": "Bon Retour !",
+        "message": "Vous avez été réabonné aux rappels de prière. Vous recevrez votre prochain rappel à l'heure prévue.",
+        "viewCampaign": "Voir la Campagne"
+      },
+      "error": {
+        "title": "Erreur",
+        "message": "Une erreur s'est produite. Veuillez réessayer.",
+        "goHome": "Retour à l'Accueil"
+      },
+      "otherReminders": "Vous avez d'autres rappels pour cette campagne :",
+      "unsubscribeThis": "Désabonner",
+      "unsubscribeAll": "Se Désabonner de Tous",
+      "reminderFormat": {
+        "daily": "Quotidien à {time}",
+        "weekly": "{days} à {time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "Gérer les Préférences",
+      "title": "Paramètres de Rappel",
+      "greeting": "Bonjour {name}, gérez vos préférences de rappels de prière ci-dessous.",
+      "save": "Enregistrer les Modifications",
+      "saving": "Enregistrement...",
+      "success": "Vos préférences ont été mises à jour.",
+      "emailChanged": "Nous avons envoyé un e-mail de vérification à votre nouvelle adresse. Veuillez le vérifier pour continuer à recevoir des rappels.",
+      "emailNotVerified": "Votre e-mail n'est pas vérifié. Veuillez vérifier votre boîte de réception pour le lien de vérification.",
+      "emailHint": "La modification de votre e-mail nécessitera une nouvelle vérification.",
+      "sections": {
+        "account": "Compte",
+        "schedule": "Horaire des Rappels",
+        "prayer": "Préférences de Prière"
+      },
+      "subscriptions": "Vos Abonnements",
+      "saveAccount": "Enregistrer le Compte",
+      "unsubscribed": "Désabonné",
+      "current": "Actuel",
+      "viewCampaign": "Voir la Campagne",
+      "unsubscribeButton": "Se Désabonner",
+      "resubscribeButton": "Se Réabonner",
+      "unsubscribeConfirm": "Êtes-vous sûr de vouloir vous désabonner de {campaign} ?",
+      "unsubscribeSuccess": "Vous avez été désabonné.",
+      "resubscribeSuccess": "Vous avez été réabonné.",
+      "reminders": "rappels",
+      "reminder": "Rappel",
+      "deleteReminderConfirm": "Êtes-vous sûr de vouloir supprimer ce rappel ?",
+      "deleteReminderSuccess": "Rappel supprimé.",
+      "error": {
+        "title": "Erreur",
+        "notFound": "Abonnement introuvable.",
+        "failed": "Échec de l'enregistrement des modifications. Veuillez réessayer."
+      }
     }
   },
   "prayerFuel": {

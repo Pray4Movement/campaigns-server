@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   const query = getQuery(event)
   const trackingId = query.id as string
+  const subscriptionId = query.sid ? Number(query.sid) : null
 
   if (!slug) {
     throw createError({
@@ -41,32 +42,78 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the subscription for this campaign
-  const subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+  // Get all subscriptions for this subscriber/campaign
+  const allSubscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
     subscriber.id,
     campaign.id
   )
 
-  if (!subscription) {
+  if (allSubscriptions.length === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'You are not subscribed to this campaign'
     })
   }
 
-  // Check if already unsubscribed
-  if (subscription.status === 'unsubscribed') {
+  // Find the specific subscription to unsubscribe
+  let subscriptionToUnsubscribe = subscriptionId
+    ? allSubscriptions.find(s => s.id === subscriptionId)
+    : allSubscriptions.find(s => s.status === 'active') // Fallback to first active if no sid
+
+  if (!subscriptionToUnsubscribe) {
+    // All subscriptions might be already unsubscribed
+    const otherReminders = allSubscriptions
+      .filter(s => s.status === 'active')
+      .map(s => ({
+        id: s.id,
+        frequency: s.frequency,
+        days_of_week: s.days_of_week ? JSON.parse(s.days_of_week) : [],
+        time_preference: s.time_preference,
+        timezone: s.timezone
+      }))
+
     return {
       success: true,
       message: 'You have already been unsubscribed',
       already_unsubscribed: true,
       campaign_title: campaign.title,
-      campaign_slug: slug
+      campaign_slug: slug,
+      unsubscribed_reminder: null,
+      other_reminders: otherReminders
     }
   }
 
-  // Unsubscribe from this campaign
-  const result = await campaignSubscriptionService.unsubscribe(subscription.id)
+  // Check if this specific subscription is already unsubscribed
+  if (subscriptionToUnsubscribe.status === 'unsubscribed') {
+    const otherReminders = allSubscriptions
+      .filter(s => s.id !== subscriptionToUnsubscribe!.id && s.status === 'active')
+      .map(s => ({
+        id: s.id,
+        frequency: s.frequency,
+        days_of_week: s.days_of_week ? JSON.parse(s.days_of_week) : [],
+        time_preference: s.time_preference,
+        timezone: s.timezone
+      }))
+
+    return {
+      success: true,
+      message: 'You have already been unsubscribed from this reminder',
+      already_unsubscribed: true,
+      campaign_title: campaign.title,
+      campaign_slug: slug,
+      unsubscribed_reminder: {
+        id: subscriptionToUnsubscribe.id,
+        frequency: subscriptionToUnsubscribe.frequency,
+        days_of_week: subscriptionToUnsubscribe.days_of_week ? JSON.parse(subscriptionToUnsubscribe.days_of_week) : [],
+        time_preference: subscriptionToUnsubscribe.time_preference,
+        timezone: subscriptionToUnsubscribe.timezone
+      },
+      other_reminders: otherReminders
+    }
+  }
+
+  // Unsubscribe from this specific reminder
+  const result = await campaignSubscriptionService.unsubscribe(subscriptionToUnsubscribe.id)
 
   if (!result) {
     throw createError({
@@ -75,11 +122,30 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Get remaining active reminders
+  const otherReminders = allSubscriptions
+    .filter(s => s.id !== subscriptionToUnsubscribe!.id && s.status === 'active')
+    .map(s => ({
+      id: s.id,
+      frequency: s.frequency,
+      days_of_week: s.days_of_week ? JSON.parse(s.days_of_week) : [],
+      time_preference: s.time_preference,
+      timezone: s.timezone
+    }))
+
   return {
     success: true,
-    message: 'Successfully unsubscribed from prayer reminders',
+    message: 'Successfully unsubscribed from this reminder',
     already_unsubscribed: false,
     campaign_title: campaign.title,
-    campaign_slug: slug
+    campaign_slug: slug,
+    unsubscribed_reminder: {
+      id: subscriptionToUnsubscribe.id,
+      frequency: subscriptionToUnsubscribe.frequency,
+      days_of_week: subscriptionToUnsubscribe.days_of_week ? JSON.parse(subscriptionToUnsubscribe.days_of_week) : [],
+      time_preference: subscriptionToUnsubscribe.time_preference,
+      timezone: subscriptionToUnsubscribe.timezone
+    },
+    other_reminders: otherReminders
   }
 })

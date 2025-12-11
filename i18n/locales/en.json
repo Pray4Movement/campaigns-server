@@ -42,7 +42,7 @@
       "modal": {
         "title": "Check Your Email",
         "message": "We've sent a verification link to:",
-        "hint": "Click the link in the email to complete your signup. Don't forget to check your spam folder.",
+        "hint": "Click the link in the email to complete your signup. Don't forget to check your spam folder. If your email is already verified, you'll receive a confirmation email.",
         "button": "Got It"
       },
       "form": {
@@ -146,14 +146,14 @@
       "processing": "Processing your request...",
       "success": {
         "title": "Unsubscribed",
-        "message": "You have been unsubscribed from prayer reminders.",
+        "message": "You have been unsubscribed from this reminder.",
         "campaign": "Campaign: {title}",
         "resubscribe": "Re-subscribe",
         "resubscribing": "Re-subscribing..."
       },
       "alreadyDone": {
         "title": "Already Unsubscribed",
-        "message": "You have already been unsubscribed from these prayer reminders."
+        "message": "You have already been unsubscribed from this reminder."
       },
       "resubscribed": {
         "title": "Welcome Back!",
@@ -164,6 +164,13 @@
         "title": "Error",
         "message": "Something went wrong. Please try again.",
         "goHome": "Go Home"
+      },
+      "otherReminders": "You have other reminders for this campaign:",
+      "unsubscribeThis": "Unsubscribe",
+      "unsubscribeAll": "Unsubscribe from All",
+      "reminderFormat": {
+        "daily": "Daily at {time}",
+        "weekly": "{days} at {time}"
       }
     },
     "profile": {
@@ -191,6 +198,10 @@
       "unsubscribeConfirm": "Are you sure you want to unsubscribe from {campaign}?",
       "unsubscribeSuccess": "You have been unsubscribed.",
       "resubscribeSuccess": "You have been re-subscribed.",
+      "reminders": "reminders",
+      "reminder": "Reminder",
+      "deleteReminderConfirm": "Are you sure you want to delete this reminder?",
+      "deleteReminderSuccess": "Reminder deleted.",
       "error": {
         "title": "Error",
         "notFound": "Subscription not found.",

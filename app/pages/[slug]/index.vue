@@ -352,7 +352,6 @@ const signupForm = ref({
 
 const submitting = ref(false)
 const signupSuccess = ref(false)
-const signupRequiresVerification = ref(false)
 const signupError = ref('')
 
 // Email verification modal state
@@ -380,7 +379,6 @@ function resetForm() {
     reminder_time: '09:00',
     prayer_duration: 10
   }
-  signupRequiresVerification.value = false
 }
 
 // Close verification modal
@@ -399,7 +397,6 @@ async function handleSignup() {
 
   submitting.value = true
   signupSuccess.value = false
-  signupRequiresVerification.value = false
   signupError.value = ''
 
   try {
@@ -418,18 +415,15 @@ async function handleSignup() {
     })
 
     console.log('Signup successful:', response)
-    signupRequiresVerification.value = response.requires_verification || false
 
-    // For email signups, show verification modal
-    if (signupRequiresVerification.value) {
+    // For email signups, always show verification modal
+    if (signupForm.value.delivery_method === 'email') {
       verificationEmail.value = signupForm.value.email
       showVerificationModal.value = true
-      // Reset form immediately for email signups
       resetForm()
     } else {
       // For non-email signups, show inline success message
       signupSuccess.value = true
-      // Reset form after success
       setTimeout(() => {
         resetForm()
         signupSuccess.value = false

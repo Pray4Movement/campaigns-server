@@ -41,17 +41,30 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get the subscription for this campaign
-  const subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
-    subscriber.id,
-    campaign.id
-  )
+  // Get the subscription - by ID if provided, otherwise find first unsubscribed
+  const subscriptionId = body.subscription_id as number | undefined
+  let subscription
 
-  if (!subscription) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'You are not subscribed to this campaign'
-    })
+  if (subscriptionId) {
+    subscription = await campaignSubscriptionService.getById(subscriptionId)
+    if (!subscription || subscription.subscriber_id !== subscriber.id || subscription.campaign_id !== campaign.id) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Subscription not found'
+      })
+    }
+  } else {
+    // Legacy behavior: find first subscription for this campaign
+    subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+      subscriber.id,
+      campaign.id
+    )
+    if (!subscription) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'You are not subscribed to this campaign'
+      })
+    }
   }
 
   // Check if already active

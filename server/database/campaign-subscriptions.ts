@@ -96,6 +96,52 @@ class CampaignSubscriptionService {
   }
 
   /**
+   * Get all subscriptions for a subscriber on a specific campaign
+   */
+  async getAllBySubscriberAndCampaign(
+    subscriberId: number,
+    campaignId: number
+  ): Promise<CampaignSubscription[]> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM campaign_subscriptions
+      WHERE subscriber_id = ? AND campaign_id = ?
+      ORDER BY created_at ASC
+    `)
+    return await stmt.all(subscriberId, campaignId) as CampaignSubscription[]
+  }
+
+  /**
+   * Count subscriptions for a subscriber on a specific campaign
+   */
+  async countBySubscriberAndCampaign(
+    subscriberId: number,
+    campaignId: number
+  ): Promise<number> {
+    const stmt = this.db.prepare(`
+      SELECT COUNT(*) as count FROM campaign_subscriptions
+      WHERE subscriber_id = ? AND campaign_id = ?
+    `)
+    const result = await stmt.get(subscriberId, campaignId) as { count: number }
+    return result.count
+  }
+
+  /**
+   * Unsubscribe from all subscriptions for a subscriber on a campaign
+   */
+  async unsubscribeAllForCampaign(
+    subscriberId: number,
+    campaignId: number
+  ): Promise<number> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE subscriber_id = ? AND campaign_id = ?
+    `)
+    const result = await stmt.run(subscriberId, campaignId)
+    return result.changes
+  }
+
+  /**
    * Get all subscriptions for a subscriber (with campaign details)
    */
   async getSubscriberSubscriptions(subscriberId: number): Promise<CampaignSubscriptionWithDetails[]> {

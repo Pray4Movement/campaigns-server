@@ -42,7 +42,7 @@
       "modal": {
         "title": "Revise su Correo",
         "message": "Hemos enviado un enlace de verificación a:",
-        "hint": "Haga clic en el enlace del correo para completar su registro. No olvide revisar su carpeta de spam.",
+        "hint": "Haga clic en el enlace del correo para completar su registro. No olvide revisar su carpeta de spam. Si su correo ya está verificado, recibirá un correo de confirmación.",
         "button": "Entendido"
       },
       "form": {
@@ -135,6 +135,73 @@
       },
       "backToCampaign": "Volver a la Campaña",
       "startPraying": "Empezar a Orar"
+    },
+    "unsubscribe": {
+      "pageTitle": "Cancelar Suscripción",
+      "processing": "Procesando su solicitud...",
+      "success": {
+        "title": "Suscripción Cancelada",
+        "message": "Ha cancelado la suscripción a este recordatorio.",
+        "campaign": "Campaña: {title}",
+        "resubscribe": "Re-suscribirse",
+        "resubscribing": "Re-suscribiendo..."
+      },
+      "alreadyDone": {
+        "title": "Ya Cancelado",
+        "message": "Ya ha cancelado la suscripción a este recordatorio."
+      },
+      "resubscribed": {
+        "title": "¡Bienvenido de Nuevo!",
+        "message": "Se ha re-suscrito a los recordatorios de oración. Recibirá su próximo recordatorio en su hora programada.",
+        "viewCampaign": "Ver Campaña"
+      },
+      "error": {
+        "title": "Error",
+        "message": "Algo salió mal. Por favor intente de nuevo.",
+        "goHome": "Ir al Inicio"
+      },
+      "otherReminders": "Tiene otros recordatorios para esta campaña:",
+      "unsubscribeThis": "Cancelar",
+      "unsubscribeAll": "Cancelar Todos",
+      "reminderFormat": {
+        "daily": "Diario a las {time}",
+        "weekly": "{days} a las {time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "Administrar Preferencias",
+      "title": "Configuración de Recordatorios",
+      "greeting": "Hola {name}, administre sus preferencias de recordatorios de oración a continuación.",
+      "save": "Guardar Cambios",
+      "saving": "Guardando...",
+      "success": "Sus preferencias han sido actualizadas.",
+      "emailChanged": "Hemos enviado un correo de verificación a su nueva dirección. Por favor verifíquelo para continuar recibiendo recordatorios.",
+      "emailNotVerified": "Su correo no está verificado. Por favor revise su bandeja de entrada para el enlace de verificación.",
+      "emailHint": "Cambiar su correo requerirá re-verificación.",
+      "sections": {
+        "account": "Cuenta",
+        "schedule": "Horario de Recordatorios",
+        "prayer": "Preferencias de Oración"
+      },
+      "subscriptions": "Sus Suscripciones",
+      "saveAccount": "Guardar Cuenta",
+      "unsubscribed": "Cancelado",
+      "current": "Actual",
+      "viewCampaign": "Ver Campaña",
+      "unsubscribeButton": "Cancelar Suscripción",
+      "resubscribeButton": "Re-suscribirse",
+      "unsubscribeConfirm": "¿Está seguro de que desea cancelar la suscripción a {campaign}?",
+      "unsubscribeSuccess": "Ha cancelado la suscripción.",
+      "resubscribeSuccess": "Se ha re-suscrito.",
+      "reminders": "recordatorios",
+      "reminder": "Recordatorio",
+      "deleteReminderConfirm": "¿Está seguro de que desea eliminar este recordatorio?",
+      "deleteReminderSuccess": "Recordatorio eliminado.",
+      "error": {
+        "title": "Error",
+        "notFound": "Suscripción no encontrada.",
+        "failed": "Error al guardar los cambios. Por favor intente de nuevo."
+      }
     }
   },
   "prayerFuel": {

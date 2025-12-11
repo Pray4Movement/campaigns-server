@@ -43,16 +43,29 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get subscriber's subscription for this campaign
-  const subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+  // Get subscriber's subscriptions for this campaign
+  const subscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
     subscriber.id,
     campaign.id
   )
 
-  if (!subscription) {
+  if (subscriptions.length === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'You are not subscribed to this campaign'
+    })
+  }
+
+  // Find the specific subscription to update (by subscription_id or default to first)
+  const subscriptionId = body.subscription_id as number | undefined
+  const subscription = subscriptionId
+    ? subscriptions.find(s => s.id === subscriptionId)
+    : subscriptions[0]
+
+  if (!subscription) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Subscription not found'
     })
   }
 

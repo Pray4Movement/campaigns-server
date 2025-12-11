@@ -60,7 +60,36 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Return subscriber info + all subscriptions
+  // Group subscriptions by campaign
+  const subscriptionsByCampaign = new Map<number, typeof allSubscriptions>()
+  for (const sub of allSubscriptions) {
+    if (!subscriptionsByCampaign.has(sub.campaign_id)) {
+      subscriptionsByCampaign.set(sub.campaign_id, [])
+    }
+    subscriptionsByCampaign.get(sub.campaign_id)!.push(sub)
+  }
+
+  // Build campaigns array with reminders
+  const campaigns = Array.from(subscriptionsByCampaign.entries()).map(([campaignId, subs]) => ({
+    id: campaignId,
+    title: subs[0].campaign_title,
+    slug: subs[0].campaign_slug,
+    reminders: subs.map(sub => ({
+      id: sub.id,
+      delivery_method: sub.delivery_method,
+      frequency: sub.frequency,
+      days_of_week: sub.days_of_week ? JSON.parse(sub.days_of_week) : [],
+      time_preference: sub.time_preference,
+      timezone: sub.timezone,
+      prayer_duration: sub.prayer_duration,
+      status: sub.status
+    }))
+  }))
+
+  // Find current campaign's reminders
+  const currentCampaignReminders = campaigns.find(c => c.id === campaign.id)?.reminders || []
+
+  // Return subscriber info + all subscriptions grouped by campaign
   return {
     subscriber: {
       id: subscriber.id,
@@ -76,30 +105,9 @@ export default defineEventHandler(async (event) => {
       title: campaign.title,
       slug: campaign.slug
     },
-    // Current campaign's subscription
-    currentSubscription: {
-      id: currentSubscription.id,
-      delivery_method: currentSubscription.delivery_method,
-      frequency: currentSubscription.frequency,
-      days_of_week: currentSubscription.days_of_week ? JSON.parse(currentSubscription.days_of_week) : [],
-      time_preference: currentSubscription.time_preference,
-      timezone: currentSubscription.timezone,
-      prayer_duration: currentSubscription.prayer_duration,
-      status: currentSubscription.status
-    },
-    // All subscriptions for unified profile view
-    subscriptions: allSubscriptions.map(sub => ({
-      id: sub.id,
-      campaign_id: sub.campaign_id,
-      campaign_title: sub.campaign_title,
-      campaign_slug: sub.campaign_slug,
-      delivery_method: sub.delivery_method,
-      frequency: sub.frequency,
-      days_of_week: sub.days_of_week ? JSON.parse(sub.days_of_week) : [],
-      time_preference: sub.time_preference,
-      timezone: sub.timezone,
-      prayer_duration: sub.prayer_duration,
-      status: sub.status
-    }))
+    // Current campaign's reminders (for backwards compatibility and convenience)
+    currentReminders: currentCampaignReminders,
+    // All campaigns with their reminders (grouped)
+    campaigns
   }
 })
