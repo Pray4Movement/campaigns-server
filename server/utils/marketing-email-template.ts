@@ -27,7 +27,8 @@ function renderNode(node: any): string {
       return `<p style="margin: 16px 0; font-size: 16px; line-height: 1.6; color: #3B463D;">${pContent}</p>`
 
     case 'heading':
-      const level = node.attrs?.level || 2
+      const rawLevel = node.attrs?.level
+      const level = (typeof rawLevel === 'number' && rawLevel >= 1 && rawLevel <= 6) ? rawLevel : 2
       const hContent = node.content ? renderNodes(node.content) : ''
       const sizes: Record<number, string> = { 1: '24px', 2: '20px', 3: '18px', 4: '16px', 5: '14px', 6: '12px' }
       return `<h${level} style="margin: 24px 0 16px; font-size: ${sizes[level] || '18px'}; font-weight: 600; color: #3B463D;">${hContent}</h${level}>`

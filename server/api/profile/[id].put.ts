@@ -136,6 +136,21 @@ export default defineEventHandler(async (event) => {
   // Handle subscription-specific updates (requires subscription_id)
   let updatedSubscription = null
   if (body.subscription_id) {
+    // Security: Verify subscription belongs to this subscriber
+    const subscription = await campaignSubscriptionService.getById(body.subscription_id)
+    if (!subscription) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Subscription not found'
+      })
+    }
+    if (subscription.subscriber_id !== subscriber.id) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Unauthorized: Subscription does not belong to this profile'
+      })
+    }
+
     const subscriptionUpdates: {
       delivery_method?: 'email' | 'whatsapp' | 'app'
       frequency?: string
