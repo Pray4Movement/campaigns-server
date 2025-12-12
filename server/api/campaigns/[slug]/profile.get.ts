@@ -89,6 +89,16 @@ export default defineEventHandler(async (event) => {
   // Find current campaign's reminders
   const currentCampaignReminders = campaigns.find(c => c.id === campaign.id)?.reminders || []
 
+  // Build consent information (from primary contact method)
+  const consents = {
+    doxa_general: primaryEmail?.consent_doxa_general || false,
+    doxa_general_at: primaryEmail?.consent_doxa_general_at || null,
+    campaigns: (primaryEmail?.consented_campaign_ids || []).map(campaignId => ({
+      campaign_id: campaignId,
+      consented_at: primaryEmail?.consented_campaign_ids_at?.[String(campaignId)] || null
+    }))
+  }
+
   // Return subscriber info + all subscriptions grouped by campaign
   return {
     subscriber: {
@@ -108,6 +118,8 @@ export default defineEventHandler(async (event) => {
     // Current campaign's reminders (for backwards compatibility and convenience)
     currentReminders: currentCampaignReminders,
     // All campaigns with their reminders (grouped)
-    campaigns
+    campaigns,
+    // Consent preferences
+    consents
   }
 })

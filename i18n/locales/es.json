@@ -96,7 +96,12 @@
           "60min": "1 hora"
         },
         "submit": "Comprometerse a Orar",
-        "submitting": "Uniéndose..."
+        "submitting": "Uniéndose...",
+        "consent": {
+          "description": "Manténgase conectado (opcional):",
+          "campaignUpdates": "Envíeme actualizaciones sobre {campaign}",
+          "doxaGeneral": "Recibir noticias y actualizaciones de Doxa"
+        }
       },
       "errors": {
         "invalidPhone": "Por favor ingrese un número de teléfono válido",
@@ -181,8 +186,16 @@
       "sections": {
         "account": "Cuenta",
         "schedule": "Horario de Recordatorios",
-        "prayer": "Preferencias de Oración"
+        "prayer": "Preferencias de Oración",
+        "emailPreferences": "Preferencias de Comunicación"
       },
+      "emailPreferences": {
+        "description": "Elija qué comunicaciones desea recibir:",
+        "campaignUpdates": "Actualizaciones sobre {campaign}",
+        "doxaGeneral": "Actualizaciones generales de Doxa",
+        "doxaGeneralHint": "Noticias y actualizaciones de Doxa"
+      },
+      "consentUpdated": "Preferencias de comunicación actualizadas.",
       "subscriptions": "Sus Suscripciones",
       "saveAccount": "Guardar Cuenta",
       "unsubscribed": "Cancelado",

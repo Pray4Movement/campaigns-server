@@ -132,7 +132,7 @@ export default defineEventHandler(async (event) => {
       if (currentEmail) {
         // Update existing email contact (resets verification)
         await contactMethodService.updateContactMethod(currentEmail.id, { value: newEmail })
-        newEmailContact = await contactMethodService.getById(currentEmail.id)
+        newEmailContact = await contactMethodService.getById(currentEmail.id) ?? undefined
       } else {
         // Create new email contact
         newEmailContact = await contactMethodService.addContactMethod(subscriber.id, 'email', newEmail)
@@ -150,6 +150,21 @@ export default defineEventHandler(async (event) => {
           campaign.title,
           body.name?.trim() || subscriber.name
         )
+      }
+    }
+  }
+
+  // Handle consent updates (stored on contact method)
+  if (currentEmail) {
+    if (body.consent_doxa_general !== undefined) {
+      await contactMethodService.updateDoxaConsent(currentEmail.id, body.consent_doxa_general)
+    }
+
+    if (body.consent_campaign_updates !== undefined) {
+      if (body.consent_campaign_updates) {
+        await contactMethodService.addCampaignConsent(currentEmail.id, campaign.id)
+      } else {
+        await contactMethodService.removeCampaignConsent(currentEmail.id, campaign.id)
       }
     }
   }
@@ -184,6 +199,12 @@ export default defineEventHandler(async (event) => {
   const updatedContacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
   const updatedEmail = updatedContacts.find(c => c.type === 'email')
 
+  // Build consent state for response (from contact method)
+  const consents = {
+    doxa_general: updatedEmail?.consent_doxa_general || false,
+    campaign_updates: (updatedEmail?.consented_campaign_ids || []).includes(campaign.id)
+  }
+
   return {
     success: true,
     email_changed: emailChanged,
@@ -203,6 +224,7 @@ export default defineEventHandler(async (event) => {
       timezone: updatedSubscription.timezone,
       prayer_duration: updatedSubscription.prayer_duration,
       status: updatedSubscription.status
-    }
+    },
+    consents
   }
 })

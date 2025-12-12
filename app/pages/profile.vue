@@ -91,6 +91,47 @@
         </div>
       </UCard>
 
+      <!-- Communication Preferences -->
+      <UCard class="mb-6">
+        <template #header>
+          <div class="flex items-center gap-2">
+            <UIcon name="i-lucide-mail" class="w-5 h-5" />
+            <span class="font-medium">{{ $t('campaign.profile.sections.emailPreferences') }}</span>
+          </div>
+        </template>
+
+        <div class="space-y-4">
+          <p class="text-sm text-[var(--ui-text-muted)]">
+            {{ $t('campaign.profile.emailPreferences.description') }}
+          </p>
+
+          <!-- Doxa General Consent -->
+          <div class="flex items-center justify-between py-2 border-b border-[var(--ui-border)]">
+            <div>
+              <p class="text-sm font-medium">{{ $t('campaign.profile.emailPreferences.doxaGeneral') }}</p>
+              <p class="text-xs text-[var(--ui-text-muted)]">{{ $t('campaign.profile.emailPreferences.doxaGeneralHint') }}</p>
+            </div>
+            <UToggle
+              v-model="consentForm.doxa_general"
+              @update:model-value="updateDoxaConsent"
+            />
+          </div>
+
+          <!-- Campaign-specific consents -->
+          <div
+            v-for="campaignGroup in data.campaigns"
+            :key="'consent-' + campaignGroup.id"
+            class="flex items-center justify-between py-2"
+          >
+            <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: campaignGroup.title }) }}</p>
+            <UToggle
+              :model-value="isCampaignConsented(campaignGroup.id)"
+              @update:model-value="(val) => updateCampaignConsent(campaignGroup.id, campaignGroup.slug, val)"
+            />
+          </div>
+        </div>
+      </UCard>
+
       <!-- Campaign Subscriptions (grouped by campaign) -->
       <div class="space-y-4">
         <h2 class="text-lg font-semibold flex items-center gap-2">
@@ -319,6 +360,12 @@ const globalForm = ref({
   email_verified: true
 })
 
+// Consent form state
+const consentForm = ref({
+  doxa_general: false,
+  campaign_ids: [] as number[]
+})
+
 // Reminder form state (for editing individual reminders)
 const reminderForm = ref({
   frequency: 'daily',
@@ -337,13 +384,19 @@ const saveSuccess = ref(false)
 const saveError = ref('')
 const successMessage = ref('')
 
-// Initialize global form with data
+// Initialize global form and consent form with data
 watch(data, (newData) => {
   if (newData?.subscriber) {
     globalForm.value = {
       name: newData.subscriber.name,
       email: newData.subscriber.email,
       email_verified: newData.subscriber.email_verified
+    }
+  }
+  if (newData?.consents) {
+    consentForm.value = {
+      doxa_general: newData.consents.doxa_general || false,
+      campaign_ids: (newData.consents.campaigns || []).map((c: any) => c.campaign_id)
     }
   }
 }, { immediate: true })
@@ -537,6 +590,68 @@ async function resubscribeReminder(reminder: any, campaignGroup: any) {
     })
 
     await refresh()
+  } catch (err: any) {
+    toast.add({
+      title: err.data?.statusMessage || t('campaign.profile.error.failed'),
+      color: 'error'
+    })
+  }
+}
+
+// Check if a campaign is consented
+function isCampaignConsented(campaignId: number): boolean {
+  return consentForm.value.campaign_ids.includes(campaignId)
+}
+
+// Update Doxa general consent
+async function updateDoxaConsent(granted: boolean) {
+  try {
+    await $fetch(`/api/campaigns/${slug}/profile`, {
+      method: 'PUT',
+      body: {
+        profile_id: profileId,
+        consent_doxa_general: granted
+      }
+    })
+
+    toast.add({
+      title: t('campaign.profile.consentUpdated'),
+      color: 'success'
+    })
+  } catch (err: any) {
+    // Revert on error
+    consentForm.value.doxa_general = !granted
+    toast.add({
+      title: err.data?.statusMessage || t('campaign.profile.error.failed'),
+      color: 'error'
+    })
+  }
+}
+
+// Update campaign-specific consent
+async function updateCampaignConsent(campaignId: number, campaignSlug: string, granted: boolean) {
+  try {
+    await $fetch(`/api/campaigns/${campaignSlug}/profile`, {
+      method: 'PUT',
+      body: {
+        profile_id: profileId,
+        consent_campaign_updates: granted
+      }
+    })
+
+    // Update local state
+    if (granted) {
+      if (!consentForm.value.campaign_ids.includes(campaignId)) {
+        consentForm.value.campaign_ids.push(campaignId)
+      }
+    } else {
+      consentForm.value.campaign_ids = consentForm.value.campaign_ids.filter(id => id !== campaignId)
+    }
+
+    toast.add({
+      title: t('campaign.profile.consentUpdated'),
+      color: 'success'
+    })
   } catch (err: any) {
     toast.add({
       title: err.data?.statusMessage || t('campaign.profile.error.failed'),

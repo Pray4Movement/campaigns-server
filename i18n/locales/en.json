@@ -101,7 +101,12 @@
           "60min": "1 hour"
         },
         "submit": "Commit to Prayer",
-        "submitting": "Joining..."
+        "submitting": "Joining...",
+        "consent": {
+          "description": "Stay connected (optional):",
+          "campaignUpdates": "Send me updates about {campaign}",
+          "doxaGeneral": "Hear about progress and updates from Doxa"
+        }
       },
       "errors": {
         "invalidPhone": "Please enter a valid phone number",
@@ -187,8 +192,16 @@
       "sections": {
         "account": "Account",
         "schedule": "Reminder Schedule",
-        "prayer": "Prayer Preferences"
+        "prayer": "Prayer Preferences",
+        "emailPreferences": "Communication Preferences"
       },
+      "emailPreferences": {
+        "description": "Choose what communications you'd like to receive:",
+        "campaignUpdates": "Updates about {campaign}",
+        "doxaGeneral": "General updates from Doxa",
+        "doxaGeneralHint": "Progress updates and news from Doxa"
+      },
+      "consentUpdated": "Communication preferences updated.",
       "subscriptions": "Your Subscriptions",
       "saveAccount": "Save Account",
       "unsubscribed": "Unsubscribed",

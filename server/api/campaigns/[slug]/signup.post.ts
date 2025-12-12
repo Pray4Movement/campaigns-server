@@ -93,6 +93,26 @@ export default defineEventHandler(async (event) => {
       await subscriberService.updateSubscriber(subscriber.id, { name: body.name })
     }
 
+    // Handle consent preferences (stored on the contact method)
+    if (body.consent_campaign_updates || body.consent_doxa_general) {
+      // Get the contact method for the delivery channel
+      let contactMethod = null
+      if (body.email) {
+        contactMethod = await contactMethodService.getByValue('email', body.email)
+      } else if (body.phone) {
+        contactMethod = await contactMethodService.getByValue('phone', body.phone)
+      }
+
+      if (contactMethod) {
+        if (body.consent_campaign_updates) {
+          await contactMethodService.addCampaignConsent(contactMethod.id, campaign.id)
+        }
+        if (body.consent_doxa_general) {
+          await contactMethodService.updateDoxaConsent(contactMethod.id, true)
+        }
+      }
+    }
+
     // Get all existing subscriptions for this subscriber/campaign
     const existingSubscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
       subscriber.id,

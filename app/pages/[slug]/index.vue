@@ -124,6 +124,21 @@
                 />
               </UFormField>
 
+              <!-- Consent Section -->
+              <div class="border-t border-[var(--ui-border)] pt-6 mt-2 space-y-3">
+                <p class="text-sm text-[var(--ui-text-muted)]">
+                  {{ $t('campaign.signup.form.consent.description') }}
+                </p>
+                <UCheckbox
+                  v-model="signupForm.consent_campaign_updates"
+                  :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
+                />
+                <UCheckbox
+                  v-model="signupForm.consent_doxa_general"
+                  :label="$t('campaign.signup.form.consent.doxaGeneral')"
+                />
+              </div>
+
               <!-- Submit Button -->
               <UButton
                 type="submit"
@@ -347,7 +362,9 @@ const signupForm = ref({
   frequency: 'daily',
   days_of_week: [] as number[],
   reminder_time: '09:00',
-  prayer_duration: 10
+  prayer_duration: 10,
+  consent_campaign_updates: false,
+  consent_doxa_general: false
 })
 
 const submitting = ref(false)
@@ -377,7 +394,9 @@ function resetForm() {
     frequency: 'daily',
     days_of_week: [],
     reminder_time: '09:00',
-    prayer_duration: 10
+    prayer_duration: 10,
+    consent_campaign_updates: false,
+    consent_doxa_general: false
   }
 }
 
@@ -410,7 +429,9 @@ async function handleSignup() {
         days_of_week: signupForm.value.days_of_week,
         reminder_time: signupForm.value.reminder_time,
         prayer_duration: signupForm.value.prayer_duration,
-        timezone: userTimezone.value
+        timezone: userTimezone.value,
+        consent_campaign_updates: signupForm.value.consent_campaign_updates,
+        consent_doxa_general: signupForm.value.consent_doxa_general
       }
     })
 

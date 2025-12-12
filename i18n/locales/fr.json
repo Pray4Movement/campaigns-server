@@ -96,7 +96,12 @@
           "60min": "1 heure"
         },
         "submit": "S'engager à Prier",
-        "submitting": "Inscription en cours..."
+        "submitting": "Inscription en cours...",
+        "consent": {
+          "description": "Restez connecté (optionnel) :",
+          "campaignUpdates": "M'envoyer des mises à jour sur {campaign}",
+          "doxaGeneral": "Recevoir des nouvelles et mises à jour de Doxa"
+        }
       },
       "errors": {
         "invalidPhone": "Veuillez entrer un numéro de téléphone valide",
@@ -181,8 +186,16 @@
       "sections": {
         "account": "Compte",
         "schedule": "Horaire des Rappels",
-        "prayer": "Préférences de Prière"
+        "prayer": "Préférences de Prière",
+        "emailPreferences": "Préférences de Communication"
       },
+      "emailPreferences": {
+        "description": "Choisissez les communications que vous souhaitez recevoir :",
+        "campaignUpdates": "Mises à jour sur {campaign}",
+        "doxaGeneral": "Mises à jour générales de Doxa",
+        "doxaGeneralHint": "Nouvelles et mises à jour de Doxa"
+      },
+      "consentUpdated": "Préférences de communication mises à jour.",
       "subscriptions": "Vos Abonnements",
       "saveAccount": "Enregistrer le Compte",
       "unsubscribed": "Désabonné",
