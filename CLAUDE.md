@@ -4,103 +4,186 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Nuxt.js 4.1.0 application with Vue 3, configured as an ES module project. The project uses TypeScript with Nuxt's automatic TypeScript configuration system.
-We are using NUXT UI v4.1
-This project consumes the base layer defined here: https://github.com/corsacca/nuxt-base
+Prayer Tools is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features campaign management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
 
-## RULES
-- NEVER EDIT THE .env file directly. Ask the user to.
-- always kill dev servers you start
-- When building modals, first reference [nuxt-ui-modals.md](documentation/nuxt-ui-modals.md) for proper implementation patterns.
-- never user alert() or confirm(), this is horrible user UI. Toasts and modals are a better solution.
-- User Nuxt UI components. See https://ui.nuxt.com/llms.txt and https://ui.nuxt.com/llms-full.txt for documentation.
+This project consumes the base layer: https://github.com/corsacca/nuxt-base
+
+## Rules
+
+- **NEVER edit `.env` directly** - Ask the user to make environment variable changes
+- **Always kill dev servers you start**
+- **Never use `alert()` or `confirm()`** - Use toasts and modals instead
+- **Reference `documentation/nuxt-ui-modals.md`** when building modals
+- **Use Nuxt UI components** - See https://ui.nuxt.com/llms.txt for documentation
+
+## Nuxt Routing Rules (CRITICAL)
+
+Avoid routing conflicts in Nuxt file-based routing:
+- **NEVER** create both `pages/section.vue` AND `pages/section/[id]/page.vue`
+- **ALWAYS** use nested structure: `pages/section/index.vue` + `pages/section/[id]/page.vue`
+- When adding nested routes, move existing flat files to `index.vue` in subdirectory
+
+```
+❌ pages/admin/users.vue + pages/admin/users/[id]/activity.vue
+✅ pages/admin/users/index.vue + pages/admin/users/[id]/activity.vue
+```
 
 ## Development Commands
 
-- **Start development server**: `npm run dev`
-- **Build for production**: `npm run build`
-- **Generate static site**: `npm run generate`
-- **Preview production build**: `npm run preview`
-- **Prepare Nuxt (post-install)**: `npm run postinstall`
+```bash
+npm run dev          # Start development server (runs migrations automatically)
+npm run build        # Build for production (runs migrations automatically)
+npm run start        # Start production server
+npm run postinstall  # Nuxt prepare
+npm run migrate      # Run database migrations manually
+```
 
-## Project Structure
+## Architecture
 
-- `app/app.vue` - Main application entry point with theme toggle functionality
-- `app/assets/css/main.css` - Global CSS with black/white theme variables
-- `app/composables/useTheme.ts` - Theme management composable
-- `nuxt.config.ts` - Nuxt configuration with devtools enabled, SSR disabled
-- `tsconfig.json` - TypeScript configuration using Nuxt's reference system
-- `public/` - Static assets (favicon, robots.txt)
-- `documentation/` - Comprehensive Nuxt 4.1 documentation
+### Base Layer Pattern
 
-## ⚠️ MANDATORY: Nuxt Routing Rules
-**CRITICAL: Avoid routing conflicts in Nuxt file-based routing**
-- **NEVER create both `pages/section.vue` AND `pages/section/[id]/page.vue`** - This creates routing conflicts
-- **ALWAYS use nested structure**: `pages/section/index.vue` + `pages/section/[id]/page.vue`
-- **Example conflict**: `pages/admin/users.vue` + `pages/admin/users/[id]/activity.vue` ❌
-- **Correct structure**: `pages/admin/users/index.vue` + `pages/admin/users/[id]/activity.vue` ✅
-- **When adding nested routes, move existing flat files to index.vue in subdirectory**
+This project extends a shared Nuxt base layer (`github:corsacca/nuxt-base`). See `documentation/BASE_LAYER.md` for full reference.
 
-## Key Directories
+**Base layer provides:**
+- Database connection (`sql` from `#imports`)
+- Authentication system (`useAuth()` composable, `auth` middleware)
+- Theme system (`useTheme()` composable, `<ThemeToggle />` component)
+- Email utilities (`sendEmail`, `sendTemplateEmail`)
+- S3 storage (`uploadToS3`, `generateSignedUrl`, `deleteFromS3`)
+- Activity logging (`logCreate`, `logUpdate`, `logDelete`)
 
-- `app/assets/` - Static assets (images, styles, fonts)
-- `app/components/` - Auto-imported Vue components
-- `app/composables/` - Reusable composition functions
-- `app/layouts/` - Page layout structures
-- `app/pages/` - File-based routing
-- `app/utils/` - Auto-imported utility functions
+Local utilities in `server/utils/app/` are excluded from auto-imports to avoid conflicts with the base layer. Access them through `server/utils` re-exports.
 
-## Auto-Import Features
+**Key base layer composables:**
+```typescript
+// Authentication
+const { user, isLoggedIn, authReady, login, logout, register, checkAuth } = useAuth()
 
-- Vue APIs (`ref`, `computed`, `onMounted`)
-- Nuxt composables (`useFetch`, `useRoute`)
-- Custom composables from `app/composables/`
-- Components from `app/components/`
-- Utilities from `app/utils/`
+// Theme
+const { theme, toggleTheme } = useTheme()
+```
 
-## Styling System
+**Server-side auth utilities:**
+```typescript
+import { requireAuth, getAuthUser } from '../utils/auth'
 
-- Black and white theme system with light/dark mode support
-- Do not use any colors
-- Global CSS via `css: ['~/assets/css/main.css']` in nuxt.config.ts
-- CSS custom properties for theme variables
-- Theme toggle button in top-right corner
-- LocalStorage persistence and system preference detection
-- USE tailwind
+// Require authentication (throws 401 if not authenticated)
+const user = await requireAuth(event)  // { userId, email, display_name }
 
-## Styling Options
+// Optional authentication (returns null if not authenticated)
+const user = await getAuthUser(event)
+```
 
-- Local stylesheets in components
-- Global CSS via nuxt.config.ts
-- Preprocessors (SCSS, Less, Stylus)
-- PostCSS integration
-- Third-party frameworks (Tailwind, UnoCSS, etc.)
+### Key Directories
 
-## TypeScript Configuration
+```
+app/
+  components/     # Vue components (RichTextEditor, modals, etc.)
+  composables/    # useAuthUser, useCampaign, useModal
+  layouts/        # default.vue, admin.vue
+  middleware/     # superadmin.ts, guest.ts
+  pages/          # File-based routing
+  utils/          # languages.ts, tiptap.ts
 
-The project uses Nuxt's automatic TypeScript configuration system. The main `tsconfig.json` references generated configurations in `.nuxt/` directory:
-- `.nuxt/tsconfig.app.json` - App-specific TypeScript config
-- `.nuxt/tsconfig.server.json` - Server-side TypeScript config
-- `.nuxt/tsconfig.shared.json` - Shared TypeScript config
-- `.nuxt/tsconfig.node.json` - Node.js TypeScript config
+server/
+  api/            # API endpoints (Nitro file-based routing)
+  database/       # Database access functions (campaigns, libraries, subscribers, etc.)
+  plugins/        # Schedulers (backup, reminder, marketing-email)
+  utils/          # Email templates, auth, media upload
 
-## Nuxt Configuration
+migrations/       # PostgreSQL migrations (auto-run on startup)
+i18n/locales/     # Translation files (en.json, es.json, fr.json, etc.)
+```
 
-- Compatibility date: 2025-07-15
-- Devtools enabled for development
-- SSR disabled (SPA mode)
-- Uses Nuxt 4.x with Vue 3.5+ and Vue Router 4.5+
+### Database
+
+- PostgreSQL with the `postgres` package
+- `server/database/db.ts` provides a wrapper mimicking better-sqlite3 API
+- Migrations in `migrations/` directory auto-execute on startup
+- Migration files: `{number}_{description}.js`, extend `BaseMigration`
+
+### Content System
+
+- **Libraries**: Centralized content managed in `/admin/libraries`
+- **Library Content**: Organized by day number (1-365+), each day can have multiple language versions
+- **Campaigns**: Subscribe to libraries via global configuration at `/admin/campaign-config`
+- Prayer content uses Tiptap rich text editor (stored as JSON, rendered as HTML)
+
+### API Pattern
+
+API routes follow Nitro conventions:
+- `server/api/admin/` - Admin-only endpoints (require authentication)
+- `server/api/campaigns/[slug]/` - Public campaign endpoints
+- `server/api/libraries/` - Public library endpoints
+
+### Authentication
+
+- JWT-based authentication (base layer)
+- Roles: superadmin, admin
+- Middleware: `auth` (base layer), `superadmin.ts`, `guest.ts` (project)
+- `useAuth()` composable for client-side auth state (base layer)
+- `useAuthUser()` composable extends auth for project-specific needs
+
+### Email System
+
+Server plugins run scheduled tasks:
+- `reminder-scheduler.ts` - Prayer reminder emails
+- `marketing-email-scheduler.ts` - Marketing campaigns
+- `backup-scheduler.ts` - Database backups to S3
+
+Email templates in `server/utils/`: `prayer-reminder-email.ts`, `welcome-email.ts`, `invitation-email.ts`
+
+## Internationalization
+
+- 10 languages: en, es, fr, pt, de, it, zh, ar, ru, hi
+- Translation files: `i18n/locales/*.json`
+- URL strategy: `prefix_except_default` (English has no prefix)
+- Use `$t('key')` in templates, `useI18n()` in scripts
+- Use `localePath()` for navigation links
+
+## Styling
+
+- Light/dark mode support via base layer theme system
+- Use **Tailwind CSS** for styling
+- Theme toggle available via `<ThemeToggle />` component
+
+## UI Components
+
+**Always use Nuxt UI components** instead of plain HTML for consistent theming:
+
+- `<UButton>` not `<button>`
+- `<UInput>` not `<input>`
+- `<UTextarea>` not `<textarea>`
+- `<USelect>` not `<select>`
+- `<UCard>` not `<div class="card">`
+- `<UModal>` not custom modal divs
+- `<UTable>` not `<table>`
+
+Icons use Lucide: `<UButton icon="i-lucide-plus">Add</UButton>`
+
+Reference: https://ui.nuxt.com/components
+
+## Tech Stack
+
+- **Frontend**: Nuxt 4.1, Vue 3, Nuxt UI v4, Tailwind CSS
+- **Backend**: Nitro (Nuxt server), PostgreSQL
+- **Editor**: Tiptap (rich text)
+- **Email**: Nodemailer
+- **Storage**: S3-compatible (DigitalOcean Spaces)
+
+## Configuration
+
+Runtime config in `nuxt.config.ts` pulls from environment variables:
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Authentication secret
+- `SMTP_*` - Email configuration
+- `S3_*` - S3/Spaces configuration
+- `NUXT_PUBLIC_SITE_URL` - Public URL for links in emails
 
 ## Documentation
 
-Comprehensive Base Nuxt Layer and Nuxt 4.1 documentation is available in the `documentation/` folder:
-- `BASE_LAYER.md` - Base layer documentation (authentication, theme, email, storage, database utilities)
-- `nuxt-4x-introduction.md` - Framework overview and key features
-- `nuxt-4x-installation.md` - Installation guide and prerequisites
-- `nuxt-4x-directory-structure.md` - App directory structure and organization
-- `nuxt-4x-auto-imports.md` - Auto-import system for composables, components, and utils
-- `nuxt-4x-styling.md` - Styling approaches, CSS imports, and preprocessors
-- `nuxt-ui-modals.md` - Guide for properly implementing Nuxt UI modals
-- `wysiwyg-editor.md` - WYSIWYG editor implementation
-
-For the most up-to-date information, refer to the official [Nuxt 4.x Documentation](https://nuxt.com/docs/4.x).
+Reference documentation in `documentation/` folder:
+- `BASE_LAYER.md` - Base layer (authentication, theme, email, storage, database)
+- `nuxt-ui-modals.md` - Modal implementation patterns
+- `wysiwyg-editor.md` - Tiptap editor implementation
+- `nuxt-4x-*.md` - Nuxt 4.x framework documentation
