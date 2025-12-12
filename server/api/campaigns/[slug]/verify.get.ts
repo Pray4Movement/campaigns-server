@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
           subscriber.name,
           campaign.title,
           slug,
-          subscriber.tracking_id
+          subscriber.profile_id
         ).catch(err => console.error('Failed to send welcome email:', err))
       }
     }

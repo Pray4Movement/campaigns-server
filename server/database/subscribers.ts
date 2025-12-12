@@ -21,10 +21,18 @@ export interface SubscriberWithContacts extends Subscriber {
   }[]
 }
 
+export interface SubscriberConsents {
+  doxa_general: boolean
+  doxa_general_at: string | null
+  campaign_ids: number[]
+  campaign_names: string[]
+}
+
 export interface SubscriberWithSubscriptions extends SubscriberWithContacts {
   primary_email: string | null
   primary_phone: string | null
   subscriptions: CampaignSubscriptionWithDetails[]
+  consents: SubscriberConsents
 }
 
 class SubscriberService {
@@ -56,6 +64,12 @@ class SubscriberService {
   async getSubscriberByProfileId(profileId: string): Promise<Subscriber | null> {
     const stmt = this.db.prepare('SELECT * FROM subscribers WHERE profile_id = ?')
     return await stmt.get(profileId) as Subscriber | null
+  }
+
+  async getSubscriberByContactMethodId(contactMethodId: number): Promise<Subscriber | null> {
+    const contact = await contactMethodService.getById(contactMethodId)
+    if (!contact) return null
+    return this.getSubscriberById(contact.subscriber_id)
   }
 
   async getSubscriberWithContacts(trackingId: string): Promise<SubscriberWithContacts | null> {
@@ -241,6 +255,22 @@ class SubscriberService {
       const emailContact = contacts.find(c => c.type === 'email' && c.verified) || contacts.find(c => c.type === 'email')
       const phoneContact = contacts.find(c => c.type === 'phone' && c.verified) || contacts.find(c => c.type === 'phone')
 
+      // Get consent info from primary email contact
+      const consentedCampaignIds = emailContact?.consented_campaign_ids || []
+
+      // Get campaign names for consented campaigns
+      let campaignNames: string[] = []
+      if (consentedCampaignIds.length > 0) {
+        const campaignStmt = this.db.prepare(`
+          SELECT id, title FROM campaigns WHERE id IN (${consentedCampaignIds.map(() => '?').join(',')})
+        `)
+        const campaigns = await campaignStmt.all(...consentedCampaignIds) as { id: number; title: string }[]
+        campaignNames = consentedCampaignIds.map(id => {
+          const campaign = campaigns.find(c => c.id === id)
+          return campaign?.title || `Campaign ${id}`
+        })
+      }
+
       enrichedSubscribers.push({
         ...subscriber,
         contacts: contacts.map(c => ({
@@ -251,7 +281,13 @@ class SubscriberService {
         })),
         primary_email: emailContact?.value || null,
         primary_phone: phoneContact?.value || null,
-        subscriptions
+        subscriptions,
+        consents: {
+          doxa_general: emailContact?.consent_doxa_general || false,
+          doxa_general_at: emailContact?.consent_doxa_general_at || null,
+          campaign_ids: consentedCampaignIds,
+          campaign_names: campaignNames
+        }
       })
     }
 

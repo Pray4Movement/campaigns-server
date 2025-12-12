@@ -96,6 +96,50 @@
             </div>
 
             <div class="form-section">
+              <h3>Marketing Consents</h3>
+
+              <div class="consents-list">
+                <div class="consent-item">
+                  <div class="consent-label">
+                    <span class="consent-name">Doxa General Updates</span>
+                    <UBadge
+                      :label="selectedSubscriber.consents.doxa_general ? 'Opted In' : 'Not Opted In'"
+                      :color="selectedSubscriber.consents.doxa_general ? 'success' : 'neutral'"
+                      :variant="selectedSubscriber.consents.doxa_general ? 'solid' : 'outline'"
+                      size="xs"
+                    />
+                  </div>
+                  <span v-if="selectedSubscriber.consents.doxa_general && selectedSubscriber.consents.doxa_general_at" class="consent-date">
+                    since {{ formatDate(selectedSubscriber.consents.doxa_general_at) }}
+                  </span>
+                </div>
+
+                <div v-if="selectedSubscriber.consents.campaign_names.length > 0" class="consent-item">
+                  <div class="consent-label">
+                    <span class="consent-name">Campaign Marketing</span>
+                  </div>
+                  <div class="campaign-consents">
+                    <UBadge
+                      v-for="(name, idx) in selectedSubscriber.consents.campaign_names"
+                      :key="selectedSubscriber.consents.campaign_ids[idx]"
+                      :label="name"
+                      color="primary"
+                      variant="subtle"
+                      size="xs"
+                    />
+                  </div>
+                </div>
+
+                <div v-else class="consent-item">
+                  <div class="consent-label">
+                    <span class="consent-name">Campaign Marketing</span>
+                    <UBadge label="None" color="neutral" variant="outline" size="xs" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
               <h3>Subscriptions ({{ selectedSubscriber.subscriptions.length }})</h3>
 
               <div v-if="selectedSubscriber.subscriptions.length === 0" class="no-subscriptions">
@@ -349,6 +393,13 @@ interface Subscription {
   updated_at: string
 }
 
+interface SubscriberConsents {
+  doxa_general: boolean
+  doxa_general_at: string | null
+  campaign_ids: number[]
+  campaign_names: string[]
+}
+
 interface GeneralSubscriber {
   id: number
   tracking_id: string
@@ -360,6 +411,7 @@ interface GeneralSubscriber {
   primary_email: string | null
   primary_phone: string | null
   subscriptions: Subscription[]
+  consents: SubscriberConsents
 }
 
 interface Campaign {
@@ -1298,5 +1350,44 @@ onMounted(() => {
   gap: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--ui-border);
+}
+
+/* Consent Styles */
+.consents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.consent-item {
+  padding: 0.75rem;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+}
+
+.consent-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.consent-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.consent-date {
+  font-size: 0.75rem;
+  color: var(--ui-text-muted);
+  margin-top: 0.25rem;
+}
+
+.campaign-consents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
 }
 </style>

@@ -111,7 +111,7 @@
               <p class="text-sm font-medium">{{ $t('campaign.profile.emailPreferences.doxaGeneral') }}</p>
               <p class="text-xs text-[var(--ui-text-muted)]">{{ $t('campaign.profile.emailPreferences.doxaGeneralHint') }}</p>
             </div>
-            <UToggle
+            <USwitch
               v-model="consentForm.doxa_general"
               @update:model-value="updateDoxaConsent"
             />
@@ -124,7 +124,7 @@
             class="flex items-center justify-between py-2"
           >
             <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: campaignGroup.title }) }}</p>
-            <UToggle
+            <USwitch
               :model-value="isCampaignConsented(campaignGroup.id)"
               @update:model-value="(val) => updateCampaignConsent(campaignGroup.id, campaignGroup.slug, val)"
             />
@@ -145,13 +145,6 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <span class="font-medium">{{ campaignGroup.title }}</span>
-                  <UBadge
-                    v-if="campaignGroup.id === data.campaign.id"
-                    color="primary"
-                    size="xs"
-                  >
-                    {{ $t('campaign.profile.current') }}
-                  </UBadge>
                   <UBadge
                     v-if="campaignGroup.reminders.length > 1"
                     color="neutral"
@@ -323,13 +316,13 @@
       </div>
 
       <!-- Back Button -->
-      <div class="flex items-center justify-start pt-8">
+      <div v-if="data.campaigns.length > 0" class="flex items-center justify-start pt-8">
         <UButton
-          :to="localePath(`/${data.campaign.slug}`)"
+          :to="localePath(`/${data.campaigns[0].slug}`)"
           variant="ghost"
         >
           <UIcon name="i-lucide-arrow-left" class="w-4 h-4 mr-1" />
-          {{ $t('prayerFuel.backTo', { campaign: data.campaign.title }) }}
+          {{ $t('prayerFuel.backTo', { campaign: data.campaigns[0].title }) }}
         </UButton>
       </div>
     </div>
@@ -342,16 +335,13 @@ definePageMeta({
 })
 
 const route = useRoute()
-const slug = route.query.slug as string
 const profileId = route.query.id as string
 const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
 
-// Fetch subscriber profile
-const { data, pending, error, refresh } = await useFetch(`/api/campaigns/${slug}/profile`, {
-  query: { id: profileId }
-})
+// Fetch subscriber profile using new profile API
+const { data, pending, error, refresh } = await useFetch(`/api/profile/${profileId}`)
 
 // Global form state (name, email)
 const globalForm = ref({
@@ -481,10 +471,9 @@ async function saveGlobalSettings() {
   saveError.value = ''
 
   try {
-    const response = await $fetch(`/api/campaigns/${slug}/profile`, {
+    const response = await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        profile_id: profileId,
         name: globalForm.value.name,
         email: globalForm.value.email
       }
@@ -522,10 +511,9 @@ async function saveReminder(reminder: any, campaignGroup: any) {
   saveError.value = ''
 
   try {
-    await $fetch(`/api/campaigns/${campaignGroup.slug}/profile`, {
+    await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        profile_id: profileId,
         subscription_id: reminder.id,
         frequency: reminderForm.value.frequency,
         days_of_week: reminderForm.value.days_of_week,
@@ -606,10 +594,9 @@ function isCampaignConsented(campaignId: number): boolean {
 // Update Doxa general consent
 async function updateDoxaConsent(granted: boolean) {
   try {
-    await $fetch(`/api/campaigns/${slug}/profile`, {
+    await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        profile_id: profileId,
         consent_doxa_general: granted
       }
     })
@@ -631,10 +618,10 @@ async function updateDoxaConsent(granted: boolean) {
 // Update campaign-specific consent
 async function updateCampaignConsent(campaignId: number, campaignSlug: string, granted: boolean) {
   try {
-    await $fetch(`/api/campaigns/${campaignSlug}/profile`, {
+    await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        profile_id: profileId,
+        consent_campaign_id: campaignId,
         consent_campaign_updates: granted
       }
     })

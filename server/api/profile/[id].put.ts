@@ -1,35 +1,17 @@
-import { campaignService } from '#server/database/campaigns'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { campaignService } from '#server/database/campaigns'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 
 export default defineEventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug')
+  const profileId = getRouterParam(event, 'id')
   const body = await readBody(event)
-  const profileId = body.profile_id as string
-
-  if (!slug) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Campaign slug is required'
-    })
-  }
 
   if (!profileId) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Profile ID is required'
-    })
-  }
-
-  // Verify the campaign exists
-  const campaign = await campaignService.getCampaignBySlug(slug)
-
-  if (!campaign) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Campaign not found'
     })
   }
 
@@ -39,33 +21,7 @@ export default defineEventHandler(async (event) => {
   if (!subscriber) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Subscription not found'
-    })
-  }
-
-  // Get subscriber's subscriptions for this campaign
-  const subscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
-    subscriber.id,
-    campaign.id
-  )
-
-  if (subscriptions.length === 0) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'You are not subscribed to this campaign'
-    })
-  }
-
-  // Find the specific subscription to update (by subscription_id or default to first)
-  const subscriptionId = body.subscription_id as number | undefined
-  const subscription = subscriptionId
-    ? subscriptions.find(s => s.id === subscriptionId)
-    : subscriptions[0]
-
-  if (!subscription) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Subscription not found'
+      statusMessage: 'Subscriber not found'
     })
   }
 
@@ -140,16 +96,23 @@ export default defineEventHandler(async (event) => {
 
       emailChanged = true
 
-      // Send verification email
+      // Send verification email - need a campaign for context
       if (newEmailContact) {
-        const verificationToken = await contactMethodService.generateVerificationToken(newEmailContact.id)
-        await sendSignupVerificationEmail(
-          newEmail,
-          verificationToken,
-          slug,
-          campaign.title,
-          body.name?.trim() || subscriber.name
-        )
+        // Get subscriber's first subscription to use for verification email context
+        const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+        if (subscriptions.length > 0) {
+          const campaign = await campaignService.getCampaignById(subscriptions[0].campaign_id)
+          if (campaign) {
+            const verificationToken = await contactMethodService.generateVerificationToken(newEmailContact.id)
+            await sendSignupVerificationEmail(
+              newEmail,
+              verificationToken,
+              campaign.slug,
+              campaign.title,
+              body.name?.trim() || subscriber.name
+            )
+          }
+        }
       }
     }
   }
@@ -160,38 +123,41 @@ export default defineEventHandler(async (event) => {
       await contactMethodService.updateDoxaConsent(currentEmail.id, body.consent_doxa_general)
     }
 
-    if (body.consent_campaign_updates !== undefined) {
+    // Campaign consent update - requires campaign_id
+    if (body.consent_campaign_id !== undefined && body.consent_campaign_updates !== undefined) {
       if (body.consent_campaign_updates) {
-        await contactMethodService.addCampaignConsent(currentEmail.id, campaign.id)
+        await contactMethodService.addCampaignConsent(currentEmail.id, body.consent_campaign_id)
       } else {
-        await contactMethodService.removeCampaignConsent(currentEmail.id, campaign.id)
+        await contactMethodService.removeCampaignConsent(currentEmail.id, body.consent_campaign_id)
       }
     }
   }
 
-  // Handle subscription-specific updates
-  const subscriptionUpdates: {
-    delivery_method?: 'email' | 'whatsapp' | 'app'
-    frequency?: string
-    days_of_week?: number[]
-    time_preference?: string
-    timezone?: string
-    prayer_duration?: number
-  } = {}
+  // Handle subscription-specific updates (requires subscription_id)
+  let updatedSubscription = null
+  if (body.subscription_id) {
+    const subscriptionUpdates: {
+      delivery_method?: 'email' | 'whatsapp' | 'app'
+      frequency?: string
+      days_of_week?: number[]
+      time_preference?: string
+      timezone?: string
+      prayer_duration?: number
+    } = {}
 
-  if (body.delivery_method !== undefined) subscriptionUpdates.delivery_method = body.delivery_method
-  if (body.frequency !== undefined) subscriptionUpdates.frequency = body.frequency
-  if (body.days_of_week !== undefined) subscriptionUpdates.days_of_week = body.days_of_week
-  if (body.time_preference !== undefined) subscriptionUpdates.time_preference = body.time_preference
-  if (body.timezone !== undefined) subscriptionUpdates.timezone = body.timezone
-  if (body.prayer_duration !== undefined) subscriptionUpdates.prayer_duration = body.prayer_duration
+    if (body.delivery_method !== undefined) subscriptionUpdates.delivery_method = body.delivery_method
+    if (body.frequency !== undefined) subscriptionUpdates.frequency = body.frequency
+    if (body.days_of_week !== undefined) subscriptionUpdates.days_of_week = body.days_of_week
+    if (body.time_preference !== undefined) subscriptionUpdates.time_preference = body.time_preference
+    if (body.timezone !== undefined) subscriptionUpdates.timezone = body.timezone
+    if (body.prayer_duration !== undefined) subscriptionUpdates.prayer_duration = body.prayer_duration
 
-  let updatedSubscription = subscription
-  if (Object.keys(subscriptionUpdates).length > 0) {
-    updatedSubscription = await campaignSubscriptionService.updateSubscription(
-      subscription.id,
-      subscriptionUpdates
-    ) || subscription
+    if (Object.keys(subscriptionUpdates).length > 0) {
+      updatedSubscription = await campaignSubscriptionService.updateSubscription(
+        body.subscription_id,
+        subscriptionUpdates
+      )
+    }
   }
 
   // Get updated subscriber info
@@ -199,13 +165,13 @@ export default defineEventHandler(async (event) => {
   const updatedContacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
   const updatedEmail = updatedContacts.find(c => c.type === 'email')
 
-  // Build consent state for response (from contact method)
+  // Build consent state for response
   const consents = {
     doxa_general: updatedEmail?.consent_doxa_general || false,
-    campaign_updates: (updatedEmail?.consented_campaign_ids || []).includes(campaign.id)
+    campaign_ids: updatedEmail?.consented_campaign_ids || []
   }
 
-  return {
+  const response: any = {
     success: true,
     email_changed: emailChanged,
     subscriber: {
@@ -215,7 +181,12 @@ export default defineEventHandler(async (event) => {
       email: updatedEmail?.value || '',
       email_verified: updatedEmail?.verified || false
     },
-    currentSubscription: {
+    consents
+  }
+
+  // Include updated subscription if one was updated
+  if (updatedSubscription) {
+    response.currentSubscription = {
       id: updatedSubscription.id,
       delivery_method: updatedSubscription.delivery_method,
       frequency: updatedSubscription.frequency,
@@ -224,7 +195,8 @@ export default defineEventHandler(async (event) => {
       timezone: updatedSubscription.timezone,
       prayer_duration: updatedSubscription.prayer_duration,
       status: updatedSubscription.status
-    },
-    consents
+    }
   }
+
+  return response
 })

@@ -3,12 +3,12 @@ export async function sendWelcomeEmail(
   subscriberName: string,
   campaignTitle: string,
   campaignSlug: string,
-  trackingId: string
+  profileId: string
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const campaignUrl = `${baseUrl}/${campaignSlug}`
-  const profileUrl = `${baseUrl}/profile?slug=${campaignSlug}&id=${trackingId}`
+  const profileUrl = `${baseUrl}/profile?id=${profileId}`
 
   const html = `
     <!DOCTYPE html>

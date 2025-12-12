@@ -1,34 +1,14 @@
-import { campaignService } from '#server/database/campaigns'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 
 export default defineEventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug')
-  const query = getQuery(event)
-  const profileId = query.id as string
-
-  if (!slug) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Campaign slug is required'
-    })
-  }
+  const profileId = getRouterParam(event, 'id')
 
   if (!profileId) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Profile ID is required'
-    })
-  }
-
-  // Verify the campaign exists
-  const campaign = await campaignService.getCampaignBySlug(slug)
-
-  if (!campaign) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Campaign not found'
     })
   }
 
@@ -38,7 +18,7 @@ export default defineEventHandler(async (event) => {
   if (!subscriber) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Subscription not found'
+      statusMessage: 'Subscriber not found'
     })
   }
 
@@ -49,16 +29,6 @@ export default defineEventHandler(async (event) => {
 
   // Get all subscriptions for this subscriber
   const allSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
-
-  // Find this campaign's subscription
-  const currentSubscription = allSubscriptions.find(sub => sub.campaign_id === campaign.id)
-
-  if (!currentSubscription) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'You are not subscribed to this campaign'
-    })
-  }
 
   // Group subscriptions by campaign
   const subscriptionsByCampaign = new Map<number, typeof allSubscriptions>()
@@ -86,9 +56,6 @@ export default defineEventHandler(async (event) => {
     }))
   }))
 
-  // Find current campaign's reminders
-  const currentCampaignReminders = campaigns.find(c => c.id === campaign.id)?.reminders || []
-
   // Build consent information (from primary contact method)
   const consents = {
     doxa_general: primaryEmail?.consent_doxa_general || false,
@@ -99,7 +66,6 @@ export default defineEventHandler(async (event) => {
     }))
   }
 
-  // Return subscriber info + all subscriptions grouped by campaign
   return {
     subscriber: {
       id: subscriber.id,
@@ -109,17 +75,7 @@ export default defineEventHandler(async (event) => {
       email_verified: primaryEmail?.verified || false,
       phone: primaryPhone?.value || ''
     },
-    // Current campaign info
-    campaign: {
-      id: campaign.id,
-      title: campaign.title,
-      slug: campaign.slug
-    },
-    // Current campaign's reminders (for backwards compatibility and convenience)
-    currentReminders: currentCampaignReminders,
-    // All campaigns with their reminders (grouped)
     campaigns,
-    // Consent preferences
     consents
   }
 })
