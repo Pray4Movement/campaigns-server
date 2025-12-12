@@ -1,6 +1,7 @@
 import { getDatabase } from './db'
 import { randomUUID } from 'crypto'
 import { contactMethodService } from './contact-methods'
+import { campaignSubscriptionService, type CampaignSubscriptionWithDetails } from './campaign-subscriptions'
 
 export interface Subscriber {
   id: number
@@ -18,6 +19,12 @@ export interface SubscriberWithContacts extends Subscriber {
     value: string
     verified: boolean
   }[]
+}
+
+export interface SubscriberWithSubscriptions extends SubscriberWithContacts {
+  primary_email: string | null
+  primary_phone: string | null
+  subscriptions: CampaignSubscriptionWithDetails[]
 }
 
 class SubscriberService {
@@ -180,6 +187,75 @@ class SubscriberService {
     const stmt = this.db.prepare('SELECT COUNT(*) as count FROM subscribers')
     const result = await stmt.get() as { count: number }
     return result.count
+  }
+
+  /**
+   * Get all subscribers with their contact methods and subscriptions.
+   * For the general subscribers admin page.
+   */
+  async getAllSubscribersWithSubscriptions(options?: {
+    search?: string
+    campaignId?: number
+  }): Promise<SubscriberWithSubscriptions[]> {
+    // Build base query to get subscribers
+    // If campaignId filter is set, only get subscribers with subscriptions to that campaign
+    let query = 'SELECT DISTINCT s.* FROM subscribers s'
+    const params: any[] = []
+
+    if (options?.campaignId) {
+      query += ' JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.campaign_id = ?'
+      params.push(options.campaignId)
+    }
+
+    if (options?.search) {
+      const searchTerm = `%${options.search}%`
+      if (options?.campaignId) {
+        // Already have WHERE clause from campaign filter
+        query += ` AND (
+          s.name ILIKE ? OR
+          EXISTS (SELECT 1 FROM contact_methods cm WHERE cm.subscriber_id = s.id AND cm.value ILIKE ?)
+        )`
+        params.push(searchTerm, searchTerm)
+      } else {
+        query += ` WHERE (
+          s.name ILIKE ? OR
+          EXISTS (SELECT 1 FROM contact_methods cm WHERE cm.subscriber_id = s.id AND cm.value ILIKE ?)
+        )`
+        params.push(searchTerm, searchTerm)
+      }
+    }
+
+    query += ' ORDER BY s.created_at DESC'
+
+    const stmt = this.db.prepare(query)
+    const subscribers = await stmt.all(...params) as Subscriber[]
+
+    // Enrich each subscriber with contacts and subscriptions
+    const enrichedSubscribers: SubscriberWithSubscriptions[] = []
+
+    for (const subscriber of subscribers) {
+      const contacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
+      const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+
+      // Find primary email and phone
+      const emailContact = contacts.find(c => c.type === 'email' && c.verified) || contacts.find(c => c.type === 'email')
+      const phoneContact = contacts.find(c => c.type === 'phone' && c.verified) || contacts.find(c => c.type === 'phone')
+
+      enrichedSubscribers.push({
+        ...subscriber,
+        contacts: contacts.map(c => ({
+          id: c.id,
+          type: c.type,
+          value: c.value,
+          verified: c.verified
+        })),
+        primary_email: emailContact?.value || null,
+        primary_phone: phoneContact?.value || null,
+        subscriptions
+      })
+    }
+
+    return enrichedSubscribers
   }
 }
 

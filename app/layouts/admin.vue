@@ -17,6 +17,11 @@
             Campaigns
           </NuxtLink>
         </li>
+        <li>
+          <NuxtLink to="/admin/subscribers" class="nav-link">
+            Subscribers
+          </NuxtLink>
+        </li>
         <li v-if="isAdmin">
           <NuxtLink to="/admin/libraries" class="nav-link">
             Libraries

@@ -243,7 +243,7 @@ async function loadCampaigns() {
 }
 
 function navigateToSubscribers(campaignId: number) {
-  navigateTo(`/admin/campaigns/${campaignId}/subscribers`)
+  navigateTo(`/admin/subscribers?campaign=${campaignId}`)
 }
 
 function editCampaign(campaign: Campaign) {
