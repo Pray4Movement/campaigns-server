@@ -22,6 +22,11 @@
             Subscribers
           </NuxtLink>
         </li>
+        <li>
+          <NuxtLink to="/admin/marketing" class="nav-link">
+            Marketing
+          </NuxtLink>
+        </li>
         <li v-if="isAdmin">
           <NuxtLink to="/admin/libraries" class="nav-link">
             Libraries

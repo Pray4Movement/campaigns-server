@@ -1,0 +1,94 @@
+import { marketingEmailService } from '#server/database/marketing-emails'
+import { marketingEmailQueueService } from '#server/database/marketing-email-queue'
+import { contactMethodService } from '#server/database/contact-methods'
+
+export default defineEventHandler(async (event) => {
+  const user = await requirePermission(event, 'campaigns.view')
+
+  const id = Number(getRouterParam(event, 'id'))
+  if (!id || isNaN(id)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid email ID'
+    })
+  }
+
+  const canAccess = await marketingEmailService.canUserAccessEmail(user.userId, id)
+  if (!canAccess) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Email not found'
+    })
+  }
+
+  const email = await marketingEmailService.getById(id)
+  if (!email) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Email not found'
+    })
+  }
+
+  if (email.status !== 'draft') {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Only drafts can be sent'
+    })
+  }
+
+  const canSend = await marketingEmailService.canUserSendToAudience(
+    user.userId,
+    email.audience_type,
+    email.campaign_id ?? undefined
+  )
+
+  if (!canSend) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: email.audience_type === 'doxa'
+        ? 'Only admins can send Doxa-wide emails'
+        : 'You do not have access to this campaign'
+    })
+  }
+
+  let recipients: Array<{ id: number; value: string }>
+
+  if (email.audience_type === 'doxa') {
+    const contacts = await contactMethodService.getContactsWithDoxaConsent()
+    recipients = contacts.map(c => ({ id: c.id, value: c.value }))
+  } else if (email.campaign_id) {
+    const contacts = await contactMethodService.getContactsConsentedToCampaign(email.campaign_id)
+    recipients = contacts.map(c => ({ id: c.id, value: c.value }))
+  } else {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid audience configuration'
+    })
+  }
+
+  if (recipients.length === 0) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'No recipients found for this audience'
+    })
+  }
+
+  try {
+    await marketingEmailService.updateStatus(id, 'queued')
+    await marketingEmailService.updateStats(id, recipients.length, 0, 0)
+
+    const queuedCount = await marketingEmailQueueService.populateQueue(id, recipients)
+
+    return {
+      success: true,
+      message: `Email queued for ${queuedCount} recipients`,
+      recipient_count: queuedCount
+    }
+  } catch (error: any) {
+    await marketingEmailService.updateStatus(id, 'draft')
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || 'Failed to queue email'
+    })
+  }
+})
