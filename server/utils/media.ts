@@ -10,6 +10,21 @@ export interface UploadedFile {
   mimeType: string
 }
 
+const mimeToExtension: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'video/ogg': 'ogg'
+}
+
+function getSafeExtension(mimeType: string): string {
+  return mimeToExtension[mimeType] || 'bin'
+}
+
 export async function uploadMedia(file: File): Promise<UploadedFile> {
   const uploadDir = join(process.cwd(), 'public', 'uploads')
 
@@ -18,8 +33,8 @@ export async function uploadMedia(file: File): Promise<UploadedFile> {
     await mkdir(uploadDir, { recursive: true })
   }
 
-  // Generate unique filename
-  const ext = file.name.split('.').pop()
+  // Generate unique filename with safe extension derived from MIME type
+  const ext = getSafeExtension(file.type)
   const filename = `${uuidv4()}.${ext}`
   const filepath = join(uploadDir, filename)
 
