@@ -143,7 +143,7 @@ watch(() => props.content, (newContent) => {
   const newJsonStr = JSON.stringify(newContent)
 
   if (currentJson !== newJsonStr) {
-    editor.value.commands.setContent(newContent, false)
+    editor.value.commands.setContent(newContent, { emitUpdate: false })
   }
 })
 

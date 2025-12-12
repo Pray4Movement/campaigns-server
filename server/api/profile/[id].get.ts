@@ -40,21 +40,23 @@ export default defineEventHandler(async (event) => {
   }
 
   // Build campaigns array with reminders
-  const campaigns = Array.from(subscriptionsByCampaign.entries()).map(([campaignId, subs]) => ({
-    id: campaignId,
-    title: subs[0].campaign_title,
-    slug: subs[0].campaign_slug,
-    reminders: subs.map(sub => ({
-      id: sub.id,
-      delivery_method: sub.delivery_method,
-      frequency: sub.frequency,
-      days_of_week: sub.days_of_week ? JSON.parse(sub.days_of_week) : [],
-      time_preference: sub.time_preference,
-      timezone: sub.timezone,
-      prayer_duration: sub.prayer_duration,
-      status: sub.status
+  const campaigns = Array.from(subscriptionsByCampaign.entries())
+    .filter(([, subs]) => subs.length > 0)
+    .map(([campaignId, subs]) => ({
+      id: campaignId,
+      title: subs[0]!.campaign_title,
+      slug: subs[0]!.campaign_slug,
+      reminders: subs.map(sub => ({
+        id: sub.id,
+        delivery_method: sub.delivery_method,
+        frequency: sub.frequency,
+        days_of_week: sub.days_of_week ? JSON.parse(sub.days_of_week) : [],
+        time_preference: sub.time_preference,
+        timezone: sub.timezone,
+        prayer_duration: sub.prayer_duration,
+        status: sub.status
+      }))
     }))
-  }))
 
   // Build consent information (from primary contact method)
   const consents = {

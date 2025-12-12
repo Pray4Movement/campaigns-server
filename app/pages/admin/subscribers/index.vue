@@ -234,7 +234,7 @@
                       <div v-if="loadingEmailHistory[subscription.id]" class="email-history-loading">
                         Loading...
                       </div>
-                      <div v-else-if="!emailHistories[subscription.id] || emailHistories[subscription.id].length === 0" class="email-history-empty">
+                      <div v-else-if="!emailHistories[subscription.id] || emailHistories[subscription.id]?.length === 0" class="email-history-empty">
                         No emails sent yet
                       </div>
                       <div v-else class="email-history-list">
@@ -703,7 +703,7 @@ async function saveChanges() {
 
     // If name changed, include it in the first subscription update
     if (changedSubscriptions.length > 0) {
-      const firstSubId = changedSubscriptions[0]
+      const firstSubId = changedSubscriptions[0]!
       const form = subscriptionForms.value.get(firstSubId)
       if (!form) return
 
@@ -755,13 +755,13 @@ async function saveChanges() {
     toast.add({
       title: 'Success',
       description: 'Changes saved successfully',
-      color: 'green'
+      color: 'success'
     })
   } catch (err: any) {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to save changes',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -796,7 +796,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Success',
       description: `Subscriber "${subscriberToDelete.value.name}" has been deleted.`,
-      color: 'green'
+      color: 'success'
     })
 
     // Remove from local list
@@ -808,7 +808,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to delete subscriber',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     deleting.value = false

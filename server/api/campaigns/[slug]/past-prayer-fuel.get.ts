@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
   const languageCode = (query.language as string) || campaign.default_language || 'en'
 
   // Get current date to exclude today and future dates
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0]!
 
   // Get past prayer content (limit to 30 most recent)
   const pastContent = await prayerContentService.getCampaignPrayerContent(campaign.id, {
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
       : new Date(item.content_date).toISOString().split('T')[0]
 
     // Skip today and future dates
-    if (itemDate >= today) continue
+    if (!itemDate || itemDate >= today) continue
 
     // Only keep first content item for each unique date
     if (!dateMap.has(itemDate)) {

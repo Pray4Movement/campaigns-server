@@ -285,7 +285,8 @@ const transformPastedHTML = (html: string): string => {
     const href = link.getAttribute('href')
     // Remove all attributes except href
     while (link.attributes.length > 0) {
-      link.removeAttribute(link.attributes[0].name)
+      const attr = link.attributes[0]
+      if (attr) link.removeAttribute(attr.name)
     }
     if (href) {
       link.setAttribute('href', href)

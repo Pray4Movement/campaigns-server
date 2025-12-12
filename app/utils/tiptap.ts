@@ -1,4 +1,4 @@
-import type { Editor } from '@tiptap/vue-3'
+import type { Editor } from '@tiptap/core'
 
 /**
  * Check if a position is valid in the editor

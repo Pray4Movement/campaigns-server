@@ -318,11 +318,11 @@
       <!-- Back Button -->
       <div v-if="data.campaigns.length > 0" class="flex items-center justify-start pt-8">
         <UButton
-          :to="localePath(`/${data.campaigns[0].slug}`)"
+          :to="localePath(`/${data.campaigns[0]?.slug}`)"
           variant="ghost"
         >
           <UIcon name="i-lucide-arrow-left" class="w-4 h-4 mr-1" />
-          {{ $t('prayerFuel.backTo', { campaign: data.campaigns[0].title }) }}
+          {{ $t('prayerFuel.backTo', { campaign: data.campaigns[0]?.title }) }}
         </UButton>
       </div>
     </div>
@@ -340,8 +340,42 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
 
+interface ProfileResponse {
+  subscriber: {
+    id: number
+    profile_id: string
+    name: string
+    email: string
+    email_verified: boolean
+    phone: string
+  }
+  campaigns: Array<{
+    id: number
+    title: string
+    slug: string
+    reminders: Array<{
+      id: number
+      delivery_method: string
+      frequency: string
+      days_of_week: number[]
+      time_preference: string
+      timezone: string
+      prayer_duration: number
+      status: string
+    }>
+  }>
+  consents: {
+    doxa_general: boolean
+    doxa_general_at: string | null
+    campaigns: Array<{
+      campaign_id: number
+      consented_at: string | null
+    }>
+  }
+}
+
 // Fetch subscriber profile using new profile API
-const { data, pending, error, refresh } = await useFetch(`/api/profile/${profileId}`)
+const { data, pending, error, refresh } = await useFetch<ProfileResponse>(`/api/profile/${profileId}`)
 
 // Global form state (name, email)
 const globalForm = ref({
@@ -471,7 +505,12 @@ async function saveGlobalSettings() {
   saveError.value = ''
 
   try {
-    const response = await $fetch(`/api/profile/${profileId}`, {
+    const response = await $fetch<{
+      success: boolean
+      email_changed: boolean
+      subscriber: { id: number; profile_id: string; name: string; email: string; email_verified: boolean }
+      consents: { doxa_general: boolean; campaign_ids: number[] }
+    }>(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
         name: globalForm.value.name,

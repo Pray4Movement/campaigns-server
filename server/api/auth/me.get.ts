@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
     // Fetch full user data from database
     // Note: JWT payload uses 'userId', not 'id'
-    const userId = (authUser as any).userId || authUser.id
+    const userId = (authUser as any).userId || (authUser as any).id
     const fullUser = await userService.getUserById(userId)
 
     if (!fullUser) {

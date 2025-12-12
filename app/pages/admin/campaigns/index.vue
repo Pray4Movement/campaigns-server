@@ -281,7 +281,7 @@ async function saveCampaign() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to save campaign',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -305,7 +305,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Campaign deleted',
       description: `"${campaignToDelete.value.title}" has been deleted successfully.`,
-      color: 'green'
+      color: 'success'
     })
 
     showDeleteModal.value = false
@@ -315,7 +315,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to delete campaign',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     deleting.value = false

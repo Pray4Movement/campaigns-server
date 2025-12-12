@@ -61,7 +61,10 @@ async function createBackup() {
   backupMessage.value = null
 
   try {
-    const response = await $fetch('/api/admin/backup/create', {
+    const response = await $fetch<{
+      success: boolean
+      backup: { filename: string; size: number; location: string }
+    }>('/api/admin/backup/create', {
       method: 'POST'
     })
 

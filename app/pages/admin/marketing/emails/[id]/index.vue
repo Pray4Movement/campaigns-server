@@ -222,7 +222,7 @@ const error = ref('')
 const form = ref({
   subject: '',
   audience_type: '' as 'doxa' | 'campaign' | '',
-  campaign_id: null as number | null,
+  campaign_id: undefined as number | undefined,
   content: { type: 'doc', content: [{ type: 'paragraph' }] } as any
 })
 
@@ -269,8 +269,10 @@ const hasUnsavedChanges = computed(() => {
   return JSON.stringify(form.value) !== originalForm.value
 })
 
-function getStatusColor(status: string) {
-  const colors: Record<string, string> = {
+type BadgeColor = 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral'
+
+function getStatusColor(status: string): BadgeColor {
+  const colors: Record<string, BadgeColor> = {
     draft: 'neutral',
     queued: 'warning',
     sending: 'info',
@@ -283,7 +285,7 @@ function getStatusColor(status: string) {
 function selectAudience(type: 'doxa' | 'campaign') {
   form.value.audience_type = type
   if (type === 'doxa') {
-    form.value.campaign_id = null
+    form.value.campaign_id = undefined
     campaignCount.value = null
   }
 }
@@ -302,7 +304,7 @@ async function loadEmail() {
       form.value = {
         subject: response.email.subject,
         audience_type: response.email.audience_type,
-        campaign_id: response.email.campaign_id,
+        campaign_id: response.email.campaign_id ?? undefined,
         content: JSON.parse(response.email.content_json)
       }
       originalForm.value = JSON.stringify(form.value)
@@ -375,7 +377,7 @@ async function saveEmail() {
     toast.add({
       title: 'Draft saved',
       description: 'Your changes have been saved.',
-      color: 'green'
+      color: 'success'
     })
 
     await loadEmail()
@@ -383,7 +385,7 @@ async function saveEmail() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to save email',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -418,7 +420,7 @@ async function sendEmail() {
     toast.add({
       title: 'Email queued',
       description: `Your email is being sent to ${sendResponse.recipient_count} recipients.`,
-      color: 'green'
+      color: 'success'
     })
 
     navigateTo('/admin/marketing/emails')
@@ -426,7 +428,7 @@ async function sendEmail() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to send email',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -455,7 +457,7 @@ async function previewEmail() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to preview email',
-      color: 'red'
+      color: 'error'
     })
   }
 }

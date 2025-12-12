@@ -31,7 +31,7 @@
                 <span class="content-number">{{ index + 1 }}</span>
               </div>
               <h2 v-if="contentItem.title" class="content-title">{{ contentItem.title }}</h2>
-              <RichTextViewer :content="contentItem.content_json" :item-id="String(contentItem.id)" />
+              <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
             </div>
           </div>
 

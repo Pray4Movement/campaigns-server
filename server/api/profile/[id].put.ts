@@ -101,8 +101,8 @@ export default defineEventHandler(async (event) => {
         // Get subscriber's first subscription to use for verification email context
         const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
         if (subscriptions.length > 0) {
-          const campaign = await campaignService.getCampaignById(subscriptions[0].campaign_id)
-          if (campaign) {
+          const campaign = await campaignService.getCampaignById(subscriptions[0]!.campaign_id)
+          if (campaign && newEmailContact) {
             const verificationToken = await contactMethodService.generateVerificationToken(newEmailContact.id)
             await sendSignupVerificationEmail(
               newEmail,

@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
     // Get the inviter's info for the email
     const { userService } = await import('#server/database/users')
-    const inviter = await userService.getUserById(invitation.invited_by)
+    const inviter = await userService.getUserById(String(invitation.invited_by))
 
     if (!inviter) {
       throw createError({

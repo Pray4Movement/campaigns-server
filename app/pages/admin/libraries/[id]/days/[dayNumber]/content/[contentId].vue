@@ -166,14 +166,14 @@ async function saveContent() {
     toast.add({
       title: 'Content updated',
       description: 'Your changes have been saved successfully.',
-      color: 'green'
+      color: 'success'
     })
   } catch (err: any) {
     console.error('Failed to save content:', err)
     toast.add({
       title: 'Failed to save content',
       description: err.data?.statusMessage || 'An error occurred while saving your changes.',
-      color: 'red'
+      color: 'error'
     })
     // If save failed, keep hasChanges as true
   } finally {

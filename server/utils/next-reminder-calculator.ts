@@ -17,7 +17,7 @@ export function calculateNextReminderUtc(options: NextReminderOptions): Date {
   const { timezone, timePreference, frequency, daysOfWeek } = options
 
   // Parse time preference
-  const [hours, minutes] = timePreference.split(':').map(Number)
+  const [hours = 0, minutes = 0] = timePreference.split(':').map(Number)
 
   // Get current time in user's timezone
   const nowUtc = new Date()
@@ -89,7 +89,7 @@ export function calculateNextReminderAfterSend(options: NextReminderOptions): Da
   const { timezone, timePreference, frequency, daysOfWeek } = options
 
   // Parse time preference
-  const [hours, minutes] = timePreference.split(':').map(Number)
+  const [hours = 0, minutes = 0] = timePreference.split(':').map(Number)
 
   // Get current time in user's timezone
   const nowUtc = new Date()

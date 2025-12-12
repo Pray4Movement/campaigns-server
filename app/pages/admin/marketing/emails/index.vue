@@ -150,8 +150,10 @@ const filteredEmails = computed(() => {
   return emails.value.filter(e => e.status === statusFilter.value)
 })
 
-function getStatusColor(status: string) {
-  const colors: Record<string, string> = {
+type BadgeColor = 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral'
+
+function getStatusColor(status: string): BadgeColor {
+  const colors: Record<string, BadgeColor> = {
     draft: 'neutral',
     queued: 'warning',
     sending: 'info',
@@ -192,7 +194,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Email deleted',
       description: 'The email draft has been deleted.',
-      color: 'green'
+      color: 'success'
     })
 
     showDeleteModal.value = false
@@ -202,7 +204,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to delete email',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     deleting.value = false

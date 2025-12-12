@@ -37,7 +37,7 @@
                 <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
               </div>
               <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8 text-center">{{ contentItem.title }}</h2>
-              <RichTextViewer :content="contentItem.content_json" :item-id="String(contentItem.id)" />
+              <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
             </div>
           </div>
 

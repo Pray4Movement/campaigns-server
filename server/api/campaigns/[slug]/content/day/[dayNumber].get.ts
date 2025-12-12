@@ -59,17 +59,18 @@ export default defineEventHandler(async (event) => {
 
   const startDate = new Date(globalStartDate)
   startDate.setDate(startDate.getDate() + (dayNumber - 1))
-  const date = startDate.toISOString().split('T')[0]
+  const date = startDate.toISOString().split('T')[0]!
 
   // Get language preference (default to campaign's default language)
   const languageCode = (query.language as string) || campaign.default_language || 'en'
 
   // Get ALL prayer content for the day and language from all libraries
+  const defaultLang = campaign.default_language || 'en'
   let allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, languageCode)
 
   // If no content found in requested language, fall back to campaign default language
-  if (allContent.length === 0 && languageCode !== campaign.default_language) {
-    allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, campaign.default_language)
+  if (allContent.length === 0 && languageCode !== defaultLang) {
+    allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, defaultLang)
   }
 
   // Get available languages for this date

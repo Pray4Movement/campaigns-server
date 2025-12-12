@@ -129,7 +129,7 @@ const toast = useToast()
 const form = ref({
   subject: '',
   audience_type: '' as 'doxa' | 'campaign' | '',
-  campaign_id: null as number | null,
+  campaign_id: undefined as number | undefined,
   content: { type: 'doc', content: [{ type: 'paragraph' }] }
 })
 
@@ -174,7 +174,7 @@ const hasActualContent = computed(() => {
 function selectAudience(type: 'doxa' | 'campaign') {
   form.value.audience_type = type
   if (type === 'doxa') {
-    form.value.campaign_id = null
+    form.value.campaign_id = undefined
     campaignCount.value = null
   }
 }
@@ -232,7 +232,7 @@ async function saveEmail() {
     toast.add({
       title: 'Draft saved',
       description: 'Your email has been saved as a draft.',
-      color: 'green'
+      color: 'success'
     })
 
     navigateTo(`/admin/marketing/emails/${response.email.id}`)
@@ -240,7 +240,7 @@ async function saveEmail() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to save email',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -275,7 +275,7 @@ async function sendEmail() {
     toast.add({
       title: 'Email queued',
       description: `Your email is being sent to ${sendResponse.recipient_count} recipients.`,
-      color: 'green'
+      color: 'success'
     })
 
     navigateTo('/admin/marketing/emails')
@@ -283,7 +283,7 @@ async function sendEmail() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to send email',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -316,7 +316,7 @@ async function previewEmail() {
     toast.add({
       title: 'Error',
       description: err.data?.statusMessage || 'Failed to preview email',
-      color: 'red'
+      color: 'error'
     })
   }
 }

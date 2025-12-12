@@ -65,7 +65,7 @@ export class PrayerContentService {
     // Day numbers start at 1, so subtract 1
     startDate.setDate(startDate.getDate() + (dayNumber - 1))
 
-    return startDate.toISOString().split('T')[0]
+    return startDate.toISOString().split('T')[0]!
   }
 
   /**

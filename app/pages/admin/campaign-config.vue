@@ -166,8 +166,8 @@
 
               <div class="add-library-section">
                 <USelectMenu
-                  :model-value="null"
-                  @update:model-value="(lib: Library | null) => lib && addLibraryToRow(rowIndex, lib)"
+                  :model-value="undefined"
+                  @update:model-value="(lib: Library | undefined) => lib && addLibraryToRow(rowIndex, lib)"
                   :items="getAvailableLibrariesForRow(rowIndex)"
                   placeholder="Add library..."
                   label-key="name"
@@ -316,17 +316,21 @@ function getAvailableLibrariesForRow(rowIndex: number): Library[] {
 }
 
 function addLibraryToRow(rowIndex: number, library: Library) {
-  const newOrder = rows.value[rowIndex].libraries.length + 1
-  rows.value[rowIndex].libraries.push({
+  const row = rows.value[rowIndex]
+  if (!row) return
+  const newOrder = row.libraries.length + 1
+  row.libraries.push({
     libraryId: library.id,
     order: newOrder
   })
 }
 
 function removeLibraryFromRow(rowIndex: number, libIndex: number) {
-  rows.value[rowIndex].libraries.splice(libIndex, 1)
+  const row = rows.value[rowIndex]
+  if (!row) return
+  row.libraries.splice(libIndex, 1)
   // Re-order
-  rows.value[rowIndex].libraries.forEach((lib, idx) => {
+  row.libraries.forEach((lib, idx) => {
     lib.order = idx + 1
   })
 }
@@ -342,15 +346,20 @@ function getLibraryDays(libraryId: number): number {
 }
 
 function getRowTotalDays(rowIndex: number): number {
-  return rows.value[rowIndex].libraries.reduce((total, lib) => {
+  const row = rows.value[rowIndex]
+  if (!row) return 0
+  return row.libraries.reduce((total, lib) => {
     return total + getLibraryDays(lib.libraryId)
   }, 0)
 }
 
 function getLibraryStartDay(rowIndex: number, libIndex: number): number {
+  const row = rows.value[rowIndex]
+  if (!row) return 1
   let startDay = 1
   for (let i = 0; i < libIndex; i++) {
-    startDay += getLibraryDays(rows.value[rowIndex].libraries[i].libraryId)
+    const lib = row.libraries[i]
+    if (lib) startDay += getLibraryDays(lib.libraryId)
   }
   return startDay
 }
@@ -430,8 +439,18 @@ function drop(targetRowIndex: number, targetLibIndex: number) {
     return
   }
 
-  const items = [...rows.value[sourceRowIndex].libraries]
+  const row = rows.value[sourceRowIndex]
+  if (!row) {
+    dragState.value = null
+    return
+  }
+
+  const items = [...row.libraries]
   const [draggedItem] = items.splice(sourceLibIndex, 1)
+  if (!draggedItem) {
+    dragState.value = null
+    return
+  }
 
   // Adjust target index if we removed an item before it
   const adjustedTargetIndex = sourceLibIndex < targetLibIndex ? targetLibIndex - 1 : targetLibIndex
@@ -442,7 +461,7 @@ function drop(targetRowIndex: number, targetLibIndex: number) {
     lib.order = idx + 1
   })
 
-  rows.value[sourceRowIndex].libraries = items
+  row.libraries = items
   dragState.value = null
 }
 
@@ -451,7 +470,7 @@ async function saveConfiguration() {
     toast.add({
       title: 'Validation Error',
       description: 'Global start date is required',
-      color: 'red'
+      color: 'error'
     })
     return
   }
@@ -470,13 +489,13 @@ async function saveConfiguration() {
     toast.add({
       title: 'Configuration saved',
       description: 'Global campaign configuration has been updated successfully.',
-      color: 'green'
+      color: 'success'
     })
   } catch (err: any) {
     toast.add({
       title: 'Failed to save configuration',
       description: err.data?.statusMessage || 'An error occurred while saving the configuration.',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
