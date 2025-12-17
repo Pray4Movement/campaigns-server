@@ -9,6 +9,7 @@ export interface Campaign {
   description: string
   status: 'active' | 'inactive'
   default_language: string
+  dt_id: string | null
   created_at: string
   updated_at: string
 }
@@ -19,6 +20,7 @@ export interface CreateCampaignData {
   slug?: string
   status?: 'active' | 'inactive'
   default_language?: string
+  dt_id?: string
 }
 
 export interface UpdateCampaignData {
@@ -27,6 +29,7 @@ export interface UpdateCampaignData {
   slug?: string
   status?: 'active' | 'inactive'
   default_language?: string
+  dt_id?: string | null
 }
 
 export class CampaignService {
@@ -66,7 +69,7 @@ export class CampaignService {
 
   // Create a new campaign
   async createCampaign(data: CreateCampaignData): Promise<Campaign> {
-    const { title, description = '', status = 'active', default_language = 'en' } = data
+    const { title, description = '', status = 'active', default_language = 'en', dt_id = null } = data
 
     // Generate unique slug if not provided
     const slug = data.slug || await this.generateUniqueSlug(title)
@@ -77,12 +80,12 @@ export class CampaignService {
     }
 
     const stmt = this.db.prepare(`
-      INSERT INTO campaigns (slug, title, description, status, default_language)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO campaigns (slug, title, description, status, default_language, dt_id)
+      VALUES (?, ?, ?, ?, ?, ?)
     `)
 
     try {
-      const result = await stmt.run(slug, title, description, status, default_language)
+      const result = await stmt.run(slug, title, description, status, default_language, dt_id)
       return (await this.getCampaignById(result.lastInsertRowid as number))!
     } catch (error: any) {
       if (error.code === '23505') { // PostgreSQL unique violation
@@ -95,7 +98,7 @@ export class CampaignService {
   // Get campaign by ID
   async getCampaignById(id: number): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, default_language, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, created_at, updated_at
       FROM campaigns
       WHERE id = ?
     `)
@@ -106,7 +109,7 @@ export class CampaignService {
   // Get campaign by slug
   async getCampaignBySlug(slug: string): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, default_language, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, created_at, updated_at
       FROM campaigns
       WHERE slug = ?
     `)
@@ -117,7 +120,7 @@ export class CampaignService {
   // Get all campaigns
   async getAllCampaigns(statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
     let query = `
-      SELECT id, slug, title, description, status, default_language, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, created_at, updated_at
       FROM campaigns
     `
 
@@ -171,6 +174,11 @@ export class CampaignService {
     if (data.default_language !== undefined) {
       updates.push('default_language = ?')
       values.push(data.default_language)
+    }
+
+    if (data.dt_id !== undefined) {
+      updates.push('dt_id = ?')
+      values.push(data.dt_id)
     }
 
     if (updates.length === 0) {
@@ -242,7 +250,7 @@ export class CampaignService {
 
     // Build query to get only accessible campaigns
     let query = `
-      SELECT id, slug, title, description, status, default_language, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, created_at, updated_at
       FROM campaigns
       WHERE id IN (${campaignIds.map(() => '?').join(',')})
     `
