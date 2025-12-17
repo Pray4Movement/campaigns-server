@@ -27,11 +27,20 @@
           <div v-if="data.hasContent" class="prayer-content-wrapper">
             <!-- Loop through all content items from different libraries -->
             <div v-for="(contentItem, index) in data.content" :key="contentItem.id" class="content-section">
-              <div v-if="data.content.length > 1" class="content-divider">
+              <div v-if="data.content.length > 1 && index > 0" class="content-divider">
                 <span class="content-number">{{ index + 1 }}</span>
               </div>
-              <h2 v-if="contentItem.title" class="content-title">{{ contentItem.title }}</h2>
-              <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
+
+              <!-- People Group content -->
+              <template v-if="contentItem.content_type === 'people_group' && contentItem.people_group_data">
+                <PeopleGroupCard :people-group="contentItem.people_group_data" />
+              </template>
+
+              <!-- Static library content -->
+              <template v-else>
+                <h2 v-if="contentItem.title" class="content-title">{{ contentItem.title }}</h2>
+                <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
+              </template>
             </div>
           </div>
 

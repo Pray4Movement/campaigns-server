@@ -67,7 +67,9 @@ export default defineEventHandler(async (event) => {
       title: content.title,
       language_code: content.language_code,
       content_json: contentJson,
-      content_date: content.content_date
+      content_date: content.content_date,
+      content_type: content.content_type || 'static',
+      people_group_data: content.people_group_data || null
     }
   })
 

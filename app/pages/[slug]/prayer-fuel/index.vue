@@ -29,15 +29,24 @@
           <div v-if="data.hasContent">
             <!-- Loop through all content items from different libraries -->
             <div v-for="(contentItem, index) in data.content" :key="contentItem.id" class="mb-12 last:mb-0">
-              <div v-if="data.content.length > 1" class="flex items-center justify-center my-12 relative">
+              <div v-if="data.content.length > 1 && index > 0" class="flex items-center justify-center my-12 relative">
                 <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
                 <span class="inline-flex items-center justify-center w-8 h-8 mx-4 bg-[var(--ui-bg)] border-2 border-[var(--ui-border)] rounded-full text-sm font-semibold text-[var(--ui-text-muted)]">
                   {{ index + 1 }}
                 </span>
                 <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
               </div>
-              <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8 text-center">{{ contentItem.title }}</h2>
-              <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
+
+              <!-- People Group content -->
+              <template v-if="contentItem.content_type === 'people_group' && contentItem.people_group_data">
+                <PeopleGroupCard :people-group="contentItem.people_group_data" />
+              </template>
+
+              <!-- Static library content -->
+              <template v-else>
+                <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8 text-center">{{ contentItem.title }}</h2>
+                <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
+              </template>
             </div>
           </div>
 

@@ -1,9 +1,12 @@
 import { getDatabase } from './db'
 
+export type LibraryType = 'static' | 'people_group'
+
 export interface Library {
   id: number
   name: string
   description: string
+  type: LibraryType
   created_at: string
   updated_at: string
 }
@@ -137,6 +140,16 @@ export class LibraryService {
     totalDays: number
     languageStats: { [key: string]: number }
   }> {
+    // Check if this is a people_group library
+    const library = await this.getLibraryById(id)
+    if (library?.type === 'people_group') {
+      // People group libraries have "infinite" days - content is dynamic
+      return {
+        totalDays: -1, // -1 indicates continuous/infinite
+        languageStats: {}
+      }
+    }
+
     // Get total unique days
     const daysStmt = this.db.prepare(`
       SELECT COUNT(DISTINCT day_number) as count
@@ -163,6 +176,14 @@ export class LibraryService {
       totalDays: daysResult.count,
       languageStats
     }
+  }
+
+  // Get the People Group library
+  async getPeopleGroupLibrary(): Promise<Library | null> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM libraries WHERE type = 'people_group' LIMIT 1
+    `)
+    return await stmt.get() as Library | null
   }
 }
 

@@ -1,6 +1,21 @@
 import { getDatabase } from './db'
 import { appConfigService } from './app-config'
 import { libraryContentService } from './library-content'
+import { libraryService } from './libraries'
+import { peopleGroupService } from './people-groups'
+import { campaignService } from './campaigns'
+import { getLanguageLabel, getReligionLabel } from '../utils/app/field-options'
+
+export interface PeopleGroupData {
+  name: string
+  image_url: string | null
+  description: string | null
+  population: number | null
+  language: string | null
+  religion: string | null
+  lat: number | null
+  lng: number | null
+}
 
 export interface PrayerContent {
   id: number
@@ -9,6 +24,8 @@ export interface PrayerContent {
   language_code: string
   title: string
   content_json: string | null
+  content_type: 'static' | 'people_group'
+  people_group_data?: PeopleGroupData | null
   created_at: string
   updated_at: string
 }
@@ -85,16 +102,35 @@ export class PrayerContentService {
    * Get library stats (total days) - cached for efficiency
    */
   private libraryStatsCache: Map<number, number> = new Map()
+  private libraryTypeCache: Map<number, string> = new Map()
 
   private async getLibraryTotalDays(libraryId: number): Promise<number> {
     if (this.libraryStatsCache.has(libraryId)) {
       return this.libraryStatsCache.get(libraryId)!
     }
 
+    // Check if this is a people_group library - they have infinite days
+    const library = await libraryService.getLibraryById(libraryId)
+    if (library?.type === 'people_group') {
+      this.libraryStatsCache.set(libraryId, 999999)
+      this.libraryTypeCache.set(libraryId, 'people_group')
+      return 999999
+    }
+
+    this.libraryTypeCache.set(libraryId, 'static')
     const dayRange = await libraryContentService.getDayRange(libraryId)
     const totalDays = dayRange?.maxDay || 0
     this.libraryStatsCache.set(libraryId, totalDays)
     return totalDays
+  }
+
+  private async getLibraryType(libraryId: number): Promise<string> {
+    if (this.libraryTypeCache.has(libraryId)) {
+      return this.libraryTypeCache.get(libraryId)!
+    }
+    // This will populate the cache
+    await this.getLibraryTotalDays(libraryId)
+    return this.libraryTypeCache.get(libraryId) || 'static'
   }
 
   /**
@@ -155,8 +191,79 @@ export class PrayerContentService {
       language_code: libraryContent.language_code,
       title: '', // Library content doesn't have titles, but keeping for compatibility
       content_json: libraryContent.content_json,
+      content_type: 'static',
       created_at: libraryContent.created_at,
       updated_at: libraryContent.updated_at
+    }
+  }
+
+  /**
+   * Generate people group content for a campaign
+   */
+  private async generatePeopleGroupContent(campaignId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
+    // Get the campaign to find its dt_id
+    const campaign = await campaignService.getCampaignById(campaignId)
+    if (!campaign?.dt_id) {
+      return null
+    }
+
+    // Fetch the people group by dt_id
+    const peopleGroup = await peopleGroupService.getPeopleGroupByDtId(campaign.dt_id)
+    if (!peopleGroup) {
+      return null
+    }
+
+    // Parse metadata for additional fields
+    let description: string | null = null
+    let population: number | null = null
+    let language: string | null = null
+    let religion: string | null = null
+    let lat: number | null = null
+    let lng: number | null = null
+
+    if (peopleGroup.metadata) {
+      try {
+        const metadata = JSON.parse(peopleGroup.metadata)
+        description = metadata.imb_statement_of_need || metadata.imb_people_description || metadata.description || null
+        population = metadata.imb_population ? parseInt(metadata.imb_population, 10) : null
+
+        // Look up labels from field options
+        const languageCode = metadata.imb_reg_of_language
+        const religionCode = metadata.imb_reg_of_religion_3
+
+        language = languageCode ? (getLanguageLabel(languageCode) || languageCode) : null
+        religion = religionCode ? (getReligionLabel(religionCode) || religionCode) : null
+
+        // Extract coordinates
+        lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
+        lng = metadata.imb_lng ? parseFloat(metadata.imb_lng) : null
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+
+    const now = new Date().toISOString()
+
+    return {
+      id: -1, // Virtual content - no actual database ID
+      campaign_id: campaignId,
+      content_date: date,
+      language_code: languageCode,
+      title: peopleGroup.name,
+      content_json: null, // Not used for people_group type
+      content_type: 'people_group',
+      people_group_data: {
+        name: peopleGroup.name,
+        image_url: peopleGroup.image_url,
+        description,
+        population,
+        language,
+        religion,
+        lat,
+        lng
+      },
+      created_at: now,
+      updated_at: now
     }
   }
 
@@ -238,15 +345,26 @@ export class PrayerContentService {
         const libraryInfo = await this.findLibraryForDay(row, campaignDay)
 
         if (libraryInfo) {
-          // Fetch content from this library at the calculated day
-          const content = await libraryContentService.getLibraryContentByDay(
-            libraryInfo.libraryId,
-            libraryInfo.dayInLibrary,
-            languageCode
-          )
+          // Check if this is a people_group library
+          const libraryType = await this.getLibraryType(libraryInfo.libraryId)
 
-          if (content) {
-            allContent.push(this.transformLibraryContent(content, campaignId, date))
+          if (libraryType === 'people_group') {
+            // Generate dynamic people group content
+            const peopleGroupContent = await this.generatePeopleGroupContent(campaignId, date, languageCode)
+            if (peopleGroupContent) {
+              allContent.push(peopleGroupContent)
+            }
+          } else {
+            // Fetch content from this library at the calculated day
+            const content = await libraryContentService.getLibraryContentByDay(
+              libraryInfo.libraryId,
+              libraryInfo.dayInLibrary,
+              languageCode
+            )
+
+            if (content) {
+              allContent.push(this.transformLibraryContent(content, campaignId, date))
+            }
           }
         }
         // If libraryInfo is null, this row is exhausted - nothing to display

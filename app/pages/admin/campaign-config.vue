@@ -48,13 +48,17 @@
             v-for="library in allLibraries"
             :key="library.id"
             class="library-chip"
+            :class="{
+              'dragging': dragState?.source === 'available' && dragState?.libraryId === library.id,
+              'people-group-chip': library.type === 'people_group'
+            }"
             draggable="true"
             @dragstart="dragStartFromAvailable(library.id)"
             @dragend="dragEnd"
-            :class="{ 'dragging': dragState?.source === 'available' && dragState?.libraryId === library.id }"
           >
+            <UIcon v-if="library.type === 'people_group'" name="i-lucide-users" class="library-type-icon" />
             <span class="library-chip-name">{{ library.name }}</span>
-            <span class="library-chip-days">{{ library.stats?.totalDays || 0 }} days</span>
+            <span class="library-chip-days">{{ getLibraryDaysLabel(library) }}</span>
           </div>
         </div>
       </div>
@@ -118,26 +122,30 @@
                   v-for="(libConfig, libIndex) in row.libraries"
                   :key="`${rowIndex}-${libIndex}`"
                   class="row-library-card"
+                  :class="{
+                    'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === libIndex,
+                    'dragging': dragState?.source === 'row' && dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex,
+                    'people-group-card': getLibraryType(libConfig.libraryId) === 'people_group'
+                  }"
                   draggable="true"
                   @dragstart="dragStart(rowIndex, libIndex)"
                   @dragend="dragEnd"
                   @dragover.prevent="onDragOver($event, rowIndex, libIndex)"
                   @dragleave="onDragLeave"
                   @drop="drop(rowIndex, libIndex)"
-                  :class="{
-                    'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === libIndex,
-                    'dragging': dragState?.source === 'row' && dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex
-                  }"
                 >
                   <div class="drag-handle">
                     <span class="order-number">{{ libIndex + 1 }}</span>
                     ⋮⋮
                   </div>
                   <div class="library-info">
-                    <strong>{{ getLibraryName(libConfig.libraryId) }}</strong>
+                    <div class="library-name-row">
+                      <UIcon v-if="getLibraryType(libConfig.libraryId) === 'people_group'" name="i-lucide-users" class="library-type-icon" />
+                      <strong>{{ getLibraryName(libConfig.libraryId) }}</strong>
+                    </div>
                     <span class="library-stats">
-                      {{ getLibraryDays(libConfig.libraryId) }} days
-                      <template v-if="libIndex > 0">
+                      {{ getLibraryDaysDisplay(libConfig.libraryId) }}
+                      <template v-if="libIndex > 0 && getLibraryType(libConfig.libraryId) !== 'people_group'">
                         (starts Day {{ getLibraryStartDay(rowIndex, libIndex) }})
                       </template>
                     </span>
@@ -177,8 +185,11 @@
                   :ui="{ content: 'min-w-64' }"
                 >
                   <template #item="{ item }">
-                    <span>{{ item.name }}</span>
-                    <span class="select-item-days">{{ item.stats?.totalDays || 0 }} days</span>
+                    <div class="select-item-content">
+                      <UIcon v-if="item.type === 'people_group'" name="i-lucide-users" class="select-item-icon" />
+                      <span>{{ item.name }}</span>
+                    </div>
+                    <span class="select-item-days">{{ getLibraryDaysLabel(item) }}</span>
                   </template>
                 </USelectMenu>
               </div>
@@ -210,6 +221,7 @@ interface Library {
   id: number
   name: string
   description: string
+  type: 'static' | 'people_group'
   stats?: {
     totalDays: number
     languageStats: { [key: string]: number }
@@ -340,9 +352,31 @@ function getLibraryName(libraryId: number): string {
   return library?.name || 'Unknown'
 }
 
+function getLibraryType(libraryId: number): string {
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  return library?.type || 'static'
+}
+
 function getLibraryDays(libraryId: number): number {
   const library = allLibraries.value.find(lib => lib.id === libraryId)
+  // People group libraries have "infinite" days represented by -1
+  if (library?.type === 'people_group') {
+    return 0 // Don't count towards row total
+  }
   return Number(library?.stats?.totalDays) || 0
+}
+
+function getLibraryDaysLabel(library: Library): string {
+  if (library.type === 'people_group') {
+    return 'Continuous'
+  }
+  return `${library.stats?.totalDays || 0} days`
+}
+
+function getLibraryDaysDisplay(libraryId: number): string {
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  if (!library) return '0 days'
+  return getLibraryDaysLabel(library)
 }
 
 function getRowTotalDays(rowIndex: number): number {
@@ -633,6 +667,21 @@ onMounted(async () => {
   font-size: 0.75rem;
 }
 
+.library-type-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ui-text-muted);
+}
+
+.people-group-chip {
+  border-color: var(--ui-primary);
+  background-color: var(--ui-primary-50, rgba(var(--ui-primary-rgb), 0.1));
+}
+
+.people-group-chip .library-type-icon {
+  color: var(--ui-primary);
+}
+
 /* Rows */
 .rows-container {
   display: flex;
@@ -779,8 +828,23 @@ onMounted(async () => {
   gap: 0.125rem;
 }
 
+.library-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
 .library-info strong {
   font-size: 0.875rem;
+}
+
+.people-group-card {
+  border-color: var(--ui-primary);
+  background-color: var(--ui-primary-50, rgba(var(--ui-primary-rgb), 0.05));
+}
+
+.people-group-card .library-type-icon {
+  color: var(--ui-primary);
 }
 
 .library-stats {
@@ -798,6 +862,18 @@ onMounted(async () => {
   min-width: 250px;
 }
 
+
+.select-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.select-item-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ui-primary);
+}
 
 .select-item-days {
   margin-left: auto;
