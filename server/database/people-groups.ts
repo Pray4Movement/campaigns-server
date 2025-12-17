@@ -150,6 +150,20 @@ export class PeopleGroupService {
     const result = await stmt.run(id)
     return result.changes > 0
   }
+
+  async countPeopleGroups(search?: string): Promise<number> {
+    let query = 'SELECT COUNT(*) as count FROM people_groups'
+    const params: any[] = []
+
+    if (search) {
+      query += ' WHERE name ILIKE ?'
+      params.push(`%${search}%`)
+    }
+
+    const stmt = this.db.prepare(query)
+    const result = await stmt.get(...params) as { count: number }
+    return result.count
+  }
 }
 
 export const peopleGroupService = new PeopleGroupService()

@@ -38,6 +38,11 @@
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
+          <NuxtLink to="/admin/people-groups" class="nav-link">
+            People Groups
+          </NuxtLink>
+        </li>
+        <li v-if="isAdmin">
           <NuxtLink to="/admin/users" class="nav-link">
             Users
           </NuxtLink>

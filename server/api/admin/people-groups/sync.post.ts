@@ -2,7 +2,7 @@ import { peopleGroupService } from '../../../database/people-groups'
 
 interface DtPeopleGroup {
   dt_id: string
-  name: string
+  imb_display_name: string
   imb_picture_url?: string | null
   [key: string]: any
 }
@@ -54,14 +54,22 @@ export default defineEventHandler(async (event) => {
     let updated = 0
     let errors = 0
 
+    // Log first record to see available fields
+    if (data.posts.length > 0) {
+      console.log('Sample record fields:', Object.keys(data.posts[0]))
+      console.log('Sample record:', JSON.stringify(data.posts[0], null, 2))
+    }
+
     for (const group of data.posts) {
-      if (!group.dt_id || !group.name) {
+      if (!group.dt_id || !group.imb_display_name) {
+        console.log('Missing field - dt_id:', group.dt_id, 'imb_display_name:', group.imb_display_name)
         errors++
         continue
       }
 
       // Extract core fields, put rest in metadata
-      const { dt_id, name, imb_picture_url, ...rest } = group
+      const { dt_id, imb_display_name, imb_picture_url, ...rest } = group
+      const name = imb_display_name
       const imageUrl = imb_picture_url || null
       const metadata = JSON.stringify(rest)
 
