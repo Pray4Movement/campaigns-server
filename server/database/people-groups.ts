@@ -161,8 +161,8 @@ export class PeopleGroupService {
     }
 
     const stmt = this.db.prepare(query)
-    const result = await stmt.get(...params) as { count: number }
-    return result.count
+    const result = await stmt.get(...params) as { count: string | number }
+    return Number(result.count)
   }
 }
 

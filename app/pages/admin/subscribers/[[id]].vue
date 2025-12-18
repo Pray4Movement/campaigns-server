@@ -1,25 +1,18 @@
 <template>
-  <div class="subscribers-page">
-    <div class="page-header">
+  <CrmLayout :loading="loading" :error="error">
+    <template #header>
       <div>
-        <NuxtLink to="/admin" class="back-link">← Back to Dashboard</NuxtLink>
+        <NuxtLink :to="backLink.to" class="back-link">← {{ backLink.label }}</NuxtLink>
         <h1>All Subscribers</h1>
       </div>
-    </div>
+    </template>
 
-    <div v-if="loading" class="loading">Loading subscribers...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-
-    <div v-else class="subscribers-layout">
-      <!-- Left Column: Subscriber List (1/3 width) -->
-      <div class="subscriber-list">
-        <div class="list-header">
-          <UInput
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by name, email, or phone..."
-            class="search-input"
-          />
+    <template #list-header>
+      <CrmListPanel
+        v-model="searchQuery"
+        search-placeholder="Search by name, email, or phone..."
+      >
+        <template #filters>
           <USelect
             v-model="filterCampaignId"
             :items="campaignOptions"
@@ -27,340 +20,316 @@
             placeholder="All Campaigns"
             class="filter-select"
           />
+        </template>
+      </CrmListPanel>
+    </template>
+
+    <template #list>
+      <template v-if="filteredSubscribers.length === 0">
+        <div class="empty-list">No subscribers found</div>
+      </template>
+      <CrmListItem
+        v-else
+        v-for="subscriber in filteredSubscribers"
+        :key="subscriber.id"
+        :active="selectedSubscriber?.id === subscriber.id"
+        @click="selectSubscriber(subscriber)"
+      >
+        <div class="subscriber-name">{{ subscriber.name }}</div>
+        <div class="subscriber-contact">
+          {{ subscriber.primary_email || subscriber.primary_phone || 'No contact' }}
         </div>
-
-        <div v-if="filteredSubscribers.length === 0" class="empty-list">
-          No subscribers found
+        <div class="subscriber-meta">
+          <UBadge
+            :label="`${subscriber.subscriptions.length} subscription${subscriber.subscriptions.length !== 1 ? 's' : ''}`"
+            variant="outline"
+            color="neutral"
+            size="xs"
+          />
+          <span class="date">{{ formatDate(subscriber.created_at) }}</span>
         </div>
+      </CrmListItem>
+    </template>
 
-        <div v-else class="list-items">
-          <div
-            v-for="subscriber in filteredSubscribers"
-            :key="subscriber.id"
-            class="subscriber-item"
-            :class="{ active: selectedSubscriber?.id === subscriber.id }"
-            @click="selectSubscriber(subscriber)"
-          >
-            <div class="subscriber-name">{{ subscriber.name }}</div>
-            <div class="subscriber-contact">
-              {{ subscriber.primary_email || subscriber.primary_phone || 'No contact' }}
-            </div>
-            <div class="subscriber-meta">
-              <div class="meta-badges">
-                <UBadge
-                  :label="`${subscriber.subscriptions.length} subscription${subscriber.subscriptions.length !== 1 ? 's' : ''}`"
-                  variant="outline"
-                  color="neutral"
-                  size="xs"
-                />
-              </div>
-              <span class="date">{{ formatDate(subscriber.created_at) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <template #detail>
+      <CrmDetailPanel :has-selection="!!selectedSubscriber">
+        <template #header>
+          <h2>{{ selectedSubscriber?.name }}</h2>
+        </template>
 
-      <!-- Right Column: Subscriber Details (2/3 width) -->
-      <div class="subscriber-details">
-        <div v-if="!selectedSubscriber" class="no-selection">
-          Select a subscriber to view details
-        </div>
+        <template #actions>
+          <UButton type="button" @click="resetForm" variant="outline">Reset</UButton>
+          <UButton @click="openDeleteModal" color="error" variant="outline">Delete</UButton>
+          <UButton @click="saveChanges" :loading="saving">
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </UButton>
+        </template>
 
-        <div v-else class="details-content">
-          <div class="details-header">
-            <h2>{{ selectedSubscriber.name }}</h2>
-            <div class="header-actions">
-              <UButton @click="openDeleteModal" color="neutral" variant="outline">Delete</UButton>
-            </div>
-          </div>
+        <form v-if="selectedSubscriber" @submit.prevent="saveChanges">
+          <!-- Contact Information -->
+          <CrmFormSection title="Contact Information">
+            <UFormField label="Name" required>
+              <UInput v-model="subscriberForm.name" type="text" class="w-full" />
+            </UFormField>
 
-          <form @submit.prevent="saveChanges" class="details-form">
-            <div class="form-section">
-              <h3>Contact Information</h3>
+            <UFormField v-if="selectedSubscriber.primary_email" label="Email">
+              <div class="contact-display">{{ selectedSubscriber.primary_email }}</div>
+            </UFormField>
 
-              <UFormField label="Name" required>
-                <UInput
-                  v-model="subscriberForm.name"
-                  type="text"
-                  class="w-full"
-                />
-              </UFormField>
+            <UFormField v-if="selectedSubscriber.primary_phone" label="Phone">
+              <div class="contact-display">{{ selectedSubscriber.primary_phone }}</div>
+            </UFormField>
+          </CrmFormSection>
 
-              <UFormField v-if="selectedSubscriber.primary_email" label="Email">
-                <div class="contact-display">{{ selectedSubscriber.primary_email }}</div>
-              </UFormField>
-
-              <UFormField v-if="selectedSubscriber.primary_phone" label="Phone">
-                <div class="contact-display">{{ selectedSubscriber.primary_phone }}</div>
-              </UFormField>
-            </div>
-
-            <div class="form-section">
-              <h3>Marketing Consents</h3>
-
-              <div class="consents-list">
-                <div class="consent-item">
-                  <div class="consent-label">
-                    <span class="consent-name">Doxa General Updates</span>
-                    <UBadge
-                      :label="selectedSubscriber.consents.doxa_general ? 'Opted In' : 'Not Opted In'"
-                      :color="selectedSubscriber.consents.doxa_general ? 'success' : 'neutral'"
-                      :variant="selectedSubscriber.consents.doxa_general ? 'solid' : 'outline'"
-                      size="xs"
-                    />
-                  </div>
-                  <span v-if="selectedSubscriber.consents.doxa_general && selectedSubscriber.consents.doxa_general_at" class="consent-date">
-                    since {{ formatDate(selectedSubscriber.consents.doxa_general_at) }}
-                  </span>
-                </div>
-
-                <div v-if="selectedSubscriber.consents.campaign_names.length > 0" class="consent-item">
-                  <div class="consent-label">
-                    <span class="consent-name">Campaign Marketing</span>
-                  </div>
-                  <div class="campaign-consents">
-                    <UBadge
-                      v-for="(name, idx) in selectedSubscriber.consents.campaign_names"
-                      :key="selectedSubscriber.consents.campaign_ids[idx]"
-                      :label="name"
-                      color="primary"
-                      variant="subtle"
-                      size="xs"
-                    />
-                  </div>
-                </div>
-
-                <div v-else class="consent-item">
-                  <div class="consent-label">
-                    <span class="consent-name">Campaign Marketing</span>
-                    <UBadge label="None" color="neutral" variant="outline" size="xs" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <h3>Subscriptions ({{ selectedSubscriber.subscriptions.length }})</h3>
-
-              <div v-if="selectedSubscriber.subscriptions.length === 0" class="no-subscriptions">
-                No active subscriptions
-              </div>
-
-              <div v-else class="subscriptions-list">
-                <div
-                  v-for="subscription in selectedSubscriber.subscriptions"
-                  :key="subscription.id"
-                  class="subscription-card"
-                >
-                  <div
-                    class="subscription-header"
-                    @click="toggleSubscription(subscription.id)"
-                  >
-                    <div class="subscription-title">
-                      <span class="campaign-name">{{ subscription.campaign_title }}</span>
-                      <UBadge
-                        :label="subscription.status"
-                        variant="outline"
-                        :color="subscription.status === 'active' ? 'success' : 'error'"
-                        size="xs"
-                      />
-                    </div>
-                    <UIcon
-                      :name="expandedSubscriptions.has(subscription.id) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                      class="expand-icon"
-                    />
-                  </div>
-
-                  <div
-                    v-if="expandedSubscriptions.has(subscription.id)"
-                    class="subscription-details"
-                  >
-                    <UFormField label="Delivery Method">
-                      <div class="field-display">
-                        <UBadge
-                          :label="subscription.delivery_method"
-                          :variant="subscription.delivery_method === 'email' ? 'solid' : 'outline'"
-                          :color="subscription.delivery_method === 'email' ? 'primary' : 'neutral'"
-                          size="xs"
-                        />
-                      </div>
-                    </UFormField>
-
-                    <UFormField label="Frequency">
-                      <USelect
-                        v-model="getSubscriptionForm(subscription.id).frequency"
-                        :items="frequencyOptions"
-                        value-key="value"
-                        class="w-full"
-                      />
-                    </UFormField>
-
-                    <UFormField v-if="subscription.frequency !== 'daily' && subscription.days_of_week" label="Days of Week">
-                      <div class="field-display">{{ formatDaysOfWeek(subscription.days_of_week) }}</div>
-                    </UFormField>
-
-                    <UFormField label="Time Preference">
-                      <UInput
-                        v-model="getSubscriptionForm(subscription.id).time_preference"
-                        type="time"
-                        class="w-full"
-                      />
-                    </UFormField>
-
-                    <UFormField v-if="subscription.timezone" label="Timezone">
-                      <div class="field-display">{{ subscription.timezone }}</div>
-                    </UFormField>
-
-                    <UFormField label="Prayer Duration">
-                      <div class="field-display">{{ formatDuration(subscription.prayer_duration) }}</div>
-                    </UFormField>
-
-                    <UFormField v-if="subscription.next_reminder_utc" label="Next Reminder">
-                      <div class="field-display">{{ formatDateTime(subscription.next_reminder_utc) }}</div>
-                    </UFormField>
-
-                    <UFormField label="Status">
-                      <USelect
-                        v-model="getSubscriptionForm(subscription.id).status"
-                        :items="statusOptions"
-                        value-key="value"
-                        class="w-full"
-                      />
-                    </UFormField>
-
-                    <!-- Email History for this subscription -->
-                    <div class="subscription-email-history">
-                      <h4>Email History</h4>
-                      <div v-if="loadingEmailHistory[subscription.id]" class="email-history-loading">
-                        Loading...
-                      </div>
-                      <div v-else-if="!emailHistories[subscription.id] || emailHistories[subscription.id]?.length === 0" class="email-history-empty">
-                        No emails sent yet
-                      </div>
-                      <div v-else class="email-history-list">
-                        <div v-for="sent in emailHistories[subscription.id]" :key="sent.id" class="email-history-item">
-                          <span class="email-date">{{ sent.sent_date }}</span>
-                          <span class="email-time">{{ formatDateTime(sent.sent_at) }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="subscription-actions">
-                      <UButton
-                        size="xs"
-                        variant="outline"
-                        :loading="sendingReminder[subscription.id]"
-                        :disabled="subscription.delivery_method !== 'email'"
-                        @click="sendReminder(subscription)"
-                      >
-                        Send Reminder
-                      </UButton>
-                      <UButton
-                        size="xs"
-                        variant="ghost"
-                        @click="filterByCampaign(subscription)"
-                      >
-                        Filter by Campaign
-                      </UButton>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <h3>Metadata</h3>
-
-              <div class="info-row">
-                <span class="label">Tracking ID:</span>
-                <span class="value monospace">{{ selectedSubscriber.tracking_id }}</span>
-              </div>
-
-              <div class="info-row">
-                <span class="label">Profile Link:</span>
-                <div class="profile-link-container">
-                  <span class="value profile-link-text">{{ getProfileUrl(selectedSubscriber) }}</span>
-                  <UButton
+          <!-- Marketing Consents -->
+          <CrmFormSection title="Marketing Consents">
+            <div class="consents-list">
+              <div class="consent-item">
+                <div class="consent-label">
+                  <span class="consent-name">Doxa General Updates</span>
+                  <UBadge
+                    :label="selectedSubscriber.consents.doxa_general ? 'Opted In' : 'Not Opted In'"
+                    :color="selectedSubscriber.consents.doxa_general ? 'success' : 'neutral'"
+                    :variant="selectedSubscriber.consents.doxa_general ? 'solid' : 'outline'"
                     size="xs"
-                    variant="ghost"
-                    icon="i-lucide-copy"
-                    @click="copyProfileLink(selectedSubscriber)"
+                  />
+                </div>
+                <span v-if="selectedSubscriber.consents.doxa_general && selectedSubscriber.consents.doxa_general_at" class="consent-date">
+                  since {{ formatDate(selectedSubscriber.consents.doxa_general_at) }}
+                </span>
+              </div>
+
+              <div v-if="selectedSubscriber.consents.campaign_names.length > 0" class="consent-item">
+                <div class="consent-label">
+                  <span class="consent-name">Campaign Marketing</span>
+                </div>
+                <div class="campaign-consents">
+                  <UBadge
+                    v-for="(name, idx) in selectedSubscriber.consents.campaign_names"
+                    :key="selectedSubscriber.consents.campaign_ids[idx]"
+                    :label="name"
+                    color="primary"
+                    variant="subtle"
+                    size="xs"
                   />
                 </div>
               </div>
 
-              <div class="info-row">
-                <span class="label">Subscriber Since:</span>
-                <span class="value">{{ formatDateTime(selectedSubscriber.created_at) }}</span>
+              <div v-else class="consent-item">
+                <div class="consent-label">
+                  <span class="consent-name">Campaign Marketing</span>
+                  <UBadge label="None" color="neutral" variant="outline" size="xs" />
+                </div>
               </div>
             </div>
+          </CrmFormSection>
 
-            <div class="form-section">
-              <h3>Activity Log</h3>
-              <div v-if="loadingActivityLog" class="activity-loading">
-                Loading...
-              </div>
-              <div v-else-if="activityLog.length === 0" class="activity-empty">
-                No activity recorded yet
-              </div>
-              <div v-else class="activity-list">
-                <div v-for="activity in activityLog" :key="activity.id" class="activity-item">
-                  <div class="activity-header">
+          <!-- Subscriptions -->
+          <CrmFormSection :title="`Subscriptions (${selectedSubscriber.subscriptions.length})`">
+            <div v-if="selectedSubscriber.subscriptions.length === 0" class="no-subscriptions">
+              No active subscriptions
+            </div>
+
+            <div v-else class="subscriptions-list">
+              <div
+                v-for="subscription in selectedSubscriber.subscriptions"
+                :key="subscription.id"
+                class="subscription-card"
+              >
+                <div class="subscription-header" @click="toggleSubscription(subscription.id)">
+                  <div class="subscription-title">
+                    <span class="campaign-name">{{ subscription.campaign_title }}</span>
                     <UBadge
-                      :label="formatEventType(activity.eventType)"
-                      :color="getEventColor(activity.eventType)"
+                      :label="subscription.status"
+                      variant="outline"
+                      :color="subscription.status === 'active' ? 'success' : 'error'"
                       size="xs"
                     />
-                    <span class="activity-time">{{ formatTimestamp(activity.timestamp) }}</span>
                   </div>
-                  <div class="activity-user">
-                    <template v-if="activity.metadata?.source === 'self_service'">
-                      by subscriber (self-service)
-                    </template>
-                    <template v-else-if="activity.userName">
-                      by {{ activity.userName }}
-                    </template>
-                  </div>
-                  <div v-if="activity.metadata?.changes" class="activity-changes">
-                    <div
-                      v-for="(change, field) in activity.metadata.changes"
-                      :key="field"
-                      class="change-item"
-                    >
-                      <span class="change-field">{{ formatFieldName(field as string) }}:</span>
-                      <span class="change-from">{{ formatValue(change.from) }}</span>
-                      <span class="change-arrow">→</span>
-                      <span class="change-to">{{ formatValue(change.to) }}</span>
+                  <UIcon
+                    :name="expandedSubscriptions.has(subscription.id) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                    class="expand-icon"
+                  />
+                </div>
+
+                <div v-if="expandedSubscriptions.has(subscription.id)" class="subscription-details">
+                  <UFormField label="Delivery Method">
+                    <div class="field-display">
+                      <UBadge
+                        :label="subscription.delivery_method"
+                        :variant="subscription.delivery_method === 'email' ? 'solid' : 'outline'"
+                        :color="subscription.delivery_method === 'email' ? 'primary' : 'neutral'"
+                        size="xs"
+                      />
                     </div>
+                  </UFormField>
+
+                  <UFormField label="Frequency">
+                    <USelect
+                      v-model="getSubscriptionForm(subscription.id).frequency"
+                      :items="frequencyOptions"
+                      value-key="value"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UFormField v-if="subscription.frequency !== 'daily' && subscription.days_of_week" label="Days of Week">
+                    <div class="field-display">{{ formatDaysOfWeek(subscription.days_of_week) }}</div>
+                  </UFormField>
+
+                  <UFormField label="Time Preference">
+                    <UInput
+                      v-model="getSubscriptionForm(subscription.id).time_preference"
+                      type="time"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UFormField v-if="subscription.timezone" label="Timezone">
+                    <div class="field-display">{{ subscription.timezone }}</div>
+                  </UFormField>
+
+                  <UFormField label="Prayer Duration">
+                    <div class="field-display">{{ formatDuration(subscription.prayer_duration) }}</div>
+                  </UFormField>
+
+                  <UFormField v-if="subscription.next_reminder_utc" label="Next Reminder">
+                    <div class="field-display">{{ formatDateTime(subscription.next_reminder_utc) }}</div>
+                  </UFormField>
+
+                  <UFormField label="Status">
+                    <USelect
+                      v-model="getSubscriptionForm(subscription.id).status"
+                      :items="statusOptions"
+                      value-key="value"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <!-- Email History -->
+                  <div class="subscription-email-history">
+                    <h4>Email History</h4>
+                    <div v-if="loadingEmailHistory[subscription.id]" class="email-history-loading">
+                      Loading...
+                    </div>
+                    <div v-else-if="!emailHistories[subscription.id] || emailHistories[subscription.id]?.length === 0" class="email-history-empty">
+                      No emails sent yet
+                    </div>
+                    <div v-else class="email-history-list">
+                      <div v-for="sent in emailHistories[subscription.id]" :key="sent.id" class="email-history-item">
+                        <span class="email-date">{{ sent.sent_date }}</span>
+                        <span class="email-time">{{ formatDateTime(sent.sent_at) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="subscription-actions">
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      :loading="sendingReminder[subscription.id]"
+                      :disabled="subscription.delivery_method !== 'email'"
+                      @click="sendReminder(subscription)"
+                    >
+                      Send Reminder
+                    </UButton>
+                    <UButton size="xs" variant="ghost" @click="filterByCampaign(subscription)">
+                      Filter by Campaign
+                    </UButton>
                   </div>
                 </div>
               </div>
             </div>
+          </CrmFormSection>
 
-            <div class="form-actions">
-              <UButton type="button" @click="resetForm" variant="outline">Reset</UButton>
-              <UButton type="submit" :disabled="saving">
-                {{ saving ? 'Saving...' : 'Save Changes' }}
-              </UButton>
+          <!-- Metadata -->
+          <CrmFormSection title="Metadata">
+            <div class="info-row">
+              <span class="label">Tracking ID:</span>
+              <span class="value monospace">{{ selectedSubscriber.tracking_id }}</span>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
 
-    <!-- Delete Confirmation Modal -->
-    <ConfirmModal
-      v-model:open="showDeleteModal"
-      title="Delete Subscriber"
-      :message="subscriberToDelete ? `Are you sure you want to delete &quot;${subscriberToDelete.name}&quot;?` : ''"
-      warning="This will delete all subscriptions for this subscriber. This action cannot be undone."
-      confirm-text="Delete"
-      confirm-color="primary"
-      :loading="deleting"
-      @confirm="confirmDelete"
-      @cancel="cancelDelete"
-    />
-  </div>
+            <div class="info-row">
+              <span class="label">Profile Link:</span>
+              <div class="profile-link-container">
+                <span class="value profile-link-text">{{ getProfileUrl(selectedSubscriber) }}</span>
+                <UButton
+                  size="xs"
+                  variant="ghost"
+                  icon="i-lucide-copy"
+                  @click="copyProfileLink(selectedSubscriber)"
+                />
+              </div>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Subscriber Since:</span>
+              <span class="value">{{ formatDateTime(selectedSubscriber.created_at) }}</span>
+            </div>
+          </CrmFormSection>
+
+          <!-- Activity Log -->
+          <CrmFormSection title="Activity Log">
+            <div v-if="loadingActivityLog" class="activity-loading">
+              Loading...
+            </div>
+            <div v-else-if="activityLog.length === 0" class="activity-empty">
+              No activity recorded yet
+            </div>
+            <div v-else class="activity-list">
+              <div v-for="activity in activityLog" :key="activity.id" class="activity-item">
+                <div class="activity-header">
+                  <UBadge
+                    :label="formatEventType(activity.eventType)"
+                    :color="getEventColor(activity.eventType)"
+                    size="xs"
+                  />
+                  <span class="activity-time">{{ formatTimestamp(activity.timestamp) }}</span>
+                </div>
+                <div class="activity-user">
+                  <template v-if="activity.metadata?.source === 'self_service'">
+                    by subscriber (self-service)
+                  </template>
+                  <template v-else-if="activity.userName">
+                    by {{ activity.userName }}
+                  </template>
+                </div>
+                <div v-if="activity.metadata?.changes" class="activity-changes">
+                  <div
+                    v-for="(change, field) in activity.metadata.changes"
+                    :key="field"
+                    class="change-item"
+                  >
+                    <span class="change-field">{{ formatFieldName(field as string) }}:</span>
+                    <span class="change-from">{{ formatValue(change.from) }}</span>
+                    <span class="change-arrow">→</span>
+                    <span class="change-to">{{ formatValue(change.to) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CrmFormSection>
+        </form>
+
+        <template #empty>
+          Select a subscriber to view details
+        </template>
+      </CrmDetailPanel>
+    </template>
+  </CrmLayout>
+
+  <!-- Delete Confirmation Modal -->
+  <ConfirmModal
+    v-model:open="showDeleteModal"
+    title="Delete Subscriber"
+    :message="subscriberToDelete ? `Are you sure you want to delete &quot;${subscriberToDelete.name}&quot;?` : ''"
+    warning="This will delete all subscriptions for this subscriber. This action cannot be undone."
+    confirm-text="Delete"
+    confirm-color="primary"
+    :loading="deleting"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
@@ -456,7 +425,7 @@ const showDeleteModal = ref(false)
 const subscriberToDelete = ref<GeneralSubscriber | null>(null)
 const deleting = ref(false)
 
-// Email history state (per subscription)
+// Email history state
 interface EmailSent {
   id: number
   signup_id: number
@@ -466,7 +435,7 @@ interface EmailSent {
 const emailHistories = ref<Record<number, EmailSent[]>>({})
 const loadingEmailHistory = ref<Record<number, boolean>>({})
 
-// Activity log state (per subscription)
+// Activity log state
 interface ActivityLogEntry {
   id: string
   timestamp: number
@@ -480,11 +449,10 @@ interface ActivityLogEntry {
     source?: string
   }
 }
-// Activity log state (subscriber-level, aggregated from all subscriptions)
 const activityLog = ref<ActivityLogEntry[]>([])
 const loadingActivityLog = ref(false)
 
-// Send reminder state (per subscription)
+// Send reminder state
 const sendingReminder = ref<Record<number, boolean>>({})
 
 // Options
@@ -505,10 +473,16 @@ const campaignOptions = computed(() => {
   ]
 })
 
+const backLink = computed(() => {
+  if (route.query.from === 'campaign' && route.query.campaignId) {
+    return { to: `/admin/campaigns/${route.query.campaignId}`, label: 'Back to Campaign' }
+  }
+  return { to: '/admin', label: 'Back to Dashboard' }
+})
+
 const filteredSubscribers = computed(() => {
   let filtered = subscribers.value
 
-  // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(s =>
@@ -518,7 +492,6 @@ const filteredSubscribers = computed(() => {
     )
   }
 
-  // Filter by campaign
   if (filterCampaignId.value) {
     filtered = filtered.filter(s =>
       s.subscriptions.some(sub => sub.campaign_id === filterCampaignId.value)
@@ -533,11 +506,9 @@ async function loadData() {
     loading.value = true
     error.value = ''
 
-    // Load campaigns for the filter dropdown
     const campaignsResponse = await $fetch<{ campaigns: Campaign[] }>('/api/admin/campaigns')
     campaigns.value = campaignsResponse.campaigns
 
-    // Load all subscribers
     const subscribersResponse = await $fetch<{ subscribers: GeneralSubscriber[] }>('/api/admin/subscribers')
     subscribers.value = subscribersResponse.subscribers
   } catch (err: any) {
@@ -548,11 +519,18 @@ async function loadData() {
   }
 }
 
-async function selectSubscriber(subscriber: GeneralSubscriber) {
+async function selectSubscriber(subscriber: GeneralSubscriber, updateUrl = true) {
   selectedSubscriber.value = subscriber
   subscriberForm.value = { name: subscriber.name }
+  if (updateUrl && import.meta.client) {
+    const params = new URLSearchParams()
+    if (filterCampaignId.value) params.set('campaign', String(filterCampaignId.value))
+    if (route.query.from) params.set('from', route.query.from as string)
+    if (route.query.campaignId) params.set('campaignId', route.query.campaignId as string)
+    const queryString = params.toString()
+    window.history.replaceState({}, '', `/admin/subscribers/${subscriber.id}${queryString ? '?' + queryString : ''}`)
+  }
 
-  // Initialize subscription forms
   subscriptionForms.value = new Map()
   for (const sub of subscriber.subscriptions) {
     subscriptionForms.value.set(sub.id, {
@@ -562,23 +540,19 @@ async function selectSubscriber(subscriber: GeneralSubscriber) {
     })
   }
 
-  // Expand first subscription by default if any exist
   expandedSubscriptions.value = new Set()
   const firstSubscription = subscriber.subscriptions[0]
   if (firstSubscription) {
     expandedSubscriptions.value.add(firstSubscription.id)
-    // Load email history for first subscription
     await loadEmailHistory(firstSubscription.id)
   }
 
-  // Load activity log for the subscriber (all subscriptions)
   await loadActivityLog(subscriber)
 }
 
 function getSubscriptionForm(subscriptionId: number): SubscriptionForm {
   let form = subscriptionForms.value.get(subscriptionId)
   if (!form) {
-    // Create default form if not found
     const subscription = selectedSubscriber.value?.subscriptions.find(s => s.id === subscriptionId)
     form = {
       frequency: subscription?.frequency || '',
@@ -595,13 +569,12 @@ async function toggleSubscription(subscriptionId: number) {
     expandedSubscriptions.value.delete(subscriptionId)
   } else {
     expandedSubscriptions.value.add(subscriptionId)
-    // Load email history when expanding
     await loadEmailHistory(subscriptionId)
   }
 }
 
 async function loadEmailHistory(subscriptionId: number) {
-  if (emailHistories.value[subscriptionId]) return // Already loaded
+  if (emailHistories.value[subscriptionId]) return
 
   try {
     loadingEmailHistory.value[subscriptionId] = true
@@ -623,7 +596,6 @@ async function loadActivityLog(subscriber: GeneralSubscriber) {
 
   try {
     loadingActivityLog.value = true
-    // Load activity for all subscriptions and merge them
     const allActivities: ActivityLogEntry[] = []
 
     for (const subscription of subscriber.subscriptions) {
@@ -635,7 +607,6 @@ async function loadActivityLog(subscriber: GeneralSubscriber) {
       }
     }
 
-    // Sort by timestamp descending and remove duplicates
     activityLog.value = allActivities
       .sort((a, b) => b.timestamp - a.timestamp)
       .filter((activity, index, self) =>
@@ -664,7 +635,6 @@ async function sendReminder(subscription: Subscription) {
       color: 'success'
     })
 
-    // Refresh email history
     emailHistories.value[subscription.id] = undefined as any
     await loadEmailHistory(subscription.id)
   } catch (err: any) {
@@ -686,7 +656,6 @@ async function saveChanges() {
     const subscriber = selectedSubscriber.value
     const nameChanged = subscriberForm.value.name !== subscriber.name
 
-    // Find changed subscriptions
     const changedSubscriptions: number[] = []
     for (const [subId, form] of subscriptionForms.value.entries()) {
       const original = subscriber.subscriptions.find(s => s.id === subId)
@@ -701,7 +670,6 @@ async function saveChanges() {
       }
     }
 
-    // If name changed, include it in the first subscription update
     if (changedSubscriptions.length > 0) {
       const firstSubId = changedSubscriptions[0]!
       const form = subscriptionForms.value.get(firstSubId)
@@ -715,7 +683,6 @@ async function saveChanges() {
         }
       })
 
-      // Update remaining subscriptions
       for (const subId of changedSubscriptions.slice(1)) {
         const subForm = subscriptionForms.value.get(subId)
         if (!subForm) continue
@@ -725,7 +692,6 @@ async function saveChanges() {
         })
       }
     } else if (nameChanged && subscriber.subscriptions.length > 0) {
-      // Only name changed, update via first subscription
       const firstSub = subscriber.subscriptions[0]
       if (!firstSub) return
       const form = subscriptionForms.value.get(firstSub.id) || {
@@ -743,10 +709,8 @@ async function saveChanges() {
       })
     }
 
-    // Refresh data
     await loadData()
 
-    // Re-select the subscriber to refresh form
     const updated = subscribers.value.find(s => s.id === subscriber.id)
     if (updated) {
       selectSubscriber(updated)
@@ -786,7 +750,6 @@ async function confirmDelete() {
   try {
     deleting.value = true
 
-    // Delete all subscriptions for this subscriber
     for (const subscription of subscriberToDelete.value.subscriptions) {
       await $fetch(`/api/admin/subscribers/${subscription.id}`, {
         method: 'DELETE'
@@ -799,11 +762,19 @@ async function confirmDelete() {
       color: 'success'
     })
 
-    // Remove from local list
     subscribers.value = subscribers.value.filter(s => s.id !== subscriberToDelete.value!.id)
     selectedSubscriber.value = null
     showDeleteModal.value = false
     subscriberToDelete.value = null
+
+    if (import.meta.client) {
+      const params = new URLSearchParams()
+      if (filterCampaignId.value) params.set('campaign', String(filterCampaignId.value))
+      if (route.query.from) params.set('from', route.query.from as string)
+      if (route.query.campaignId) params.set('campaignId', route.query.campaignId as string)
+      const queryString = params.toString()
+      window.history.replaceState({}, '', `/admin/subscribers${queryString ? '?' + queryString : ''}`)
+    }
   } catch (err: any) {
     toast.add({
       title: 'Error',
@@ -822,7 +793,6 @@ function cancelDelete() {
 
 function filterByCampaign(subscription: Subscription) {
   filterCampaignId.value = subscription.campaign_id
-  // Update URL to reflect the filter
   router.push({ query: { campaign: subscription.campaign_id } })
 }
 
@@ -853,7 +823,6 @@ function formatDuration(minutes: number | null): string {
   return `${minutes} min`
 }
 
-// Profile URL functions
 function getProfileUrl(subscriber: GeneralSubscriber): string {
   const baseUrl = window.location.origin
   return `${baseUrl}/profile?id=${subscriber.profile_id}`
@@ -877,7 +846,6 @@ async function copyProfileLink(subscriber: GeneralSubscriber) {
   }
 }
 
-// Activity log formatting functions
 function formatTimestamp(timestamp: number): string {
   return new Date(timestamp).toLocaleString()
 }
@@ -923,25 +891,29 @@ function formatValue(value: any): string {
   return String(value)
 }
 
-onMounted(() => {
-  // Check for campaign filter in URL query params
+// Handle URL-based selection
+function handleUrlSelection() {
+  const idParam = route.params.id as string | undefined
+  if (!idParam) return
+
+  const id = parseInt(idParam)
+  const subscriber = subscribers.value.find(s => s.id === id)
+  if (subscriber) {
+    selectSubscriber(subscriber, false)
+  }
+}
+
+onMounted(async () => {
   const campaignParam = route.query.campaign
   if (campaignParam) {
     filterCampaignId.value = parseInt(campaignParam as string)
   }
-  loadData()
+  await loadData()
+  handleUrlSelection()
 })
 </script>
 
 <style scoped>
-.subscribers-page {
-  max-width: 1400px;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
 .back-link {
   display: inline-block;
   margin-bottom: 1rem;
@@ -955,47 +927,6 @@ onMounted(() => {
   opacity: 0.7;
 }
 
-.page-header h1 {
-  margin: 0;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error {
-  color: var(--text-muted);
-}
-
-.subscribers-layout {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 2rem;
-  min-height: 600px;
-}
-
-/* Left Column: Subscriber List */
-.subscriber-list {
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 50px);
-}
-
-.list-header {
-  padding: 1rem;
-  border-bottom: 1px solid var(--ui-border);
-  background-color: var(--ui-bg-elevated);
-}
-
-.search-input {
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
 .filter-select {
   width: 100%;
 }
@@ -1004,27 +935,6 @@ onMounted(() => {
   padding: 2rem;
   text-align: center;
   color: var(--ui-text-muted);
-}
-
-.list-items {
-  overflow-y: auto;
-  flex: 1;
-}
-
-.subscriber-item {
-  padding: 1rem;
-  border-bottom: 1px solid var(--ui-border);
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.subscriber-item:hover {
-  background-color: var(--ui-bg-elevated);
-}
-
-.subscriber-item.active {
-  background-color: var(--ui-bg-elevated);
-  border-left: 3px solid var(--text);
 }
 
 .subscriber-name {
@@ -1045,66 +955,8 @@ onMounted(() => {
   font-size: 0.75rem;
 }
 
-.meta-badges {
-  display: flex;
-  gap: 0.375rem;
-}
-
 .date {
   color: var(--ui-text-muted);
-}
-
-/* Right Column: Subscriber Details */
-.subscriber-details {
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  padding: 2rem;
-  background-color: var(--ui-bg-elevated);
-  overflow-y: auto;
-  max-height: calc(100vh - 50px);
-}
-
-.no-selection {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--ui-text-muted);
-}
-
-.details-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--ui-border);
-}
-
-.details-header h2 {
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.details-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-section h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
 }
 
 .contact-display,
@@ -1185,15 +1037,13 @@ onMounted(() => {
 }
 
 /* Email History Styles */
-.subscription-email-history,
-.subscription-activity {
+.subscription-email-history {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--ui-border);
 }
 
-.subscription-email-history h4,
-.subscription-activity h4 {
+.subscription-email-history h4 {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1342,14 +1192,6 @@ onMounted(() => {
 
 .monospace {
   font-family: monospace;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ui-border);
 }
 
 /* Consent Styles */
