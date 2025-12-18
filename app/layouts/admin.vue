@@ -75,14 +75,10 @@ const config = useRuntimeConfig()
 const { user, isAdmin, isSuperAdmin, checkAuth } = useAuthUser()
 
 onMounted(async () => {
-  // Only fetch if we don't have user data yet
-  if (!user.value) {
-    try {
-      await checkAuth()
-    } catch (error) {
-      // If not authenticated, redirect to login
-      navigateTo('/')
-    }
+  try {
+    await checkAuth()
+  } catch (error) {
+    navigateTo('/')
   }
 })
 </script>

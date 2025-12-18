@@ -159,7 +159,7 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
   const appName = config.appName || 'Prayer Tools'
 
   const unsubscribeUrl = `${baseUrl}/unsubscribe?slug=${data.campaignSlug}&id=${data.profileId}&sid=${data.subscriptionId}`
-  const profileUrl = `${baseUrl}/profile?id=${data.profileId}`
+  const profileUrl = `${baseUrl}/subscriber?id=${data.profileId}`
   const prayerFuelUrl = `${baseUrl}/${data.campaignSlug}/prayer-fuel?uid=${data.trackingId}`
 
   // Build content HTML - just a reminder with link to prayer fuel
