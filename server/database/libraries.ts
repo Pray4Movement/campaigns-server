@@ -2,6 +2,17 @@ import { getDatabase } from './db'
 
 export type LibraryType = 'static' | 'people_group'
 
+// Virtual People Group library - not stored in database
+export const PEOPLE_GROUP_LIBRARY_ID = -1
+export const PEOPLE_GROUP_LIBRARY: Library = {
+  id: PEOPLE_GROUP_LIBRARY_ID,
+  name: 'People Group',
+  description: 'Dynamically displays the linked people group information for the campaign',
+  type: 'people_group',
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z'
+}
+
 export interface Library {
   id: number
   name: string
@@ -47,6 +58,11 @@ export class LibraryService {
 
   // Get library by ID
   async getLibraryById(id: number): Promise<Library | null> {
+    // Return virtual People Group library for special ID
+    if (id === PEOPLE_GROUP_LIBRARY_ID) {
+      return PEOPLE_GROUP_LIBRARY
+    }
+
     const stmt = this.db.prepare(`
       SELECT * FROM libraries WHERE id = ?
     `)
@@ -140,12 +156,19 @@ export class LibraryService {
     totalDays: number
     languageStats: { [key: string]: number }
   }> {
-    // Check if this is a people_group library
-    const library = await this.getLibraryById(id)
-    if (library?.type === 'people_group') {
-      // People group libraries have "infinite" days - content is dynamic
+    // Virtual People Group library has "infinite" days
+    if (id === PEOPLE_GROUP_LIBRARY_ID) {
       return {
         totalDays: -1, // -1 indicates continuous/infinite
+        languageStats: {}
+      }
+    }
+
+    // Check if this is a people_group library (shouldn't happen anymore, but keep for safety)
+    const library = await this.getLibraryById(id)
+    if (library?.type === 'people_group') {
+      return {
+        totalDays: -1,
         languageStats: {}
       }
     }
@@ -178,13 +201,6 @@ export class LibraryService {
     }
   }
 
-  // Get the People Group library
-  async getPeopleGroupLibrary(): Promise<Library | null> {
-    const stmt = this.db.prepare(`
-      SELECT * FROM libraries WHERE type = 'people_group' LIMIT 1
-    `)
-    return await stmt.get() as Library | null
-  }
 }
 
 // Export singleton instance

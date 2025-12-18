@@ -13,6 +13,22 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Check if the library exists and is not a people_group library
+  const library = await libraryService.getLibraryById(id)
+  if (!library) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Library not found'
+    })
+  }
+
+  if (library.type === 'people_group') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'The People Group library cannot be deleted'
+    })
+  }
+
   try {
     const success = await libraryService.deleteLibrary(id)
 

@@ -297,7 +297,8 @@ const currentDay = computed(() => {
 
 async function loadLibraries() {
   try {
-    const response = await $fetch<{ libraries: Library[] }>('/api/admin/libraries')
+    // Include virtual People Group library for prayer fuel ordering
+    const response = await $fetch<{ libraries: Library[] }>('/api/admin/libraries?includeVirtual=true')
     allLibraries.value = response.libraries
   } catch (err) {
     console.error('Failed to load libraries:', err)

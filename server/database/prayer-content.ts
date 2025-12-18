@@ -1,7 +1,7 @@
 import { getDatabase } from './db'
 import { appConfigService } from './app-config'
 import { libraryContentService } from './library-content'
-import { libraryService } from './libraries'
+import { libraryService, PEOPLE_GROUP_LIBRARY_ID } from './libraries'
 import { peopleGroupService } from './people-groups'
 import { campaignService } from './campaigns'
 import { getLanguageLabel, getReligionLabel } from '../utils/app/field-options'
@@ -109,9 +109,8 @@ export class PrayerContentService {
       return this.libraryStatsCache.get(libraryId)!
     }
 
-    // Check if this is a people_group library - they have infinite days
-    const library = await libraryService.getLibraryById(libraryId)
-    if (library?.type === 'people_group') {
+    // Virtual People Group library has infinite days
+    if (libraryId === PEOPLE_GROUP_LIBRARY_ID) {
       this.libraryStatsCache.set(libraryId, 999999)
       this.libraryTypeCache.set(libraryId, 'people_group')
       return 999999
