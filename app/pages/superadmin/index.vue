@@ -68,6 +68,27 @@
             </div>
           </UCard>
         </div>
+
+        <!-- Campaigns Tab -->
+        <div v-if="item.value === 'campaigns'" class="py-6">
+          <h2 class="text-xl font-semibold mb-2">Campaign Management</h2>
+          <p class="text-[var(--ui-text-muted)] mb-6">Update the "People Praying" count for all campaigns. This calculates the 7-day average of daily unique prayers.</p>
+
+          <UButton
+            @click="updatePrayerCounts"
+            :loading="isUpdatingPrayerCounts"
+            variant="outline"
+          >
+            {{ isUpdatingPrayerCounts ? 'Updating...' : 'Save Prayer Counts' }}
+          </UButton>
+
+          <UAlert
+            v-if="prayerCountsMessage"
+            :color="prayerCountsMessage.type === 'success' ? 'success' : 'error'"
+            :title="prayerCountsMessage.text"
+            class="mt-4"
+          />
+        </div>
       </template>
     </UTabs>
   </div>
@@ -82,6 +103,7 @@ definePageMeta({
 const tabs = [
   { label: 'Backups', value: 'backups' },
   { label: 'People Groups', value: 'people-groups' },
+  { label: 'Campaigns', value: 'campaigns' },
 ]
 
 const activeTab = ref('backups')
@@ -92,6 +114,9 @@ const lastBackup = ref<{ filename: string; size: number; location: string } | nu
 const isSyncingPeopleGroups = ref(false)
 const syncMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 const syncStats = ref<{ total: number; created: number; updated: number; errors: number } | null>(null)
+
+const isUpdatingPrayerCounts = ref(false)
+const prayerCountsMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 
 async function createBackup() {
   isCreatingBackup.value = true
@@ -157,6 +182,30 @@ async function syncPeopleGroups() {
     }
   } finally {
     isSyncingPeopleGroups.value = false
+  }
+}
+
+async function updatePrayerCounts() {
+  isUpdatingPrayerCounts.value = true
+  prayerCountsMessage.value = null
+
+  try {
+    await $fetch('/api/admin/campaigns/update-prayer-counts', {
+      method: 'POST'
+    })
+
+    prayerCountsMessage.value = {
+      text: 'Prayer counts updated successfully!',
+      type: 'success'
+    }
+  } catch (error: any) {
+    console.error('Prayer counts update error:', error)
+    prayerCountsMessage.value = {
+      text: error.data?.message || 'Failed to update prayer counts. Please try again.',
+      type: 'error'
+    }
+  } finally {
+    isUpdatingPrayerCounts.value = false
   }
 }
 </script>

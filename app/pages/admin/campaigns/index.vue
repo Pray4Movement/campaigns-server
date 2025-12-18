@@ -27,6 +27,7 @@
           <tr>
             <th>Title</th>
             <th>Slug</th>
+            <th>People Praying</th>
             <th>Status</th>
             <th>Created</th>
             <th>Actions</th>
@@ -37,6 +38,9 @@
             <td class="title-cell">{{ campaign.title }}</td>
             <td class="slug-cell">
               <a :href="`/${campaign.slug}`" target="_blank" rel="noopener noreferrer">/{{ campaign.slug }}</a>
+            </td>
+            <td class="praying-cell" :title="`Average of ${campaign.people_praying} people praying daily in the last 7 days`">
+              {{ campaign.people_praying }}
             </td>
             <td>
               <UBadge
@@ -176,6 +180,7 @@ interface Campaign {
   default_language: string
   created_at: string
   updated_at: string
+  people_praying: number
 }
 
 const campaigns = ref<Campaign[]>([])
@@ -449,6 +454,11 @@ onMounted(() => {
 .slug-cell a:hover {
   color: var(--text);
   text-decoration: underline;
+}
+
+.praying-cell {
+  text-align: center;
+  font-weight: 500;
 }
 
 .date-cell {
