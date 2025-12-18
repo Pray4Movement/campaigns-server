@@ -1,15 +1,6 @@
 class BaseMigration {
-  async exec(pool, sql) {
-    await pool.query(sql)
-  }
-
-  async query(pool, sql, params = []) {
-    const result = await pool.query(sql, params)
-    return result.rows
-  }
-
-  down(pool) {
-    throw new Error(`Down migration not implemented for migration ${this.id}`)
+  async exec(sql, query) {
+    await sql.unsafe(query)
   }
 }
 
@@ -17,11 +8,11 @@ export default class LibrarySystemMigration extends BaseMigration {
   id = 5
   name = 'Library System'
 
-  async up(pool) {
+  async up(sql) {
     console.log('📚 Creating library system tables...')
 
     // Libraries table
-    await this.exec(pool, `
+    await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS libraries (
         id SERIAL PRIMARY KEY,
         name TEXT UNIQUE NOT NULL,
@@ -31,12 +22,12 @@ export default class LibrarySystemMigration extends BaseMigration {
       )
     `)
 
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_libraries_name ON libraries(name)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_libraries_name ON libraries(name)')
 
     console.log('  ✅ Libraries table created')
 
     // Library content table
-    await this.exec(pool, `
+    await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS library_content (
         id SERIAL PRIMARY KEY,
         library_id INTEGER NOT NULL,
@@ -51,14 +42,14 @@ export default class LibrarySystemMigration extends BaseMigration {
       )
     `)
 
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_library_content_library_day ON library_content(library_id, day_number)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_library_content_day ON library_content(day_number)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_library_content_language ON library_content(language_code)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_library_content_library_day ON library_content(library_id, day_number)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_library_content_day ON library_content(day_number)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_library_content_language ON library_content(language_code)')
 
     console.log('  ✅ Library content table created')
 
     // Campaign library configuration table
-    await this.exec(pool, `
+    await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS campaign_library_config (
         id SERIAL PRIMARY KEY,
         campaign_id INTEGER NOT NULL,
@@ -73,9 +64,9 @@ export default class LibrarySystemMigration extends BaseMigration {
       )
     `)
 
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_campaign_library_config_campaign ON campaign_library_config(campaign_id)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_campaign_library_config_library ON campaign_library_config(library_id)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_campaign_library_config_order ON campaign_library_config(campaign_id, order_index)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_campaign_library_config_campaign ON campaign_library_config(campaign_id)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_campaign_library_config_library ON campaign_library_config(library_id)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_campaign_library_config_order ON campaign_library_config(campaign_id, order_index)')
 
     console.log('  ✅ Campaign library config table created')
 
