@@ -118,6 +118,17 @@ export class CampaignService {
     return await stmt.get(slug) as Campaign | null
   }
 
+  // Get campaign by dt_id
+  async getCampaignByDtId(dtId: string): Promise<Campaign | null> {
+    const stmt = this.db.prepare(`
+      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, created_at, updated_at
+      FROM campaigns
+      WHERE dt_id = ?
+    `)
+
+    return await stmt.get(dtId) as Campaign | null
+  }
+
   // Get all campaigns
   async getAllCampaigns(statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
     let query = `
