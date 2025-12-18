@@ -1,9 +1,9 @@
 <template>
-  <div class="campaign-config-page">
+  <div class="prayer-fuel-order-page">
     <div class="page-header">
       <div>
-        <h1>Global Campaign Configuration</h1>
-        <p class="subtitle">Configure library rows for all campaigns. Libraries within a row play sequentially.</p>
+        <h1>Prayer Fuel Order</h1>
+        <p class="subtitle">Configure the order of prayer fuel content. Libraries within a row play sequentially.</p>
       </div>
     </div>
 
@@ -90,15 +90,35 @@
             <div class="row-header">
               <span class="row-label">Row {{ rowIndex + 1 }}</span>
               <span class="row-total-days">{{ getRowTotalDays(rowIndex) }} total days</span>
-              <UButton
-                @click="removeRow(rowIndex)"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :disabled="rows.length === 1 && row.libraries.length === 0"
-              >
-                Remove Row
-              </UButton>
+              <div class="row-actions">
+                <UButton
+                  @click="moveRowUp(rowIndex)"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-chevron-up"
+                  :disabled="rowIndex === 0"
+                  title="Move up"
+                />
+                <UButton
+                  @click="moveRowDown(rowIndex)"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-chevron-down"
+                  :disabled="rowIndex === rows.length - 1"
+                  title="Move down"
+                />
+                <UButton
+                  @click="removeRow(rowIndex)"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  :disabled="rows.length === 1 && row.libraries.length === 0"
+                >
+                  Remove Row
+                </UButton>
+              </div>
             </div>
 
             <div
@@ -175,8 +195,8 @@
               <div class="add-library-section">
                 <USelectMenu
                   :model-value="undefined"
-                  @update:model-value="(lib: Library | undefined) => lib && addLibraryToRow(rowIndex, lib)"
-                  :items="getAvailableLibrariesForRow(rowIndex)"
+                  @update:model-value="(lib: any) => lib && addLibraryToRow(rowIndex, lib as Library)"
+                  :items="(getAvailableLibrariesForRow(rowIndex) as any[])"
                   placeholder="Add library..."
                   label-key="name"
                   searchable
@@ -186,10 +206,10 @@
                 >
                   <template #item="{ item }">
                     <div class="select-item-content">
-                      <UIcon v-if="item.type === 'people_group'" name="i-lucide-users" class="select-item-icon" />
-                      <span>{{ item.name }}</span>
+                      <UIcon v-if="(item as Library)?.type === 'people_group'" name="i-lucide-users" class="select-item-icon" />
+                      <span>{{ (item as Library)?.name }}</span>
                     </div>
-                    <span class="select-item-days">{{ getLibraryDaysLabel(item) }}</span>
+                    <span class="select-item-days">{{ getLibraryDaysLabel(item as Library) }}</span>
                   </template>
                 </USelectMenu>
               </div>
@@ -320,6 +340,32 @@ function removeRow(rowIndex: number) {
   rows.value.forEach((row, idx) => {
     row.rowIndex = idx + 1
   })
+}
+
+function moveRowUp(rowIndex: number) {
+  if (rowIndex === 0) return
+  const items = [...rows.value]
+  const temp = items[rowIndex - 1]!
+  items[rowIndex - 1] = items[rowIndex]!
+  items[rowIndex] = temp
+  // Re-index rows
+  items.forEach((row, idx) => {
+    row.rowIndex = idx + 1
+  })
+  rows.value = items
+}
+
+function moveRowDown(rowIndex: number) {
+  if (rowIndex >= rows.value.length - 1) return
+  const items = [...rows.value]
+  const temp = items[rowIndex + 1]!
+  items[rowIndex + 1] = items[rowIndex]!
+  items[rowIndex] = temp
+  // Re-index rows
+  items.forEach((row, idx) => {
+    row.rowIndex = idx + 1
+  })
+  rows.value = items
 }
 
 function getAvailableLibrariesForRow(rowIndex: number): Library[] {
@@ -556,7 +602,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.campaign-config-page {
+.prayer-fuel-order-page {
   max-width: 1400px;
 }
 
@@ -703,6 +749,12 @@ onMounted(async () => {
   padding: 0.75rem 1rem;
   background-color: var(--ui-bg);
   border-bottom: 1px solid var(--ui-border);
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .row-label {

@@ -33,8 +33,8 @@
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
-          <NuxtLink to="/admin/campaign-config" class="nav-link">
-            Campaign Config
+          <NuxtLink to="/admin/prayer-fuel-order" class="nav-link">
+            Prayer Fuel Order
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
