@@ -31,52 +31,52 @@ const mapEmbedUrl = computed(() => {
 
 <template>
   <div class="people-group-card">
-    <!-- Image -->
-    <div v-if="peopleGroup.image_url" class="image-container">
-      <img
-        :src="peopleGroup.image_url"
-        :alt="peopleGroup.name"
-        class="people-group-image"
-      />
-    </div>
-
-    <!-- Content -->
-    <div class="content">
-      <!-- Name -->
-      <h2 class="name">{{ peopleGroup.name }}</h2>
-
-      <!-- Info row: Population, Language, Religion -->
-      <div class="info-row">
-        <div v-if="peopleGroup.population" class="info-item">
-          <UIcon name="i-lucide-users" class="icon" />
-          <span>{{ formatPopulation(peopleGroup.population) }}</span>
+    <!-- Left column: Header + Description -->
+    <div class="left-column">
+      <div class="header-row">
+        <div v-if="peopleGroup.image_url" class="image-container">
+          <img
+            :src="peopleGroup.image_url"
+            :alt="peopleGroup.name"
+            class="people-group-image"
+          />
         </div>
-        <div v-if="peopleGroup.language" class="info-item">
-          <UIcon name="i-lucide-languages" class="icon" />
-          <span>{{ peopleGroup.language }}</span>
-        </div>
-        <div v-if="peopleGroup.religion" class="info-item">
-          <UIcon name="i-lucide-church" class="icon" />
-          <span>{{ peopleGroup.religion }}</span>
+
+        <div class="header-content">
+          <h2 class="name">{{ peopleGroup.name }}</h2>
+
+          <div class="info-row">
+            <div v-if="peopleGroup.population" class="info-item">
+              <UIcon name="i-lucide-users" class="icon" />
+              <span>{{ formatPopulation(peopleGroup.population) }}</span>
+            </div>
+            <div v-if="peopleGroup.language" class="info-item">
+              <UIcon name="i-lucide-languages" class="icon" />
+              <span>{{ peopleGroup.language }}</span>
+            </div>
+            <div v-if="peopleGroup.religion" class="info-item">
+              <UIcon name="i-lucide-church" class="icon" />
+              <span>{{ peopleGroup.religion }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Description -->
       <p v-if="peopleGroup.description" class="description">
         {{ peopleGroup.description }}
       </p>
+    </div>
 
-      <!-- Map -->
-      <div v-if="mapEmbedUrl" class="map-container">
-        <iframe
-          :src="mapEmbedUrl"
-          :title="`Map showing location of ${peopleGroup.name}`"
-          class="map-embed"
-          loading="lazy"
-          frameborder="0"
-          scrolling="no"
-        />
-      </div>
+    <!-- Right column: Map spanning full height -->
+    <div v-if="mapEmbedUrl" class="map-container">
+      <iframe
+        :src="mapEmbedUrl"
+        :title="`Map showing location of ${peopleGroup.name}`"
+        class="map-embed"
+        loading="lazy"
+        frameborder="0"
+        scrolling="no"
+      />
     </div>
   </div>
 </template>
@@ -85,7 +85,7 @@ const mapEmbedUrl = computed(() => {
 .people-group-card {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 1.5rem;
   border: 1px solid var(--ui-border);
   border-radius: 0.75rem;
@@ -95,23 +95,36 @@ const mapEmbedUrl = computed(() => {
 @media (min-width: 640px) {
   .people-group-card {
     flex-direction: row;
-    align-items: flex-start;
-    gap: 2rem;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+}
+
+/* Left column */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .header-row {
+    flex-direction: row;
+    align-items: center;
   }
 }
 
 .image-container {
   flex-shrink: 0;
-  width: 100%;
-  max-width: 200px;
-  margin: 0 auto;
-}
-
-@media (min-width: 640px) {
-  .image-container {
-    width: 160px;
-    margin: 0;
-  }
+  width: 100px;
 }
 
 .people-group-image {
@@ -122,11 +135,17 @@ const mapEmbedUrl = computed(() => {
   border-radius: 0.5rem;
 }
 
-.content {
+.header-content {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
+  gap: 0.5rem;
+}
+
+@media (max-width: 639px) {
+  .header-content {
+    align-items: center;
+    text-align: center;
+  }
 }
 
 .name {
@@ -136,22 +155,10 @@ const mapEmbedUrl = computed(() => {
   margin: 0;
 }
 
-@media (max-width: 639px) {
-  .name {
-    text-align: center;
-  }
-}
-
 .info-row {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-}
-
-@media (max-width: 639px) {
-  .info-row {
-    justify-content: center;
-  }
 }
 
 .info-item {
@@ -181,25 +188,32 @@ const mapEmbedUrl = computed(() => {
   }
 }
 
+/* Right column: Map */
 .map-container {
-  margin-top: 0.5rem;
+  flex-shrink: 0;
   border-radius: 0.5rem;
   overflow: hidden;
-  max-width: 300px;
+  width: 100%;
 }
 
-@media (max-width: 639px) {
+@media (min-width: 640px) {
   .map-container {
-    margin-left: auto;
-    margin-right: auto;
+    width: 300px;
   }
 }
 
 .map-embed {
   width: 100%;
-  height: 150px;
+  height: 180px;
   display: block;
   border: none;
   border-radius: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .map-embed {
+    height: 100%;
+    min-height: 200px;
+  }
 }
 </style>
