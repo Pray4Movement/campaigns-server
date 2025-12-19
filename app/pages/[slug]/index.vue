@@ -136,8 +136,7 @@
           <UCard>
             <template #header>
               <div class="text-center">
-                <span class="text-xs uppercase tracking-wider text-[var(--ui-text-muted)]">Alternative Design 1</span>
-                <h2 class="text-2xl font-bold mt-1">Step-by-Step Wizard</h2>
+                <h2 class="text-2xl font-bold">Step-by-Step Wizard</h2>
               </div>
             </template>
 
@@ -291,8 +290,7 @@
           <UCard>
             <template #header>
               <div class="text-center">
-                <span class="text-xs uppercase tracking-wider text-[var(--ui-text-muted)]">Alternative Design 2</span>
-                <h2 class="text-2xl font-bold mt-1">Visual Card Selector</h2>
+                <h2 class="text-2xl font-bold">Visual Card Selector</h2>
               </div>
             </template>
 
@@ -371,46 +369,26 @@
                   <TimePicker
                     v-model="altForm2.time"
                     size="lg"
-                    class="max-w-[150px]"
+                    class="w-full"
                   />
                 </div>
               </div>
 
-              <!-- Right side: Contact + Summary -->
+              <!-- Right side: Contact -->
               <div class="space-y-6">
-                <div class="p-6 rounded-2xl bg-[var(--ui-bg-elevated)] border border-[var(--ui-border)]">
-                  <h4 class="font-semibold mb-4">Your Commitment</h4>
-                  <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                      <span class="text-[var(--ui-text-muted)]">Frequency</span>
-                      <span class="font-medium">{{ altForm2.frequency === 'daily' ? 'Every day' : 'Selected days' }}</span>
-                    </div>
-                    <div v-if="altForm2.frequency === 'weekly'" class="flex justify-between">
-                      <span class="text-[var(--ui-text-muted)]">Days</span>
-                      <span class="font-medium">{{ altForm2.days_of_week.length > 0 ? altForm2.days_of_week.sort((a, b) => a - b).map(d => translatedDaysOfWeek[d].label).join(', ') : 'None selected' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-[var(--ui-text-muted)]">Duration</span>
-                      <span class="font-medium">{{ altForm2.duration < 60 ? `${altForm2.duration} minutes` : '1 hour' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-[var(--ui-text-muted)]">Time</span>
-                      <span class="font-medium">{{ altForm2.time }}</span>
-                    </div>
-                  </div>
-                </div>
-
                 <div class="space-y-3">
                   <UInput
                     v-model="altForm2.name"
                     placeholder="Your name"
                     size="lg"
+                    class="w-full"
                   />
                   <UInput
                     v-model="altForm2.email"
                     type="email"
                     placeholder="Email address"
                     size="lg"
+                    class="w-full"
                   />
                   <UButton block size="lg" :disabled="!altForm2.name || !altForm2.email || (altForm2.frequency === 'weekly' && altForm2.days_of_week.length === 0)">
                     Count Me In
