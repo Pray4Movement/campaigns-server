@@ -7,26 +7,142 @@
 
     <div v-else-if="error" class="flex flex-col items-center justify-center min-h-[50vh] text-center p-8">
       <h2 class="text-2xl font-bold mb-4">{{ $t('campaign.notFound.title') }}</h2>
-      <p class="text-[var(--ui-text-muted)] mb-6">{{ $t('campaign.notFound.message') }}</p>
+      <p class="text-muted mb-6">{{ $t('campaign.notFound.message') }}</p>
       <UButton to="/">{{ $t('campaign.notFound.goHome') }}</UButton>
     </div>
 
     <div v-else-if="campaign" class="campaign-content">
-      <!-- Hero Section -->
-      <section class="py-8 text-center">
-        <div class="max-w-3xl mx-auto px-4">
-          <p class="text-xl text-[var(--ui-text-muted)] leading-relaxed">{{ campaign.description }}</p>
+
+      <!-- People Group Section -->
+      <section v-if="peopleGroup" class="py-12 bg-default">
+        <div class="max-w-5xl mx-auto px-4 space-y-8">
+
+          <!-- Header: Image, Name, Description -->
+          <div class="flex flex-col sm:flex-row gap-6 items-start">
+            <!-- Image -->
+            <div v-if="peopleGroup.image_url" class="shrink-0 w-40 mx-auto sm:mx-0">
+              <img
+                :src="peopleGroup.image_url"
+                :alt="peopleGroup.name"
+                class="w-full aspect-square object-cover rounded-lg shadow-md"
+              />
+            </div>
+
+            <!-- Name & Description -->
+            <div class="flex-1 text-center sm:text-left">
+              <h2 class="text-2xl md:text-3xl font-bold text-default mb-4">
+                {{ peopleGroup.name }}
+              </h2>
+              <p v-if="peopleGroup.metadata?.imb_people_description" class="text-muted leading-relaxed">
+                {{ peopleGroup.metadata.imb_people_description }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Info Blocks Grid -->
+          <div class="grid md:grid-cols-3 gap-6">
+
+            <!-- Prayer Status Block -->
+            <div class="bg-forest-500 rounded-2xl p-6 text-white">
+              <h3 class="font-bold uppercase tracking-wide text-center mb-4">Prayer Status</h3>
+              <div class="text-center">
+                <div class="text-5xl font-bold mb-2">
+                  {{ campaign.people_praying || 0 }} / {{ PRAYER_GOAL }}
+                </div>
+                <p class="text-sage-200 text-sm mb-6">
+                  people praying 10 minutes a day for this people group.
+                </p>
+                <!-- Progress Bar -->
+                <div class="w-full bg-forest-600 rounded-full h-3">
+                  <div
+                    class="bg-sage-300 h-3 rounded-full transition-all duration-500"
+                    :style="{ width: `${Math.min(((campaign.people_praying || 0) / PRAYER_GOAL) * 100, 100)}%` }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Overview Data Block -->
+            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6">
+              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Overview</h3>
+              <div class="space-y-3 text-sm">
+                <div v-if="peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata?.imb_isoalpha3" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata.imb_isoalpha3 }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_subregion || peopleGroup.labels?.imb_region || peopleGroup.metadata?.imb_subregion || peopleGroup.metadata?.imb_region" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-globe" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_subregion || peopleGroup.labels?.imb_region || peopleGroup.metadata.imb_subregion || peopleGroup.metadata.imb_region }}</span>
+                </div>
+                <div v-if="peopleGroup.metadata?.imb_population" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-users" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ Number(peopleGroup.metadata.imb_population).toLocaleString() }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata?.imb_reg_of_language" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-languages" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata.imb_reg_of_language }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spiritual Status Block -->
+            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6">
+              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Spiritual Status</h3>
+              <div class="space-y-3 text-sm">
+                <div v-if="peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata?.imb_reg_of_religion" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-bookmark" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata.imb_reg_of_religion }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata?.imb_engagement_status" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-target" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata.imb_engagement_status }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_evangelical_level || peopleGroup.metadata?.imb_evangelical_level !== undefined" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-trending-up" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">Evangelical: {{ peopleGroup.labels?.imb_evangelical_level || peopleGroup.metadata.imb_evangelical_level }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_congregation_existing || peopleGroup.metadata?.imb_congregation_existing !== undefined" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-church" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">Churches: {{ peopleGroup.labels?.imb_congregation_existing || (peopleGroup.metadata.imb_congregation_existing === '1' || peopleGroup.metadata.imb_congregation_existing === 1 ? 'Yes' : 'No') }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_church_planting || peopleGroup.metadata?.imb_church_planting !== undefined" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-sprout" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_church_planting || peopleGroup.metadata.imb_church_planting }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_gsec || peopleGroup.metadata?.imb_gsec !== undefined" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-bar-chart-3" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">GSEC: {{ peopleGroup.labels?.imb_gsec || peopleGroup.metadata.imb_gsec }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div v-if="peopleGroup.metadata?.imb_lat && peopleGroup.metadata?.imb_lng" class="mt-6">
+            <div class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden">
+              <div class="relative rounded-lg overflow-hidden h-64">
+                <iframe
+                  :src="`https://www.openstreetmap.org/export/embed.html?bbox=${peopleGroup.metadata.imb_lng - 15},${peopleGroup.metadata.imb_lat - 10},${peopleGroup.metadata.imb_lng + 15},${peopleGroup.metadata.imb_lat + 10}&layer=mapnik&marker=${peopleGroup.metadata.imb_lat},${peopleGroup.metadata.imb_lng}`"
+                  class="w-full h-full border-0"
+                  loading="lazy"
+                ></iframe>
+                <!-- Overlay to prevent scroll zoom while allowing click-through -->
+                <div class="absolute inset-0 z-10" @wheel.prevent @click="($event.currentTarget as HTMLElement).style.display = 'none'"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
       <!-- Prayer Signup Section -->
-      <section class="py-12">
+      <section class="py-12 bg-accented">
         <div class="max-w-4xl mx-auto px-4">
           <UCard>
             <template #header>
               <div class="text-center">
                 <h2 class="text-2xl font-bold">{{ $t('campaign.signup.title') }}</h2>
-                <p class="text-[var(--ui-text-muted)] mt-2">{{ $t('campaign.signup.description') }}</p>
+                <p class="text-muted mt-2">{{ $t('campaign.signup.description') }}</p>
               </div>
             </template>
 
@@ -42,28 +158,28 @@
                       @click="signupForm.frequency = 'daily'"
                       class="relative p-5 rounded-2xl border-2 transition-all group"
                       :class="signupForm.frequency === 'daily'
-                        ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
-                        : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
+                        ? 'border-(--ui-text) bg-elevated'
+                        : 'border-default hover:border-(--ui-text-muted)'"
                     >
                       <UIcon name="i-lucide-sun" class="w-8 h-8 mb-2" />
-                      <div class="font-semibold">Every Day</div>
-                      <div v-if="signupForm.frequency === 'daily'" class="absolute top-2 right-2">
+                      <span class="block font-semibold">Every Day</span>
+                      <span v-if="signupForm.frequency === 'daily'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
-                      </div>
+                      </span>
                     </button>
                     <button
                       type="button"
                       @click="signupForm.frequency = 'weekly'"
                       class="relative p-5 rounded-2xl border-2 transition-all group"
                       :class="signupForm.frequency === 'weekly'
-                        ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
-                        : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
+                        ? 'border-(--ui-text) bg-elevated'
+                        : 'border-default hover:border-(--ui-text-muted)'"
                     >
                       <UIcon name="i-lucide-calendar-days" class="w-8 h-8 mb-2" />
-                      <div class="font-semibold">Some Days</div>
-                      <div v-if="signupForm.frequency === 'weekly'" class="absolute top-2 right-2">
+                      <span class="block font-semibold">Some Days</span>
+                      <span v-if="signupForm.frequency === 'weekly'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
-                      </div>
+                      </span>
                     </button>
                   </div>
                   <!-- Day selection for weekly frequency -->
@@ -71,8 +187,8 @@
                     <label
                       v-for="day in translatedDaysOfWeek"
                       :key="day.value"
-                      class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
-                      :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': signupForm.days_of_week.includes(day.value) }"
+                      class="flex flex-col items-center gap-1 p-2 border border-default rounded-lg cursor-pointer transition-colors hover:bg-elevated"
+                      :class="{ 'border-primary bg-elevated': signupForm.days_of_week.includes(day.value) }"
                     >
                       <UCheckbox
                         :model-value="signupForm.days_of_week.includes(day.value)"
@@ -86,7 +202,7 @@
                 <!-- Duration as slider-style pills -->
                 <div>
                   <label class="text-sm font-medium mb-3 block">For...</label>
-                  <div class="flex rounded-full border border-[var(--ui-border)] p-1 bg-[var(--ui-bg)]">
+                  <div class="flex rounded-full border border-default p-1 bg-default">
                     <button
                       v-for="dur in [5, 10, 15, 30, 60]"
                       :key="dur"
@@ -94,8 +210,8 @@
                       @click="signupForm.prayer_duration = dur"
                       class="flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all"
                       :class="signupForm.prayer_duration === dur
-                        ? 'bg-[var(--ui-text)] text-[var(--ui-bg)]'
-                        : 'hover:bg-[var(--ui-bg-elevated)]'"
+                        ? 'bg-(--ui-text) text-(--ui-bg)'
+                        : 'hover:bg-elevated'"
                     >
                       {{ dur < 60 ? `${dur}m` : '1h' }}
                     </button>
@@ -149,8 +265,8 @@
                 </div>
 
                 <!-- Stay Connected -->
-                <div class="border-t border-[var(--ui-border)] pt-4 space-y-3">
-                  <p class="text-sm text-[var(--ui-text-muted)]">
+                <div class="border-t border-default pt-4 space-y-3">
+                  <p class="text-sm text-muted">
                     {{ $t('campaign.signup.form.consent.description') }}
                   </p>
                   <UCheckbox
@@ -182,46 +298,46 @@
       </section>
 
       <!-- Prayer Fuel Link Section -->
-      <section class="py-12">
+      <section class="py-12 bg-forest-400">
         <div class="max-w-3xl mx-auto px-4">
-          <UCard class="text-center">
-            <h2 class="text-2xl font-bold mb-3">{{ $t('campaign.prayerFuel.title') }}</h2>
-            <p class="text-[var(--ui-text-muted)] mb-6">{{ $t('campaign.prayerFuel.description') }}</p>
+          <div class="text-center text-white">
+            <h2 class="text-2xl font-bold uppercase tracking-wide mb-3">{{ $t('campaign.prayerFuel.title') }}</h2>
+            <p class="text-sage-200 mb-6">{{ $t('campaign.prayerFuel.description') }}</p>
             <UButton
               :to="localePath(`/${campaign.slug}/prayer-fuel`)"
               size="lg"
-              variant="outline"
+              class="bg-sage-300 text-forest-500 hover:bg-sage-400 rounded-full px-8"
             >
               {{ $t('campaign.prayerFuel.button') }}
             </UButton>
-          </UCard>
+          </div>
         </div>
       </section>
 
       <!-- Mobile App Links Section -->
-      <section class="py-12">
+      <section class="py-12 bg-elevated">
         <div class="max-w-3xl mx-auto px-4">
-          <UCard class="text-center">
-            <h2 class="text-2xl font-bold mb-3">{{ $t('campaign.mobileApp.title') }}</h2>
-            <p class="text-[var(--ui-text-muted)] mb-6">
+          <div class="text-center">
+            <h2 class="text-2xl font-bold uppercase tracking-wide text-default mb-3">{{ $t('campaign.mobileApp.title') }}</h2>
+            <p class="text-muted mb-6">
               {{ $t('campaign.mobileApp.description') }}
             </p>
 
             <div class="flex gap-4 justify-center flex-wrap">
-              <UButton href="#" variant="outline" size="lg" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
+              <UButton href="#" size="lg" class="bg-forest-500 text-white hover:bg-forest-600 rounded-full px-6" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
                 <div class="flex flex-col items-start text-left min-w-[140px]">
                   <span class="text-xs opacity-80">{{ $t('campaign.mobileApp.appStore.label') }}</span>
                   <span class="text-lg font-semibold">{{ $t('campaign.mobileApp.appStore.store') }}</span>
                 </div>
               </UButton>
-              <UButton href="#" variant="outline" size="lg" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
+              <UButton href="#" size="lg" class="bg-forest-500 text-white hover:bg-forest-600 rounded-full px-6" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
                 <div class="flex flex-col items-start text-left min-w-[140px]">
                   <span class="text-xs opacity-80">{{ $t('campaign.mobileApp.googlePlay.label') }}</span>
                   <span class="text-lg font-semibold">{{ $t('campaign.mobileApp.googlePlay.store') }}</span>
                 </div>
               </UButton>
             </div>
-          </UCard>
+          </div>
         </div>
       </section>
 
@@ -230,12 +346,12 @@
         <template #content>
           <div class="p-8 text-center">
             <div class="flex items-center justify-center gap-3 mb-6">
-              <UIcon name="i-lucide-mail" class="w-10 h-10 text-[var(--ui-text)] animate-pulse" />
+              <UIcon name="i-lucide-mail" class="w-10 h-10 text-default animate-pulse" />
               <h2 class="text-2xl font-semibold">{{ $t('campaign.signup.modal.title') }}</h2>
             </div>
-            <p class="text-[var(--ui-text-muted)] mb-2">{{ $t('campaign.signup.modal.message') }}</p>
+            <p class="text-muted mb-2">{{ $t('campaign.signup.modal.message') }}</p>
             <p class="text-lg font-semibold mb-4 break-all">{{ verificationEmail }}</p>
-            <p class="text-sm text-[var(--ui-text-muted)] mb-8">{{ $t('campaign.signup.modal.hint') }}</p>
+            <p class="text-sm text-muted mb-8">{{ $t('campaign.signup.modal.hint') }}</p>
             <UButton
               size="lg"
               @click="closeVerificationModal"
@@ -250,6 +366,32 @@
 </template>
 
 <script setup lang="ts">
+// Type definitions for API response
+interface CampaignResponse {
+  campaign: {
+    id: number
+    slug: string
+    title: string
+    description: string
+    status: 'active' | 'inactive'
+    default_language: string
+    dt_id: string | null
+    people_praying: number
+    created_at: string
+    updated_at: string
+  }
+  peopleGroup: {
+    id: number
+    dt_id: string
+    name: string
+    image_url: string | null
+    metadata: Record<string, any>
+    labels: Record<string, string | null>
+    created_at: string
+    updated_at: string
+  } | null
+}
+
 definePageMeta({
   layout: 'default'
 })
@@ -260,11 +402,23 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 
 // Fetch campaign data
-const { data, pending, error } = await useFetch(`/api/campaigns/${slug}`)
+const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`)
 const campaign = computed(() => data.value?.campaign)
+const peopleGroup = computed(() => data.value?.peopleGroup)
 
 // Campaign title management
-const { setCampaignTitle } = useCampaign()
+const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+
+// Reset campaign header when leaving this page
+onUnmounted(() => {
+  resetCampaignTitle()
+})
+
+// Dynamic prayer goal - starts at 144, then increases to 1000 once reached
+const PRAYER_GOAL = computed(() => {
+  const peoplePraying = campaign.value?.people_praying || 0
+  return peoplePraying >= 144 ? 1000 : 144
+})
 
 // Set campaign title when campaign is loaded
 watch(campaign, (newCampaign) => {
@@ -285,80 +439,15 @@ const translatedDaysOfWeek = computed(() => [
   { value: 6, label: t('campaign.signup.form.daysOfWeek.days.sat') }
 ])
 
-// Common timezone options (grouped by region)
-const timezoneOptions = [
-  // Americas
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Anchorage',
-  'America/Phoenix',
-  'America/Toronto',
-  'America/Vancouver',
-  'America/Mexico_City',
-  'America/Bogota',
-  'America/Lima',
-  'America/Santiago',
-  'America/Buenos_Aires',
-  'America/Sao_Paulo',
-  // Europe
-  'Europe/London',
-  'Europe/Dublin',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Europe/Madrid',
-  'Europe/Rome',
-  'Europe/Amsterdam',
-  'Europe/Brussels',
-  'Europe/Vienna',
-  'Europe/Warsaw',
-  'Europe/Prague',
-  'Europe/Stockholm',
-  'Europe/Oslo',
-  'Europe/Helsinki',
-  'Europe/Athens',
-  'Europe/Moscow',
-  // Asia
-  'Asia/Dubai',
-  'Asia/Kolkata',
-  'Asia/Bangkok',
-  'Asia/Singapore',
-  'Asia/Hong_Kong',
-  'Asia/Shanghai',
-  'Asia/Tokyo',
-  'Asia/Seoul',
-  'Asia/Manila',
-  'Asia/Jakarta',
-  // Pacific
-  'Pacific/Auckland',
-  'Pacific/Fiji',
-  'Pacific/Honolulu',
-  // Australia
-  'Australia/Sydney',
-  'Australia/Melbourne',
-  'Australia/Brisbane',
-  'Australia/Perth',
-  // Africa
-  'Africa/Cairo',
-  'Africa/Johannesburg',
-  'Africa/Lagos',
-  'Africa/Nairobi',
-  // Other
-  'UTC'
-]
+// Get all IANA timezone options
+const timezoneOptions = Intl.supportedValuesOf('timeZone')
 
 // Auto-detect user's timezone
 const userTimezone = ref('UTC')
 onMounted(() => {
   try {
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone
-    // Use detected timezone if it's in our list, otherwise keep it anyway
     userTimezone.value = detected || 'UTC'
-    // Add detected timezone to options if not already there
-    if (detected && !timezoneOptions.includes(detected)) {
-      timezoneOptions.unshift(detected)
-    }
   } catch {
     userTimezone.value = 'UTC'
   }

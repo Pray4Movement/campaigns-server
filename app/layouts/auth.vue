@@ -18,18 +18,11 @@
       </div>
     </header>
 
-    <!-- Campaign Title -->
-    <div v-if="showCampaignHeader" class="bg-beige-50 dark:bg-elevated py-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-        <h1 class="text-3xl md:text-4xl font-bold uppercase tracking-wide">
-          <span class="text-default">{{ campaignTitle }}</span>
-        </h1>
-      </div>
-    </div>
-
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col">
-      <slot />
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+      <div class="w-full max-w-md">
+        <slot />
+      </div>
     </main>
 
     <!-- Footer -->
@@ -49,7 +42,6 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 const currentYear = new Date().getFullYear()
-const { campaignTitle, showCampaignHeader } = useCampaign()
 </script>
 
 <style scoped>

@@ -73,7 +73,12 @@ const localePath = useLocalePath()
 const route = useRoute()
 const slug = route.params.slug as string
 const dateParam = route.params.date as string
-const { setCampaignTitle } = useCampaign()
+const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+
+// Reset campaign header when leaving this page
+onUnmounted(() => {
+  resetCampaignTitle()
+})
 
 // Get language preference from global language selector or query param
 const selectedLanguage = ref((route.query.language as string) || locale.value || '')

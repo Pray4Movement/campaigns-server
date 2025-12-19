@@ -31,3 +31,4 @@ logs
 .env.*
 !.env.example
 /public/uploads/
+/data/tmp/

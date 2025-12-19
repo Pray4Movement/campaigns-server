@@ -97,7 +97,12 @@ const localePath = useLocalePath()
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
-const { setCampaignTitle } = useCampaign()
+const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+
+// Reset campaign header when leaving this page
+onUnmounted(() => {
+  resetCampaignTitle()
+})
 const toast = useToast()
 
 // Get tracking ID from URL if present (from email/WhatsApp links)
