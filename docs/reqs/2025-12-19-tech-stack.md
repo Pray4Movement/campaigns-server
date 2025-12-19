@@ -23,7 +23,7 @@ Prayer Tools is deployed on Railway with PostgreSQL, using Cloudflare for edge c
 - Built-in connection pooling (PgBouncer)
 - Zero-downtime deployments
 - Git push to deploy
-- ~1ms database latency (same network)
+- ~2ms read latency, ~10-15ms write latency (internal network)
 
 **Deployment:**
 - Region: US-East (good latency to Americas and EU)
@@ -79,7 +79,7 @@ Prayer Tools is deployed on Railway with PostgreSQL, using Cloudflare for edge c
 │                                                         │
 │  ┌─────────────────┐         ┌─────────────────┐       │
 │  │   Nuxt App      │────────▶│   PostgreSQL    │       │
-│  │   (Node.js)     │ ~1ms    │                 │       │
+│  │   (Node.js)     │ 2-15ms  │                 │       │
 │  │                 │         │                 │       │
 │  │  - API routes   │         │  - Subscribers  │       │
 │  │  - SSR pages    │         │  - Campaigns    │       │
@@ -160,18 +160,41 @@ SendBulkTemplatedEmail({
 
 ### Why Not Neon (Previous Setup)
 
+Measured latency comparison (December 2025):
+
+| Metric | Railway (internal) | DO + Neon (cross-network) |
+|--------|-------------------|---------------------------|
+| Simple SELECT | 1.5ms | 9-18ms |
+| Single INSERT | 11ms | 20ms |
+| Single UPDATE | 22ms | 18ms |
+| SELECT+UPDATE pattern | 14ms | 37ms |
+| Cold start spike | None | 100ms observed |
+
 | Issue | Impact |
 |-------|--------|
-| Cold starts | 100-500ms delay if database scaled to zero |
-| Per-query latency | 5-15ms vs 1-3ms with Railway |
-| N+1 query impact | Sync operations took 10-50x longer |
+| Cold starts | 100ms+ delay when database wakes from zero |
+| Cross-network latency | 2-3x slower than Railway internal network |
+| N+1 query impact | Sequential operations compound latency |
 
 ### Railway PostgreSQL Benefits
 
 - No cold starts (always running)
-- ~1ms latency (same internal network)
+- ~2ms read latency, ~10-15ms write latency (internal network)
 - Built-in PgBouncer for connection pooling
 - Automatic backups
+
+### Bulk Database Operations
+
+Sequential queries compound latency. Always use bulk operations for batch processing:
+
+| Pattern | Time for 2000 rows | Example |
+|---------|-------------------|---------|
+| Sequential SELECT+UPDATE | 30-60 seconds | Current people group sync |
+| Bulk UPSERT (batches of 100) | < 1 second | `INSERT ... ON CONFLICT DO UPDATE` |
+
+**Measured:** Bulk INSERT of 100 rows takes ~11ms vs sequential inserts at ~92ms (10 rows).
+
+Use `INSERT ... ON CONFLICT DO UPDATE` (upsert) for sync operations instead of check-then-insert/update patterns.
 
 ### Connection Limits by Scale
 
@@ -228,8 +251,10 @@ SendBulkTemplatedEmail({
 | Kubernetes | Overkill for current scale |
 | Multi-region | Cloudflare CDN handles global distribution |
 | Vercel | Serverless cold starts + Neon latency issues |
-| DigitalOcean | Railway is simpler; DO available as fallback at scale |
+| DigitalOcean | Measured similar latency; Railway internal network is faster than cross-network DB |
+| Neon | Cross-network latency + cold starts; Railway Postgres is 2-3x faster |
 | Individual email sends | Bulk API is 50x more efficient |
+| Sequential DB queries | Bulk upsert is 50-100x faster for batch operations |
 
 ---
 
