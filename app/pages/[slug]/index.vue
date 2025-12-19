@@ -21,353 +21,62 @@
 
       <!-- Prayer Signup Section -->
       <section class="py-12">
-        <div class="max-w-3xl mx-auto px-4">
-          <UCard>
-            <template #header>
-              <h2 class="text-2xl font-bold text-center">{{ $t('campaign.signup.title') }}</h2>
-            </template>
-
-            <p class="text-center text-[var(--ui-text-muted)] mb-8">
-              {{ $t('campaign.signup.description') }}
-            </p>
-
-            <form @submit.prevent="handleSignup" class="max-w-md mx-auto space-y-6">
-              <!-- Name Field -->
-              <UFormField :label="$t('campaign.signup.form.name.label')" required class="w-full">
-                <UInput
-                  v-model="signupForm.name"
-                  type="text"
-                  required
-                  :placeholder="$t('campaign.signup.form.name.placeholder')"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Email Field -->
-              <UFormField :label="$t('campaign.signup.form.email.label')" required class="w-full">
-                <UInput
-                  v-model="signupForm.email"
-                  type="email"
-                  required
-                  :placeholder="$t('campaign.signup.form.email.placeholder')"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Frequency -->
-              <UFormField :label="$t('campaign.signup.form.frequency.label')" required class="w-full">
-                <USelect
-                  v-model="signupForm.frequency"
-                  :items="frequencyOptions"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Days of Week (for weekly frequency) -->
-              <UFormField v-if="signupForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')" class="w-full">
-                <div class="grid grid-cols-7 gap-1 w-full">
-                  <label
-                    v-for="day in translatedDaysOfWeek"
-                    :key="day.value"
-                    class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
-                    :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': signupForm.days_of_week.includes(day.value) }"
-                  >
-                    <UCheckbox
-                      :model-value="signupForm.days_of_week.includes(day.value)"
-                      @update:model-value="toggleDayOfWeek(day.value)"
-                    />
-                    <span class="text-xs font-medium">{{ day.label }}</span>
-                  </label>
-                </div>
-                <template #hint>
-                  <span v-if="signupForm.days_of_week.length === 0" class="text-[var(--ui-text-muted)]">
-                    {{ $t('campaign.signup.form.daysOfWeek.error') }}
-                  </span>
-                </template>
-              </UFormField>
-
-              <!-- Reminder Time Picker -->
-              <UFormField :label="$t('campaign.signup.form.time.label')" required class="w-full">
-                <TimePicker
-                  v-model="signupForm.reminder_time"
-                  class="w-full"
-                />
-                <template #hint>
-                  {{ $t('campaign.signup.form.time.hint') }}
-                </template>
-              </UFormField>
-
-              <!-- Timezone Selector -->
-              <UFormField :label="$t('campaign.signup.form.timezone.label')" required class="w-full">
-                <USelectMenu
-                  v-model="userTimezone"
-                  :items="timezoneOptions"
-                  searchable
-                  :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
-                  class="w-full"
-                />
-                <template #hint>
-                  {{ $t('campaign.signup.form.timezone.hint') }}
-                </template>
-              </UFormField>
-
-              <!-- Prayer Duration -->
-              <UFormField :label="$t('campaign.signup.form.duration.label')" required class="w-full">
-                <USelect
-                  v-model="signupForm.prayer_duration"
-                  :items="durationOptions"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Consent Section -->
-              <div class="border-t border-[var(--ui-border)] pt-6 mt-2 space-y-3">
-                <p class="text-sm text-[var(--ui-text-muted)]">
-                  {{ $t('campaign.signup.form.consent.description') }}
-                </p>
-                <UCheckbox
-                  v-model="signupForm.consent_campaign_updates"
-                  :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
-                />
-                <UCheckbox
-                  v-model="signupForm.consent_doxa_general"
-                  :label="$t('campaign.signup.form.consent.doxaGeneral')"
-                />
-              </div>
-
-              <!-- Submit Button -->
-              <UButton
-                type="submit"
-                size="lg"
-                block
-                :loading="submitting"
-              >
-                {{ submitting ? $t('campaign.signup.form.submitting') : $t('campaign.signup.form.submit') }}
-              </UButton>
-
-              <!-- Success/Error Messages -->
-              <UAlert v-if="signupSuccess" color="success" :title="$t('campaign.signup.success')" />
-              <UAlert v-if="signupError" color="error" :title="signupError" />
-            </form>
-          </UCard>
-        </div>
-      </section>
-
-      <!-- ============================================== -->
-      <!-- ALTERNATIVE FORM DESIGNS FOR EXPLORATION -->
-      <!-- ============================================== -->
-
-      <!-- Alternative Form 1: Step-by-Step Wizard -->
-      <section class="py-12 bg-[var(--ui-bg-elevated)]">
-        <div class="max-w-3xl mx-auto px-4">
-          <UCard>
-            <template #header>
-              <div class="text-center">
-                <h2 class="text-2xl font-bold">Step-by-Step Wizard</h2>
-              </div>
-            </template>
-
-            <!-- Progress Steps -->
-            <div class="flex justify-center mb-8">
-              <div class="flex items-center gap-2">
-                <button
-                  v-for="step in 4"
-                  :key="step"
-                  @click="wizardStep = step"
-                  class="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all"
-                  :class="wizardStep === step
-                    ? 'bg-[var(--ui-text)] text-[var(--ui-bg)]'
-                    : wizardStep > step
-                      ? 'bg-[var(--ui-text)] text-[var(--ui-bg)] opacity-50'
-                      : 'border-2 border-[var(--ui-border)] text-[var(--ui-text-muted)]'"
-                >
-                  <UIcon v-if="wizardStep > step" name="i-lucide-check" class="w-5 h-5" />
-                  <span v-else>{{ step }}</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Step 1: When to pray -->
-            <div v-if="wizardStep === 1" class="text-center max-w-md mx-auto">
-              <h3 class="text-xl font-semibold mb-2">When works best for you?</h3>
-              <p class="text-[var(--ui-text-muted)] mb-6">Choose your prayer rhythm.</p>
-
-              <div class="grid grid-cols-2 gap-3 mb-6">
-                <button
-                  @click="altForm1.frequency = 'daily'"
-                  class="p-4 rounded-xl border-2 transition-all text-left"
-                  :class="altForm1.frequency === 'daily'
-                    ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
-                    : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
-                >
-                  <div class="text-2xl mb-1">Every Day</div>
-                  <div class="text-sm text-[var(--ui-text-muted)]">Build a daily habit</div>
-                </button>
-                <button
-                  @click="altForm1.frequency = 'weekly'"
-                  class="p-4 rounded-xl border-2 transition-all text-left"
-                  :class="altForm1.frequency === 'weekly'
-                    ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
-                    : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
-                >
-                  <div class="text-2xl mb-1">Weekly</div>
-                  <div class="text-sm text-[var(--ui-text-muted)]">Pick specific days</div>
-                </button>
-              </div>
-
-              <!-- Day selection for weekly frequency -->
-              <div v-if="altForm1.frequency === 'weekly'" class="mb-6">
-                <label class="text-sm text-[var(--ui-text-muted)] mb-3 block">Which days?</label>
-                <div class="grid grid-cols-7 gap-1 w-full max-w-md mx-auto">
-                  <label
-                    v-for="day in translatedDaysOfWeek"
-                    :key="day.value"
-                    class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
-                    :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': altForm1.days_of_week.includes(day.value) }"
-                  >
-                    <UCheckbox
-                      :model-value="altForm1.days_of_week.includes(day.value)"
-                      @update:model-value="toggleAltForm1Day(day.value)"
-                    />
-                    <span class="text-xs font-medium">{{ day.label }}</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="mb-6">
-                <label class="text-sm text-[var(--ui-text-muted)] mb-2 block">Remind me at</label>
-                <TimePicker v-model="altForm1.time" size="lg" class="max-w-[150px] mx-auto" />
-              </div>
-
-              <UButton
-                :disabled="altForm1.frequency === 'weekly' && altForm1.days_of_week.length === 0"
-                @click="wizardStep = 2"
-              >
-                Continue
-              </UButton>
-            </div>
-
-            <!-- Step 2: How long -->
-            <div v-if="wizardStep === 2" class="text-center max-w-md mx-auto">
-              <h3 class="text-xl font-semibold mb-2">How much time can you commit?</h3>
-              <p class="text-[var(--ui-text-muted)] mb-6">Every minute of prayer makes a difference.</p>
-
-              <div class="flex flex-wrap gap-2 justify-center mb-8">
-                <button
-                  v-for="dur in [5, 10, 15, 30, 60]"
-                  :key="dur"
-                  @click="altForm1.duration = dur"
-                  class="px-5 py-3 rounded-full border-2 transition-all font-medium"
-                  :class="altForm1.duration === dur
-                    ? 'border-[var(--ui-text)] bg-[var(--ui-text)] text-[var(--ui-bg)]'
-                    : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
-                >
-                  {{ dur < 60 ? `${dur} min` : '1 hour' }}
-                </button>
-              </div>
-
-              <div class="flex gap-2 justify-center">
-                <UButton variant="outline" @click="wizardStep = 1">Back</UButton>
-                <UButton @click="wizardStep = 3">Continue</UButton>
-              </div>
-            </div>
-
-            <!-- Step 3: Who are you? -->
-            <div v-if="wizardStep === 3" class="text-center max-w-sm mx-auto">
-              <h3 class="text-xl font-semibold mb-2">What's your name?</h3>
-              <p class="text-[var(--ui-text-muted)] mb-6">We'd love to know who's joining us in prayer.</p>
-              <UInput
-                v-model="altForm1.name"
-                type="text"
-                placeholder="Your first name"
-                size="xl"
-                class="text-center text-lg"
-              />
-              <div class="flex gap-2 justify-center mt-6">
-                <UButton variant="outline" @click="wizardStep = 2">Back</UButton>
-                <UButton :disabled="!altForm1.name" @click="wizardStep = 4">Continue</UButton>
-              </div>
-            </div>
-
-            <!-- Step 4: How to reach you -->
-            <div v-if="wizardStep === 4" class="text-center max-w-sm mx-auto">
-              <h3 class="text-xl font-semibold mb-2">Hi {{ altForm1.name }}!</h3>
-              <p class="text-[var(--ui-text-muted)] mb-6">Where should we send your prayer reminders?</p>
-              <UInput
-                v-model="altForm1.email"
-                type="email"
-                placeholder="your@email.com"
-                size="xl"
-                class="text-center"
-              />
-              <div class="flex gap-2 justify-center mt-6">
-                <UButton variant="outline" @click="wizardStep = 3">Back</UButton>
-                <UButton size="lg" :disabled="!altForm1.email">
-                  Join the Prayer Team
-                </UButton>
-              </div>
-            </div>
-          </UCard>
-        </div>
-      </section>
-
-      <!-- Alternative Form 2: Single-Screen Visual Selector -->
-      <section class="py-12">
         <div class="max-w-4xl mx-auto px-4">
           <UCard>
             <template #header>
               <div class="text-center">
-                <h2 class="text-2xl font-bold">Visual Card Selector</h2>
+                <h2 class="text-2xl font-bold">{{ $t('campaign.signup.title') }}</h2>
+                <p class="text-[var(--ui-text-muted)] mt-2">{{ $t('campaign.signup.description') }}</p>
               </div>
             </template>
 
-            <div class="grid md:grid-cols-2 gap-8">
+            <form @submit.prevent="handleSignup" class="grid md:grid-cols-2 gap-8">
               <!-- Left side: Visual selectors -->
               <div class="space-y-6">
                 <!-- Frequency as visual cards -->
                 <div>
-                  <label class="text-sm font-medium mb-3 block">I want to pray...</label>
+                  <label class="text-sm font-medium mb-3 block">I will pray...</label>
                   <div class="grid grid-cols-2 gap-3">
                     <button
-                      @click="altForm2.frequency = 'daily'"
+                      type="button"
+                      @click="signupForm.frequency = 'daily'"
                       class="relative p-5 rounded-2xl border-2 transition-all group"
-                      :class="altForm2.frequency === 'daily'
+                      :class="signupForm.frequency === 'daily'
                         ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
                         : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
                     >
                       <UIcon name="i-lucide-sun" class="w-8 h-8 mb-2" />
                       <div class="font-semibold">Every Day</div>
-                      <div v-if="altForm2.frequency === 'daily'" class="absolute top-2 right-2">
+                      <div v-if="signupForm.frequency === 'daily'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
                       </div>
                     </button>
                     <button
-                      @click="altForm2.frequency = 'weekly'"
+                      type="button"
+                      @click="signupForm.frequency = 'weekly'"
                       class="relative p-5 rounded-2xl border-2 transition-all group"
-                      :class="altForm2.frequency === 'weekly'
+                      :class="signupForm.frequency === 'weekly'
                         ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
                         : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
                     >
                       <UIcon name="i-lucide-calendar-days" class="w-8 h-8 mb-2" />
                       <div class="font-semibold">Some Days</div>
-                      <div v-if="altForm2.frequency === 'weekly'" class="absolute top-2 right-2">
+                      <div v-if="signupForm.frequency === 'weekly'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
                       </div>
                     </button>
                   </div>
                   <!-- Day selection for weekly frequency -->
-                  <div v-if="altForm2.frequency === 'weekly'" class="grid grid-cols-7 gap-1 mt-3">
+                  <div v-if="signupForm.frequency === 'weekly'" class="grid grid-cols-7 gap-1 mt-3">
                     <label
                       v-for="day in translatedDaysOfWeek"
                       :key="day.value"
                       class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
-                      :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': altForm2.days_of_week.includes(day.value) }"
+                      :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': signupForm.days_of_week.includes(day.value) }"
                     >
                       <UCheckbox
-                        :model-value="altForm2.days_of_week.includes(day.value)"
-                        @update:model-value="toggleAltForm2Day(day.value)"
+                        :model-value="signupForm.days_of_week.includes(day.value)"
+                        @update:model-value="toggleDayOfWeek(day.value)"
                       />
                       <span class="text-xs font-medium">{{ day.label }}</span>
                     </label>
@@ -376,14 +85,15 @@
 
                 <!-- Duration as slider-style pills -->
                 <div>
-                  <label class="text-sm font-medium mb-3 block">For about...</label>
+                  <label class="text-sm font-medium mb-3 block">For...</label>
                   <div class="flex rounded-full border border-[var(--ui-border)] p-1 bg-[var(--ui-bg)]">
                     <button
                       v-for="dur in [5, 10, 15, 30, 60]"
                       :key="dur"
-                      @click="altForm2.duration = dur"
+                      type="button"
+                      @click="signupForm.prayer_duration = dur"
                       class="flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all"
-                      :class="altForm2.duration === dur
+                      :class="signupForm.prayer_duration === dur
                         ? 'bg-[var(--ui-text)] text-[var(--ui-bg)]'
                         : 'hover:bg-[var(--ui-bg-elevated)]'"
                     >
@@ -394,10 +104,22 @@
 
                 <!-- Time picker -->
                 <div>
-                  <label class="text-sm font-medium mb-3 block">Best time for me</label>
+                  <label class="text-sm font-medium mb-3 block">Reminder time</label>
                   <TimePicker
-                    v-model="altForm2.time"
+                    v-model="signupForm.reminder_time"
                     size="lg"
+                    class="w-full"
+                  />
+                </div>
+
+                <!-- Timezone -->
+                <div>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.timezone.label') }}</label>
+                  <USelectMenu
+                    v-model="userTimezone"
+                    :items="timezoneOptions"
+                    searchable
+                    :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
                     class="w-full"
                   />
                 </div>
@@ -405,30 +127,56 @@
 
               <!-- Right side: Contact -->
               <div class="space-y-6">
-                <div class="space-y-3">
+                <div>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.name.label') }}</label>
                   <UInput
-                    v-model="altForm2.name"
-                    placeholder="Your name"
+                    v-model="signupForm.name"
+                    :placeholder="$t('campaign.signup.form.name.placeholder')"
                     size="lg"
                     class="w-full"
                   />
-                  <UInput
-                    v-model="altForm2.email"
-                    type="email"
-                    placeholder="Email address"
-                    size="lg"
-                    class="w-full"
-                  />
-                  <UButton block size="lg" :disabled="!altForm2.name || !altForm2.email || (altForm2.frequency === 'weekly' && altForm2.days_of_week.length === 0)">
-                    Count Me In
-                  </UButton>
                 </div>
 
-                <p class="text-xs text-center text-[var(--ui-text-muted)]">
-                  Join {{ Math.floor(Math.random() * 500) + 100 }} others praying for this campaign
-                </p>
+                <div>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.email.label') }}</label>
+                  <UInput
+                    v-model="signupForm.email"
+                    type="email"
+                    :placeholder="$t('campaign.signup.form.email.placeholder')"
+                    size="lg"
+                    class="w-full"
+                  />
+                </div>
+
+                <!-- Stay Connected -->
+                <div class="border-t border-[var(--ui-border)] pt-4 space-y-3">
+                  <p class="text-sm text-[var(--ui-text-muted)]">
+                    {{ $t('campaign.signup.form.consent.description') }}
+                  </p>
+                  <UCheckbox
+                    v-model="signupForm.consent_campaign_updates"
+                    :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
+                  />
+                  <UCheckbox
+                    v-model="signupForm.consent_doxa_general"
+                    :label="$t('campaign.signup.form.consent.doxaGeneral')"
+                  />
+                </div>
+
+                <UButton
+                  type="submit"
+                  block
+                  size="lg"
+                  :loading="submitting"
+                  :disabled="!signupForm.name || !signupForm.email || (signupForm.frequency === 'weekly' && signupForm.days_of_week.length === 0)"
+                >
+                  {{ submitting ? $t('campaign.signup.form.submitting') : $t('campaign.signup.form.submit') }}
+                </UButton>
+
+                <!-- Error Message -->
+                <UAlert v-if="signupError" color="error" :title="signupError" />
               </div>
-            </div>
+            </form>
           </UCard>
         </div>
       </section>
@@ -525,20 +273,6 @@ watch(campaign, (newCampaign) => {
   }
 }, { immediate: true })
 
-// Frequency options
-const frequencyOptions = computed(() => [
-  { value: 'daily', label: t('campaign.signup.form.frequency.daily') },
-  { value: 'weekly', label: t('campaign.signup.form.frequency.weekly') }
-])
-
-// Prayer duration options (in minutes)
-const durationOptions = computed(() => [
-  { value: 5, label: t('campaign.signup.form.duration.5min') },
-  { value: 10, label: t('campaign.signup.form.duration.10min') },
-  { value: 15, label: t('campaign.signup.form.duration.15min') },
-  { value: 30, label: t('campaign.signup.form.duration.30min') },
-  { value: 60, label: t('campaign.signup.form.duration.60min') }
-])
 
 // Days of week for weekly frequency (translated)
 const translatedDaysOfWeek = computed(() => [
@@ -647,27 +381,6 @@ const submitting = ref(false)
 const signupSuccess = ref(false)
 const signupError = ref('')
 
-// Alternative Form 1: Wizard state
-const wizardStep = ref(1)
-const altForm1 = ref({
-  name: '',
-  email: '',
-  frequency: 'daily',
-  days_of_week: [] as number[],
-  time: '09:00',
-  duration: 10
-})
-
-// Alternative Form 2: Visual selector state
-const altForm2 = ref({
-  name: '',
-  email: '',
-  frequency: 'daily',
-  days_of_week: [] as number[],
-  time: '09:00',
-  duration: 10
-})
-
 // Email verification modal state
 const showVerificationModal = ref(false)
 const verificationEmail = ref('')
@@ -679,26 +392,6 @@ function toggleDayOfWeek(day: number) {
     signupForm.value.days_of_week.push(day)
   } else {
     signupForm.value.days_of_week.splice(index, 1)
-  }
-}
-
-// Toggle day for Alternative Form 1
-function toggleAltForm1Day(day: number) {
-  const index = altForm1.value.days_of_week.indexOf(day)
-  if (index === -1) {
-    altForm1.value.days_of_week.push(day)
-  } else {
-    altForm1.value.days_of_week.splice(index, 1)
-  }
-}
-
-// Toggle day for Alternative Form 2
-function toggleAltForm2Day(day: number) {
-  const index = altForm2.value.days_of_week.indexOf(day)
-  if (index === -1) {
-    altForm2.value.days_of_week.push(day)
-  } else {
-    altForm2.value.days_of_week.splice(index, 1)
   }
 }
 
