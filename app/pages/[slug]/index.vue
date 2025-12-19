@@ -21,137 +21,161 @@
 
       <!-- Prayer Signup Section -->
       <section class="py-12">
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-4xl mx-auto px-4">
           <UCard>
             <template #header>
-              <h2 class="text-2xl font-bold text-center">{{ $t('campaign.signup.title') }}</h2>
+              <div class="text-center">
+                <h2 class="text-2xl font-bold">{{ $t('campaign.signup.title') }}</h2>
+                <p class="text-[var(--ui-text-muted)] mt-2">{{ $t('campaign.signup.description') }}</p>
+              </div>
             </template>
 
-            <p class="text-center text-[var(--ui-text-muted)] mb-8">
-              {{ $t('campaign.signup.description') }}
-            </p>
-
-            <form @submit.prevent="handleSignup" class="max-w-md mx-auto space-y-6">
-              <!-- Name Field -->
-              <UFormField :label="$t('campaign.signup.form.name.label')" required class="w-full">
-                <UInput
-                  v-model="signupForm.name"
-                  type="text"
-                  required
-                  :placeholder="$t('campaign.signup.form.name.placeholder')"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Email Field -->
-              <UFormField :label="$t('campaign.signup.form.email.label')" required class="w-full">
-                <UInput
-                  v-model="signupForm.email"
-                  type="email"
-                  required
-                  :placeholder="$t('campaign.signup.form.email.placeholder')"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Frequency -->
-              <UFormField :label="$t('campaign.signup.form.frequency.label')" required class="w-full">
-                <USelect
-                  v-model="signupForm.frequency"
-                  :items="frequencyOptions"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Days of Week (for weekly frequency) -->
-              <UFormField v-if="signupForm.frequency === 'weekly'" :label="$t('campaign.signup.form.daysOfWeek.label')" class="w-full">
-                <div class="grid grid-cols-7 gap-1 w-full">
-                  <label
-                    v-for="day in translatedDaysOfWeek"
-                    :key="day.value"
-                    class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
-                    :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': signupForm.days_of_week.includes(day.value) }"
-                  >
-                    <UCheckbox
-                      :model-value="signupForm.days_of_week.includes(day.value)"
-                      @update:model-value="toggleDayOfWeek(day.value)"
-                    />
-                    <span class="text-xs font-medium">{{ day.label }}</span>
-                  </label>
+            <form @submit.prevent="handleSignup" class="grid md:grid-cols-2 gap-8">
+              <!-- Left side: Visual selectors -->
+              <div class="space-y-6">
+                <!-- Frequency as visual cards -->
+                <div>
+                  <label class="text-sm font-medium mb-3 block">I will pray...</label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      @click="signupForm.frequency = 'daily'"
+                      class="relative p-5 rounded-2xl border-2 transition-all group"
+                      :class="signupForm.frequency === 'daily'
+                        ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
+                        : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
+                    >
+                      <UIcon name="i-lucide-sun" class="w-8 h-8 mb-2" />
+                      <div class="font-semibold">Every Day</div>
+                      <div v-if="signupForm.frequency === 'daily'" class="absolute top-2 right-2">
+                        <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      @click="signupForm.frequency = 'weekly'"
+                      class="relative p-5 rounded-2xl border-2 transition-all group"
+                      :class="signupForm.frequency === 'weekly'
+                        ? 'border-[var(--ui-text)] bg-[var(--ui-bg-elevated)]'
+                        : 'border-[var(--ui-border)] hover:border-[var(--ui-text-muted)]'"
+                    >
+                      <UIcon name="i-lucide-calendar-days" class="w-8 h-8 mb-2" />
+                      <div class="font-semibold">Some Days</div>
+                      <div v-if="signupForm.frequency === 'weekly'" class="absolute top-2 right-2">
+                        <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
+                      </div>
+                    </button>
+                  </div>
+                  <!-- Day selection for weekly frequency -->
+                  <div v-if="signupForm.frequency === 'weekly'" class="grid grid-cols-7 gap-1 mt-3">
+                    <label
+                      v-for="day in translatedDaysOfWeek"
+                      :key="day.value"
+                      class="flex flex-col items-center gap-1 p-2 border border-[var(--ui-border)] rounded-lg cursor-pointer transition-colors hover:bg-[var(--ui-bg-elevated)]"
+                      :class="{ 'border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)]': signupForm.days_of_week.includes(day.value) }"
+                    >
+                      <UCheckbox
+                        :model-value="signupForm.days_of_week.includes(day.value)"
+                        @update:model-value="toggleDayOfWeek(day.value)"
+                      />
+                      <span class="text-xs font-medium">{{ day.label }}</span>
+                    </label>
+                  </div>
                 </div>
-                <template #hint>
-                  <span v-if="signupForm.days_of_week.length === 0" class="text-[var(--ui-text-muted)]">
-                    {{ $t('campaign.signup.form.daysOfWeek.error') }}
-                  </span>
-                </template>
-              </UFormField>
 
-              <!-- Reminder Time Picker -->
-              <UFormField :label="$t('campaign.signup.form.time.label')" required class="w-full">
-                <UInput
-                  v-model="signupForm.reminder_time"
-                  type="time"
-                  required
-                  class="w-full"
-                />
-                <template #hint>
-                  {{ $t('campaign.signup.form.time.hint') }}
-                </template>
-              </UFormField>
+                <!-- Duration as slider-style pills -->
+                <div>
+                  <label class="text-sm font-medium mb-3 block">For...</label>
+                  <div class="flex rounded-full border border-[var(--ui-border)] p-1 bg-[var(--ui-bg)]">
+                    <button
+                      v-for="dur in [5, 10, 15, 30, 60]"
+                      :key="dur"
+                      type="button"
+                      @click="signupForm.prayer_duration = dur"
+                      class="flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all"
+                      :class="signupForm.prayer_duration === dur
+                        ? 'bg-[var(--ui-text)] text-[var(--ui-bg)]'
+                        : 'hover:bg-[var(--ui-bg-elevated)]'"
+                    >
+                      {{ dur < 60 ? `${dur}m` : '1h' }}
+                    </button>
+                  </div>
+                </div>
 
-              <!-- Timezone Selector -->
-              <UFormField :label="$t('campaign.signup.form.timezone.label')" required class="w-full">
-                <USelectMenu
-                  v-model="userTimezone"
-                  :items="timezoneOptions"
-                  searchable
-                  :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
-                  class="w-full"
-                />
-                <template #hint>
-                  {{ $t('campaign.signup.form.timezone.hint') }}
-                </template>
-              </UFormField>
+                <!-- Time picker -->
+                <div>
+                  <label class="text-sm font-medium mb-3 block">Reminder time</label>
+                  <TimePicker
+                    v-model="signupForm.reminder_time"
+                    size="lg"
+                    class="w-full"
+                  />
+                </div>
 
-              <!-- Prayer Duration -->
-              <UFormField :label="$t('campaign.signup.form.duration.label')" required class="w-full">
-                <USelect
-                  v-model="signupForm.prayer_duration"
-                  :items="durationOptions"
-                  required
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- Consent Section -->
-              <div class="border-t border-[var(--ui-border)] pt-6 mt-2 space-y-3">
-                <p class="text-sm text-[var(--ui-text-muted)]">
-                  {{ $t('campaign.signup.form.consent.description') }}
-                </p>
-                <UCheckbox
-                  v-model="signupForm.consent_campaign_updates"
-                  :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
-                />
-                <UCheckbox
-                  v-model="signupForm.consent_doxa_general"
-                  :label="$t('campaign.signup.form.consent.doxaGeneral')"
-                />
+                <!-- Timezone -->
+                <div>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.timezone.label') }}</label>
+                  <USelectMenu
+                    v-model="userTimezone"
+                    :items="timezoneOptions"
+                    searchable
+                    :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
+                    class="w-full"
+                  />
+                </div>
               </div>
 
-              <!-- Submit Button -->
-              <UButton
-                type="submit"
-                size="lg"
-                block
-                :loading="submitting"
-              >
-                {{ submitting ? $t('campaign.signup.form.submitting') : $t('campaign.signup.form.submit') }}
-              </UButton>
+              <!-- Right side: Contact -->
+              <div class="space-y-6">
+                <div>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.name.label') }}</label>
+                  <UInput
+                    v-model="signupForm.name"
+                    :placeholder="$t('campaign.signup.form.name.placeholder')"
+                    size="lg"
+                    class="w-full"
+                  />
+                </div>
 
-              <!-- Success/Error Messages -->
-              <UAlert v-if="signupSuccess" color="success" :title="$t('campaign.signup.success')" />
-              <UAlert v-if="signupError" color="error" :title="signupError" />
+                <div>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.email.label') }}</label>
+                  <UInput
+                    v-model="signupForm.email"
+                    type="email"
+                    :placeholder="$t('campaign.signup.form.email.placeholder')"
+                    size="lg"
+                    class="w-full"
+                  />
+                </div>
+
+                <!-- Stay Connected -->
+                <div class="border-t border-[var(--ui-border)] pt-4 space-y-3">
+                  <p class="text-sm text-[var(--ui-text-muted)]">
+                    {{ $t('campaign.signup.form.consent.description') }}
+                  </p>
+                  <UCheckbox
+                    v-model="signupForm.consent_campaign_updates"
+                    :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
+                  />
+                  <UCheckbox
+                    v-model="signupForm.consent_doxa_general"
+                    :label="$t('campaign.signup.form.consent.doxaGeneral')"
+                  />
+                </div>
+
+                <UButton
+                  type="submit"
+                  block
+                  size="lg"
+                  :loading="submitting"
+                  :disabled="!signupForm.name || !signupForm.email || (signupForm.frequency === 'weekly' && signupForm.days_of_week.length === 0)"
+                >
+                  {{ submitting ? $t('campaign.signup.form.submitting') : $t('campaign.signup.form.submit') }}
+                </UButton>
+
+                <!-- Error Message -->
+                <UAlert v-if="signupError" color="error" :title="signupError" />
+              </div>
             </form>
           </UCard>
         </div>
@@ -249,20 +273,6 @@ watch(campaign, (newCampaign) => {
   }
 }, { immediate: true })
 
-// Frequency options
-const frequencyOptions = computed(() => [
-  { value: 'daily', label: t('campaign.signup.form.frequency.daily') },
-  { value: 'weekly', label: t('campaign.signup.form.frequency.weekly') }
-])
-
-// Prayer duration options (in minutes)
-const durationOptions = computed(() => [
-  { value: 5, label: t('campaign.signup.form.duration.5min') },
-  { value: 10, label: t('campaign.signup.form.duration.10min') },
-  { value: 15, label: t('campaign.signup.form.duration.15min') },
-  { value: 30, label: t('campaign.signup.form.duration.30min') },
-  { value: 60, label: t('campaign.signup.form.duration.60min') }
-])
 
 // Days of week for weekly frequency (translated)
 const translatedDaysOfWeek = computed(() => [
