@@ -55,7 +55,7 @@ const selectedLanguage = computed(() => getLanguageByCode(languageCode.value))
 const form = ref({
   content_json: {
     type: 'doc',
-    content: []
+    content: [] as Array<{ content?: Array<{ text?: string }> }>
   }
 })
 
@@ -115,7 +115,7 @@ async function saveContent() {
     toast.add({
       title: 'Content created',
       description: 'Your content has been saved successfully.',
-      color: 'green'
+      color: 'success'
     })
 
     // Navigate back to day overview
@@ -125,7 +125,7 @@ async function saveContent() {
     toast.add({
       title: 'Failed to create content',
       description: err.data?.statusMessage || 'An error occurred while saving your content.',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false

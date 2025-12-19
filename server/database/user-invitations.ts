@@ -103,7 +103,7 @@ export class UserInvitationService {
       FROM user_invitations ui
       LEFT JOIN users u ON ui.invited_by = u.id
       WHERE ui.status = 'pending'
-        AND ui.expires_at > CURRENT_TIMESTAMP
+        AND ui.expires_at > CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       ORDER BY ui.created_at DESC
     `)
     return await stmt.all() as UserInvitationWithInviter[]
@@ -141,7 +141,7 @@ export class UserInvitationService {
   ): Promise<boolean> {
     let query = `
       UPDATE user_invitations
-      SET status = ?, updated_at = CURRENT_TIMESTAMP
+      SET status = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
     `
     const params: any[] = [status]
 
@@ -182,7 +182,7 @@ export class UserInvitationService {
       FROM user_invitations
       WHERE email = ?
         AND status = 'pending'
-        AND expires_at > CURRENT_TIMESTAMP
+        AND expires_at > CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
     `)
     const result = await stmt.get(email) as { count: number }
     return result.count > 0
@@ -192,9 +192,9 @@ export class UserInvitationService {
   async cleanupExpiredInvitations(): Promise<number> {
     const stmt = this.db.prepare(`
       UPDATE user_invitations
-      SET status = 'expired', updated_at = CURRENT_TIMESTAMP
+      SET status = 'expired', updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE status = 'pending'
-        AND expires_at < CURRENT_TIMESTAMP
+        AND expires_at < CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
     `)
     const result = await stmt.run()
     return result.changes

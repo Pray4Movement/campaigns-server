@@ -17,14 +17,29 @@
             Campaigns
           </NuxtLink>
         </li>
+        <li>
+          <NuxtLink to="/admin/subscribers" class="nav-link">
+            Subscribers
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/admin/marketing" class="nav-link">
+            Marketing
+          </NuxtLink>
+        </li>
         <li v-if="isAdmin">
           <NuxtLink to="/admin/libraries" class="nav-link">
             Libraries
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
-          <NuxtLink to="/admin/campaign-config" class="nav-link">
-            Campaign Config
+          <NuxtLink to="/admin/prayer-fuel-order" class="nav-link">
+            Prayer Fuel Order
+          </NuxtLink>
+        </li>
+        <li v-if="isAdmin">
+          <NuxtLink to="/admin/people-groups" class="nav-link">
+            People Groups
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
@@ -60,14 +75,10 @@ const config = useRuntimeConfig()
 const { user, isAdmin, isSuperAdmin, checkAuth } = useAuthUser()
 
 onMounted(async () => {
-  // Only fetch if we don't have user data yet
-  if (!user.value) {
-    try {
-      await checkAuth()
-    } catch (error) {
-      // If not authenticated, redirect to login
-      navigateTo('/')
-    }
+  try {
+    await checkAuth()
+  } catch (error) {
+    navigateTo('/')
   }
 })
 </script>

@@ -83,6 +83,9 @@ export default defineNuxtConfig({
     s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
     s3BucketName: process.env.S3_BUCKET_NAME || process.env.S3_BACKUP_BUCKET || '',
 
+    // Disciple.Tools API
+    dtPeopleGroupsApiUrl: process.env.DT_PEOPLE_GROUPS_API_URL || '',
+
     // Public keys (exposed to the frontend)
     public: {
       appName: appTitle,

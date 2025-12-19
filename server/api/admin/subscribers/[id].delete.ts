@@ -1,31 +1,53 @@
-import { getDatabase } from '#server/database/db'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { subscriberService } from '#server/database/subscribers'
+import { contactMethodService } from '#server/database/contact-methods'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
 
-  const subscriberId = getRouterParam(event, 'id')
+  const subscriptionId = getRouterParam(event, 'id')
 
-  if (!subscriberId) {
+  if (!subscriptionId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Subscriber ID is required'
+      statusMessage: 'Subscription ID is required'
     })
   }
 
-  const db = getDatabase()
-
   try {
-    // Check if subscriber exists
-    const existing = db.prepare('SELECT id FROM reminder_signups WHERE id = ?').get(subscriberId)
-    if (!existing) {
+    // Get subscription data before deletion for logging
+    const subscription = await campaignSubscriptionService.getById(parseInt(subscriptionId))
+
+    if (!subscription) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Subscriber not found'
+        statusMessage: 'Subscription not found'
       })
     }
 
-    // Delete subscriber
-    db.prepare('DELETE FROM reminder_signups WHERE id = ?').run(subscriberId)
+    // Get subscriber info
+    const subscriber = await subscriberService.getSubscriberById(subscription.subscriber_id)
+    const contacts = subscriber ? await contactMethodService.getSubscriberContactMethods(subscriber.id) : []
+    const emailContact = contacts.find(c => c.type === 'email')
+    const phoneContact = contacts.find(c => c.type === 'phone')
+
+    // Delete the subscription
+    await campaignSubscriptionService.deleteSubscription(subscription.id)
+
+    // Log the deletion with details
+    logDelete('campaign_subscriptions', subscriptionId, event, {
+      deletedRecord: {
+        name: subscriber?.name,
+        email: emailContact?.value,
+        phone: phoneContact?.value,
+        delivery_method: subscription.delivery_method,
+        status: subscription.status,
+        campaign_id: subscription.campaign_id
+      }
+    })
+
+    // Note: We don't delete the subscriber here because they might have other subscriptions
+    // The subscriber will remain even if all subscriptions are deleted
 
     return {
       success: true
@@ -33,10 +55,10 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     if (error.statusCode) throw error
 
-    console.error('Error deleting subscriber:', error)
+    console.error('Error deleting subscription:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to delete subscriber'
+      statusMessage: 'Failed to delete subscription'
     })
   }
 })

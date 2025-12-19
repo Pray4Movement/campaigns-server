@@ -37,7 +37,8 @@ const flatItems = computed(() => {
   const flattened: Command[] = []
 
   for (const groupName in groupedItems.value) {
-    flattened.push(...groupedItems.value[groupName])
+    const items = groupedItems.value[groupName]
+    if (items) flattened.push(...items)
   }
 
   return flattened

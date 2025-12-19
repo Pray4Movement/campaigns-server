@@ -31,20 +31,21 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get user date from query params or use current date
-  const userDate = query.userDate as string || new Date().toISOString().split('T')[0]
+  const userDateParam = (query.userDate as string) || new Date().toISOString().split('T')[0]!
 
   // Extract just the date part (YYYY-MM-DD)
-  const date = userDate.split('T')[0]
+  const date = userDateParam.split('T')[0]!
 
   // Get language preference (default to campaign's default language)
-  const languageCode = (query.language as string) || campaign.default_language || 'en'
+  const defaultLang = campaign.default_language || 'en'
+  const languageCode = (query.language as string) || defaultLang
 
   // Get ALL prayer content for the date and language from all libraries
   let allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, languageCode)
 
   // If no content found in requested language, fall back to campaign default language
-  if (allContent.length === 0 && languageCode !== campaign.default_language) {
-    allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, campaign.default_language)
+  if (allContent.length === 0 && languageCode !== defaultLang) {
+    allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, defaultLang)
   }
 
   // Get available languages for this date
@@ -66,7 +67,9 @@ export default defineEventHandler(async (event) => {
       title: content.title,
       language_code: content.language_code,
       content_json: contentJson,
-      content_date: content.content_date
+      content_date: content.content_date,
+      content_type: content.content_type || 'static',
+      people_group_data: content.people_group_data || null
     }
   })
 

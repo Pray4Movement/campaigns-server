@@ -114,7 +114,7 @@ watch(() => props.modelValue, (value) => {
   const isSame = currentJson === newJson
 
   if (!isSame) {
-    editor.value.commands.setContent(parsedValue, false)
+    editor.value.commands.setContent(parsedValue, { emitUpdate: false })
   }
 })
 

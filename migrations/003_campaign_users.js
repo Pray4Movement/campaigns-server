@@ -6,17 +6,8 @@
  */
 
 class BaseMigration {
-  async exec(pool, sql) {
-    await pool.query(sql)
-  }
-
-  async query(pool, sql, params = []) {
-    const result = await pool.query(sql, params)
-    return result.rows
-  }
-
-  down(pool) {
-    throw new Error(`Down migration not implemented for migration ${this.id}`)
+  async exec(sql, query) {
+    await sql.unsafe(query)
   }
 }
 
@@ -24,11 +15,11 @@ export default class CampaignUsersMigration extends BaseMigration {
   id = 3
   name = 'Campaign Users'
 
-  async up(pool) {
+  async up(sql) {
     console.log('📥 Creating campaign_users table...')
 
     // Campaign users junction table
-    await this.exec(pool, `
+    await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS campaign_users (
         campaign_id INTEGER NOT NULL,
         user_id UUID NOT NULL,
@@ -40,16 +31,16 @@ export default class CampaignUsersMigration extends BaseMigration {
     `)
 
     // Create indexes for faster lookups
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_campaign_users_user ON campaign_users(user_id)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_campaign_users_campaign ON campaign_users(campaign_id)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_campaign_users_user ON campaign_users(user_id)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_campaign_users_campaign ON campaign_users(campaign_id)')
 
     console.log('  ✅ Campaign users table created')
     console.log('🎉 Campaign users migration completed successfully!')
   }
 
-  async down(pool) {
+  async down(sql) {
     console.log('📥 Rolling back campaign_users table...')
-    await this.exec(pool, 'DROP TABLE IF EXISTS campaign_users')
+    await this.exec(sql, 'DROP TABLE IF EXISTS campaign_users')
     console.log('  ✅ Campaign users table dropped')
   }
 }

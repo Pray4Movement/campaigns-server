@@ -41,9 +41,9 @@
                 <span
                   v-for="(count, lang) in library.stats?.languageStats"
                   :key="lang"
-                  :title="`${getLanguageName(lang)}: ${count} days`"
+                  :title="`${getLanguageName(String(lang))}: ${count} days`"
                 >
-                  {{ getLanguageFlag(lang) }}
+                  {{ getLanguageFlag(String(lang)) }}
                 </span>
               </div>
             </td>
@@ -207,7 +207,7 @@ async function saveLibrary() {
     toast.add({
       title: 'Validation Error',
       description: 'Library name is required',
-      color: 'red'
+      color: 'error'
     })
     return
   }
@@ -225,7 +225,7 @@ async function saveLibrary() {
       toast.add({
         title: 'Library updated',
         description: `"${form.value.name}" has been updated successfully.`,
-        color: 'green'
+        color: 'success'
       })
     } else {
       // Create new library
@@ -237,7 +237,7 @@ async function saveLibrary() {
       toast.add({
         title: 'Library created',
         description: `"${form.value.name}" has been created successfully.`,
-        color: 'green'
+        color: 'success'
       })
 
       // Redirect to content editor for new library
@@ -252,7 +252,7 @@ async function saveLibrary() {
     toast.add({
       title: 'Failed to save library',
       description: err.data?.statusMessage || 'An error occurred while saving the library.',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -278,7 +278,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Library deleted',
       description: `"${library.name}" has been deleted successfully.`,
-      color: 'green'
+      color: 'success'
     })
 
     await loadLibraries()
@@ -286,7 +286,7 @@ async function confirmDelete() {
     toast.add({
       title: 'Failed to delete library',
       description: err.data?.statusMessage || 'An error occurred while deleting the library.',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     deleting.value = false

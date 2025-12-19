@@ -16,6 +16,7 @@ export interface VimeoOptions {
   portrait: boolean
   title: boolean
   controls: boolean
+  HTMLAttributes: Record<string, any>
 }
 
 declare module '@tiptap/core' {
@@ -62,7 +63,8 @@ export const Vimeo = Node.create<VimeoOptions>({
       color: '00adef',
       portrait: true,
       title: true,
-      controls: true
+      controls: true,
+      HTMLAttributes: {}
     }
   },
 

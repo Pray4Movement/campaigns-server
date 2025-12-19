@@ -1,0 +1,5 @@
+export { default as CrmLayout } from './CrmLayout.vue'
+export { default as CrmListPanel } from './CrmListPanel.vue'
+export { default as CrmListItem } from './CrmListItem.vue'
+export { default as CrmDetailPanel } from './CrmDetailPanel.vue'
+export { default as CrmFormSection } from './CrmFormSection.vue'

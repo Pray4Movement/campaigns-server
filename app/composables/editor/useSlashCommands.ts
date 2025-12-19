@@ -200,11 +200,11 @@ export const createSuggestionConfig = () => {
             editor: props.editor
           })
 
-          if (!props.clientRect) {
+          if (!props.clientRect || !component.element) {
             return
           }
 
-          popup = tippy('body', {
+          popup = [tippy(document.body, {
             getReferenceClientRect: props.clientRect,
             appendTo: () => document.body,
             content: component.element,
@@ -214,7 +214,7 @@ export const createSuggestionConfig = () => {
             placement: editorConfig.slashCommand.menu.placement as any,
             theme: editorConfig.slashCommand.menu.theme,
             arrow: editorConfig.slashCommand.menu.arrow
-          })
+          })]
         },
 
         onUpdate(props: any) {
@@ -224,14 +224,14 @@ export const createSuggestionConfig = () => {
             return
           }
 
-          popup[0].setProps({
+          popup[0]?.setProps({
             getReferenceClientRect: props.clientRect
           })
         },
 
         onKeyDown(props: any) {
           if (props.event.key === 'Escape') {
-            popup[0].hide()
+            popup[0]?.hide()
             return true
           }
 
@@ -239,7 +239,7 @@ export const createSuggestionConfig = () => {
         },
 
         onExit() {
-          popup[0].destroy()
+          popup[0]?.destroy()
           component.destroy()
         }
       }

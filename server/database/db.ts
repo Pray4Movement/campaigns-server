@@ -1,4 +1,5 @@
 import type { Sql } from 'postgres'
+// @ts-ignore - sql is auto-imported from base layer server/utils/database.ts
 import { sql } from '#imports'
 
 // PostgreSQL query wrapper that mimics better-sqlite3 API

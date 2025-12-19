@@ -5,17 +5,8 @@
  */
 
 class BaseMigration {
-  async exec(pool, sql) {
-    await pool.query(sql)
-  }
-
-  async query(pool, sql, params = []) {
-    const result = await pool.query(sql, params)
-    return result.rows
-  }
-
-  down(pool) {
-    throw new Error(`Down migration not implemented for migration ${this.id}`)
+  async exec(sql, query) {
+    await sql.unsafe(query)
   }
 }
 
@@ -23,11 +14,11 @@ export default class UserInvitationsMigration extends BaseMigration {
   id = 2
   name = 'User Invitations'
 
-  async up(pool) {
+  async up(sql) {
     console.log('📥 Creating user invitations table...')
 
     // User invitations table
-    await this.exec(pool, `
+    await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS user_invitations (
         id SERIAL PRIMARY KEY,
         email TEXT NOT NULL,
@@ -44,18 +35,18 @@ export default class UserInvitationsMigration extends BaseMigration {
     `)
 
     // Create indexes for faster lookups
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_email ON user_invitations(email)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_token ON user_invitations(token)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_status ON user_invitations(status)')
-    await this.exec(pool, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_invited_by ON user_invitations(invited_by)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_email ON user_invitations(email)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_token ON user_invitations(token)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_status ON user_invitations(status)')
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_user_invitations_invited_by ON user_invitations(invited_by)')
 
     console.log('  ✅ User invitations table created')
     console.log('🎉 User invitations migration completed successfully!')
   }
 
-  async down(pool) {
+  async down(sql) {
     console.log('📥 Rolling back user invitations table...')
-    await this.exec(pool, 'DROP TABLE IF EXISTS user_invitations')
+    await this.exec(sql, 'DROP TABLE IF EXISTS user_invitations')
     console.log('  ✅ User invitations table dropped')
   }
 }

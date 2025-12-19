@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from '@tiptap/core'
+import { Node, mergeAttributes, type NodeViewRenderer } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageUploadNode from '~/components/ImageUploadNode.vue'
 
@@ -99,7 +99,7 @@ export const ImageUploadExtension = Node.create<ImageUploadNodeOptions>({
     ]
   },
 
-  addNodeView() {
+  addNodeView(): NodeViewRenderer {
     return VueNodeViewRenderer(ImageUploadNode)
   },
 

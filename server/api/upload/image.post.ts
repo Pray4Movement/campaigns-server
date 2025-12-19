@@ -27,9 +27,16 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-    if (!allowedTypes.includes(file.type || '')) {
+    // Validate file type and get safe extension from MIME type
+    const mimeToExtension: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/webp': 'webp'
+    }
+    const extension = mimeToExtension[file.type || '']
+    if (!extension) {
       throw createError({
         statusCode: 400,
         statusMessage: 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'
@@ -42,9 +49,8 @@ export default defineEventHandler(async (event) => {
       await mkdir(uploadsDir, { recursive: true })
     }
 
-    // Generate unique filename
+    // Generate unique filename using safe extension derived from MIME type
     const timestamp = Date.now()
-    const extension = file.filename?.split('.').pop() || 'jpg'
     const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`
     const filepath = join(uploadsDir, filename)
 

@@ -1,6 +1,10 @@
 import { campaignService } from '#server/database/campaigns'
-import { reminderSignupService } from '#server/database/reminder-signups'
+import { subscriberService } from '#server/database/subscribers'
+import { contactMethodService } from '#server/database/contact-methods'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
+import { sendWelcomeEmail } from '#server/utils/welcome-email'
+import { isValidTimezone } from '#server/utils/next-reminder-calculator'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -73,48 +77,166 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Validate and normalize timezone (default to UTC if invalid or missing)
+  const timezone = body.timezone && isValidTimezone(body.timezone) ? body.timezone : 'UTC'
+
   try {
-    // Create the signup
-    const signup = await reminderSignupService.createSignup({
-      campaign_id: campaign.id,
-      name: body.name,
+    // Find or create subscriber
+    const { subscriber, isNew } = await subscriberService.findOrCreateSubscriber({
       email: body.email,
       phone: body.phone,
+      name: body.name
+    })
+
+    // Update name if subscriber exists and provided a different name
+    if (!isNew && body.name && body.name !== subscriber.name) {
+      await subscriberService.updateSubscriber(subscriber.id, { name: body.name })
+    }
+
+    // Handle consent preferences (stored on the contact method)
+    if (body.consent_campaign_updates || body.consent_doxa_general) {
+      // Get the contact method for the delivery channel
+      let contactMethod = null
+      if (body.email) {
+        contactMethod = await contactMethodService.getByValue('email', body.email)
+      } else if (body.phone) {
+        contactMethod = await contactMethodService.getByValue('phone', body.phone)
+      }
+
+      if (contactMethod) {
+        if (body.consent_campaign_updates) {
+          await contactMethodService.addCampaignConsent(contactMethod.id, campaign.id)
+        }
+        if (body.consent_doxa_general) {
+          await contactMethodService.updateDoxaConsent(contactMethod.id, true)
+        }
+      }
+    }
+
+    // Get all existing subscriptions for this subscriber/campaign
+    const existingSubscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
+      subscriber.id,
+      campaign.id
+    )
+
+    const MAX_SUBSCRIPTIONS_PER_CAMPAIGN = 5
+
+    // Check subscription limit
+    const activeCount = existingSubscriptions.filter(s => s.status === 'active').length
+    if (activeCount >= MAX_SUBSCRIPTIONS_PER_CAMPAIGN) {
+      // At limit - send welcome email to prevent email enumeration
+      if (body.delivery_method === 'email' && body.email) {
+        await sendWelcomeEmail(
+          body.email,
+          body.name,
+          campaign.title,
+          slug,
+          subscriber.profile_id
+        )
+      }
+      // Return same response as new signup for privacy
+      return {
+        success: true,
+        message: 'Please check your email to complete your signup'
+      }
+    }
+
+    // Check for duplicate (same frequency + time_preference)
+    const duplicate = existingSubscriptions.find(
+      s => s.status === 'active' &&
+           s.frequency === body.frequency &&
+           s.time_preference === body.reminder_time
+    )
+
+    if (duplicate) {
+      // Duplicate schedule - send welcome email to prevent email enumeration
+      if (body.delivery_method === 'email' && body.email) {
+        await sendWelcomeEmail(
+          body.email,
+          body.name,
+          campaign.title,
+          slug,
+          subscriber.profile_id
+        )
+      }
+      // Return same response as new signup for privacy
+      return {
+        success: true,
+        message: 'Please check your email to complete your signup'
+      }
+    }
+
+    // Check if there's an unsubscribed subscription with the same schedule to reactivate
+    const unsubscribedMatch = existingSubscriptions.find(
+      s => s.status === 'unsubscribed' &&
+           s.frequency === body.frequency &&
+           s.time_preference === body.reminder_time
+    )
+
+    if (unsubscribedMatch) {
+      // Reactivate the matching unsubscribed subscription
+      await campaignSubscriptionService.updateSubscription(unsubscribedMatch.id, {
+        delivery_method: body.delivery_method,
+        days_of_week: body.days_of_week,
+        timezone,
+        prayer_duration: body.prayer_duration
+      })
+      await campaignSubscriptionService.resubscribe(unsubscribedMatch.id)
+
+      // For email delivery, send appropriate email
+      if (body.delivery_method === 'email') {
+        const emailContact = await contactMethodService.getByValue('email', body.email)
+        if (emailContact && !emailContact.verified) {
+          const token = await contactMethodService.generateVerificationToken(emailContact.id)
+          await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name)
+        } else if (emailContact?.verified) {
+          await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id)
+        }
+      }
+
+      // Return same response for privacy
+      return {
+        success: true,
+        message: 'Please check your email to complete your signup'
+      }
+    }
+
+    // Create new subscription
+    const subscription = await campaignSubscriptionService.createSubscription({
+      campaign_id: campaign.id,
+      subscriber_id: subscriber.id,
       delivery_method: body.delivery_method,
       frequency: body.frequency,
       days_of_week: body.days_of_week,
       time_preference: body.reminder_time,
+      timezone,
       prayer_duration: body.prayer_duration
     })
 
-    // For email delivery, send verification email
+    // For email delivery, handle verification
     if (body.delivery_method === 'email') {
-      const token = await reminderSignupService.generateVerificationToken(signup.id)
-      const emailSent = await sendSignupVerificationEmail(
-        body.email,
-        token,
-        slug,
-        campaign.title,
-        body.name
-      )
+      const emailContact = await contactMethodService.getByValue('email', body.email)
 
-      if (!emailSent) {
-        console.error('Failed to send verification email for signup:', signup.id)
+      if (emailContact?.verified) {
+        // Email already verified - set next reminder and send welcome
+        await campaignSubscriptionService.setInitialNextReminder(subscription.id)
+        await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id)
+      } else if (emailContact) {
+        // Email not verified - send verification email
+        const token = await contactMethodService.generateVerificationToken(emailContact.id)
+        await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name)
       }
 
+      // Always return same response for email signups
       return {
         success: true,
-        tracking_id: signup.tracking_id,
-        requires_verification: true,
-        message: 'Please check your email to verify your subscription'
+        message: 'Please check your email to complete your signup'
       }
     }
 
-    // For non-email delivery, no verification needed
+    // For non-email delivery (WhatsApp, app), return success
     return {
       success: true,
-      tracking_id: signup.tracking_id,
-      requires_verification: false,
       message: 'Successfully signed up for prayer reminders'
     }
   } catch (error: any) {

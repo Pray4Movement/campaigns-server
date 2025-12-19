@@ -87,7 +87,7 @@
                 </template>
               </UFormField>
 
-              <!-- Time Picker -->
+              <!-- Reminder Time Picker -->
               <UFormField :label="$t('campaign.signup.form.time.label')" required class="w-full">
                 <TimePicker
                   v-model="signupForm.reminder_time"
@@ -95,6 +95,20 @@
                 />
                 <template #hint>
                   {{ $t('campaign.signup.form.time.hint') }}
+                </template>
+              </UFormField>
+
+              <!-- Timezone Selector -->
+              <UFormField :label="$t('campaign.signup.form.timezone.label')" required class="w-full">
+                <USelectMenu
+                  v-model="userTimezone"
+                  :items="timezoneOptions"
+                  searchable
+                  :search-placeholder="$t('campaign.signup.form.timezone.searchPlaceholder')"
+                  class="w-full"
+                />
+                <template #hint>
+                  {{ $t('campaign.signup.form.timezone.hint') }}
                 </template>
               </UFormField>
 
@@ -107,6 +121,21 @@
                   class="w-full"
                 />
               </UFormField>
+
+              <!-- Consent Section -->
+              <div class="border-t border-[var(--ui-border)] pt-6 mt-2 space-y-3">
+                <p class="text-sm text-[var(--ui-text-muted)]">
+                  {{ $t('campaign.signup.form.consent.description') }}
+                </p>
+                <UCheckbox
+                  v-model="signupForm.consent_campaign_updates"
+                  :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
+                />
+                <UCheckbox
+                  v-model="signupForm.consent_doxa_general"
+                  :label="$t('campaign.signup.form.consent.doxaGeneral')"
+                />
+              </div>
 
               <!-- Submit Button -->
               <UButton
@@ -522,6 +551,85 @@ const translatedDaysOfWeek = computed(() => [
   { value: 6, label: t('campaign.signup.form.daysOfWeek.days.sat') }
 ])
 
+// Common timezone options (grouped by region)
+const timezoneOptions = [
+  // Americas
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Anchorage',
+  'America/Phoenix',
+  'America/Toronto',
+  'America/Vancouver',
+  'America/Mexico_City',
+  'America/Bogota',
+  'America/Lima',
+  'America/Santiago',
+  'America/Buenos_Aires',
+  'America/Sao_Paulo',
+  // Europe
+  'Europe/London',
+  'Europe/Dublin',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Madrid',
+  'Europe/Rome',
+  'Europe/Amsterdam',
+  'Europe/Brussels',
+  'Europe/Vienna',
+  'Europe/Warsaw',
+  'Europe/Prague',
+  'Europe/Stockholm',
+  'Europe/Oslo',
+  'Europe/Helsinki',
+  'Europe/Athens',
+  'Europe/Moscow',
+  // Asia
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Bangkok',
+  'Asia/Singapore',
+  'Asia/Hong_Kong',
+  'Asia/Shanghai',
+  'Asia/Tokyo',
+  'Asia/Seoul',
+  'Asia/Manila',
+  'Asia/Jakarta',
+  // Pacific
+  'Pacific/Auckland',
+  'Pacific/Fiji',
+  'Pacific/Honolulu',
+  // Australia
+  'Australia/Sydney',
+  'Australia/Melbourne',
+  'Australia/Brisbane',
+  'Australia/Perth',
+  // Africa
+  'Africa/Cairo',
+  'Africa/Johannesburg',
+  'Africa/Lagos',
+  'Africa/Nairobi',
+  // Other
+  'UTC'
+]
+
+// Auto-detect user's timezone
+const userTimezone = ref('UTC')
+onMounted(() => {
+  try {
+    const detected = Intl.DateTimeFormat().resolvedOptions().timeZone
+    // Use detected timezone if it's in our list, otherwise keep it anyway
+    userTimezone.value = detected || 'UTC'
+    // Add detected timezone to options if not already there
+    if (detected && !timezoneOptions.includes(detected)) {
+      timezoneOptions.unshift(detected)
+    }
+  } catch {
+    userTimezone.value = 'UTC'
+  }
+})
+
 // Signup form state
 const signupForm = ref({
   name: '',
@@ -530,12 +638,13 @@ const signupForm = ref({
   frequency: 'daily',
   days_of_week: [] as number[],
   reminder_time: '09:00',
-  prayer_duration: 10
+  prayer_duration: 10,
+  consent_campaign_updates: false,
+  consent_doxa_general: false
 })
 
 const submitting = ref(false)
 const signupSuccess = ref(false)
-const signupRequiresVerification = ref(false)
 const signupError = ref('')
 
 // Alternative Form 1: Wizard state
@@ -602,9 +711,10 @@ function resetForm() {
     frequency: 'daily',
     days_of_week: [],
     reminder_time: '09:00',
-    prayer_duration: 5
+    prayer_duration: 10,
+    consent_campaign_updates: false,
+    consent_doxa_general: false
   }
-  signupRequiresVerification.value = false
 }
 
 // Close verification modal
@@ -623,7 +733,6 @@ async function handleSignup() {
 
   submitting.value = true
   signupSuccess.value = false
-  signupRequiresVerification.value = false
   signupError.value = ''
 
   try {
@@ -636,23 +745,23 @@ async function handleSignup() {
         frequency: signupForm.value.frequency,
         days_of_week: signupForm.value.days_of_week,
         reminder_time: signupForm.value.reminder_time,
-        prayer_duration: signupForm.value.prayer_duration
+        prayer_duration: signupForm.value.prayer_duration,
+        timezone: userTimezone.value,
+        consent_campaign_updates: signupForm.value.consent_campaign_updates,
+        consent_doxa_general: signupForm.value.consent_doxa_general
       }
     })
 
     console.log('Signup successful:', response)
-    signupRequiresVerification.value = response.requires_verification || false
 
-    // For email signups, show verification modal
-    if (signupRequiresVerification.value) {
+    // For email signups, always show verification modal
+    if (signupForm.value.delivery_method === 'email') {
       verificationEmail.value = signupForm.value.email
       showVerificationModal.value = true
-      // Reset form immediately for email signups
       resetForm()
     } else {
       // For non-email signups, show inline success message
       signupSuccess.value = true
-      // Reset form after success
       setTimeout(() => {
         resetForm()
         signupSuccess.value = false

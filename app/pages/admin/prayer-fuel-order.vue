@@ -1,9 +1,9 @@
 <template>
-  <div class="campaign-config-page">
+  <div class="prayer-fuel-order-page">
     <div class="page-header">
       <div>
-        <h1>Global Campaign Configuration</h1>
-        <p class="subtitle">Configure library rows for all campaigns. Libraries within a row play sequentially.</p>
+        <h1>Prayer Fuel Order</h1>
+        <p class="subtitle">Configure the order of prayer fuel content. Libraries within a row play sequentially.</p>
       </div>
     </div>
 
@@ -48,13 +48,17 @@
             v-for="library in allLibraries"
             :key="library.id"
             class="library-chip"
+            :class="{
+              'dragging': dragState?.source === 'available' && dragState?.libraryId === library.id,
+              'people-group-chip': library.type === 'people_group'
+            }"
             draggable="true"
             @dragstart="dragStartFromAvailable(library.id)"
             @dragend="dragEnd"
-            :class="{ 'dragging': dragState?.source === 'available' && dragState?.libraryId === library.id }"
           >
+            <UIcon v-if="library.type === 'people_group'" name="i-lucide-users" class="library-type-icon" />
             <span class="library-chip-name">{{ library.name }}</span>
-            <span class="library-chip-days">{{ library.stats?.totalDays || 0 }} days</span>
+            <span class="library-chip-days">{{ getLibraryDaysLabel(library) }}</span>
           </div>
         </div>
       </div>
@@ -86,15 +90,35 @@
             <div class="row-header">
               <span class="row-label">Row {{ rowIndex + 1 }}</span>
               <span class="row-total-days">{{ getRowTotalDays(rowIndex) }} total days</span>
-              <UButton
-                @click="removeRow(rowIndex)"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :disabled="rows.length === 1 && row.libraries.length === 0"
-              >
-                Remove Row
-              </UButton>
+              <div class="row-actions">
+                <UButton
+                  @click="moveRowUp(rowIndex)"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-chevron-up"
+                  :disabled="rowIndex === 0"
+                  title="Move up"
+                />
+                <UButton
+                  @click="moveRowDown(rowIndex)"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-chevron-down"
+                  :disabled="rowIndex === rows.length - 1"
+                  title="Move down"
+                />
+                <UButton
+                  @click="removeRow(rowIndex)"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  :disabled="rows.length === 1 && row.libraries.length === 0"
+                >
+                  Remove Row
+                </UButton>
+              </div>
             </div>
 
             <div
@@ -118,26 +142,30 @@
                   v-for="(libConfig, libIndex) in row.libraries"
                   :key="`${rowIndex}-${libIndex}`"
                   class="row-library-card"
+                  :class="{
+                    'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === libIndex,
+                    'dragging': dragState?.source === 'row' && dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex,
+                    'people-group-card': getLibraryType(libConfig.libraryId) === 'people_group'
+                  }"
                   draggable="true"
                   @dragstart="dragStart(rowIndex, libIndex)"
                   @dragend="dragEnd"
                   @dragover.prevent="onDragOver($event, rowIndex, libIndex)"
                   @dragleave="onDragLeave"
                   @drop="drop(rowIndex, libIndex)"
-                  :class="{
-                    'drag-over': dragOverTarget?.rowIndex === rowIndex && dragOverTarget?.libIndex === libIndex,
-                    'dragging': dragState?.source === 'row' && dragState?.rowIndex === rowIndex && dragState?.libIndex === libIndex
-                  }"
                 >
                   <div class="drag-handle">
                     <span class="order-number">{{ libIndex + 1 }}</span>
                     ⋮⋮
                   </div>
                   <div class="library-info">
-                    <strong>{{ getLibraryName(libConfig.libraryId) }}</strong>
+                    <div class="library-name-row">
+                      <UIcon v-if="getLibraryType(libConfig.libraryId) === 'people_group'" name="i-lucide-users" class="library-type-icon" />
+                      <strong>{{ getLibraryName(libConfig.libraryId) }}</strong>
+                    </div>
                     <span class="library-stats">
-                      {{ getLibraryDays(libConfig.libraryId) }} days
-                      <template v-if="libIndex > 0">
+                      {{ getLibraryDaysDisplay(libConfig.libraryId) }}
+                      <template v-if="libIndex > 0 && getLibraryType(libConfig.libraryId) !== 'people_group'">
                         (starts Day {{ getLibraryStartDay(rowIndex, libIndex) }})
                       </template>
                     </span>
@@ -166,9 +194,9 @@
 
               <div class="add-library-section">
                 <USelectMenu
-                  :model-value="null"
-                  @update:model-value="(lib: Library | null) => lib && addLibraryToRow(rowIndex, lib)"
-                  :items="getAvailableLibrariesForRow(rowIndex)"
+                  :model-value="undefined"
+                  @update:model-value="(lib: any) => lib && addLibraryToRow(rowIndex, lib as Library)"
+                  :items="(getAvailableLibrariesForRow(rowIndex) as any[])"
                   placeholder="Add library..."
                   label-key="name"
                   searchable
@@ -177,8 +205,11 @@
                   :ui="{ content: 'min-w-64' }"
                 >
                   <template #item="{ item }">
-                    <span>{{ item.name }}</span>
-                    <span class="select-item-days">{{ item.stats?.totalDays || 0 }} days</span>
+                    <div class="select-item-content">
+                      <UIcon v-if="(item as Library)?.type === 'people_group'" name="i-lucide-users" class="select-item-icon" />
+                      <span>{{ (item as Library)?.name }}</span>
+                    </div>
+                    <span class="select-item-days">{{ getLibraryDaysLabel(item as Library) }}</span>
                   </template>
                 </USelectMenu>
               </div>
@@ -210,6 +241,7 @@ interface Library {
   id: number
   name: string
   description: string
+  type: 'static' | 'people_group'
   stats?: {
     totalDays: number
     languageStats: { [key: string]: number }
@@ -265,7 +297,8 @@ const currentDay = computed(() => {
 
 async function loadLibraries() {
   try {
-    const response = await $fetch<{ libraries: Library[] }>('/api/admin/libraries')
+    // Include virtual People Group library for prayer fuel ordering
+    const response = await $fetch<{ libraries: Library[] }>('/api/admin/libraries?includeVirtual=true')
     allLibraries.value = response.libraries
   } catch (err) {
     console.error('Failed to load libraries:', err)
@@ -310,23 +343,53 @@ function removeRow(rowIndex: number) {
   })
 }
 
+function moveRowUp(rowIndex: number) {
+  if (rowIndex === 0) return
+  const items = [...rows.value]
+  const temp = items[rowIndex - 1]!
+  items[rowIndex - 1] = items[rowIndex]!
+  items[rowIndex] = temp
+  // Re-index rows
+  items.forEach((row, idx) => {
+    row.rowIndex = idx + 1
+  })
+  rows.value = items
+}
+
+function moveRowDown(rowIndex: number) {
+  if (rowIndex >= rows.value.length - 1) return
+  const items = [...rows.value]
+  const temp = items[rowIndex + 1]!
+  items[rowIndex + 1] = items[rowIndex]!
+  items[rowIndex] = temp
+  // Re-index rows
+  items.forEach((row, idx) => {
+    row.rowIndex = idx + 1
+  })
+  rows.value = items
+}
+
 function getAvailableLibrariesForRow(rowIndex: number): Library[] {
   // Return all libraries - duplicates allowed for repeating content
   return allLibraries.value
 }
 
 function addLibraryToRow(rowIndex: number, library: Library) {
-  const newOrder = rows.value[rowIndex].libraries.length + 1
-  rows.value[rowIndex].libraries.push({
+  const row = rows.value[rowIndex]
+  if (!row) return
+  const newOrder = row.libraries.length + 1
+  row.libraries.push({
     libraryId: library.id,
     order: newOrder
   })
 }
 
 function removeLibraryFromRow(rowIndex: number, libIndex: number) {
-  rows.value[rowIndex].libraries.splice(libIndex, 1)
+  const row = rows.value[rowIndex]
+  if (!row) return
+  row.libraries.splice(libIndex, 1)
   // Re-order
-  rows.value[rowIndex].libraries.forEach((lib, idx) => {
+  row.libraries.forEach((lib, idx) => {
     lib.order = idx + 1
   })
 }
@@ -336,21 +399,48 @@ function getLibraryName(libraryId: number): string {
   return library?.name || 'Unknown'
 }
 
+function getLibraryType(libraryId: number): string {
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  return library?.type || 'static'
+}
+
 function getLibraryDays(libraryId: number): number {
   const library = allLibraries.value.find(lib => lib.id === libraryId)
+  // People group libraries have "infinite" days represented by -1
+  if (library?.type === 'people_group') {
+    return 0 // Don't count towards row total
+  }
   return Number(library?.stats?.totalDays) || 0
 }
 
+function getLibraryDaysLabel(library: Library): string {
+  if (library.type === 'people_group') {
+    return 'Continuous'
+  }
+  return `${library.stats?.totalDays || 0} days`
+}
+
+function getLibraryDaysDisplay(libraryId: number): string {
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  if (!library) return '0 days'
+  return getLibraryDaysLabel(library)
+}
+
 function getRowTotalDays(rowIndex: number): number {
-  return rows.value[rowIndex].libraries.reduce((total, lib) => {
+  const row = rows.value[rowIndex]
+  if (!row) return 0
+  return row.libraries.reduce((total, lib) => {
     return total + getLibraryDays(lib.libraryId)
   }, 0)
 }
 
 function getLibraryStartDay(rowIndex: number, libIndex: number): number {
+  const row = rows.value[rowIndex]
+  if (!row) return 1
   let startDay = 1
   for (let i = 0; i < libIndex; i++) {
-    startDay += getLibraryDays(rows.value[rowIndex].libraries[i].libraryId)
+    const lib = row.libraries[i]
+    if (lib) startDay += getLibraryDays(lib.libraryId)
   }
   return startDay
 }
@@ -430,8 +520,18 @@ function drop(targetRowIndex: number, targetLibIndex: number) {
     return
   }
 
-  const items = [...rows.value[sourceRowIndex].libraries]
+  const row = rows.value[sourceRowIndex]
+  if (!row) {
+    dragState.value = null
+    return
+  }
+
+  const items = [...row.libraries]
   const [draggedItem] = items.splice(sourceLibIndex, 1)
+  if (!draggedItem) {
+    dragState.value = null
+    return
+  }
 
   // Adjust target index if we removed an item before it
   const adjustedTargetIndex = sourceLibIndex < targetLibIndex ? targetLibIndex - 1 : targetLibIndex
@@ -442,7 +542,7 @@ function drop(targetRowIndex: number, targetLibIndex: number) {
     lib.order = idx + 1
   })
 
-  rows.value[sourceRowIndex].libraries = items
+  row.libraries = items
   dragState.value = null
 }
 
@@ -451,7 +551,7 @@ async function saveConfiguration() {
     toast.add({
       title: 'Validation Error',
       description: 'Global start date is required',
-      color: 'red'
+      color: 'error'
     })
     return
   }
@@ -470,13 +570,13 @@ async function saveConfiguration() {
     toast.add({
       title: 'Configuration saved',
       description: 'Global campaign configuration has been updated successfully.',
-      color: 'green'
+      color: 'success'
     })
   } catch (err: any) {
     toast.add({
       title: 'Failed to save configuration',
       description: err.data?.statusMessage || 'An error occurred while saving the configuration.',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -503,7 +603,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.campaign-config-page {
+.prayer-fuel-order-page {
   max-width: 1400px;
 }
 
@@ -614,6 +714,21 @@ onMounted(async () => {
   font-size: 0.75rem;
 }
 
+.library-type-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ui-text-muted);
+}
+
+.people-group-chip {
+  border-color: var(--ui-primary);
+  background-color: var(--ui-primary-50, rgba(var(--ui-primary-rgb), 0.1));
+}
+
+.people-group-chip .library-type-icon {
+  color: var(--ui-primary);
+}
+
 /* Rows */
 .rows-container {
   display: flex;
@@ -635,6 +750,12 @@ onMounted(async () => {
   padding: 0.75rem 1rem;
   background-color: var(--ui-bg);
   border-bottom: 1px solid var(--ui-border);
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .row-label {
@@ -760,8 +881,23 @@ onMounted(async () => {
   gap: 0.125rem;
 }
 
+.library-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
 .library-info strong {
   font-size: 0.875rem;
+}
+
+.people-group-card {
+  border-color: var(--ui-primary);
+  background-color: var(--ui-primary-50, rgba(var(--ui-primary-rgb), 0.05));
+}
+
+.people-group-card .library-type-icon {
+  color: var(--ui-primary);
 }
 
 .library-stats {
@@ -779,6 +915,18 @@ onMounted(async () => {
   min-width: 250px;
 }
 
+
+.select-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.select-item-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ui-primary);
+}
 
 .select-item-days {
   margin-left: auto;

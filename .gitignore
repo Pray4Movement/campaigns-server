@@ -7,7 +7,6 @@
 dist
 
 # Database files
-data/
 server/database/*.sqlite
 server/database/*.sqlite-shm
 server/database/*.sqlite-wal
