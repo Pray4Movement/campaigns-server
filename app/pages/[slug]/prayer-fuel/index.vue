@@ -77,29 +77,17 @@
       </footer>
 
       <!-- Past Prayer Fuel -->
-      <section v-if="pastContent && pastContent.content.length > 0" class="bg-[var(--ui-bg-elevated)] border-t border-[var(--ui-border)] py-12 px-4">
-        <div class="max-w-4xl mx-auto">
-          <h2 class="text-xl font-bold mb-6 text-center">{{ $t('prayerFuel.pastPrayers.title') }}</h2>
-          <div class="flex flex-col gap-3 max-w-2xl mx-auto">
-            <NuxtLink
-              v-for="item in pastContent.content"
-              :key="item.id"
-              :to="localePath(`/${slug}/prayer-fuel/${item.content_date}`)"
-              class="flex justify-between items-center gap-4 p-4 bg-[var(--ui-bg)] border border-[var(--ui-border)] rounded-lg no-underline text-[var(--ui-text)] transition-all hover:border-[var(--ui-text-muted)] hover:translate-x-1"
-            >
-              <span class="text-sm text-[var(--ui-text-muted)] font-medium min-w-[100px]">{{ formatPastDate(item.content_date) }}</span>
-              <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{ item.title }}</span>
-            </NuxtLink>
-          </div>
-        </div>
-      </section>
+      <PastPrayerFuelGrid
+        v-if="pastContent?.content"
+        :items="pastContent.content"
+        :slug="slug"
+        :language="selectedLanguage"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getLanguageName, getLanguageFlag } from '~/utils/languages'
-
 definePageMeta({
   layout: 'default'
 })
@@ -173,16 +161,6 @@ function formatDate(dateString: string) {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  })
-}
-
-// Format past date (shorter format)
-function formatPastDate(dateString: string) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString(selectedLanguage.value || 'en', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
   })
 }
 

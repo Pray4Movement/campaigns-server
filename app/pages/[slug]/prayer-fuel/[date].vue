@@ -53,22 +53,12 @@
       </main>
 
       <!-- Past Prayer Fuel -->
-      <section v-if="pastContent && pastContent.content.length > 0" class="past-prayers">
-        <div class="container">
-          <h2 class="past-prayers-title">{{ $t('prayerFuel.pastPrayers.title') }}</h2>
-          <div class="past-prayers-list">
-            <NuxtLink
-              v-for="item in pastContent.content"
-              :key="item.id"
-              :to="localePath(`/${slug}/prayer-fuel/${item.content_date}`)"
-              class="past-prayer-item"
-            >
-              <span class="past-prayer-date">{{ formatPastDate(item.content_date) }}</span>
-              <span class="past-prayer-title">{{ item.title }}</span>
-            </NuxtLink>
-          </div>
-        </div>
-      </section>
+      <PastPrayerFuelGrid
+        v-if="pastContent?.content"
+        :items="pastContent.content"
+        :slug="slug"
+        :language="selectedLanguage"
+      />
     </div>
   </div>
 </template>
@@ -133,16 +123,6 @@ function formatDate(dateString: string) {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  })
-}
-
-// Format past date (shorter format)
-function formatPastDate(dateString: string) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString(selectedLanguage.value || 'en', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
   })
 }
 
@@ -321,63 +301,6 @@ useHead(() => ({
 
 .btn-primary:hover {
   opacity: 0.85;
-}
-
-/* Past Prayers */
-.past-prayers {
-  background-color: var(--ui-bg-elevated);
-  border-top: 1px solid var(--border);
-  padding: 3rem 0;
-}
-
-.past-prayers-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0 0 1.5rem;
-  text-align: center;
-}
-
-.past-prayers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.past-prayer-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.2s;
-}
-
-.past-prayer-item:hover {
-  border-color: var(--text-muted);
-  transform: translateX(4px);
-}
-
-.past-prayer-date {
-  font-size: 0.875rem;
-  color: var(--text-muted, #666);
-  font-weight: 500;
-  flex-shrink: 0;
-  min-width: 100px;
-}
-
-.past-prayer-title {
-  flex: 1;
-  font-size: 1rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* Responsive */
