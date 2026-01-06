@@ -13,6 +13,22 @@
           <div class="flex items-center gap-4 navbar-actions">
             <LanguageSwitcher />
             <ThemeToggle />
+            <template v-if="isHomePage">
+              <UButton
+                v-if="isLoggedIn"
+                to="/admin"
+                variant="ghost"
+              >
+                Admin
+              </UButton>
+              <UButton
+                v-else
+                to="/login"
+                variant="ghost"
+              >
+                Sign In
+              </UButton>
+            </template>
           </div>
         </div>
       </div>
@@ -51,10 +67,17 @@ const config = useRuntimeConfig()
 const route = useRoute()
 const currentYear = new Date().getFullYear()
 const { campaignTitle, showCampaignHeader } = useCampaign()
+const { isLoggedIn, checkAuth } = useAuth()
 
 const logoLink = computed(() => {
   const slug = route.params.slug as string | undefined
   return slug ? `/${slug}` : '/'
+})
+
+const isHomePage = computed(() => route.path === '/')
+
+onMounted(() => {
+  checkAuth()
 })
 </script>
 
