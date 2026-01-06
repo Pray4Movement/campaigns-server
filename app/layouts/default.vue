@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between items-center py-4">
           <!-- Logo -->
-          <NuxtLink to="/" class="flex items-center gap-2">
+          <NuxtLink :to="logoLink" class="flex items-center gap-2">
             <span class="text-xl font-bold tracking-wider">{{ config.public.appName }}</span>
           </NuxtLink>
 
@@ -48,8 +48,14 @@
 
 <script setup lang="ts">
 const config = useRuntimeConfig()
+const route = useRoute()
 const currentYear = new Date().getFullYear()
 const { campaignTitle, showCampaignHeader } = useCampaign()
+
+const logoLink = computed(() => {
+  const slug = route.params.slug as string | undefined
+  return slug ? `/${slug}` : '/'
+})
 </script>
 
 <style scoped>
