@@ -83,7 +83,7 @@
         </template>
 
         <form @submit.prevent="saveCampaign">
-          <CrmFormSection title="Campaign Details" :collapsible="false">
+          <CrmFormSection title="Campaign Details">
             <div class="form-fields">
               <UFormField label="Title" required>
                 <UInput

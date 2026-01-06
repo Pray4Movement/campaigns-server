@@ -77,7 +77,6 @@
             v-for="category in fieldCategories"
             :key="category.key"
             :title="category.label"
-            :default-open="category.key === 'basic'"
           >
             <div class="fields-grid">
               <UFormField
