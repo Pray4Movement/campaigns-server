@@ -2,7 +2,6 @@
   <CrmLayout :loading="loading" :error="error">
     <template #header>
       <div>
-        <NuxtLink :to="backLink.to" class="back-link">← {{ backLink.label }}</NuxtLink>
         <h1>All Subscribers</h1>
       </div>
     </template>
@@ -11,13 +10,16 @@
       <CrmListPanel
         v-model="searchQuery"
         search-placeholder="Search by name, email, or phone..."
+        :total-count="filteredSubscribers.length"
       >
         <template #filters>
-          <USelect
+          <USelectMenu
             v-model="filterCampaignId"
             :items="campaignOptions"
             value-key="value"
             placeholder="All Campaigns"
+            searchable
+            virtualize
             class="filter-select"
           />
         </template>
@@ -473,13 +475,6 @@ const campaignOptions = computed(() => {
   ]
 })
 
-const backLink = computed(() => {
-  if (route.query.from === 'campaign' && route.query.campaignId) {
-    return { to: `/admin/campaigns/${route.query.campaignId}`, label: 'Back to Campaign' }
-  }
-  return { to: '/admin', label: 'Back to Dashboard' }
-})
-
 const filteredSubscribers = computed(() => {
   let filtered = subscribers.value
 
@@ -914,19 +909,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.back-link {
-  display: inline-block;
-  margin-bottom: 1rem;
-  color: var(--text);
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: opacity 0.2s;
-}
-
-.back-link:hover {
-  opacity: 0.7;
-}
-
 .filter-select {
   width: 100%;
 }

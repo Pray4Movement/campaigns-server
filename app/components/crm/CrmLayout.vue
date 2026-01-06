@@ -4,17 +4,15 @@
       <slot name="header" />
     </div>
 
-    <div v-if="loading" class="loading">
-      <slot name="loading">Loading...</slot>
-    </div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-if="error" class="error">{{ error }}</div>
 
     <div v-else class="crm-layout">
       <!-- Left Column: List Panel -->
       <div class="list-panel">
         <slot name="list-header" />
         <div class="list-items">
-          <slot name="list">
+          <div v-if="loading" class="list-loading">Loading...</div>
+          <slot v-else name="list">
             <div class="empty-list">
               <slot name="list-empty">No items found</slot>
             </div>
@@ -53,12 +51,15 @@ defineProps<{
   margin-bottom: 2rem;
 }
 
-.loading, .error {
+.error {
   text-align: center;
   padding: 2rem;
+  color: var(--ui-text-muted);
 }
 
-.error {
+.list-loading {
+  padding: 2rem;
+  text-align: center;
   color: var(--ui-text-muted);
 }
 

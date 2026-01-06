@@ -73,6 +73,13 @@
           <UButton @click="navigateToSubscribers(selectedCampaign.id)" variant="outline">
             View Subscribers
           </UButton>
+          <UButton
+            :to="`/${selectedCampaign.slug}`"
+            target="_blank"
+            variant="outline"
+          >
+            Open Camapaign
+          </UButton>
         </template>
 
         <form @submit.prevent="saveCampaign">

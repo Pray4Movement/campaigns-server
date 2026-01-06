@@ -2,7 +2,6 @@
   <CrmLayout :loading="loading" :error="error">
     <template #header>
       <div>
-        <NuxtLink to="/admin" class="back-link">← Back to Dashboard</NuxtLink>
         <h1>People Groups</h1>
       </div>
       <UButton @click="syncPeopleGroups" :loading="syncing" icon="i-lucide-refresh-cw">
