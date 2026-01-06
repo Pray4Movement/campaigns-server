@@ -43,16 +43,93 @@ export default defineEventHandler(async (event) => {
       LIMIT 100
     `
 
+    // Get tracking_id from subscriber to fetch prayer activity
+    const subscriberResult = await sql`
+      SELECT s.tracking_id
+      FROM campaign_subscriptions cs
+      JOIN subscribers s ON cs.subscriber_id = s.id
+      WHERE cs.id = ${subscriptionId}
+    `
+    const trackingId = subscriberResult[0]?.tracking_id
+
+    // Fetch prayer activity if tracking_id exists
+    let prayerActivities: any[] = []
+    if (trackingId) {
+      prayerActivities = await sql`
+        SELECT
+          pa.id,
+          pa.timestamp,
+          pa.duration,
+          pa.campaign_id,
+          c.title as campaign_title
+        FROM prayer_activity pa
+        LEFT JOIN campaigns c ON pa.campaign_id = c.id
+        WHERE pa.tracking_id = ${trackingId}
+        ORDER BY pa.timestamp DESC
+        LIMIT 50
+      `
+    }
+
+    // Fetch email history for this subscription
+    const emailHistory = await sql`
+      SELECT
+        res.id,
+        res.sent_date,
+        res.sent_at,
+        c.title as campaign_title
+      FROM reminder_emails_sent res
+      JOIN campaign_subscriptions cs ON res.subscription_id = cs.id
+      JOIN campaigns c ON cs.campaign_id = c.id
+      WHERE res.subscription_id = ${subscriptionId}
+      ORDER BY res.sent_at DESC
+      LIMIT 50
+    `
+
+    // Format subscription activity logs
+    const formattedActivities = activities.map((a: any) => ({
+      id: a.id,
+      timestamp: typeof a.timestamp === 'string' ? parseInt(a.timestamp, 10) : a.timestamp,
+      eventType: a.event_type,
+      tableName: a.table_name,
+      userId: a.user_id,
+      userName: a.user_name,
+      metadata: typeof a.metadata === 'string' ? JSON.parse(a.metadata) : a.metadata
+    }))
+
+    // Format prayer activities
+    const formattedPrayer = prayerActivities.map((pa: any) => ({
+      id: `prayer-${pa.id}`,
+      timestamp: new Date(pa.timestamp).getTime(),
+      eventType: 'PRAYER',
+      tableName: 'prayer_activity',
+      userId: null,
+      userName: null,
+      metadata: {
+        duration: pa.duration,
+        campaignTitle: pa.campaign_title
+      }
+    }))
+
+    // Format email history
+    const formattedEmails = emailHistory.map((e: any) => ({
+      id: `email-${e.id}`,
+      timestamp: new Date(e.sent_at).getTime(),
+      eventType: 'EMAIL',
+      tableName: 'reminder_emails_sent',
+      userId: null,
+      userName: null,
+      metadata: {
+        sentDate: e.sent_date,
+        campaignTitle: e.campaign_title
+      }
+    }))
+
+    // Combine and sort by timestamp descending
+    const allActivities = [...formattedActivities, ...formattedPrayer, ...formattedEmails]
+      .sort((a, b) => b.timestamp - a.timestamp)
+
     return {
-      activities: activities.map((a: any) => ({
-        id: a.id,
-        timestamp: typeof a.timestamp === 'string' ? parseInt(a.timestamp, 10) : a.timestamp,
-        eventType: a.event_type,
-        tableName: a.table_name,
-        userId: a.user_id,
-        userName: a.user_name,
-        metadata: typeof a.metadata === 'string' ? JSON.parse(a.metadata) : a.metadata
-      }))
+      activities: allActivities
     }
   } catch (error: any) {
     console.error('Error fetching subscriber activity:', error)

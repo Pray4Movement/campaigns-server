@@ -208,23 +208,6 @@
                     />
                   </UFormField>
 
-                  <!-- Email History -->
-                  <div class="subscription-email-history">
-                    <h4>Email History</h4>
-                    <div v-if="loadingEmailHistory[subscription.id]" class="email-history-loading">
-                      Loading...
-                    </div>
-                    <div v-else-if="!emailHistories[subscription.id] || emailHistories[subscription.id]?.length === 0" class="email-history-empty">
-                      No emails sent yet
-                    </div>
-                    <div v-else class="email-history-list">
-                      <div v-for="sent in emailHistories[subscription.id]" :key="sent.id" class="email-history-item">
-                        <span class="email-date">{{ sent.sent_date }}</span>
-                        <span class="email-time">{{ formatDateTime(sent.sent_at) }}</span>
-                      </div>
-                    </div>
-                  </div>
-
                   <div class="subscription-actions">
                     <UButton
                       size="xs"
@@ -294,6 +277,18 @@
                   </template>
                   <template v-else-if="activity.userName">
                     by {{ activity.userName }}
+                  </template>
+                </div>
+                <div v-if="activity.eventType === 'PRAYER'" class="prayer-details">
+                  {{ formatPrayerDuration(activity.metadata.duration) }}
+                  <template v-if="activity.metadata.campaignTitle">
+                    for {{ activity.metadata.campaignTitle }}
+                  </template>
+                </div>
+                <div v-if="activity.eventType === 'EMAIL'" class="email-details">
+                  Day {{ activity.metadata.sentDate }}
+                  <template v-if="activity.metadata.campaignTitle">
+                    · {{ activity.metadata.campaignTitle }}
                   </template>
                 </div>
                 <div v-if="activity.metadata?.changes" class="activity-changes">
@@ -427,16 +422,6 @@ const showDeleteModal = ref(false)
 const subscriberToDelete = ref<GeneralSubscriber | null>(null)
 const deleting = ref(false)
 
-// Email history state
-interface EmailSent {
-  id: number
-  signup_id: number
-  sent_date: string
-  sent_at: string
-}
-const emailHistories = ref<Record<number, EmailSent[]>>({})
-const loadingEmailHistory = ref<Record<number, boolean>>({})
-
 // Activity log state
 interface ActivityLogEntry {
   id: string
@@ -539,7 +524,6 @@ async function selectSubscriber(subscriber: GeneralSubscriber, updateUrl = true)
   const firstSubscription = subscriber.subscriptions[0]
   if (firstSubscription) {
     expandedSubscriptions.value.add(firstSubscription.id)
-    await loadEmailHistory(firstSubscription.id)
   }
 
   await loadActivityLog(subscriber)
@@ -559,27 +543,11 @@ function getSubscriptionForm(subscriptionId: number): SubscriptionForm {
   return form
 }
 
-async function toggleSubscription(subscriptionId: number) {
+function toggleSubscription(subscriptionId: number) {
   if (expandedSubscriptions.value.has(subscriptionId)) {
     expandedSubscriptions.value.delete(subscriptionId)
   } else {
     expandedSubscriptions.value.add(subscriptionId)
-    await loadEmailHistory(subscriptionId)
-  }
-}
-
-async function loadEmailHistory(subscriptionId: number) {
-  if (emailHistories.value[subscriptionId]) return
-
-  try {
-    loadingEmailHistory.value[subscriptionId] = true
-    const response = await $fetch<{ history: EmailSent[] }>(`/api/admin/subscribers/${subscriptionId}/email-history`)
-    emailHistories.value[subscriptionId] = response.history
-  } catch (err: any) {
-    console.error('Failed to load email history:', err)
-    emailHistories.value[subscriptionId] = []
-  } finally {
-    loadingEmailHistory.value[subscriptionId] = false
   }
 }
 
@@ -630,8 +598,10 @@ async function sendReminder(subscription: Subscription) {
       color: 'success'
     })
 
-    emailHistories.value[subscription.id] = undefined as any
-    await loadEmailHistory(subscription.id)
+    // Refresh activity log to show the new email
+    if (selectedSubscriber.value) {
+      await loadActivityLog(selectedSubscriber.value)
+    }
   } catch (err: any) {
     toast.add({
       title: 'Error',
@@ -849,16 +819,20 @@ function formatEventType(eventType: string): string {
   const types: Record<string, string> = {
     'CREATE': 'Created',
     'UPDATE': 'Updated',
-    'DELETE': 'Deleted'
+    'DELETE': 'Deleted',
+    'PRAYER': 'Prayed',
+    'EMAIL': 'Email Sent'
   }
   return types[eventType] || eventType
 }
 
-function getEventColor(eventType: string): 'success' | 'warning' | 'error' | 'neutral' {
-  const colors: Record<string, 'success' | 'warning' | 'error' | 'neutral'> = {
+function getEventColor(eventType: string): 'success' | 'warning' | 'error' | 'neutral' | 'primary' {
+  const colors: Record<string, 'success' | 'warning' | 'error' | 'neutral' | 'primary'> = {
     'CREATE': 'success',
     'UPDATE': 'warning',
-    'DELETE': 'error'
+    'DELETE': 'error',
+    'PRAYER': 'primary',
+    'EMAIL': 'neutral'
   }
   return colors[eventType] || 'neutral'
 }
@@ -884,6 +858,14 @@ function formatValue(value: any): string {
     return '(empty)'
   }
   return String(value)
+}
+
+function formatPrayerDuration(seconds: number): string {
+  if (seconds >= 60) {
+    const mins = Math.round(seconds / 60)
+    return `${mins} min`
+  }
+  return `${seconds} sec`
 }
 
 // Handle URL-based selection
@@ -1018,21 +1000,7 @@ onMounted(async () => {
   margin-top: 0.5rem;
 }
 
-/* Email History Styles */
-.subscription-email-history {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ui-border);
-}
-
-.subscription-email-history h4 {
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.email-history-loading,
-.email-history-empty,
+/* Activity Log Styles */
 .activity-loading,
 .activity-empty {
   padding: 0.75rem;
@@ -1044,35 +1012,6 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
-.email-history-list {
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid var(--ui-border);
-  border-radius: 4px;
-}
-
-.email-history-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.375rem 0.5rem;
-  border-bottom: 1px solid var(--ui-border);
-  font-size: 0.8125rem;
-}
-
-.email-history-item:last-child {
-  border-bottom: none;
-}
-
-.email-date {
-  font-weight: 500;
-}
-
-.email-time {
-  color: var(--ui-text-muted);
-  font-size: 0.75rem;
-}
-
-/* Activity Log Styles */
 .activity-list {
   max-height: 200px;
   overflow-y: auto;
@@ -1105,6 +1044,13 @@ onMounted(async () => {
   color: var(--ui-text-muted);
   font-size: 0.7rem;
   margin-bottom: 0.25rem;
+}
+
+.prayer-details,
+.email-details {
+  font-size: 0.75rem;
+  color: var(--ui-text-muted);
+  margin-top: 0.25rem;
 }
 
 .activity-changes {
