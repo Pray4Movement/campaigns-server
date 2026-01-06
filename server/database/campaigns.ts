@@ -11,6 +11,7 @@ export interface Campaign {
   default_language: string
   dt_id: string | null
   people_praying: number
+  daily_prayer_duration: number
   created_at: string
   updated_at: string
 }
@@ -99,7 +100,7 @@ export class CampaignService {
   // Get campaign by ID
   async getCampaignById(id: number): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, daily_prayer_duration, created_at, updated_at
       FROM campaigns
       WHERE id = ?
     `)
@@ -110,7 +111,7 @@ export class CampaignService {
   // Get campaign by slug
   async getCampaignBySlug(slug: string): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, daily_prayer_duration, created_at, updated_at
       FROM campaigns
       WHERE slug = ?
     `)
@@ -121,7 +122,7 @@ export class CampaignService {
   // Get campaign by dt_id
   async getCampaignByDtId(dtId: string): Promise<Campaign | null> {
     const stmt = this.db.prepare(`
-      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, daily_prayer_duration, created_at, updated_at
       FROM campaigns
       WHERE dt_id = ?
     `)
@@ -132,7 +133,7 @@ export class CampaignService {
   // Get all campaigns
   async getAllCampaigns(statusFilter?: 'active' | 'inactive'): Promise<Campaign[]> {
     let query = `
-      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, daily_prayer_duration, created_at, updated_at
       FROM campaigns
     `
 
@@ -262,7 +263,7 @@ export class CampaignService {
 
     // Build query to get only accessible campaigns
     let query = `
-      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, created_at, updated_at
+      SELECT id, slug, title, description, status, default_language, dt_id, people_praying, daily_prayer_duration, created_at, updated_at
       FROM campaigns
       WHERE id IN (${campaignIds.map(() => '?').join(',')})
     `

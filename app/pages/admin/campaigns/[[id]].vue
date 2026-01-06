@@ -41,6 +41,9 @@
           <span class="praying-count" :title="`${campaign.people_praying} praying daily (7-day avg)`">
             {{ campaign.people_praying }} praying
           </span>
+          <span class="prayer-duration" :title="`${formatDuration(campaign.daily_prayer_duration)} of prayer daily (7-day avg)`">
+            {{ formatDuration(campaign.daily_prayer_duration) }} daily
+          </span>
         </div>
       </CrmListItem>
     </template>
@@ -174,6 +177,7 @@ interface Campaign {
   created_at: string
   updated_at: string
   people_praying: number
+  daily_prayer_duration: number
 }
 
 const route = useRoute()
@@ -385,6 +389,20 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString()
 }
 
+// Format seconds into hours and minutes (e.g., "2h 30m")
+function formatDuration(seconds: number): string {
+  if (!seconds || seconds === 0) return '0m'
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  if (hours > 0 && minutes > 0) {
+    return `${hours}h ${minutes}m`
+  } else if (hours > 0) {
+    return `${hours}h`
+  } else {
+    return `${minutes}m`
+  }
+}
+
 // Handle URL-based selection
 function handleUrlSelection() {
   const idParam = route.params.id as string | undefined
@@ -451,7 +469,8 @@ onMounted(async () => {
   font-size: 0.75rem;
 }
 
-.praying-count {
+.praying-count,
+.prayer-duration {
   color: var(--ui-text-muted);
 }
 

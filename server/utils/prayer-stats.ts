@@ -1,21 +1,30 @@
 import { getDatabase } from '../database/db'
 
 /**
- * Update the people_praying column for all campaigns
- * Calculates the average number of unique people praying daily over the last 7 days
+ * Update the people_praying and daily_prayer_duration columns for all campaigns
+ * - people_praying: average number of unique people praying daily over the last 7 days
+ * - daily_prayer_duration: average total prayer duration per day over the last 7 days (in seconds)
  */
 export async function updatePrayerStats(): Promise<void> {
   const db = getDatabase()
 
-  // Calculate average daily unique prayers per campaign for the last 7 days
-  // and update the campaigns table
+  // Calculate both metrics in a single query and update campaigns
   const stmt = db.prepare(`
     UPDATE campaigns c
-    SET people_praying = COALESCE(stats.avg_daily_count, 0)
+    SET
+      people_praying = COALESCE(stats.avg_daily_count, 0),
+      daily_prayer_duration = COALESCE(stats.total_duration / 7, 0)
     FROM (
-      SELECT campaign_id, ROUND(AVG(daily_count))::integer as avg_daily_count
+      SELECT
+        campaign_id,
+        ROUND(AVG(daily_count))::integer as avg_daily_count,
+        SUM(daily_duration)::integer as total_duration
       FROM (
-        SELECT campaign_id, DATE(timestamp) as prayer_date, COUNT(DISTINCT COALESCE(tracking_id, id::text)) as daily_count
+        SELECT
+          campaign_id,
+          DATE(timestamp) as prayer_date,
+          COUNT(DISTINCT COALESCE(tracking_id, id::text)) as daily_count,
+          SUM(duration) as daily_duration
         FROM prayer_activity
         WHERE timestamp >= NOW() - INTERVAL '7 days'
         GROUP BY campaign_id, DATE(timestamp)
@@ -30,7 +39,7 @@ export async function updatePrayerStats(): Promise<void> {
   // Reset campaigns with no recent activity to 0
   const resetStmt = db.prepare(`
     UPDATE campaigns
-    SET people_praying = 0
+    SET people_praying = 0, daily_prayer_duration = 0
     WHERE id NOT IN (
       SELECT DISTINCT campaign_id
       FROM prayer_activity
