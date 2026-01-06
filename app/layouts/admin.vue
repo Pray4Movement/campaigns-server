@@ -8,11 +8,6 @@
 
       <ul class="nav-menu">
         <li>
-          <NuxtLink to="/admin" class="nav-link">
-            Dashboard
-          </NuxtLink>
-        </li>
-        <li>
           <NuxtLink to="/admin/campaigns" class="nav-link">
             Campaigns
           </NuxtLink>
