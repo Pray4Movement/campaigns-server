@@ -8,15 +8,39 @@
     <div v-else-if="error" class="error-container">
       <h2>{{ $t('prayerFuel.error.title') }}</h2>
       <p>{{ error }}</p>
-      <NuxtLink :to="localePath(`/${slug}/prayer-fuel`)" class="btn-primary">{{ $t('prayerFuel.backToToday') }}</NuxtLink>
     </div>
 
     <div v-else-if="data" class="prayer-fuel-content">
       <!-- Campaign Header -->
       <header class="prayer-header">
         <div class="container">
-          <NuxtLink :to="localePath(`/${slug}/prayer-fuel`)" class="back-link">← {{ $t('prayerFuel.backToToday') }}</NuxtLink>
-          <h1 class="page-title">{{ $t('prayerFuel.pageTitle') }}</h1>
+          <!-- Title row with navigation buttons on sides -->
+          <div class="title-row">
+            <UButton
+              :to="localePath(`/${slug}/prayer-fuel/${previousDate}`)"
+              variant="ghost"
+              size="sm"
+              icon="i-lucide-chevron-left"
+              class="nav-btn"
+            />
+            <h1 class="page-title">{{ $t('prayerFuel.pageTitle') }}</h1>
+            <UButton
+              v-if="!isNextDateFuture"
+              :to="localePath(`/${slug}/prayer-fuel/${nextDate}`)"
+              variant="ghost"
+              size="sm"
+              icon="i-lucide-chevron-right"
+              class="nav-btn"
+            />
+            <UButton
+              v-else
+              :to="localePath(`/${slug}/prayer-fuel`)"
+              variant="ghost"
+              size="sm"
+              icon="i-lucide-chevron-right"
+              class="nav-btn"
+            />
+          </div>
           <p class="prayer-date">{{ formatDate(data.date) }}</p>
         </div>
       </header>
@@ -132,6 +156,27 @@ function formatDate(dateString: string) {
   })
 }
 
+// Compute previous and next dates for navigation
+const previousDate = computed(() => {
+  const date = new Date(dateParam)
+  date.setDate(date.getDate() - 1)
+  return date.toISOString().split('T')[0]
+})
+
+const nextDate = computed(() => {
+  const date = new Date(dateParam)
+  date.setDate(date.getDate() + 1)
+  return date.toISOString().split('T')[0]
+})
+
+// Check if next date is in the future (shouldn't navigate to future dates)
+const isNextDateFuture = computed(() => {
+  const next = new Date(nextDate.value)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return next >= today
+})
+
 // Set page title
 useHead(() => ({
   title: data.value?.hasContent
@@ -195,29 +240,29 @@ useHead(() => ({
   padding: 2rem 0 1.5rem;
 }
 
-.back-link {
-  display: inline-block;
-  color: var(--text-muted, #666);
-  text-decoration: none;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-  transition: color 0.2s;
-}
-
-.back-link:hover {
-  color: var(--text);
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
 }
 
 .page-title {
   font-size: 2rem;
   font-weight: bold;
-  margin: 0 0 0.5rem;
+  margin: 0;
+  text-align: center;
+}
+
+.nav-btn {
+  flex-shrink: 0;
 }
 
 .prayer-date {
   color: var(--text-muted, #666);
-  margin: 0;
+  margin: 0.5rem 0 0;
   font-size: 1rem;
+  text-align: center;
 }
 
 /* Main Content */

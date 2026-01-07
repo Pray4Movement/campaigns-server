@@ -246,6 +246,11 @@
     "thankYou": "Merci d'avoir prié ! Votre prière a été enregistrée.",
     "pastPrayers": {
       "title": "Prières Passées"
+    },
+    "navigation": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "today": "Aujourd'hui"
     }
   },
   "common": {

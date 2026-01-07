@@ -6,7 +6,7 @@ export interface UserInvitation {
   id: number
   email: string
   token: string
-  invited_by: number
+  invited_by: string
   role: RoleName | null
   status: 'pending' | 'accepted' | 'expired' | 'revoked'
   expires_at: string
@@ -22,7 +22,7 @@ export interface UserInvitationWithInviter extends UserInvitation {
 
 export interface CreateInvitationData {
   email: string
-  invited_by: number
+  invited_by: string
   role?: RoleName | null
   expires_in_days?: number // Default: 7 days
 }

@@ -15,11 +15,8 @@
       <!-- Campaign Header -->
       <header class="border-b border-[var(--ui-border)] py-8 px-4">
         <div class="max-w-4xl mx-auto">
-          <NuxtLink :to="localePath(`/${slug}`)" class="text-sm text-[var(--ui-text-muted)] hover:text-[var(--ui-text)] transition-colors mb-4 inline-block">
-            ← {{ $t('prayerFuel.backTo', { campaign: data.campaign.title }) }}
-          </NuxtLink>
-          <h1 class="text-3xl font-bold mb-2">{{ $t('prayerFuel.title') }}</h1>
-          <p class="text-[var(--ui-text-muted)]">{{ formatDate(data.date) }}</p>
+          <h1 class="text-3xl font-bold mb-2 text-center">{{ $t('prayerFuel.title') }}</h1>
+          <p class="text-[var(--ui-text-muted)] text-center">{{ formatDate(data.date) }}</p>
         </div>
       </header>
 

@@ -246,6 +246,11 @@
     "thankYou": "¡Gracias por orar! Su oración ha sido registrada.",
     "pastPrayers": {
       "title": "Oraciones Pasadas"
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "today": "Hoy"
     }
   },
   "common": {

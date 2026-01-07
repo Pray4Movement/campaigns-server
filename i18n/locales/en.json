@@ -253,6 +253,11 @@
     "peopleGroupOfTheDay": "People Group of the Day",
     "pastPrayers": {
       "title": "Past Prayer Fuel"
+    },
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next",
+      "today": "Today"
     }
   },
   "common": {
