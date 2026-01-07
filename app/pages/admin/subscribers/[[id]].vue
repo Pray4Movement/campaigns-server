@@ -267,6 +267,7 @@
                   <UBadge
                     :label="formatEventType(activity.eventType)"
                     :color="getEventColor(activity.eventType)"
+                    :icon="getEventIcon(activity.eventType)"
                     size="xs"
                   />
                   <span class="activity-time">{{ formatTimestamp(activity.timestamp) }}</span>
@@ -835,6 +836,15 @@ function getEventColor(eventType: string): 'success' | 'warning' | 'error' | 'ne
     'EMAIL': 'neutral'
   }
   return colors[eventType] || 'neutral'
+}
+
+function getEventIcon(eventType: string): string | undefined {
+  const icons: Record<string, string> = {
+    'UPDATE': 'i-lucide-pencil',
+    'PRAYER': 'i-lucide-hand-helping',
+    'EMAIL': 'i-lucide-mail'
+  }
+  return icons[eventType]
 }
 
 function formatFieldName(field: string): string {
