@@ -9,10 +9,12 @@ export const useAuthUser = () => {
   // Add app-specific role computed properties
   const isAdmin = computed(() => baseAuth.user.value?.isAdmin || false)
   const isSuperAdmin = computed(() => baseAuth.user.value?.isSuperAdmin || false)
+  const hasRole = computed(() => !!baseAuth.user.value?.role)
 
   return {
     ...baseAuth,
     isAdmin,
-    isSuperAdmin
+    isSuperAdmin,
+    hasRole
   }
 }

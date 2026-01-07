@@ -36,8 +36,8 @@
           <template #role-cell="{ row }">
             <USelect
               v-if="availableRoles.length > 0"
-              :model-value="(row.original as User).role?.name || ''"
-              @update:model-value="(val: string) => updateUserRole((row.original as User).id, val || null)"
+              :model-value="(row.original as User).role?.name || 'none'"
+              @update:model-value="(val: string) => updateUserRole((row.original as User).id, val === 'none' ? null : val)"
               :items="roleOptions"
               class="w-40"
               size="sm"
@@ -263,7 +263,7 @@ interface Role {
 }
 
 interface User {
-  id: number
+  id: string
   email: string
   display_name: string
   verified: boolean
@@ -303,7 +303,7 @@ const showInviteModal = ref(false)
 
 const inviteForm = ref({
   email: '',
-  role: null as string | null
+  role: 'none'
 })
 
 const inviteSubmitting = ref(false)
@@ -350,7 +350,7 @@ const invitationColumns = [
 
 // Computed role options for select
 const roleOptions = computed(() => [
-  { value: '', label: 'No Role' },
+  { value: 'none', label: 'No Role' },
   ...availableRoles.value.map(role => ({
     value: role.name,
     label: formatRoleName(role.name)
@@ -358,7 +358,7 @@ const roleOptions = computed(() => [
 ])
 
 const inviteRoleOptions = computed(() => [
-  { value: null, label: 'No Role (must be assigned later)' },
+  { value: 'none', label: 'No Role (must be assigned later)' },
   ...availableRoles.value.map(role => ({
     value: role.name,
     label: `${formatRoleName(role.name)} - ${role.description}`
@@ -426,13 +426,13 @@ async function handleInvite() {
       method: 'POST',
       body: {
         email: inviteForm.value.email,
-        role: inviteForm.value.role
+        role: inviteForm.value.role === 'none' ? null : inviteForm.value.role
       }
     })
 
     inviteSuccess.value = true
     inviteForm.value.email = ''
-    inviteForm.value.role = null
+    inviteForm.value.role = 'none'
 
     // Reload invitations
     await loadData()
@@ -449,7 +449,7 @@ async function handleInvite() {
   }
 }
 
-async function updateUserRole(userId: number, roleName: string | null) {
+async function updateUserRole(userId: string, roleName: string | null) {
   try {
     const response = await $fetch<{ success: boolean; message: string }>(`/api/admin/users/${userId}/role`, {
       method: 'PUT',

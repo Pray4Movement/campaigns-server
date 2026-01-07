@@ -2,7 +2,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side
   if (process.server) return
 
-  const { user, isLoggedIn, checkAuth } = useAuthUser()
+  const { user, isLoggedIn, hasRole, checkAuth } = useAuthUser()
 
   // Fetch user if not already loaded
   if (!user.value) {
@@ -10,7 +10,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
 
   if (isLoggedIn.value) {
-    // User is already logged in, redirect to admin
-    return navigateTo('/admin')
+    // User is logged in, redirect based on role
+    if (hasRole.value) {
+      return navigateTo('/admin')
+    } else {
+      return navigateTo('/admin/pending-approval')
+    }
   }
 })

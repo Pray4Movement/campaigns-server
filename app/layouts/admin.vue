@@ -6,7 +6,7 @@
         <LanguageSwitcher />
       </div>
 
-      <ul class="nav-menu">
+      <ul class="nav-menu" v-if="hasRole">
         <li>
           <NuxtLink to="/admin/campaigns" class="nav-link">
             Campaigns
@@ -48,6 +48,7 @@
           </NuxtLink>
         </li>
       </ul>
+      <div v-if="!hasRole" class="nav-menu"></div>
 
       <div class="sidebar-footer">
         <NuxtLink to="/profile" class="user-name-link" v-if="user">
@@ -67,11 +68,16 @@
 
 <script setup lang="ts">
 const config = useRuntimeConfig()
-const { user, isAdmin, isSuperAdmin, checkAuth } = useAuthUser()
+const { user, isAdmin, isSuperAdmin, hasRole, checkAuth } = useAuthUser()
+
+const route = useRoute()
 
 onMounted(async () => {
   try {
     await checkAuth()
+    if (user.value && !hasRole.value && route.path !== '/admin/pending-approval') {
+      navigateTo('/admin/pending-approval')
+    }
   } catch (error) {
     navigateTo('/')
   }
