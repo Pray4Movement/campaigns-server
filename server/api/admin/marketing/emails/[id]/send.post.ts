@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    await marketingEmailService.updateStatus(id, 'queued')
+    await marketingEmailService.updateStatus(id, 'queued', user.userId)
     await marketingEmailService.updateStats(id, recipients.length, 0, 0)
 
     const queuedCount = await marketingEmailQueueService.populateQueue(id, recipients)

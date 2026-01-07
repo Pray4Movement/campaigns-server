@@ -11,6 +11,7 @@ export interface MarketingEmail {
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
   created_by: string
   updated_by: string | null
+  sent_by: string | null
   created_at: string
   updated_at: string
   sent_at: string | null
@@ -22,6 +23,12 @@ export interface MarketingEmail {
 export interface MarketingEmailWithCampaign extends MarketingEmail {
   campaign_title?: string
   campaign_slug?: string
+  created_by_name?: string
+  created_by_email?: string
+  updated_by_name?: string
+  updated_by_email?: string
+  sent_by_name?: string
+  sent_by_email?: string
 }
 
 export interface CreateMarketingEmailData {
@@ -160,9 +167,20 @@ class MarketingEmailService {
     const isAdmin = await roleService.isAdmin(userId)
 
     let query = `
-      SELECT me.*, c.title as campaign_title, c.slug as campaign_slug
+      SELECT me.*,
+        c.title as campaign_title,
+        c.slug as campaign_slug,
+        u_created.display_name as created_by_name,
+        u_created.email as created_by_email,
+        u_updated.display_name as updated_by_name,
+        u_updated.email as updated_by_email,
+        u_sent.display_name as sent_by_name,
+        u_sent.email as sent_by_email
       FROM marketing_emails me
       LEFT JOIN campaigns c ON me.campaign_id = c.id
+      LEFT JOIN users u_created ON me.created_by = u_created.id
+      LEFT JOIN users u_updated ON me.updated_by = u_updated.id
+      LEFT JOIN users u_sent ON me.sent_by = u_sent.id
     `
     const conditions: string[] = []
     const values: any[] = []
@@ -206,9 +224,14 @@ class MarketingEmailService {
     return await stmt.all(...values) as MarketingEmailWithCampaign[]
   }
 
-  async updateStatus(id: number, status: MarketingEmail['status']): Promise<void> {
+  async updateStatus(id: number, status: MarketingEmail['status'], sentBy?: string): Promise<void> {
     const updates: string[] = ['status = ?', "updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'"]
     const values: any[] = [status]
+
+    if (status === 'queued' && sentBy) {
+      updates.push('sent_by = ?')
+      values.push(sentBy)
+    }
 
     if (status === 'sent' || status === 'failed') {
       updates.push("sent_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")

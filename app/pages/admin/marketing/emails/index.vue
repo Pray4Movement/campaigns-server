@@ -38,6 +38,7 @@
             <th>Audience</th>
             <th>Status</th>
             <th>Recipients</th>
+            <th>Author</th>
             <th>Updated</th>
             <th>Actions</th>
           </tr>
@@ -65,6 +66,22 @@
                 {{ email.sent_count }}/{{ email.recipient_count }}
                 <span v-if="email.failed_count > 0" class="failed-count">({{ email.failed_count }} failed)</span>
               </template>
+            </td>
+            <td class="author-cell">
+              <div class="author-info">
+                <div class="author-row" :title="email.created_by_email">
+                  <span class="author-label">Created:</span>
+                  <span class="author-name">{{ email.created_by_name || email.created_by_email || '-' }}</span>
+                </div>
+                <div v-if="(email.updated_by_name || email.updated_by_email) && email.updated_by_email !== email.created_by_email" class="author-row" :title="email.updated_by_email">
+                  <span class="author-label">Edited:</span>
+                  <span class="author-name">{{ email.updated_by_name || email.updated_by_email }}</span>
+                </div>
+                <div v-if="email.sent_by_name || email.sent_by_email" class="author-row" :title="email.sent_by_email">
+                  <span class="author-label">Sent:</span>
+                  <span class="author-name">{{ email.sent_by_name || email.sent_by_email }}</span>
+                </div>
+              </div>
             </td>
             <td class="date-cell">{{ formatDate(email.updated_at) }}</td>
             <td class="actions-cell">
@@ -124,6 +141,12 @@ interface MarketingEmail {
   failed_count: number
   created_at: string
   updated_at: string
+  created_by_name?: string
+  created_by_email?: string
+  updated_by_name?: string
+  updated_by_email?: string
+  sent_by_name?: string
+  sent_by_email?: string
 }
 
 const emails = ref<MarketingEmail[]>([])
@@ -369,6 +392,32 @@ onBeforeUnmount(() => {
 
 .failed-count {
   color: var(--color-error);
+}
+
+.author-cell {
+  font-size: 0.875rem;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.author-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.author-label {
+  color: var(--ui-text-muted);
+  font-size: 0.75rem;
+  min-width: 50px;
+}
+
+.author-name {
+  color: var(--ui-text);
 }
 
 .date-cell {

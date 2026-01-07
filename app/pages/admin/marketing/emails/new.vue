@@ -64,12 +64,15 @@
                 </div>
                 <p class="option-description">Send to subscribers who opted in to a specific campaign</p>
 
-                <USelect
-                  v-if="form.audience_type === 'campaign'"
+                <USelectMenu
+                  v-show="form.audience_type === 'campaign'"
                   v-model="form.campaign_id"
                   :items="campaignOptions"
                   placeholder="Select a campaign"
                   class="campaign-select"
+                  searchable
+                  virtualize
+                  value-key="value"
                   @update:model-value="loadCampaignCount"
                 />
                 <p class="option-count" v-if="form.audience_type === 'campaign' && campaignCount !== null">
