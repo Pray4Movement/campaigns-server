@@ -28,31 +28,31 @@
 
         <UTable v-else :data="users" :columns="userColumns">
           <template #email-cell="{ row }">
-            {{ row.original.email }}
+            {{ (row.original as User).email }}
           </template>
           <template #display_name-cell="{ row }">
-            {{ row.original.display_name || '—' }}
+            {{ (row.original as User).display_name || '—' }}
           </template>
           <template #role-cell="{ row }">
             <USelect
               v-if="availableRoles.length > 0"
-              :model-value="row.original.role?.name || ''"
-              @update:model-value="(val) => updateUserRole(row.original.id, val || null)"
+              :model-value="(row.original as User).role?.name || ''"
+              @update:model-value="(val: string) => updateUserRole((row.original as User).id, val || null)"
               :items="roleOptions"
               class="w-40"
               size="sm"
             />
-            <span v-else>{{ row.original.role ? formatRoleName(row.original.role.name) : 'No role' }}</span>
+            <span v-else>{{ (row.original as User).role ? formatRoleName((row.original as User).role!.name) : 'No role' }}</span>
           </template>
           <template #status-cell="{ row }">
-            <UBadge :color="row.original.verified ? 'success' : 'neutral'" variant="subtle">
-              {{ row.original.verified ? 'Verified' : 'Unverified' }}
+            <UBadge :color="(row.original as User).verified ? 'success' : 'neutral'" variant="subtle">
+              {{ (row.original as User).verified ? 'Verified' : 'Unverified' }}
             </UBadge>
           </template>
           <template #campaigns-cell="{ row }">
             <UButton
-              v-if="row.original.role?.name === 'campaign_editor'"
-              @click="openCampaignModal(row.original)"
+              v-if="(row.original as User).role?.name === 'campaign_editor'"
+              @click="openCampaignModal(row.original as User)"
               variant="outline"
               size="xs"
             >
@@ -61,7 +61,7 @@
             <span v-else class="text-[var(--ui-text-muted)]">—</span>
           </template>
           <template #created-cell="{ row }">
-            {{ formatDate(row.original.created) }}
+            {{ formatDate((row.original as User).created) }}
           </template>
         </UTable>
       </section>
@@ -76,35 +76,35 @@
 
         <UTable v-else :data="pendingInvitations" :columns="invitationColumns">
           <template #email-cell="{ row }">
-            {{ row.original.email }}
+            {{ (row.original as Invitation).email }}
           </template>
           <template #inviter-cell="{ row }">
-            {{ row.original.inviter_name || row.original.inviter_email }}
+            {{ (row.original as Invitation).inviter_name || (row.original as Invitation).inviter_email }}
           </template>
           <template #status-cell="{ row }">
-            <UBadge :color="getStatusColor(row.original.status)" variant="subtle">
-              {{ row.original.status }}
+            <UBadge :color="getStatusColor((row.original as Invitation).status)" variant="subtle">
+              {{ (row.original as Invitation).status }}
             </UBadge>
           </template>
           <template #expires_at-cell="{ row }">
-            {{ formatDateTime(row.original.expires_at) }}
+            {{ formatDateTime((row.original as Invitation).expires_at) }}
           </template>
           <template #actions-cell="{ row }">
             <div class="flex gap-2">
               <UButton
-                @click="resendInvitation(row.original.id)"
+                @click="resendInvitation((row.original as Invitation).id)"
                 variant="outline"
                 size="xs"
-                :disabled="row.original.status !== 'pending'"
+                :disabled="(row.original as Invitation).status !== 'pending'"
               >
                 Resend
               </UButton>
               <UButton
-                @click="revokeInvitation(row.original.id)"
+                @click="revokeInvitation((row.original as Invitation).id)"
                 color="error"
                 variant="outline"
                 size="xs"
-                :disabled="row.original.status !== 'pending'"
+                :disabled="(row.original as Invitation).status !== 'pending'"
               >
                 Revoke
               </UButton>
