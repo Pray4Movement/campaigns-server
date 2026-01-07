@@ -26,7 +26,11 @@
     "allRightsReserved": "Todos los derechos reservados"
   },
   "campaign": {
+    "header": {
+      "prayFor": "Ora por los {campaign}"
+    },
     "pageTitle": "Campaña",
+    "signupButton": "Inscríbete para orar",
     "loading": "Cargando campaña...",
     "notFound": {
       "title": "Campaña No Encontrada",

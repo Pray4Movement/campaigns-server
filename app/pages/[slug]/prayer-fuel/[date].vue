@@ -77,6 +77,24 @@
         </div>
       </main>
 
+      <!-- I Prayed Button (only show if content exists) -->
+      <footer v-if="data.hasContent" class="border-t border-[var(--ui-border)] py-8 px-4 bg-[var(--ui-bg-elevated)] text-center">
+        <div class="max-w-4xl mx-auto">
+          <UButton
+            @click="markAsPrayed"
+            :disabled="prayedMarked"
+            :loading="submitting"
+            size="xl"
+            class="min-w-[200px]"
+          >
+            {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.iPrayed') }}
+          </UButton>
+          <p v-if="prayedMarked" class="mt-4 text-sm text-[var(--ui-text-muted)]">
+            {{ $t('prayerFuel.thankYou') }}
+          </p>
+        </div>
+      </footer>
+
       <!-- Past Prayer Fuel -->
       <PastPrayerFuelGrid
         v-if="pastContent?.content"
@@ -98,12 +116,41 @@ const localePath = useLocalePath()
 const route = useRoute()
 const slug = route.params.slug as string
 const dateParam = route.params.date as string
-const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+const { setCampaignTitle } = useCampaign()
+const toast = useToast()
 
-// Reset campaign header when leaving this page
-onUnmounted(() => {
-  resetCampaignTitle()
+// Anonymous tracking ID storage key
+const ANON_STORAGE_KEY = 'prayertools_anon_id'
+
+// Get or create anonymous tracking ID from localStorage
+function getAnonymousTrackingId(): string {
+  if (import.meta.server) return ''
+  let anonId = localStorage.getItem(ANON_STORAGE_KEY)
+  if (!anonId) {
+    anonId = `anon-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+    localStorage.setItem(ANON_STORAGE_KEY, anonId)
+  }
+  return anonId
+}
+
+// Get tracking ID: URL param (from email) or localStorage (anonymous)
+const trackingId = computed(() => {
+  return (route.query.uid as string) || getAnonymousTrackingId()
 })
+
+// Track page open time for duration calculation
+const pageOpenTime = ref(Date.now())
+
+// Generate unique session ID for auto-save
+const sessionId = ref(`${Date.now()}-${Math.random().toString(36).substring(2, 9)}`)
+
+// Auto-save timeouts (5min, 10min, 15min)
+const autoSaveTimeouts = ref<ReturnType<typeof setTimeout>[]>([])
+const autoSaveComplete = ref(false)
+
+// Prayer tracking state
+const prayedMarked = ref(false)
+const submitting = ref(false)
 
 // Get language preference from global language selector or query param
 const selectedLanguage = ref((route.query.language as string) || locale.value || '')
@@ -177,12 +224,108 @@ const isNextDateFuture = computed(() => {
   return next >= today
 })
 
+// Auto-save prayer session
+async function autoSavePrayerSession() {
+  if (prayedMarked.value || autoSaveComplete.value) return
+
+  try {
+    const duration = Math.floor((Date.now() - pageOpenTime.value) / 1000)
+    const timestamp = new Date().toISOString()
+
+    await $fetch(`/api/campaigns/${slug}/prayer-session`, {
+      method: 'POST',
+      body: {
+        sessionId: sessionId.value,
+        trackingId: trackingId.value || null,
+        duration,
+        timestamp,
+        contentDate: dateParam
+      }
+    })
+  } catch (err: any) {
+    console.error('Failed to auto-save prayer session:', err)
+  }
+}
+
+// Cancel all auto-save timeouts
+function cancelAutoSaveTimeouts() {
+  autoSaveTimeouts.value.forEach(timeout => clearTimeout(timeout))
+  autoSaveTimeouts.value = []
+  autoSaveComplete.value = true
+}
+
+// Mark as prayed
+async function markAsPrayed() {
+  if (prayedMarked.value || submitting.value) return
+
+  submitting.value = true
+
+  // Cancel remaining auto-save timeouts
+  cancelAutoSaveTimeouts()
+
+  try {
+    // Calculate duration (time spent on page), capped at 2 hours
+    const MAX_DURATION = 2 * 60 * 60 // 2 hours in seconds
+    const rawDuration = Math.floor((Date.now() - pageOpenTime.value) / 1000)
+    const duration = Math.min(rawDuration, MAX_DURATION)
+    const timestamp = new Date().toISOString()
+
+    // Final save using prayer-session endpoint (upsert)
+    await $fetch(`/api/campaigns/${slug}/prayer-session`, {
+      method: 'POST',
+      body: {
+        sessionId: sessionId.value,
+        trackingId: trackingId.value || null,
+        duration,
+        timestamp,
+        contentDate: dateParam
+      }
+    })
+
+    prayedMarked.value = true
+  } catch (err: any) {
+    console.error('Failed to record prayer:', err)
+    toast.add({
+      title: 'Error',
+      description: t('prayerFuel.error.recordFailed'),
+      color: 'error'
+    })
+  } finally {
+    submitting.value = false
+  }
+}
+
 // Set page title
 useHead(() => ({
   title: data.value?.hasContent
     ? `${t('prayerFuel.pageTitle')} - ${data.value.campaign.title}`
     : `${t('prayerFuel.pageTitle')} - ${data.value?.campaign.title || t('common.loading')}`
 }))
+
+// Update page open time and set up auto-save when component mounts
+onMounted(() => {
+  // Set campaign title on mount (handles cached data from navigation)
+  if (data.value?.campaign?.title) {
+    setCampaignTitle(data.value.campaign.title)
+  }
+
+  pageOpenTime.value = Date.now()
+
+  // Set up auto-save timeouts at 5min, 10min, 15min
+  const autoSaveIntervals = [5 * 60 * 1000, 10 * 60 * 1000, 15 * 60 * 1000]
+
+  autoSaveIntervals.forEach((interval) => {
+    const timeout = setTimeout(() => {
+      autoSavePrayerSession()
+    }, interval)
+    autoSaveTimeouts.value.push(timeout)
+  })
+})
+
+// Clean up timeouts when component unmounts
+onUnmounted(() => {
+  cancelAutoSaveTimeouts()
+})
 </script>
 
 <style scoped>

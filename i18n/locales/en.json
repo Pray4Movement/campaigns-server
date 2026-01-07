@@ -26,7 +26,11 @@
     "allRightsReserved": "All rights reserved"
   },
   "campaign": {
+    "header": {
+      "prayFor": "Pray for the {campaign}"
+    },
     "pageTitle": "Campaign",
+    "signupButton": "Sign up to pray",
     "loading": "Loading campaign...",
     "notFound": {
       "title": "Campaign Not Found",
@@ -249,7 +253,7 @@
       "recording": "Recording...",
       "recorded": "✓ Prayer Recorded"
     },
-    "thankYou": "Thank you for praying! Your prayer has been recorded.",
+    "thankYou": "Thank you for praying!",
     "peopleGroupOfTheDay": "People Group of the Day",
     "pastPrayers": {
       "title": "Past Prayer Fuel"

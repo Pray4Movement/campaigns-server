@@ -26,7 +26,11 @@
     "allRightsReserved": "Tous droits réservés"
   },
   "campaign": {
+    "header": {
+      "prayFor": "Priez pour les {campaign}"
+    },
     "pageTitle": "Campagne",
+    "signupButton": "Inscrivez-vous pour prier",
     "loading": "Chargement de la campagne...",
     "notFound": {
       "title": "Campagne Introuvable",

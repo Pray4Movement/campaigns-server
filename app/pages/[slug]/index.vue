@@ -13,6 +13,17 @@
 
     <div v-else-if="campaign" class="campaign-content">
 
+      <!-- Sign Up CTA -->
+      <div class="max-w-5xl mx-auto px-4 pt-6 flex justify-center">
+        <UButton
+          size="lg"
+          class="bg-forest-500 text-white hover:bg-forest-600 rounded-full px-8"
+          @click="scrollToSignup"
+        >
+          {{ $t('campaign.signupButton') }}
+        </UButton>
+      </div>
+
       <!-- People Group Section -->
       <section v-if="peopleGroup" class="py-12 bg-default">
         <div class="max-w-5xl mx-auto px-4 space-y-8">
@@ -136,7 +147,7 @@
       </section>
 
       <!-- Prayer Signup Section -->
-      <section class="py-12 bg-accented">
+      <section id="signup-section" class="py-12 bg-accented">
         <div class="max-w-4xl mx-auto px-4">
           <UCard>
             <template #header>
@@ -407,11 +418,13 @@ const campaign = computed(() => data.value?.campaign)
 const peopleGroup = computed(() => data.value?.peopleGroup)
 
 // Campaign title management
-const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+const { setCampaignTitle } = useCampaign()
 
-// Reset campaign header when leaving this page
-onUnmounted(() => {
-  resetCampaignTitle()
+// Set campaign title on mount (handles cached data from navigation)
+onMounted(() => {
+  if (campaign.value?.title) {
+    setCampaignTitle(campaign.value.title)
+  }
 })
 
 // Dynamic prayer goal - starts at 144, then increases to 1000 once reached
@@ -503,6 +516,14 @@ function resetForm() {
 function closeVerificationModal() {
   showVerificationModal.value = false
   verificationEmail.value = ''
+}
+
+// Scroll to signup section
+function scrollToSignup() {
+  const section = document.getElementById('signup-section')
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' })
+  }
 }
 
 // Handle form submission

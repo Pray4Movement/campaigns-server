@@ -95,12 +95,15 @@ const localePath = useLocalePath()
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
-const { setCampaignTitle, resetCampaignTitle } = useCampaign()
+const { setCampaignTitle } = useCampaign()
 
-// Reset campaign header when leaving this page
-onUnmounted(() => {
-  resetCampaignTitle()
+// Set campaign title on mount (handles cached data from navigation)
+onMounted(() => {
+  if (data.value?.campaign?.title) {
+    setCampaignTitle(data.value.campaign.title)
+  }
 })
+
 const toast = useToast()
 
 // Anonymous tracking ID storage key
@@ -204,7 +207,8 @@ async function autoSavePrayerSession() {
         sessionId: sessionId.value,
         trackingId: trackingId.value || null,
         duration,
-        timestamp
+        timestamp,
+        contentDate: new Date().toISOString().split('T')[0]
       }
     })
   } catch (err: any) {
@@ -242,7 +246,8 @@ async function markAsPrayed() {
         sessionId: sessionId.value,
         trackingId: trackingId.value || null,
         duration,
-        timestamp
+        timestamp,
+        contentDate: new Date().toISOString().split('T')[0]
       }
     })
 

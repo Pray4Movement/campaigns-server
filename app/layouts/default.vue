@@ -35,10 +35,10 @@
     </header>
 
     <!-- Campaign Title -->
-    <div v-if="showCampaignHeader" class="bg-beige-50 dark:bg-elevated py-8">
+    <div v-if="shouldShowCampaignHeader" class="bg-beige-50 dark:bg-elevated py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
         <h1 class="text-3xl md:text-4xl font-bold uppercase tracking-wide">
-          <span class="text-default">{{ campaignTitle }}</span>
+          <span class="text-default">{{ $t('campaign.header.prayFor', { campaign: campaignTitle }) }}</span>
         </h1>
       </div>
     </div>
@@ -69,12 +69,17 @@ const currentYear = new Date().getFullYear()
 const { campaignTitle, showCampaignHeader } = useCampaign()
 const { isLoggedIn, checkAuth } = useAuth()
 
+const slug = computed(() => route.params.slug as string | undefined)
+
 const logoLink = computed(() => {
-  const slug = route.params.slug as string | undefined
-  return slug ? `/${slug}` : '/'
+  return slug.value ? `/${slug.value}` : '/'
 })
 
 const isHomePage = computed(() => route.path === '/')
+
+// Show campaign header when on a campaign route and title is set
+const isCampaignPage = computed(() => !!slug.value)
+const shouldShowCampaignHeader = computed(() => isCampaignPage.value && showCampaignHeader.value)
 
 onMounted(() => {
   checkAuth()

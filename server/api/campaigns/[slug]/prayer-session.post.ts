@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Validate request body
-  const { sessionId, trackingId, duration, timestamp } = body
+  const { sessionId, trackingId, duration, timestamp, contentDate } = body
 
   if (!sessionId || duration === undefined || !timestamp) {
     throw createError({
@@ -37,13 +37,13 @@ export default defineEventHandler(async (event) => {
   try {
     // Upsert: Insert or update based on session_id
     const stmt = db.prepare(`
-      INSERT INTO prayer_activity (campaign_id, session_id, tracking_id, duration, timestamp)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO prayer_activity (campaign_id, session_id, tracking_id, duration, timestamp, content_date)
+      VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT (session_id) WHERE session_id IS NOT NULL
-      DO UPDATE SET duration = EXCLUDED.duration, timestamp = EXCLUDED.timestamp
+      DO UPDATE SET duration = EXCLUDED.duration, timestamp = EXCLUDED.timestamp, content_date = EXCLUDED.content_date
     `)
 
-    await stmt.run(campaign.id, sessionId, trackingId || null, duration, timestamp)
+    await stmt.run(campaign.id, sessionId, trackingId || null, duration, timestamp, contentDate || null)
 
     return {
       success: true,
