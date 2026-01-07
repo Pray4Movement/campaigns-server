@@ -1,6 +1,16 @@
 <template>
   <div class="admin-layout">
-    <nav class="sidebar">
+    <!-- Mobile header with hamburger -->
+    <div class="mobile-header">
+      <UButton
+        icon="i-lucide-menu"
+        variant="ghost"
+        @click="sidebarOpen = true"
+      />
+      <span class="mobile-title">{{ config.public.appName || 'Base' }} Admin</span>
+    </div>
+
+    <nav class="sidebar" :class="{ open: sidebarOpen }">
       <div class="sidebar-header">
         <h1 class="logo">{{ config.public.appName || 'Base' }} Admin</h1>
         <LanguageSwitcher />
@@ -58,6 +68,13 @@
       </div>
     </nav>
 
+    <!-- Mobile backdrop -->
+    <div
+      v-if="sidebarOpen"
+      class="sidebar-backdrop"
+      @click="sidebarOpen = false"
+    />
+
     <div class="main-wrapper">
       <main class="main-content">
         <slot />
@@ -71,6 +88,12 @@ const config = useRuntimeConfig()
 const { user, isAdmin, isSuperAdmin, hasRole, checkAuth } = useAuthUser()
 
 const route = useRoute()
+const sidebarOpen = ref(false)
+
+// Close sidebar on route change
+watch(() => route.path, () => {
+  sidebarOpen.value = false
+})
 
 onMounted(async () => {
   try {
@@ -94,6 +117,7 @@ onMounted(async () => {
 
 .sidebar {
   width: 250px;
+  flex-shrink: 0;
   background-color: var(--ui-bg-elevated);
   border-right: 1px solid var(--ui-border);
   display: flex;
@@ -181,5 +205,61 @@ onMounted(async () => {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+}
+
+/* Mobile header - hidden on desktop */
+.mobile-header {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--ui-bg-elevated);
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.mobile-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Mobile backdrop */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 1024px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
 }
 </style>
