@@ -165,7 +165,7 @@
                     </div>
                     <span class="library-stats">
                       {{ getLibraryDaysDisplay(libConfig.libraryId) }}
-                      <template v-if="libIndex > 0 && getLibraryType(libConfig.libraryId) !== 'people_group'">
+                      <template v-if="libIndex > 0 && !isLibraryContinuous(libConfig.libraryId)">
                         (starts Day {{ getLibraryStartDay(rowIndex, libIndex) }})
                       </template>
                     </span>
@@ -242,6 +242,7 @@ interface Library {
   name: string
   description: string
   type: 'static' | 'people_group'
+  repeating?: boolean
   stats?: {
     totalDays: number
     languageStats: { [key: string]: number }
@@ -406,18 +407,23 @@ function getLibraryType(libraryId: number): string {
 
 function getLibraryDays(libraryId: number): number {
   const library = allLibraries.value.find(lib => lib.id === libraryId)
-  // People group libraries have "infinite" days represented by -1
-  if (library?.type === 'people_group') {
+  // People group libraries and repeating libraries have "infinite" days
+  if (library?.type === 'people_group' || library?.repeating) {
     return 0 // Don't count towards row total
   }
   return Number(library?.stats?.totalDays) || 0
 }
 
 function getLibraryDaysLabel(library: Library): string {
-  if (library.type === 'people_group') {
+  if (library.type === 'people_group' || library.repeating) {
     return 'Continuous'
   }
   return `${library.stats?.totalDays || 0} days`
+}
+
+function isLibraryContinuous(libraryId: number): boolean {
+  const library = allLibraries.value.find(lib => lib.id === libraryId)
+  return library?.type === 'people_group' || library?.repeating === true
 }
 
 function getLibraryDaysDisplay(libraryId: number): string {

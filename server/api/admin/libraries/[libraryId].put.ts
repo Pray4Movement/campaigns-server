@@ -1,4 +1,5 @@
 import { libraryService } from '#server/database/libraries'
+import { prayerContentService } from '#server/database/prayer-content'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -18,7 +19,8 @@ export default defineEventHandler(async (event) => {
   try {
     const library = await libraryService.updateLibrary(id, {
       name: body.name,
-      description: body.description
+      description: body.description,
+      repeating: body.repeating
     })
 
     if (!library) {
@@ -27,6 +29,9 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Library not found'
       })
     }
+
+    // Clear cached library stats so changes take effect immediately
+    prayerContentService.clearLibraryCache(id)
 
     return {
       success: true,

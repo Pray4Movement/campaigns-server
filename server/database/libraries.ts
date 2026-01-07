@@ -9,6 +9,7 @@ export const PEOPLE_GROUP_LIBRARY: Library = {
   name: 'People Group',
   description: 'Dynamically displays the linked people group information for the campaign',
   type: 'people_group',
+  repeating: false,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
 }
@@ -20,6 +21,7 @@ export const DAILY_PEOPLE_GROUP_LIBRARY: Library = {
   name: 'Daily People Group',
   description: 'Displays a different people group each day, rotating through all groups',
   type: 'people_group',
+  repeating: false,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
 }
@@ -29,6 +31,7 @@ export interface Library {
   name: string
   description: string
   type: LibraryType
+  repeating: boolean
   created_at: string
   updated_at: string
 }
@@ -36,11 +39,13 @@ export interface Library {
 export interface CreateLibraryData {
   name: string
   description?: string
+  repeating?: boolean
 }
 
 export interface UpdateLibraryData {
   name?: string
   description?: string
+  repeating?: boolean
 }
 
 export class LibraryService {
@@ -48,15 +53,15 @@ export class LibraryService {
 
   // Create library
   async createLibrary(data: CreateLibraryData): Promise<Library> {
-    const { name, description = '' } = data
+    const { name, description = '', repeating = false } = data
 
     const stmt = this.db.prepare(`
-      INSERT INTO libraries (name, description)
-      VALUES (?, ?)
+      INSERT INTO libraries (name, description, repeating)
+      VALUES (?, ?, ?)
     `)
 
     try {
-      const result = await stmt.run(name, description)
+      const result = await stmt.run(name, description, repeating)
       const libraryId = result.lastInsertRowid as number
       return (await this.getLibraryById(libraryId))!
     } catch (error: any) {
@@ -133,6 +138,11 @@ export class LibraryService {
     if (data.description !== undefined) {
       updates.push('description = ?')
       values.push(data.description)
+    }
+
+    if (data.repeating !== undefined) {
+      updates.push('repeating = ?')
+      values.push(data.repeating)
     }
 
     if (updates.length === 0) {

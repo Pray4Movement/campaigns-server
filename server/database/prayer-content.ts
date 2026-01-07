@@ -100,9 +100,12 @@ export class PrayerContentService {
 
   /**
    * Get library stats (total days) - cached for efficiency
+   * For repeating libraries, returns 999999 (infinite)
+   * Use getLibraryActualDays() to get the real day count for modulo calculations
    */
   private libraryStatsCache: Map<number, number> = new Map()
   private libraryTypeCache: Map<number, string> = new Map()
+  private libraryActualDaysCache: Map<number, number> = new Map()
 
   private async getLibraryTotalDays(libraryId: number): Promise<number> {
     if (this.libraryStatsCache.has(libraryId)) {
@@ -122,11 +125,44 @@ export class PrayerContentService {
       return 999999
     }
 
-    this.libraryTypeCache.set(libraryId, 'static')
+    // Get actual day count from database
     const dayRange = await libraryContentService.getDayRange(libraryId)
-    const totalDays = dayRange?.maxDay || 0
-    this.libraryStatsCache.set(libraryId, totalDays)
-    return totalDays
+    const actualDays = dayRange?.maxDay || 0
+    this.libraryActualDaysCache.set(libraryId, actualDays)
+
+    // Check if library is repeating
+    const library = await libraryService.getLibraryById(libraryId)
+    if (library?.repeating) {
+      this.libraryStatsCache.set(libraryId, 999999)
+      this.libraryTypeCache.set(libraryId, 'repeating')
+      return 999999
+    }
+
+    this.libraryTypeCache.set(libraryId, 'static')
+    this.libraryStatsCache.set(libraryId, actualDays)
+    return actualDays
+  }
+
+  /**
+   * Clear cached data for a specific library (call when library settings change)
+   */
+  clearLibraryCache(libraryId: number): void {
+    this.libraryStatsCache.delete(libraryId)
+    this.libraryTypeCache.delete(libraryId)
+    this.libraryActualDaysCache.delete(libraryId)
+  }
+
+  /**
+   * Get the actual day count for a library (for modulo calculations with repeating libraries)
+   */
+  private async getLibraryActualDays(libraryId: number): Promise<number> {
+    if (this.libraryActualDaysCache.has(libraryId)) {
+      return this.libraryActualDaysCache.get(libraryId)!
+    }
+
+    // Ensure the cache is populated
+    await this.getLibraryTotalDays(libraryId)
+    return this.libraryActualDaysCache.get(libraryId) || 0
   }
 
   private async getLibraryType(libraryId: number): Promise<string> {
@@ -454,10 +490,21 @@ export class PrayerContentService {
               allContent.push(dailyContent)
             }
           } else {
+            // Calculate the actual day to fetch (wrap for repeating libraries)
+            let dayToFetch = libraryInfo.dayInLibrary
+
+            if (libraryType === 'repeating') {
+              const actualDays = await this.getLibraryActualDays(libraryInfo.libraryId)
+              if (actualDays > 0) {
+                // Wrap day number: day 31 in a 30-day library becomes day 1
+                dayToFetch = ((libraryInfo.dayInLibrary - 1) % actualDays) + 1
+              }
+            }
+
             // Fetch content from this library at the calculated day
             const content = await libraryContentService.getLibraryContentByDay(
               libraryInfo.libraryId,
-              libraryInfo.dayInLibrary,
+              dayToFetch,
               languageCode
             )
 

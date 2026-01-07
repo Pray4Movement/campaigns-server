@@ -106,6 +106,14 @@
             />
           </UFormField>
 
+          <UFormField>
+            <UCheckbox
+              v-model="form.repeating"
+              label="Repeating / Continuous"
+              description="When enabled, the library cycles through its content indefinitely"
+            />
+          </UFormField>
+
           <div class="modal-footer">
             <UButton type="button" variant="outline" @click="closeModal">Cancel</UButton>
             <UButton type="submit" :disabled="saving">
@@ -143,6 +151,7 @@ interface Library {
   id: number
   name: string
   description: string
+  repeating: boolean
   created_at: string
   updated_at: string
   stats?: {
@@ -173,7 +182,8 @@ const isModalOpen = computed({
 
 const form = ref({
   name: '',
-  description: ''
+  description: '',
+  repeating: false
 })
 
 async function loadLibraries() {
@@ -198,7 +208,8 @@ function editLibrary(library: Library) {
   editingLibrary.value = library
   form.value = {
     name: library.name,
-    description: library.description
+    description: library.description,
+    repeating: library.repeating || false
   }
 }
 
@@ -305,7 +316,8 @@ function closeModal() {
   editingLibrary.value = null
   form.value = {
     name: '',
-    description: ''
+    description: '',
+    repeating: false
   }
 }
 

@@ -17,7 +17,8 @@ export default defineEventHandler(async (event) => {
   try {
     const library = await libraryService.createLibrary({
       name: body.name,
-      description: body.description
+      description: body.description,
+      repeating: body.repeating
     })
 
     return {
