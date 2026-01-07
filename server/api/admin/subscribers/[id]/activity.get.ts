@@ -1,7 +1,8 @@
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { campaignService } from '#server/database/campaigns'
 
 export default defineEventHandler(async (event) => {
-  await requireAdmin(event)
+  const user = await requirePermission(event, 'campaigns.view')
 
   const subscriptionId = getRouterParam(event, 'id')
 
@@ -18,6 +19,15 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 404,
       statusMessage: 'Subscription not found'
+    })
+  }
+
+  // Verify user has access to this campaign
+  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+  if (!hasAccess) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'You do not have access to this subscription'
     })
   }
 

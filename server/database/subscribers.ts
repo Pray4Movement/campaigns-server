@@ -206,37 +206,54 @@ class SubscriberService {
   /**
    * Get all subscribers with their contact methods and subscriptions.
    * For the general subscribers admin page.
+   *
+   * @param options.accessibleCampaignIds - If provided, only return subscribers with subscriptions
+   *   to these campaigns, and filter subscriptions to only include accessible campaigns.
+   *   Used for campaign editors who can only see their assigned campaigns.
    */
   async getAllSubscribersWithSubscriptions(options?: {
     search?: string
     campaignId?: number
+    accessibleCampaignIds?: number[]
   }): Promise<SubscriberWithSubscriptions[]> {
     // Build base query to get subscribers
-    // If campaignId filter is set, only get subscribers with subscriptions to that campaign
     let query = 'SELECT DISTINCT s.* FROM subscribers s'
     const params: any[] = []
+    let hasWhere = false
 
+    // If accessibleCampaignIds is provided, filter to only subscribers with subscriptions to those campaigns
+    if (options?.accessibleCampaignIds && options.accessibleCampaignIds.length > 0) {
+      const placeholders = options.accessibleCampaignIds.map(() => '?').join(',')
+      query += ` JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.campaign_id IN (${placeholders})`
+      params.push(...options.accessibleCampaignIds)
+      hasWhere = true
+    }
+
+    // If campaignId filter is set, only get subscribers with subscriptions to that campaign
     if (options?.campaignId) {
-      query += ' JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.campaign_id = ?'
+      if (hasWhere) {
+        query += ' AND cs.campaign_id = ?'
+      } else {
+        query += ' JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.campaign_id = ?'
+        hasWhere = true
+      }
       params.push(options.campaignId)
     }
 
     if (options?.search) {
       const searchTerm = `%${options.search}%`
-      if (options?.campaignId) {
-        // Already have WHERE clause from campaign filter
+      if (hasWhere) {
         query += ` AND (
           s.name ILIKE ? OR
           EXISTS (SELECT 1 FROM contact_methods cm WHERE cm.subscriber_id = s.id AND cm.value ILIKE ?)
         )`
-        params.push(searchTerm, searchTerm)
       } else {
         query += ` WHERE (
           s.name ILIKE ? OR
           EXISTS (SELECT 1 FROM contact_methods cm WHERE cm.subscriber_id = s.id AND cm.value ILIKE ?)
         )`
-        params.push(searchTerm, searchTerm)
       }
+      params.push(searchTerm, searchTerm)
     }
 
     query += ' ORDER BY s.created_at DESC'
@@ -249,7 +266,14 @@ class SubscriberService {
 
     for (const subscriber of subscribers) {
       const contacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
-      const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+      let subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+
+      // Filter subscriptions to only include accessible campaigns
+      if (options?.accessibleCampaignIds) {
+        subscriptions = subscriptions.filter(sub =>
+          options.accessibleCampaignIds!.includes(sub.campaign_id)
+        )
+      }
 
       // Find primary email and phone
       const emailContact = contacts.find(c => c.type === 'email' && c.verified) || contacts.find(c => c.type === 'email')

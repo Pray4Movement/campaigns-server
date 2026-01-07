@@ -8,7 +8,7 @@ The permissions system controls what logged-in users can see and do. Users are a
 
 **Admin** has full access to everything. They can manage all campaigns, all content, invite users, and assign roles. They see the complete admin interface including Libraries, Campaign Config, and Users sections.
 
-**Campaign Editor** can create and manage content, but only within campaigns they've been granted access to. They cannot see other campaigns, manage users, or access system settings.
+**Campaign Editor** can create and manage content, but only within campaigns they've been granted access to. They can also view and manage subscribers who are subscribed to their campaigns. They cannot see other campaigns, manage users, or access system settings.
 
 **No Role** is the default for new users. They can log in but have no admin capabilities until an admin assigns them a role.
 
@@ -37,6 +37,20 @@ Give someone **Campaign Editor** if they:
 - Only need to work on specific campaigns
 - Shouldn't see other teams' campaigns
 - Don't need to manage users or system settings
+
+## Subscriber Access
+
+Campaign Editors can see and manage subscribers who have subscriptions to their assigned campaigns:
+
+- **View**: See subscriber details, contact info, and subscription settings
+- **Edit**: Update subscriber names and subscription settings (frequency, time, timezone)
+- **Delete**: Remove subscriptions from their campaigns
+- **Activity**: View subscriber activity logs and email history
+- **Send Reminders**: Manually send prayer reminder emails
+
+If a subscriber has subscriptions to multiple campaigns, a Campaign Editor will only see the subscriptions for campaigns they have access to.
+
+Campaign Editors with no campaign assignments will see an empty subscriber list.
 
 ## Current Limitations
 
