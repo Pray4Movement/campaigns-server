@@ -60,8 +60,8 @@
             </UButton>
             <span v-else class="text-[var(--ui-text-muted)]">—</span>
           </template>
-          <template #created_at-cell="{ row }">
-            {{ formatDate(row.original.created_at) }}
+          <template #created-cell="{ row }">
+            {{ formatDate(row.original.created) }}
           </template>
         </UTable>
       </section>
@@ -267,7 +267,7 @@ interface User {
   email: string
   display_name: string
   verified: boolean
-  created_at: string
+  created: string
   role: { name: string; description: string } | null
 }
 
@@ -337,7 +337,7 @@ const userColumns = [
   { accessorKey: 'role', header: 'Role' },
   { accessorKey: 'status', header: 'Status' },
   { accessorKey: 'campaigns', header: 'Campaigns' },
-  { accessorKey: 'created_at', header: 'Joined' }
+  { accessorKey: 'created', header: 'Joined' }
 ]
 
 const invitationColumns = [
@@ -627,7 +627,11 @@ async function saveCampaignAccess() {
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString()
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
 }
 
 function formatDateTime(dateString: string) {
