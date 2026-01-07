@@ -1,4 +1,4 @@
-import { libraryService, PEOPLE_GROUP_LIBRARY } from '#server/database/libraries'
+import { libraryService, PEOPLE_GROUP_LIBRARY, DAILY_PEOPLE_GROUP_LIBRARY } from '#server/database/libraries'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -26,12 +26,18 @@ export default defineEventHandler(async (event) => {
     })
   )
 
-  // Optionally include virtual People Group library (for prayer-fuel-order page)
+  // Optionally include virtual People Group libraries (for prayer-fuel-order page)
   if (includeVirtual) {
     const virtualStats = await libraryService.getLibraryStats(PEOPLE_GROUP_LIBRARY.id)
     librariesWithStats.push({
       ...PEOPLE_GROUP_LIBRARY,
       stats: virtualStats
+    })
+
+    const dailyVirtualStats = await libraryService.getLibraryStats(DAILY_PEOPLE_GROUP_LIBRARY.id)
+    librariesWithStats.push({
+      ...DAILY_PEOPLE_GROUP_LIBRARY,
+      stats: dailyVirtualStats
     })
   }
 

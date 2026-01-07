@@ -33,6 +33,7 @@
 
               <!-- People Group content -->
               <template v-if="contentItem.content_type === 'people_group' && contentItem.people_group_data">
+                <h2 v-if="contentItem.id === -2" class="content-title text-center">{{ $t('prayerFuel.peopleGroupOfTheDay') }}</h2>
                 <PeopleGroupCard :people-group="contentItem.people_group_data" />
               </template>
 

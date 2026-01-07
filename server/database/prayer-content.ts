@@ -1,7 +1,7 @@
 import { getDatabase } from './db'
 import { appConfigService } from './app-config'
 import { libraryContentService } from './library-content'
-import { libraryService, PEOPLE_GROUP_LIBRARY_ID } from './libraries'
+import { libraryService, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID } from './libraries'
 import { peopleGroupService } from './people-groups'
 import { campaignService } from './campaigns'
 import { getLanguageLabel, getReligionLabel } from '../utils/app/field-options'
@@ -109,10 +109,16 @@ export class PrayerContentService {
       return this.libraryStatsCache.get(libraryId)!
     }
 
-    // Virtual People Group library has infinite days
+    // Virtual People Group libraries have infinite days
     if (libraryId === PEOPLE_GROUP_LIBRARY_ID) {
       this.libraryStatsCache.set(libraryId, 999999)
       this.libraryTypeCache.set(libraryId, 'people_group')
+      return 999999
+    }
+
+    if (libraryId === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
+      this.libraryStatsCache.set(libraryId, 999999)
+      this.libraryTypeCache.set(libraryId, 'daily_people_group')
       return 999999
     }
 
@@ -266,6 +272,94 @@ export class PrayerContentService {
     }
   }
 
+  /**
+   * Generate daily people group content - rotates through all people groups
+   * Each campaign shows a different people group based on their linked group's random_order offset
+   */
+  private async generateDailyPeopleGroupContent(campaignId: number, date: string, languageCode: string, dayNumber: number): Promise<PrayerContent | null> {
+    // Get the campaign to find its linked people group
+    const campaign = await campaignService.getCampaignById(campaignId)
+    if (!campaign?.dt_id) {
+      return null
+    }
+
+    // Get the campaign's linked people group to use its random_order as offset
+    const campaignPeopleGroup = await peopleGroupService.getPeopleGroupByDtId(campaign.dt_id)
+    if (!campaignPeopleGroup?.random_order) {
+      return null
+    }
+
+    // Get total count of people groups
+    const totalPeopleGroups = await peopleGroupService.countPeopleGroups()
+    if (totalPeopleGroups === 0) {
+      return null
+    }
+
+    // Calculate the daily random_order: offset by campaign's people group's random_order
+    // Formula: ((dayNumber + offset - 1) % total) + 1
+    const offset = campaignPeopleGroup.random_order
+    const dailyOrder = ((dayNumber + offset - 1) % totalPeopleGroups) + 1
+
+    // Fetch the people group by random_order
+    const peopleGroup = await peopleGroupService.getPeopleGroupByRandomOrder(dailyOrder)
+    if (!peopleGroup) {
+      return null
+    }
+
+    // Parse metadata for additional fields
+    let description: string | null = null
+    let population: number | null = null
+    let language: string | null = null
+    let religion: string | null = null
+    let lat: number | null = null
+    let lng: number | null = null
+
+    if (peopleGroup.metadata) {
+      try {
+        const metadata = JSON.parse(peopleGroup.metadata)
+        description = metadata.imb_statement_of_need || metadata.imb_people_description || metadata.description || null
+        population = metadata.imb_population ? parseInt(metadata.imb_population, 10) : null
+
+        // Look up labels from field options
+        const langCode = metadata.imb_reg_of_language
+        const religionCode = metadata.imb_reg_of_religion_3
+
+        language = langCode ? (getLanguageLabel(langCode) || langCode) : null
+        religion = religionCode ? (getReligionLabel(religionCode) || religionCode) : null
+
+        // Extract coordinates
+        lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
+        lng = metadata.imb_lng ? parseFloat(metadata.imb_lng) : null
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+
+    const now = new Date().toISOString()
+
+    return {
+      id: -2, // Virtual content ID for daily people group
+      campaign_id: campaignId,
+      content_date: date,
+      language_code: languageCode,
+      title: peopleGroup.name,
+      content_json: null,
+      content_type: 'people_group',
+      people_group_data: {
+        name: peopleGroup.name,
+        image_url: peopleGroup.image_url,
+        description,
+        population,
+        language,
+        religion,
+        lat,
+        lng
+      },
+      created_at: now,
+      updated_at: now
+    }
+  }
+
   // ==========================================
   // READ OPERATIONS (Library-based)
   // ==========================================
@@ -344,14 +438,20 @@ export class PrayerContentService {
         const libraryInfo = await this.findLibraryForDay(row, campaignDay)
 
         if (libraryInfo) {
-          // Check if this is a people_group library
+          // Check the library type
           const libraryType = await this.getLibraryType(libraryInfo.libraryId)
 
           if (libraryType === 'people_group') {
-            // Generate dynamic people group content
+            // Generate campaign's linked people group content
             const peopleGroupContent = await this.generatePeopleGroupContent(campaignId, date, languageCode)
             if (peopleGroupContent) {
               allContent.push(peopleGroupContent)
+            }
+          } else if (libraryType === 'daily_people_group') {
+            // Generate daily rotating people group content
+            const dailyContent = await this.generateDailyPeopleGroupContent(campaignId, date, languageCode, campaignDay)
+            if (dailyContent) {
+              allContent.push(dailyContent)
             }
           } else {
             // Fetch content from this library at the calculated day

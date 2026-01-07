@@ -6,6 +6,7 @@ export interface PeopleGroup {
   name: string
   image_url: string | null
   metadata: string | null
+  random_order: number | null
   created_at: string
   updated_at: string
 }
@@ -60,6 +61,14 @@ export class PeopleGroupService {
       SELECT * FROM people_groups WHERE dt_id = ?
     `)
     const peopleGroup = await stmt.get(dtId) as PeopleGroup | null
+    return peopleGroup
+  }
+
+  async getPeopleGroupByRandomOrder(randomOrder: number): Promise<PeopleGroup | null> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM people_groups WHERE random_order = ?
+    `)
+    const peopleGroup = await stmt.get(randomOrder) as PeopleGroup | null
     return peopleGroup
   }
 

@@ -13,6 +13,17 @@ export const PEOPLE_GROUP_LIBRARY: Library = {
   updated_at: '2025-01-01T00:00:00.000Z'
 }
 
+// Virtual Daily People Group library - rotates through all people groups
+export const DAILY_PEOPLE_GROUP_LIBRARY_ID = -2
+export const DAILY_PEOPLE_GROUP_LIBRARY: Library = {
+  id: DAILY_PEOPLE_GROUP_LIBRARY_ID,
+  name: 'Daily People Group',
+  description: 'Displays a different people group each day, rotating through all groups',
+  type: 'people_group',
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z'
+}
+
 export interface Library {
   id: number
   name: string
@@ -58,9 +69,12 @@ export class LibraryService {
 
   // Get library by ID
   async getLibraryById(id: number): Promise<Library | null> {
-    // Return virtual People Group library for special ID
+    // Return virtual libraries for special IDs
     if (id === PEOPLE_GROUP_LIBRARY_ID) {
       return PEOPLE_GROUP_LIBRARY
+    }
+    if (id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
+      return DAILY_PEOPLE_GROUP_LIBRARY
     }
 
     const stmt = this.db.prepare(`
@@ -156,8 +170,8 @@ export class LibraryService {
     totalDays: number
     languageStats: { [key: string]: number }
   }> {
-    // Virtual People Group library has "infinite" days
-    if (id === PEOPLE_GROUP_LIBRARY_ID) {
+    // Virtual People Group libraries have "infinite" days
+    if (id === PEOPLE_GROUP_LIBRARY_ID || id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
       return {
         totalDays: -1, // -1 indicates continuous/infinite
         languageStats: {}
