@@ -44,9 +44,18 @@
               <h2 class="text-2xl md:text-3xl font-bold text-default mb-4">
                 {{ peopleGroup.name }}
               </h2>
-              <p v-if="peopleGroup.metadata?.imb_people_description" class="text-muted leading-relaxed">
+              <p v-if="peopleGroup.metadata?.imb_people_description" class="text-muted leading-relaxed mb-4">
                 {{ peopleGroup.metadata.imb_people_description }}
               </p>
+              <UButton
+                :href="`https://doxa.life/research/${slug}/`"
+                target="_blank"
+                variant="outline"
+                size="sm"
+              >
+                {{ $t('campaign.peopleGroup.findOutMore') }}
+                <UIcon name="i-lucide-external-link" class="w-4 h-4 ml-1" />
+              </UButton>
             </div>
           </div>
 

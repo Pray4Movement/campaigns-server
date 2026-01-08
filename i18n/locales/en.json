@@ -26,6 +26,9 @@
     "allRightsReserved": "All rights reserved"
   },
   "campaign": {
+    "peopleGroup": {
+      "findOutMore": "Find out more"
+    },
     "header": {
       "prayFor": "Pray for the {campaign}"
     },
