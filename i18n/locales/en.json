@@ -122,6 +122,29 @@
       "description": "Access today's prayer content and prompts",
       "button": "View Prayer Content"
     },
+    "whyPray": {
+      "title": "Why Pray?",
+      "noOne": {
+        "title": "They Have No One",
+        "description": "Many unengaged people groups have no churches, no missionaries, and often no believers."
+      },
+      "opensDoors": {
+        "title": "Prayer Opens Doors",
+        "description": "Prayer softens hearts, opens doors, and invites the work of the Holy Spirit long before the Gospel is proclaimed."
+      },
+      "changed": {
+        "title": "Experience God's Presence",
+        "description": "God has met many in deep and wonderful ways during their times of prayer. Daily prayer will grow your faith and bring you closer to God."
+      }
+    },
+    "sampleContent": {
+      "title": "Sample Prayer Content",
+      "description": "Here's a preview of the daily prayer content.",
+      "peopleGroupName": "People Group",
+      "scripture": "Scripture",
+      "prayerPoints": "Prayer Points",
+      "peopleGroupOfDay": "People Group of the Day"
+    },
     "mobileApp": {
       "title": "Get the Mobile App",
       "description": "Download our mobile app for a better prayer experience",

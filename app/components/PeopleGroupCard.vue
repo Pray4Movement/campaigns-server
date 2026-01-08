@@ -24,8 +24,10 @@ const mapEmbedUrl = computed(() => {
   if (!lat || !lng) return null
 
   // Use OpenStreetMap embed - always available, no API key needed
-  const bbox = `${lng - 15},${lat - 10},${lng + 15},${lat + 10}`
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
+  const numLat = Number(lat)
+  const numLng = Number(lng)
+  const bbox = `${numLng - 10},${numLat - 10},${numLng + 10},${numLat + 10}`
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${numLat},${numLng}`
 })
 </script>
 

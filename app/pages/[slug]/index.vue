@@ -53,6 +53,50 @@
           <!-- Info Blocks Grid -->
           <div class="grid md:grid-cols-3 gap-6">
 
+            <!-- Map -->
+            <div v-if="peopleGroup.metadata?.imb_lat && peopleGroup.metadata?.imb_lng" class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden">
+              <div class="relative h-full min-h-48">
+                <iframe
+                  :src="`https://www.openstreetmap.org/export/embed.html?bbox=${Number(peopleGroup.metadata.imb_lng) - 10},${Number(peopleGroup.metadata.imb_lat) - 10},${Number(peopleGroup.metadata.imb_lng) + 10},${Number(peopleGroup.metadata.imb_lat) + 10}&layer=mapnik&marker=${peopleGroup.metadata.imb_lat},${peopleGroup.metadata.imb_lng}`"
+                  class="absolute inset-0 w-full h-full border-0"
+                  loading="lazy"
+                ></iframe>
+                <!-- Overlay to prevent scroll zoom while allowing click-through -->
+                <div class="absolute inset-0 z-10" @wheel.prevent @click="($event.currentTarget as HTMLElement).style.display = 'none'"></div>
+              </div>
+            </div>
+
+            <!-- Overview Data Block -->
+            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6">
+              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Overview</h3>
+              <div class="space-y-3 text-sm">
+                <div v-if="peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata?.imb_isoalpha3" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata.imb_isoalpha3 }}</span>
+                </div>
+                <div v-if="peopleGroup.metadata?.imb_population" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-users" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ Number(peopleGroup.metadata.imb_population).toLocaleString() }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata?.imb_reg_of_language" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-languages" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata.imb_reg_of_language }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata?.imb_reg_of_religion" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-bookmark" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata.imb_reg_of_religion }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata?.imb_engagement_status" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-target" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata.imb_engagement_status }}</span>
+                </div>
+                <div v-if="peopleGroup.labels?.imb_congregation_existing || peopleGroup.metadata?.imb_congregation_existing !== undefined" class="flex items-center gap-2">
+                  <UIcon name="i-lucide-church" class="w-4 h-4 text-muted" />
+                  <span class="text-muted">Churches: {{ peopleGroup.labels?.imb_congregation_existing || (peopleGroup.metadata.imb_congregation_existing === '1' || peopleGroup.metadata.imb_congregation_existing === 1 ? 'Yes' : 'No') }}</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Prayer Status Block -->
             <div class="bg-forest-500 rounded-2xl p-6 text-white">
               <h3 class="font-bold uppercase tracking-wide text-center mb-4">Prayer Status</h3>
@@ -72,77 +116,131 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <!-- Overview Data Block -->
-            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6">
-              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Overview</h3>
-              <div class="space-y-3 text-sm">
-                <div v-if="peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata?.imb_isoalpha3" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata.imb_isoalpha3 }}</span>
+      <!-- Why Pray + Sample Content Section -->
+      <section class="py-12 bg-elevated">
+        <div class="max-w-5xl mx-auto px-4">
+          <h2 class="text-2xl font-bold text-default text-center mb-8">{{ $t('campaign.whyPray.title') }}</h2>
+
+          <div class="grid md:grid-cols-2 gap-8">
+            <!-- Left: Why Pray Cards -->
+            <div class="space-y-4">
+              <!-- Card 1: They Have No One -->
+              <div class="p-5 bg-default rounded-xl border border-default">
+                <div class="flex items-start gap-4">
+                  <div class="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center shrink-0">
+                    <UIcon name="i-lucide-globe" class="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-default mb-1">{{ $t('campaign.whyPray.noOne.title') }}</h3>
+                    <p class="text-sm text-muted leading-relaxed">{{ $t('campaign.whyPray.noOne.description') }}</p>
+                  </div>
                 </div>
-                <div v-if="peopleGroup.labels?.imb_subregion || peopleGroup.labels?.imb_region || peopleGroup.metadata?.imb_subregion || peopleGroup.metadata?.imb_region" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-globe" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_subregion || peopleGroup.labels?.imb_region || peopleGroup.metadata.imb_subregion || peopleGroup.metadata.imb_region }}</span>
+              </div>
+
+              <!-- Card 2: Prayer Opens Doors -->
+              <div class="p-5 bg-default rounded-xl border border-default">
+                <div class="flex items-start gap-4">
+                  <div class="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center shrink-0">
+                    <UIcon name="i-lucide-door-open" class="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-default mb-1">{{ $t('campaign.whyPray.opensDoors.title') }}</h3>
+                    <p class="text-sm text-muted leading-relaxed">{{ $t('campaign.whyPray.opensDoors.description') }}</p>
+                  </div>
                 </div>
-                <div v-if="peopleGroup.metadata?.imb_population" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-users" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ Number(peopleGroup.metadata.imb_population).toLocaleString() }}</span>
-                </div>
-                <div v-if="peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata?.imb_reg_of_language" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-languages" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata.imb_reg_of_language }}</span>
+              </div>
+
+              <!-- Card 3: You Will Be Changed -->
+              <div class="p-5 bg-default rounded-xl border border-default">
+                <div class="flex items-start gap-4">
+                  <div class="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center shrink-0">
+                    <UIcon name="i-lucide-sparkles" class="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-default mb-1">{{ $t('campaign.whyPray.changed.title') }}</h3>
+                    <p class="text-sm text-muted leading-relaxed">{{ $t('campaign.whyPray.changed.description') }}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Spiritual Status Block -->
-            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6">
-              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Spiritual Status</h3>
-              <div class="space-y-3 text-sm">
-                <div v-if="peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata?.imb_reg_of_religion" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-bookmark" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata.imb_reg_of_religion }}</span>
+            <!-- Right: Sample Prayer Content -->
+            <div>
+              <UCard>
+                <div class="space-y-5">
+                  <div class="text-sm font-medium text-muted uppercase tracking-wide">{{ $t('campaign.sampleContent.title') }}</div>
+
+                  <!-- People Group Name (dynamic) -->
+                  <div>
+                    <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">
+                      <UIcon name="i-lucide-users" class="w-4 h-4 text-forest-500" />
+                      {{ peopleGroup?.name || $t('campaign.sampleContent.peopleGroupName') }}
+                    </h3>
+                    <div class="space-y-2">
+                      <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
+                      <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse w-5/6"></div>
+                    </div>
+                  </div>
+
+                  <!-- Scripture -->
+                  <div>
+                    <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">
+                      <UIcon name="i-lucide-book-open" class="w-4 h-4 text-forest-500" />
+                      {{ $t('campaign.sampleContent.scripture') }}
+                    </h3>
+                    <div class="bg-beige-100 dark:bg-default rounded-lg p-3 border-l-4 border-forest-500">
+                      <div class="space-y-2">
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse w-4/5"></div>
+                      </div>
+                      <div class="h-2 bg-gray-300 dark:bg-gray-700 rounded animate-pulse w-1/4 mt-2"></div>
+                    </div>
+                  </div>
+
+                  <!-- Prayer Points -->
+                  <div>
+                    <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">
+                      <UIcon name="i-lucide-hand" class="w-4 h-4 text-forest-500" />
+                      {{ $t('campaign.sampleContent.prayerPoints') }}
+                    </h3>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2">
+                        <div class="w-1.5 h-1.5 rounded-full bg-forest-500 shrink-0"></div>
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse flex-1"></div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-1.5 h-1.5 rounded-full bg-forest-500 shrink-0"></div>
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse flex-1 w-4/5"></div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-1.5 h-1.5 rounded-full bg-forest-500 shrink-0"></div>
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse flex-1 w-3/4"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- People Group of the Day -->
+                  <div>
+                    <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">
+                      <UIcon name="i-lucide-globe" class="w-4 h-4 text-forest-500" />
+                      {{ $t('campaign.sampleContent.peopleGroupOfDay') }}
+                    </h3>
+                    <div class="flex gap-3">
+                      <div class="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse shrink-0"></div>
+                      <div class="flex-1 space-y-2">
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse w-1/3"></div>
+                        <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse w-4/5"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div v-if="peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata?.imb_engagement_status" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-target" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata.imb_engagement_status }}</span>
-                </div>
-                <div v-if="peopleGroup.labels?.imb_evangelical_level || peopleGroup.metadata?.imb_evangelical_level !== undefined" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-trending-up" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">Evangelical: {{ peopleGroup.labels?.imb_evangelical_level || peopleGroup.metadata.imb_evangelical_level }}</span>
-                </div>
-                <div v-if="peopleGroup.labels?.imb_congregation_existing || peopleGroup.metadata?.imb_congregation_existing !== undefined" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-church" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">Churches: {{ peopleGroup.labels?.imb_congregation_existing || (peopleGroup.metadata.imb_congregation_existing === '1' || peopleGroup.metadata.imb_congregation_existing === 1 ? 'Yes' : 'No') }}</span>
-                </div>
-                <div v-if="peopleGroup.labels?.imb_church_planting || peopleGroup.metadata?.imb_church_planting !== undefined" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-sprout" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_church_planting || peopleGroup.metadata.imb_church_planting }}</span>
-                </div>
-                <div v-if="peopleGroup.labels?.imb_gsec || peopleGroup.metadata?.imb_gsec !== undefined" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-bar-chart-3" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">GSEC: {{ peopleGroup.labels?.imb_gsec || peopleGroup.metadata.imb_gsec }}</span>
-                </div>
-              </div>
+              </UCard>
             </div>
           </div>
-
-          <!-- Map -->
-          <div v-if="peopleGroup.metadata?.imb_lat && peopleGroup.metadata?.imb_lng" class="mt-6">
-            <div class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden">
-              <div class="relative rounded-lg overflow-hidden h-64">
-                <iframe
-                  :src="`https://www.openstreetmap.org/export/embed.html?bbox=${peopleGroup.metadata.imb_lng - 15},${peopleGroup.metadata.imb_lat - 10},${peopleGroup.metadata.imb_lng + 15},${peopleGroup.metadata.imb_lat + 10}&layer=mapnik&marker=${peopleGroup.metadata.imb_lat},${peopleGroup.metadata.imb_lng}`"
-                  class="w-full h-full border-0"
-                  loading="lazy"
-                ></iframe>
-                <!-- Overlay to prevent scroll zoom while allowing click-through -->
-                <div class="absolute inset-0 z-10" @wheel.prevent @click="($event.currentTarget as HTMLElement).style.display = 'none'"></div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </section>
 
@@ -187,7 +285,7 @@
                         : 'border-default hover:border-(--ui-text-muted)'"
                     >
                       <UIcon name="i-lucide-calendar-days" class="w-8 h-8 mb-2" />
-                      <span class="block font-semibold">Some Days</span>
+                      <span class="block font-semibold">Choose Days</span>
                       <span v-if="signupForm.frequency === 'weekly'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
                       </span>
@@ -325,8 +423,8 @@
         </div>
       </section>
 
-      <!-- Mobile App Links Section -->
-      <section class="py-12 bg-elevated">
+      <!-- Mobile App Links Section (hidden for now) -->
+      <section v-if="false" class="py-12 bg-elevated">
         <div class="max-w-3xl mx-auto px-4">
           <div class="text-center">
             <h2 class="text-2xl font-bold uppercase tracking-wide text-default mb-3">{{ $t('campaign.mobileApp.title') }}</h2>
