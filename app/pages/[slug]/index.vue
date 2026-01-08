@@ -31,7 +31,7 @@
           <!-- Header: Image, Name, Description -->
           <div class="flex flex-col sm:flex-row gap-6 items-start">
             <!-- Image -->
-            <div v-if="peopleGroup.image_url" class="shrink-0 w-40 mx-auto sm:mx-0">
+            <div v-if="peopleGroup.image_url" class="shrink-0 w-50 mx-auto sm:mx-0">
               <img
                 :src="peopleGroup.image_url"
                 :alt="peopleGroup.name"

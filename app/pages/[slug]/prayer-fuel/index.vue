@@ -64,7 +64,7 @@
             :disabled="prayedMarked"
             :loading="submitting"
             size="xl"
-            class="min-w-[200px]"
+            class="min-w-[200px] justify-center"
           >
             {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.iPrayed') }}
           </UButton>

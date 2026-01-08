@@ -120,7 +120,7 @@
     "prayerFuel": {
       "title": "Today's Prayer",
       "description": "Access today's prayer content and prompts",
-      "button": "View Prayer Fuel"
+      "button": "View Prayer Content"
     },
     "mobileApp": {
       "title": "Get the Mobile App",
@@ -228,7 +228,7 @@
     }
   },
   "prayerFuel": {
-    "pageTitle": "Prayer Fuel",
+    "pageTitle": "Prayer Content",
     "title": "Today's Prayer",
     "loading": "Loading today's prayer...",
     "backTo": "Back to {campaign}",
@@ -256,7 +256,7 @@
     "thankYou": "Thank you for praying!",
     "peopleGroupOfTheDay": "People Group of the Day",
     "pastPrayers": {
-      "title": "Past Prayer Fuel"
+      "title": "Past Prayer Content"
     },
     "navigation": {
       "previous": "Previous",
