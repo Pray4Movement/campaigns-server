@@ -117,17 +117,17 @@ export class LibraryService {
     return libraries
   }
 
-  // Get all libraries
+  // Get all global libraries (excludes campaign-specific libraries)
   async getAllLibraries(options?: {
     search?: string
     limit?: number
     offset?: number
   }): Promise<Library[]> {
-    let query = `SELECT * FROM libraries`
+    let query = `SELECT * FROM libraries WHERE campaign_id IS NULL`
     const params: any[] = []
 
     if (options?.search) {
-      query += ' WHERE name ILIKE ?'
+      query += ' AND name ILIKE ?'
       params.push(`%${options.search}%`)
     }
 
