@@ -88,6 +88,17 @@ const convertToCodeBlock = () => {
   }
 }
 
+const convertToVerse = () => {
+  const editor = props.editor
+
+  // If in any type of list, lift out of the list first, then convert to verse
+  if (editor.isActive('bulletList') || editor.isActive('orderedList') || editor.isActive('taskList')) {
+    editor.chain().focus().liftListItem('listItem').setVerse().run()
+  } else {
+    editor.chain().focus().setVerse().run()
+  }
+}
+
 const blockTypes = [
   { name: 'Paragraph', icon: 'lucide:text', command: convertToParagraph },
   { name: 'Heading 1', icon: 'lucide:heading-1', command: () => convertToHeading(1) },
@@ -97,6 +108,7 @@ const blockTypes = [
   { name: 'Numbered List', icon: 'lucide:list-ordered', command: () => props.editor.chain().focus().toggleOrderedList().run() },
   { name: 'Checklist', icon: 'lucide:list-todo', command: () => props.editor.chain().focus().toggleTaskList().run() },
   { name: 'Quote', icon: 'lucide:text-quote', command: convertToBlockquote },
+  { name: 'Verse', icon: 'lucide:book-open', command: convertToVerse },
   { name: 'Code Block', icon: 'lucide:code', command: convertToCodeBlock },
 ]
 
@@ -108,6 +120,7 @@ const getCurrentBlockType = () => {
   if (props.editor.isActive('orderedList')) return { name: 'List', icon: 'lucide:list-ordered' }
   if (props.editor.isActive('taskList')) return { name: 'List', icon: 'lucide:list-todo' }
   if (props.editor.isActive('blockquote')) return { name: 'Quote', icon: 'lucide:text-quote' }
+  if (props.editor.isActive('verse')) return { name: 'Verse', icon: 'lucide:book-open' }
   if (props.editor.isActive('codeBlock')) return { name: 'Code', icon: 'lucide:code' }
   return { name: 'Text', icon: 'lucide:text' }
 }

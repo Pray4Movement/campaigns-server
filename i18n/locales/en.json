@@ -275,11 +275,13 @@
       }
     },
     "button": {
-      "iPrayed": "I Prayed",
+      "amen": "Amen",
       "recording": "Recording...",
-      "recorded": "✓ Prayer Recorded"
+      "recorded": "✓ Prayer Recorded",
+      "hint": "Click to finish your prayer time"
     },
     "thankYou": "Thank you for praying!",
+    "meetThePeople": "Meet the People",
     "peopleGroupOfTheDay": "People Group of the Day",
     "pastPrayers": {
       "title": "Past Prayer Content"

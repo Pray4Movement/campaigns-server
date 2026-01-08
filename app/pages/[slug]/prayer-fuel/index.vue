@@ -21,7 +21,7 @@
       </header>
 
       <!-- Content or No Content Message -->
-      <main class="flex-1 py-8 px-4">
+      <main class="flex-1 py-8 px-8">
         <div class="max-w-4xl mx-auto">
           <div v-if="data.hasContent">
             <!-- Loop through all content items from different libraries -->
@@ -36,13 +36,14 @@
 
               <!-- People Group content -->
               <template v-if="contentItem.content_type === 'people_group' && contentItem.people_group_data">
-                <h2 v-if="contentItem.id === -2" class="text-2xl font-bold mb-8 text-center">{{ $t('prayerFuel.peopleGroupOfTheDay') }}</h2>
+                <h2 v-if="contentItem.id === -1" class="text-2xl font-bold mb-8">{{ $t('prayerFuel.meetThePeople') }}</h2>
+                <h2 v-else-if="contentItem.id === -2" class="text-2xl font-bold mb-8">{{ $t('prayerFuel.peopleGroupOfTheDay') }}</h2>
                 <PeopleGroupCard :people-group="contentItem.people_group_data" />
               </template>
 
               <!-- Static library content -->
               <template v-else>
-                <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8 text-center">{{ contentItem.title }}</h2>
+                <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8">{{ contentItem.title }}</h2>
                 <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
               </template>
             </div>
@@ -66,9 +67,12 @@
             size="xl"
             class="min-w-[200px] justify-center"
           >
-            {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.iPrayed') }}
+            {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.amen') }}
           </UButton>
-          <p v-if="prayedMarked" class="mt-4 text-sm text-[var(--ui-text-muted)]">
+          <p v-if="!prayedMarked" class="mt-4 text-sm text-[var(--ui-text-muted)]">
+            {{ $t('prayerFuel.button.hint') }}
+          </p>
+          <p v-else class="mt-4 text-sm text-[var(--ui-text-muted)]">
             {{ $t('prayerFuel.thankYou') }}
           </p>
         </div>
@@ -291,3 +295,14 @@ onUnmounted(() => {
   cancelAutoSaveTimeouts()
 })
 </script>
+
+<style scoped>
+:deep(h2) {
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+:deep(p) {
+  font-size: 1rem;
+}
+</style>

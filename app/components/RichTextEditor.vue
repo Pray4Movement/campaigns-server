@@ -519,6 +519,44 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
+/* Verse */
+:deep(.ProseMirror div[data-type="verse"]) {
+  background-color: var(--ui-primary);
+  border-radius: 5px;
+  padding: 1rem;
+  margin: 1rem 0;
+  position: relative;
+}
+
+:deep(.ProseMirror div[data-type="verse"] p) {
+  text-align: center;
+  color: white;
+  margin: 0.5rem 0;
+}
+
+:deep(.ProseMirror div[data-type="verse"] p:first-child) {
+  margin-top: 0;
+}
+
+:deep(.ProseMirror div[data-type="verse"] p:last-child) {
+  margin-bottom: 0;
+}
+
+:deep(.ProseMirror div[data-type="verse"].ProseMirror-selectednode) {
+  outline: 2px solid var(--ui-primary);
+  outline-offset: 2px;
+}
+
+:deep(.ProseMirror div[data-type="verse"]::after) {
+  content: '';
+  position: absolute;
+  left: -60px;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  cursor: pointer;
+}
+
 /* Images */
 :deep(.ProseMirror img) {
   max-width: 100%;

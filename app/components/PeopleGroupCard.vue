@@ -108,17 +108,10 @@ const viewerItemId = computed(() => props.contentId || `people-group-${props.peo
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1.5rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 0.75rem;
-  background-color: var(--ui-bg-elevated);
 }
 
 .day-in-life-section {
-  padding: 1.5rem;
-  border: 1px solid var(--ui-border);
-  border-radius: 0.75rem;
-  background-color: var(--ui-bg-elevated);
+  margin-top: 1rem;
 }
 
 @media (min-width: 640px) {
@@ -178,7 +171,7 @@ const viewerItemId = computed(() => props.contentId || `people-group-${props.peo
 }
 
 .name {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--ui-text);
   margin: 0;
@@ -205,7 +198,6 @@ const viewerItemId = computed(() => props.contentId || `people-group-${props.peo
 }
 
 .description {
-  font-size: 1rem;
   line-height: 1.7;
   color: var(--ui-text);
   margin: 0;

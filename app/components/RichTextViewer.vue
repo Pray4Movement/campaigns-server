@@ -15,6 +15,7 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import Youtube from '@tiptap/extension-youtube'
 import { Spacer } from '~/extensions/spacer'
 import { Vimeo } from '~/extensions/vimeo'
+import { Verse } from '~/extensions/verse'
 
 const props = defineProps<{
   content: Record<string, any> | null // TipTap JSON object
@@ -52,6 +53,7 @@ const editor = useEditor({
     Spacer.configure({
       defaultHeight: 24
     }),
+    Verse,
     Youtube.configure({
       inline: false,
       width: 640,
@@ -469,5 +471,27 @@ onBeforeUnmount(() => {
   border: none;
   max-width: 100%;
   display: block;
+}
+
+/* Verse */
+:deep(.prose div[data-type="verse"]) {
+  background-color: var(--ui-primary);
+  border-radius: 5px;
+  padding: 1rem;
+  margin: 1.5em 0;
+}
+
+:deep(.prose div[data-type="verse"] p) {
+  text-align: center;
+  color: white;
+  margin: 0.5rem 0;
+}
+
+:deep(.prose div[data-type="verse"] p:first-child) {
+  margin-top: 0;
+}
+
+:deep(.prose div[data-type="verse"] p:last-child) {
+  margin-bottom: 0;
 }
 </style>

@@ -110,6 +110,16 @@ export const getCommandItems = ({ query }: { query: string }): CommandItem[] => 
       }
     },
     {
+      title: 'Verse',
+      description: 'Scripture or quoted verse',
+      icon: 'lucide:book-open',
+      group: 'Basic Blocks',
+      aliases: ['verse', 'scripture', 'bible'],
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).setVerse().run()
+      }
+    },
+    {
       title: 'Code Block',
       description: 'Code with syntax highlighting',
       icon: 'lucide:code',

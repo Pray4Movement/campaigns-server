@@ -21,6 +21,7 @@ import { DOMParser } from '@tiptap/pm/model'
 import { ImageUploadExtension } from '~/utils/imageUploadExtension'
 import { Spacer } from '~/extensions/spacer'
 import { Vimeo } from '~/extensions/vimeo'
+import { Verse } from '~/extensions/verse'
 import { editorConfig } from '~/config/editor.config'
 import { uploadImage } from './useImageUpload'
 import { useSlashCommands } from './useSlashCommands'
@@ -109,6 +110,7 @@ export const createEditorExtensions = (
     Spacer.configure({
       defaultHeight: 24
     }),
+    Verse,
     Youtube.configure({
       inline: false,
       width: 640,
