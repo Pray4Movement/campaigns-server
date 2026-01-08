@@ -63,7 +63,7 @@
           <div class="grid md:grid-cols-3 gap-6">
 
             <!-- Map -->
-            <div v-if="peopleGroup.metadata?.imb_lat && peopleGroup.metadata?.imb_lng" class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden">
+            <div v-if="peopleGroup.metadata?.imb_lat && peopleGroup.metadata?.imb_lng" class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden md:order-3">
               <div class="relative h-full min-h-48">
                 <iframe
                   :src="`https://www.openstreetmap.org/export/embed.html?bbox=${Number(peopleGroup.metadata.imb_lng) - 10},${Number(peopleGroup.metadata.imb_lat) - 10},${Number(peopleGroup.metadata.imb_lng) + 10},${Number(peopleGroup.metadata.imb_lat) + 10}&layer=mapnik&marker=${peopleGroup.metadata.imb_lat},${peopleGroup.metadata.imb_lng}`"
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Overview Data Block -->
-            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6">
+            <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6 md:order-2">
               <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Overview</h3>
               <div class="space-y-3 text-sm">
                 <div v-if="peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata?.imb_isoalpha3" class="flex items-center gap-2">
@@ -107,7 +107,7 @@
             </div>
 
             <!-- Prayer Status Block -->
-            <div class="bg-forest-500 rounded-2xl p-6 text-white">
+            <div class="bg-forest-500 rounded-2xl p-6 text-white md:order-1">
               <h3 class="font-bold uppercase tracking-wide text-center mb-4">Prayer Status</h3>
               <div class="text-center">
                 <div class="text-5xl font-bold mb-2">
@@ -132,13 +132,13 @@
       <!-- Why Pray + Sample Content Section -->
       <section class="py-12 bg-elevated">
         <div class="max-w-5xl mx-auto px-4">
-          <h2 class="text-2xl font-bold text-default text-center mb-8">{{ $t('campaign.whyPray.title') }}</h2>
 
           <div class="grid md:grid-cols-2 gap-8">
             <!-- Left: Why Pray Cards -->
             <div class="space-y-4">
+              <h2 class="text-2xl font-bold text-default text-center mb-8">{{ $t('campaign.whyPray.title') }}</h2>
               <!-- Card 1: They Have No One -->
-              <div class="p-5 bg-default rounded-xl border border-default">
+              <div class="p-5 bg-beige-100 dark:bg-elevated rounded-xl">
                 <div class="flex items-start gap-4">
                   <div class="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center shrink-0">
                     <UIcon name="i-lucide-globe" class="w-5 h-5 text-white" />
@@ -151,7 +151,7 @@
               </div>
 
               <!-- Card 2: Prayer Opens Doors -->
-              <div class="p-5 bg-default rounded-xl border border-default">
+              <div class="p-5 bg-beige-100 dark:bg-elevated rounded-xl">
                 <div class="flex items-start gap-4">
                   <div class="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center shrink-0">
                     <UIcon name="i-lucide-door-open" class="w-5 h-5 text-white" />
@@ -164,7 +164,7 @@
               </div>
 
               <!-- Card 3: You Will Be Changed -->
-              <div class="p-5 bg-default rounded-xl border border-default">
+              <div class="p-5 bg-beige-100 dark:bg-elevated rounded-xl">
                 <div class="flex items-start gap-4">
                   <div class="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center shrink-0">
                     <UIcon name="i-lucide-sparkles" class="w-5 h-5 text-white" />
@@ -179,10 +179,9 @@
 
             <!-- Right: Sample Prayer Content -->
             <div>
+              <h2 class="text-2xl font-bold text-default text-center mb-8">{{ $t('campaign.sampleContent.title') }}</h2>
               <UCard>
                 <div class="space-y-5">
-                  <div class="text-sm font-medium text-muted uppercase tracking-wide">{{ $t('campaign.sampleContent.title') }}</div>
-
                   <!-- People Group Name (dynamic) -->
                   <div>
                     <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">

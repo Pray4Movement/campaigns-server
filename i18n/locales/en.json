@@ -41,7 +41,7 @@
       "goHome": "Go Home"
     },
     "signup": {
-      "title": "Join the Prayer Movement",
+      "title": "Sign up to Pray",
       "description": "Commit to praying daily and receive helpful reminders via email.",
       "success": "✓ Welcome! You've joined the prayer movement. You'll receive your first prayer prompt soon.",
       "successEmail": "✓ Almost there! Please check your email and click the verification link to complete your signup.",
@@ -141,7 +141,7 @@
       }
     },
     "sampleContent": {
-      "title": "Sample Prayer Content",
+      "title": "Receive Daily Prayer Content",
       "description": "Here's a preview of the daily prayer content.",
       "peopleGroupName": "People Group",
       "scripture": "Scripture",
