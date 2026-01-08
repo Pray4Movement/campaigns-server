@@ -76,6 +76,9 @@
           <UButton @click="navigateToSubscribers(selectedCampaign.id)" variant="outline">
             View Subscribers
           </UButton>
+          <UButton :to="`/admin/campaigns/${selectedCampaign.id}/content`" variant="outline">
+            Manage Content
+          </UButton>
           <UButton
             :to="`/${selectedCampaign.slug}`"
             target="_blank"

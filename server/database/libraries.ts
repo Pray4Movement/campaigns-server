@@ -108,6 +108,15 @@ export class LibraryService {
     return library
   }
 
+  // Get all libraries for a campaign
+  async getCampaignLibraries(campaignId: number): Promise<Library[]> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM libraries WHERE campaign_id = ? ORDER BY name
+    `)
+    const libraries = await stmt.all(campaignId) as Library[]
+    return libraries
+  }
+
   // Get all libraries
   async getAllLibraries(options?: {
     search?: string
