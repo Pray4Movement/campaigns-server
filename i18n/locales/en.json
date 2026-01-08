@@ -42,7 +42,7 @@
     },
     "signup": {
       "title": "Sign up to Pray",
-      "description": "Commit to praying daily and receive helpful reminders via email.",
+      "description": "Commit to praying daily or weekly and receive prayer content reminders.",
       "success": "✓ Welcome! You've joined the prayer movement. You'll receive your first prayer prompt soon.",
       "successEmail": "✓ Almost there! Please check your email and click the verification link to complete your signup.",
       "checkSpam": "Don't see the email? Check your spam folder.",

@@ -52,6 +52,7 @@
                 target="_blank"
                 variant="outline"
                 size="sm"
+                class="rounded-full"
               >
                 {{ $t('campaign.peopleGroup.findOutMore') }}
                 <UIcon name="i-lucide-external-link" class="w-4 h-4 ml-1" />
@@ -400,6 +401,7 @@
                   type="submit"
                   block
                   size="lg"
+                  class="rounded-full"
                   :loading="submitting"
                   :disabled="!signupForm.name || !signupForm.email || (signupForm.frequency === 'weekly' && signupForm.days_of_week.length === 0)"
                 >

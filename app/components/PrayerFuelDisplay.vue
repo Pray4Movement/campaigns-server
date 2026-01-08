@@ -4,15 +4,7 @@
     <main class="flex-1 py-8 px-8">
       <div class="max-w-4xl mx-auto">
         <div v-if="hasContent">
-          <div v-for="(contentItem, index) in content" :key="contentItem.id" class="mb-12 last:mb-0">
-            <div v-if="content.length > 1 && index > 0" class="flex items-center justify-center my-12 relative">
-              <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
-              <span class="inline-flex items-center justify-center w-8 h-8 mx-4 bg-[var(--ui-bg)] border-2 border-[var(--ui-border)] rounded-full text-sm font-semibold text-[var(--ui-text-muted)]">
-                {{ index + 1 }}
-              </span>
-              <div class="flex-1 h-px bg-[var(--ui-border)]"></div>
-            </div>
-
+          <div v-for="(contentItem, index) in content" :key="contentItem.id" :class="index > 0 ? 'mt-24' : ''">
             <!-- People Group content -->
             <template v-if="contentItem.content_type === 'people_group' && contentItem.people_group_data">
               <h2 v-if="contentItem.id === -1" class="text-2xl font-bold mb-8">{{ $t('prayerFuel.meetThePeople') }}</h2>
@@ -44,7 +36,7 @@
           :disabled="prayedMarked"
           :loading="submitting"
           size="xl"
-          class="min-w-[200px] justify-center"
+          class="min-w-[200px] justify-center rounded-full"
         >
           {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.amen') }}
         </UButton>
