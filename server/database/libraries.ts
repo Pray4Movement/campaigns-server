@@ -10,6 +10,8 @@ export const PEOPLE_GROUP_LIBRARY: Library = {
   description: 'Dynamically displays the linked people group information for the campaign',
   type: 'people_group',
   repeating: false,
+  campaign_id: null,
+  library_key: null,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
 }
@@ -22,6 +24,8 @@ export const DAILY_PEOPLE_GROUP_LIBRARY: Library = {
   description: 'Displays a different people group each day, rotating through all groups',
   type: 'people_group',
   repeating: false,
+  campaign_id: null,
+  library_key: null,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
 }
@@ -32,6 +36,8 @@ export interface Library {
   description: string
   type: LibraryType
   repeating: boolean
+  campaign_id: number | null
+  library_key: string | null
   created_at: string
   updated_at: string
 }
@@ -40,12 +46,16 @@ export interface CreateLibraryData {
   name: string
   description?: string
   repeating?: boolean
+  campaign_id?: number | null
+  library_key?: string | null
 }
 
 export interface UpdateLibraryData {
   name?: string
   description?: string
   repeating?: boolean
+  campaign_id?: number | null
+  library_key?: string | null
 }
 
 export class LibraryService {
@@ -53,15 +63,15 @@ export class LibraryService {
 
   // Create library
   async createLibrary(data: CreateLibraryData): Promise<Library> {
-    const { name, description = '', repeating = false } = data
+    const { name, description = '', repeating = false, campaign_id = null, library_key = null } = data
 
     const stmt = this.db.prepare(`
-      INSERT INTO libraries (name, description, repeating)
-      VALUES (?, ?, ?)
+      INSERT INTO libraries (name, description, repeating, campaign_id, library_key)
+      VALUES (?, ?, ?, ?, ?)
     `)
 
     try {
-      const result = await stmt.run(name, description, repeating)
+      const result = await stmt.run(name, description, repeating, campaign_id, library_key)
       const libraryId = result.lastInsertRowid as number
       return (await this.getLibraryById(libraryId))!
     } catch (error: any) {
@@ -86,6 +96,15 @@ export class LibraryService {
       SELECT * FROM libraries WHERE id = ?
     `)
     const library = await stmt.get(id) as Library | null
+    return library
+  }
+
+  // Get campaign-specific library by key
+  async getCampaignLibraryByKey(campaignId: number, libraryKey: string): Promise<Library | null> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM libraries WHERE campaign_id = ? AND library_key = ?
+    `)
+    const library = await stmt.get(campaignId, libraryKey) as Library | null
     return library
   }
 
@@ -143,6 +162,16 @@ export class LibraryService {
     if (data.repeating !== undefined) {
       updates.push('repeating = ?')
       values.push(data.repeating)
+    }
+
+    if (data.campaign_id !== undefined) {
+      updates.push('campaign_id = ?')
+      values.push(data.campaign_id)
+    }
+
+    if (data.library_key !== undefined) {
+      updates.push('library_key = ?')
+      values.push(data.library_key)
     }
 
     if (updates.length === 0) {

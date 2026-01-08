@@ -8,10 +8,12 @@ interface PeopleGroupData {
   religion: string | null
   lat: number | null
   lng: number | null
+  day_in_life_content?: Record<string, any> | null
 }
 
 const props = defineProps<{
   peopleGroup: PeopleGroupData
+  contentId?: string
 }>()
 
 function formatPopulation(population: number | null): string {
@@ -29,65 +31,90 @@ const mapEmbedUrl = computed(() => {
   const bbox = `${numLng - 10},${numLat - 10},${numLng + 10},${numLat + 10}`
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${numLat},${numLng}`
 })
+
+const viewerItemId = computed(() => props.contentId || `people-group-${props.peopleGroup.name}`)
 </script>
 
 <template>
-  <div class="people-group-card">
-    <!-- Left column: Header + Description -->
-    <div class="left-column">
-      <div class="header-row">
-        <div v-if="peopleGroup.image_url" class="image-container">
-          <img
-            :src="peopleGroup.image_url"
-            :alt="peopleGroup.name"
-            class="people-group-image"
-          />
-        </div>
+  <div class="people-group-wrapper">
+    <div class="people-group-card">
+      <!-- Left column: Header + Description -->
+      <div class="left-column">
+        <div class="header-row">
+          <div v-if="peopleGroup.image_url" class="image-container">
+            <img
+              :src="peopleGroup.image_url"
+              :alt="peopleGroup.name"
+              class="people-group-image"
+            />
+          </div>
 
-        <div class="header-content">
-          <h2 class="name">{{ peopleGroup.name }}</h2>
+          <div class="header-content">
+            <h2 class="name">{{ peopleGroup.name }}</h2>
 
-          <div class="info-row">
-            <div v-if="peopleGroup.population" class="info-item">
-              <UIcon name="i-lucide-users" class="icon" />
-              <span>{{ formatPopulation(peopleGroup.population) }}</span>
-            </div>
-            <div v-if="peopleGroup.language" class="info-item">
-              <UIcon name="i-lucide-languages" class="icon" />
-              <span>{{ peopleGroup.language }}</span>
-            </div>
-            <div v-if="peopleGroup.religion" class="info-item">
-              <UIcon name="i-lucide-church" class="icon" />
-              <span>{{ peopleGroup.religion }}</span>
+            <div class="info-row">
+              <div v-if="peopleGroup.population" class="info-item">
+                <UIcon name="i-lucide-users" class="icon" />
+                <span>{{ formatPopulation(peopleGroup.population) }}</span>
+              </div>
+              <div v-if="peopleGroup.language" class="info-item">
+                <UIcon name="i-lucide-languages" class="icon" />
+                <span>{{ peopleGroup.language }}</span>
+              </div>
+              <div v-if="peopleGroup.religion" class="info-item">
+                <UIcon name="i-lucide-church" class="icon" />
+                <span>{{ peopleGroup.religion }}</span>
+              </div>
             </div>
           </div>
         </div>
+
+        <p v-if="peopleGroup.description" class="description">
+          {{ peopleGroup.description }}
+        </p>
       </div>
 
-      <p v-if="peopleGroup.description" class="description">
-        {{ peopleGroup.description }}
-      </p>
+      <!-- Right column: Map spanning full height -->
+      <div v-if="mapEmbedUrl" class="map-container">
+        <iframe
+          :src="mapEmbedUrl"
+          :title="`Map showing location of ${peopleGroup.name}`"
+          class="map-embed"
+          loading="lazy"
+          frameborder="0"
+          scrolling="no"
+        />
+      </div>
     </div>
 
-    <!-- Right column: Map spanning full height -->
-    <div v-if="mapEmbedUrl" class="map-container">
-      <iframe
-        :src="mapEmbedUrl"
-        :title="`Map showing location of ${peopleGroup.name}`"
-        class="map-embed"
-        loading="lazy"
-        frameborder="0"
-        scrolling="no"
+    <!-- Day in the Life content section -->
+    <div v-if="peopleGroup.day_in_life_content" class="day-in-life-section">
+      <RichTextViewer
+        :content="peopleGroup.day_in_life_content"
+        :item-id="viewerItemId"
       />
     </div>
   </div>
 </template>
 
 <style scoped>
+.people-group-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .people-group-card {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--ui-border);
+  border-radius: 0.75rem;
+  background-color: var(--ui-bg-elevated);
+}
+
+.day-in-life-section {
   padding: 1.5rem;
   border: 1px solid var(--ui-border);
   border-radius: 0.75rem;
