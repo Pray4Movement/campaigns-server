@@ -343,7 +343,8 @@ async function loadLibraries() {
 function selectLibrary(library: Library) {
   selectedLibrary.value = library
   currentPage.value = 1
-  dayRange.value = { minDay: 1, maxDay: library.stats?.totalDays || 365 }
+  // Show at least 365 days even for empty libraries so users can add content
+  dayRange.value = { minDay: 1, maxDay: Math.max(library.stats?.totalDays || 0, 365) }
   loadLibraryContent()
 }
 
@@ -362,10 +363,12 @@ async function loadLibraryContent() {
     })
     dayContentMap.value = map
 
-    // Update day range
+    // Update day range - ensure at least 365 days are shown
     if (response.content.length > 0) {
       const days = response.content.map(g => g.dayNumber)
       dayRange.value.maxDay = Math.max(...days, 365)
+    } else {
+      dayRange.value.maxDay = 365
     }
   } catch (err: any) {
     console.error('Failed to load library content:', err)

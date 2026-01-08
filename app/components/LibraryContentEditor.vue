@@ -88,6 +88,7 @@ const form = ref({
 const loading = ref(props.mode === 'edit')
 const error = ref('')
 const saving = ref(false)
+const isSaved = ref(false)
 const hasUnsavedChanges = ref(false)
 const showUnsavedChangesModal = ref(false)
 const pendingNavigation = ref<any>(null)
@@ -155,6 +156,7 @@ async function saveContent() {
         }
       })
 
+      isSaved.value = true
       hasUnsavedChanges.value = false
 
       toast.add({
@@ -172,6 +174,7 @@ async function saveContent() {
         }
       })
 
+      isSaved.value = true
       hasUnsavedChanges.value = false
 
       toast.add({
@@ -195,6 +198,7 @@ async function saveContent() {
 }
 
 function confirmLeave() {
+  isSaved.value = true
   hasUnsavedChanges.value = false
   showUnsavedChangesModal.value = false
   if (pendingNavigation.value) {
@@ -208,13 +212,19 @@ function cancelLeave() {
 }
 
 onBeforeRouteLeave((to, from, next) => {
-  const shouldWarn = props.mode === 'edit'
-    ? hasUnsavedChanges.value
-    : hasActualContent.value && !hasUnsavedChanges.value === false
-
-  if (props.mode === 'new' && !hasActualContent.value) {
+  // Always allow navigation if content was saved
+  if (isSaved.value) {
     next()
-  } else if (hasUnsavedChanges.value || (props.mode === 'new' && hasActualContent.value)) {
+    return
+  }
+
+  // For new mode: warn if there's unsaved content
+  // For edit mode: warn if there are unsaved changes
+  const shouldWarn = props.mode === 'new'
+    ? hasActualContent.value
+    : hasUnsavedChanges.value
+
+  if (shouldWarn) {
     pendingNavigation.value = next
     showUnsavedChangesModal.value = true
   } else {
