@@ -86,6 +86,9 @@ export default defineNuxtConfig({
     // Disciple.Tools API
     dtPeopleGroupsApiUrl: process.env.DT_PEOPLE_GROUPS_API_URL || '',
 
+    // DeepL Translation API
+    deeplApiKey: process.env.DEEPL_API_KEY || '',
+
     // Public keys (exposed to the frontend)
     public: {
       appName: appTitle,
