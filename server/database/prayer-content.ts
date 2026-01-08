@@ -242,6 +242,7 @@ export class PrayerContentService {
   /**
    * Generate people group content for a campaign
    * Includes Day in the Life content if a campaign-specific library exists
+   * Cycles through different aspects each day (map, evangelicals, status, picture, resources)
    */
   private async generatePeopleGroupContent(campaignId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
     // Get the campaign to find its dt_id
@@ -256,6 +257,11 @@ export class PrayerContentService {
       return null
     }
 
+    // Calculate campaign day number for aspect cycling
+    const campaignDay = await this.dateToDayNumber(date)
+    // Cycle through 5 aspects: 1=map, 2=evangelicals, 3=status, 4=picture, 5=resources
+    const featuredAspect = ((campaignDay - 1) % 5) + 1
+
     // Parse metadata for additional fields
     let description: string | null = null
     let population: number | null = null
@@ -263,6 +269,16 @@ export class PrayerContentService {
     let religion: string | null = null
     let lat: number | null = null
     let lng: number | null = null
+    // Additional fields for aspect cycling
+    let evangelicalPercentage: number | null = null
+    let engagementStatus: string | null = null
+    let congregationExisting: string | null = null
+    let churchPlanting: string | null = null
+    let bibleAvailable: string | null = null
+    let jesusFilmAvailable: string | null = null
+    let radioBroadcastAvailable: string | null = null
+    let gospelRecordingsAvailable: string | null = null
+    let audioScriptureAvailable: string | null = null
 
     if (peopleGroup.metadata) {
       try {
@@ -280,6 +296,21 @@ export class PrayerContentService {
         // Extract coordinates
         lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
         lng = metadata.imb_lng ? parseFloat(metadata.imb_lng) : null
+
+        // Evangelical data for aspect 2
+        evangelicalPercentage = metadata.imb_evangelical_percentage ? parseFloat(metadata.imb_evangelical_percentage) : null
+
+        // Status data for aspect 3
+        engagementStatus = metadata.imb_engagement_status || null
+        congregationExisting = metadata.imb_congregation_existing !== undefined ? String(metadata.imb_congregation_existing) : null
+        churchPlanting = metadata.imb_church_planting !== undefined ? String(metadata.imb_church_planting) : null
+
+        // Resources data for aspect 5
+        bibleAvailable = metadata.imb_bible_available || null
+        jesusFilmAvailable = metadata.imb_jesus_film_available || null
+        radioBroadcastAvailable = metadata.imb_radio_broadcast_available || null
+        gospelRecordingsAvailable = metadata.imb_gospel_recordings_available || null
+        audioScriptureAvailable = metadata.imb_audio_scripture_available || null
       } catch (e) {
         // Ignore parse errors
       }
@@ -290,9 +321,6 @@ export class PrayerContentService {
     try {
       const dayInLifeLibrary = await libraryService.getCampaignLibraryByKey(campaignId, 'day_in_life')
       if (dayInLifeLibrary) {
-        // Calculate campaign day number from date
-        const campaignDay = await this.dateToDayNumber(date)
-
         // Get total days in the library for cycling
         const dayRange = await libraryContentService.getDayRange(dayInLifeLibrary.id)
         const totalDays = dayRange?.maxDay || 365
@@ -336,7 +364,18 @@ export class PrayerContentService {
         religion,
         lat,
         lng,
-        day_in_life_content: dayInLifeContent
+        day_in_life_content: dayInLifeContent,
+        // Aspect cycling data
+        featured_aspect: featuredAspect,
+        evangelical_percentage: evangelicalPercentage,
+        engagement_status: engagementStatus,
+        congregation_existing: congregationExisting,
+        church_planting: churchPlanting,
+        bible_available: bibleAvailable,
+        jesus_film_available: jesusFilmAvailable,
+        radio_broadcast_available: radioBroadcastAvailable,
+        gospel_recordings_available: gospelRecordingsAvailable,
+        audio_scripture_available: audioScriptureAvailable
       },
       created_at: now,
       updated_at: now
