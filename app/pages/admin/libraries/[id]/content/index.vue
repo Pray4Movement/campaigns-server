@@ -108,7 +108,7 @@
     <!-- Translation Progress Modal -->
     <TranslationProgressModal
       v-model:open="showProgressModal"
-      :batch-id="currentBatchId"
+      :library-id="libraryId"
       @close="handleProgressClose"
       @cancelled="handleProgressCancelled"
     />
@@ -159,7 +159,6 @@ const toast = useToast()
 const showTranslateModal = ref(false)
 const showProgressModal = ref(false)
 const startingTranslation = ref(false)
-const currentBatchId = ref('')
 
 const languageOptions = computed(() => [
   { label: 'All Languages', value: 'all' },
@@ -319,8 +318,7 @@ async function handleStartBulkTranslation(options: { sourceLanguage: string; tar
       return
     }
 
-    // Store batch ID and show progress modal
-    currentBatchId.value = response.batchId
+    // Show progress modal
     showTranslateModal.value = false
     showProgressModal.value = true
 
@@ -343,7 +341,6 @@ async function handleStartBulkTranslation(options: { sourceLanguage: string; tar
 
 function handleProgressClose() {
   showProgressModal.value = false
-  currentBatchId.value = ''
   // Reload content to show newly translated items
   loadContent()
 }

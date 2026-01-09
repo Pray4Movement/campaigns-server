@@ -1,7 +1,6 @@
 import { libraryContentService } from '#server/database/library-content'
-import { translationJobsService } from '#server/database/translation-jobs'
+import { jobQueueService, type TranslationPayload } from '#server/database/job-queue'
 import { isDeepLConfigured } from '#server/utils/deepl'
-import { randomUUID } from 'crypto'
 
 // All supported language codes
 const ALL_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
@@ -15,7 +14,7 @@ const ALL_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi
  * - sourceLanguage: string - Language code to translate FROM
  * - overwrite: boolean - Whether to overwrite existing translations
  *
- * Returns batch ID for tracking progress
+ * Returns library ID for tracking progress via reference_type='library_translation'
  */
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.create')
@@ -63,17 +62,8 @@ export default defineEventHandler(async (event) => {
   // Determine target languages (all except source)
   const targetLanguages = ALL_LANGUAGES.filter(lang => lang !== sourceLanguage)
 
-  // Generate batch ID
-  const batchId = randomUUID()
-
   // Create jobs for each source content × target language combination
-  const jobsToCreate: Array<{
-    batch_id: string
-    library_id: number
-    source_content_id: number
-    target_language: string
-    overwrite: boolean
-  }> = []
+  let jobCount = 0
 
   for (const content of sourceContent) {
     // Skip content without actual content
@@ -90,32 +80,35 @@ export default defineEventHandler(async (event) => {
         if (existing) continue
       }
 
-      jobsToCreate.push({
-        batch_id: batchId,
+      const payload: TranslationPayload = {
         library_id: libraryId,
         source_content_id: content.id,
+        source_language: sourceLanguage,
         target_language: targetLanguage,
         overwrite
+      }
+
+      await jobQueueService.createJob('translation', payload, {
+        referenceType: 'library_translation',
+        referenceId: libraryId
       })
+      jobCount++
     }
   }
 
-  if (jobsToCreate.length === 0) {
+  if (jobCount === 0) {
     return {
       success: true,
       message: 'No translations needed - all target languages already have content',
-      batchId,
+      libraryId,
       totalJobs: 0
     }
   }
 
-  // Create all jobs
-  const jobCount = await translationJobsService.createJobs(jobsToCreate)
-
   return {
     success: true,
     message: `Queued ${jobCount} translation job(s)`,
-    batchId,
+    libraryId,
     totalJobs: jobCount
   }
 })

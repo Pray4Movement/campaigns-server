@@ -38,10 +38,6 @@
             <span class="status-dot failed" />
             <span>Failed: {{ stats.failed }}</span>
           </div>
-          <div v-if="stats.cancelled > 0" class="status-item">
-            <span class="status-dot cancelled" />
-            <span>Cancelled: {{ stats.cancelled }}</span>
-          </div>
         </div>
 
         <!-- Status Message -->
@@ -52,11 +48,6 @@
           <template v-else-if="stats.failed > 0">
             <p class="warning">
               Translation completed with {{ stats.failed }} error(s).
-            </p>
-          </template>
-          <template v-else-if="stats.cancelled > 0">
-            <p class="info">
-              Translation was cancelled. {{ stats.completed }} translation(s) completed.
             </p>
           </template>
           <template v-else>
@@ -97,16 +88,16 @@ interface TranslationStats {
   processing: number
   completed: number
   failed: number
-  cancelled: number
 }
 
 interface Props {
   open?: boolean
-  batchId: string
+  libraryId: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  open: false
+  open: false,
+  libraryId: 0
 })
 
 const emit = defineEmits<{
@@ -125,8 +116,7 @@ const stats = ref<TranslationStats>({
   pending: 0,
   processing: 0,
   completed: 0,
-  failed: 0,
-  cancelled: 0
+  failed: 0
 })
 
 const isComplete = ref(false)
@@ -134,7 +124,7 @@ const cancelling = ref(false)
 const pollInterval = ref<NodeJS.Timeout | null>(null)
 
 const completedCount = computed(() => {
-  return stats.value.completed + stats.value.failed + stats.value.cancelled
+  return stats.value.completed + stats.value.failed
 })
 
 const progressPercent = computed(() => {
@@ -144,7 +134,7 @@ const progressPercent = computed(() => {
 
 // Start polling when modal opens
 watch(() => props.open, async (newVal) => {
-  if (newVal && props.batchId) {
+  if (newVal && props.libraryId) {
     isComplete.value = false
     cancelling.value = false
     await fetchStatus()
@@ -161,14 +151,13 @@ onUnmounted(() => {
 
 async function fetchStatus() {
   try {
-    const response = await $fetch(`/api/admin/translation-jobs/${props.batchId}/status`)
+    const response = await $fetch(`/api/admin/libraries/${props.libraryId}/translate/status`)
     stats.value = {
       total: response.total,
       pending: response.pending,
       processing: response.processing,
       completed: response.completed,
-      failed: response.failed,
-      cancelled: response.cancelled
+      failed: response.failed
     }
     isComplete.value = response.isComplete
 
@@ -195,7 +184,7 @@ function stopPolling() {
 async function handleCancel() {
   cancelling.value = true
   try {
-    await $fetch(`/api/admin/translation-jobs/${props.batchId}/cancel`, {
+    await $fetch(`/api/admin/libraries/${props.libraryId}/translate/cancel`, {
       method: 'POST'
     })
     await fetchStatus()
@@ -286,10 +275,6 @@ function handleClose() {
 
 .status-dot.failed {
   background: var(--ui-color-error);
-}
-
-.status-dot.cancelled {
-  background: var(--ui-color-warning);
 }
 
 @keyframes pulse {
