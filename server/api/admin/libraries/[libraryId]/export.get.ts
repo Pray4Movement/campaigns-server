@@ -1,0 +1,77 @@
+import { libraryService, type LibraryExportData, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID } from '#server/database/libraries'
+import { libraryContentService } from '#server/database/library-content'
+import { campaignService } from '#server/database/campaigns'
+
+export default defineEventHandler(async (event) => {
+  // Require authentication
+  const user = await requireAuth(event)
+
+  const id = parseInt(event.context.params?.libraryId || '0')
+
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid library ID'
+    })
+  }
+
+  // Cannot export virtual libraries
+  if (id === PEOPLE_GROUP_LIBRARY_ID || id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Cannot export virtual libraries'
+    })
+  }
+
+  const library = await libraryService.getLibraryById(id)
+
+  if (!library) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Library not found'
+    })
+  }
+
+  // If this is a campaign library, check user has access to the campaign
+  if (library.campaign_id) {
+    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, library.campaign_id)
+    if (!hasAccess) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'You do not have access to this campaign'
+      })
+    }
+  }
+
+  // Get all content for export
+  const content = await libraryContentService.getAllContentForExport(id)
+
+  // Calculate stats
+  const languageCoverage: Record<string, number> = {}
+  const daySet = new Set<number>()
+
+  for (const item of content) {
+    daySet.add(item.day_number)
+    languageCoverage[item.language_code] = (languageCoverage[item.language_code] || 0) + 1
+  }
+
+  const exportData: LibraryExportData = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    library: {
+      name: library.name,
+      description: library.description,
+      type: library.type,
+      repeating: library.repeating,
+      library_key: library.library_key
+    },
+    content,
+    stats: {
+      totalDays: daySet.size,
+      totalContentItems: content.length,
+      languageCoverage
+    }
+  }
+
+  return exportData
+})

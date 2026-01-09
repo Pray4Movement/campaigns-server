@@ -5,9 +5,14 @@
         <h1>Content Libraries</h1>
         <p class="subtitle">Manage centralized prayer content libraries</p>
       </div>
-      <UButton @click="showCreateModal = true" size="lg">
-        + Create Library
-      </UButton>
+      <div class="header-actions">
+        <UButton @click="showImportModal = true" variant="outline" icon="i-lucide-upload">
+          Import
+        </UButton>
+        <UButton @click="showCreateModal = true" size="lg">
+          + Create Library
+        </UButton>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">Loading libraries...</div>
@@ -56,6 +61,14 @@
                 title="Manage Content"
               >
                 Content
+              </UButton>
+              <UButton
+                @click="handleExport(library)"
+                variant="link"
+                size="sm"
+                title="Export"
+              >
+                Export
               </UButton>
               <UButton
                 @click="editLibrary(library)"
@@ -136,6 +149,13 @@
       @confirm="confirmDelete"
       @cancel="cancelDelete"
     />
+
+    <!-- Import Modal -->
+    <LibraryImportModal
+      v-model:open="showImportModal"
+      :existing-libraries="libraries"
+      @imported="handleImported"
+    />
   </div>
 </template>
 
@@ -164,12 +184,14 @@ const libraries = ref<Library[]>([])
 const loading = ref(true)
 const error = ref('')
 const showCreateModal = ref(false)
+const showImportModal = ref(false)
 const editingLibrary = ref<Library | null>(null)
 const saving = ref(false)
 const showDeleteModal = ref(false)
 const libraryToDelete = ref<Library | null>(null)
 const deleting = ref(false)
 const toast = useToast()
+const { exportLibrary } = useLibraryExport()
 
 const isModalOpen = computed({
   get: () => showCreateModal.value || !!editingLibrary.value,
@@ -325,6 +347,14 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString()
 }
 
+async function handleExport(library: Library) {
+  await exportLibrary(library)
+}
+
+function handleImported() {
+  loadLibraries()
+}
+
 onMounted(() => {
   loadLibraries()
 })
@@ -349,6 +379,12 @@ onMounted(() => {
 .subtitle {
   margin: 0;
   color: var(--ui-text-muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .loading, .error {
