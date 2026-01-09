@@ -1,7 +1,7 @@
 import { getDatabase } from './db'
 import { appConfigService } from './app-config'
 import { libraryContentService } from './library-content'
-import { libraryService, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID } from './libraries'
+import { libraryService, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID, DAY_IN_LIFE_LIBRARY_ID } from './libraries'
 import { peopleGroupService } from './people-groups'
 import { campaignService } from './campaigns'
 import { getLanguageLabel, getReligionLabel } from '../utils/app/field-options'
@@ -15,7 +15,6 @@ export interface PeopleGroupData {
   religion: string | null
   lat: number | null
   lng: number | null
-  day_in_life_content: Record<string, any> | null
 }
 
 export interface PrayerContent {
@@ -126,6 +125,13 @@ export class PrayerContentService {
       return 999999
     }
 
+    // Virtual Day in the Life library has infinite days
+    if (libraryId === DAY_IN_LIFE_LIBRARY_ID) {
+      this.libraryStatsCache.set(libraryId, 999999)
+      this.libraryTypeCache.set(libraryId, 'day_in_life')
+      return 999999
+    }
+
     // Get actual day count from database
     const dayRange = await libraryContentService.getDayRange(libraryId)
     const actualDays = dayRange?.maxDay || 0
@@ -215,7 +221,10 @@ export class PrayerContentService {
 
     for (const row of rows) {
       for (const lib of row.libraries) {
-        libraryIds.add(lib.libraryId)
+        // Skip virtual library IDs (negative numbers) for aggregate operations
+        if (lib.libraryId > 0) {
+          libraryIds.add(lib.libraryId)
+        }
       }
     }
 
@@ -285,38 +294,6 @@ export class PrayerContentService {
       }
     }
 
-    // Fetch Day in the Life content if available
-    let dayInLifeContent: Record<string, any> | null = null
-    try {
-      const dayInLifeLibrary = await libraryService.getCampaignLibraryByKey(campaignId, 'day_in_life')
-      if (dayInLifeLibrary) {
-        // Calculate campaign day number from date
-        const campaignDay = await this.dateToDayNumber(date)
-
-        // Get total days in the library for cycling
-        const dayRange = await libraryContentService.getDayRange(dayInLifeLibrary.id)
-        const totalDays = dayRange?.maxDay || 365
-
-        // Cycle the day number if campaign runs longer than content
-        const dayToFetch = ((campaignDay - 1) % totalDays) + 1
-
-        const content = await libraryContentService.getLibraryContentByDay(
-          dayInLifeLibrary.id,
-          dayToFetch,
-          languageCode
-        )
-
-        if (content?.content_json) {
-          dayInLifeContent = typeof content.content_json === 'string'
-            ? JSON.parse(content.content_json)
-            : content.content_json
-        }
-      }
-    } catch (e) {
-      // Log but don't fail if Day in the Life content isn't available
-      console.warn('Could not fetch Day in the Life content:', e)
-    }
-
     const now = new Date().toISOString()
 
     return {
@@ -335,8 +312,7 @@ export class PrayerContentService {
         language,
         religion,
         lat,
-        lng,
-        day_in_life_content: dayInLifeContent
+        lng
       },
       created_at: now,
       updated_at: now
@@ -424,11 +400,63 @@ export class PrayerContentService {
         language,
         religion,
         lat,
-        lng,
-        day_in_life_content: null // Daily People Group does not show Day in the Life content
+        lng
       },
       created_at: now,
       updated_at: now
+    }
+  }
+
+  /**
+   * Generate Day in the Life content for a campaign
+   * Looks up the campaign's day_in_life library and fetches the appropriate day's content
+   */
+  private async generateDayInLifeContent(campaignId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
+    try {
+      // Get the campaign's day_in_life library
+      const library = await libraryService.getCampaignLibraryByKey(campaignId, 'day_in_life')
+      if (!library) {
+        return null
+      }
+
+      // Calculate campaign day number from date
+      const campaignDay = await this.dateToDayNumber(date)
+
+      // Get total days in the library for cycling
+      const dayRange = await libraryContentService.getDayRange(library.id)
+      const totalDays = dayRange?.maxDay || 365
+
+      // Cycle the day number if campaign runs longer than content
+      const dayToFetch = ((campaignDay - 1) % totalDays) + 1
+
+      const content = await libraryContentService.getLibraryContentByDay(
+        library.id,
+        dayToFetch,
+        languageCode
+      )
+
+      if (!content?.content_json) {
+        return null
+      }
+
+      const now = new Date().toISOString()
+
+      return {
+        id: -3, // Virtual content ID for Day in the Life
+        campaign_id: campaignId,
+        content_date: date,
+        language_code: languageCode,
+        title: '', // Title handled via translation in frontend
+        content_json: typeof content.content_json === 'string'
+          ? content.content_json
+          : JSON.stringify(content.content_json),
+        content_type: 'static',
+        created_at: now,
+        updated_at: now
+      }
+    } catch (e) {
+      console.warn('Could not fetch Day in the Life content:', e)
+      return null
     }
   }
 
@@ -524,6 +552,12 @@ export class PrayerContentService {
             const dailyContent = await this.generateDailyPeopleGroupContent(campaignId, date, languageCode, campaignDay)
             if (dailyContent) {
               allContent.push(dailyContent)
+            }
+          } else if (libraryType === 'day_in_life') {
+            // Generate Day in the Life content from campaign's library
+            const dayInLifeContent = await this.generateDayInLifeContent(campaignId, date, languageCode)
+            if (dayInLifeContent) {
+              allContent.push(dayInLifeContent)
             }
           } else {
             // Calculate the actual day to fetch (wrap for repeating libraries)

@@ -8,7 +8,6 @@ interface PeopleGroupData {
   religion: string | null
   lat: number | null
   lng: number | null
-  day_in_life_content?: Record<string, any> | null
 }
 
 const props = defineProps<{
@@ -31,8 +30,6 @@ const mapEmbedUrl = computed(() => {
   const bbox = `${numLng - 10},${numLat - 10},${numLng + 10},${numLat + 10}`
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${numLat},${numLng}`
 })
-
-const viewerItemId = computed(() => props.contentId || `people-group-${props.peopleGroup.name}`)
 </script>
 
 <template>
@@ -86,14 +83,6 @@ const viewerItemId = computed(() => props.contentId || `people-group-${props.peo
         />
       </div>
     </div>
-
-    <!-- Day in the Life content section -->
-    <div v-if="peopleGroup.day_in_life_content" class="day-in-life-section">
-      <RichTextViewer
-        :content="peopleGroup.day_in_life_content"
-        :item-id="viewerItemId"
-      />
-    </div>
   </div>
 </template>
 
@@ -108,10 +97,6 @@ const viewerItemId = computed(() => props.contentId || `people-group-${props.peo
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.day-in-life-section {
-  margin-top: 1rem;
 }
 
 @media (min-width: 640px) {

@@ -12,6 +12,12 @@
               <PeopleGroupCard :people-group="contentItem.people_group_data" />
             </template>
 
+            <!-- Day in the Life content (virtual library ID -3) -->
+            <template v-else-if="contentItem.id === -3">
+              <h2 class="text-2xl font-bold mb-8">{{ $t('prayerFuel.dayInTheLife') }}</h2>
+              <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
+            </template>
+
             <!-- Static library content -->
             <template v-else>
               <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8">{{ contentItem.title }}</h2>
