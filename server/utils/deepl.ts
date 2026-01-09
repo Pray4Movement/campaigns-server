@@ -5,6 +5,9 @@
  * Handles both plain text and Tiptap JSON content.
  */
 
+// All supported language codes for translation
+export const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
+
 // Map app language codes to DeepL language codes
 const DEEPL_LANGUAGE_MAP: Record<string, string> = {
   en: 'EN',
@@ -71,7 +74,9 @@ export async function translateText(
     params.append('source_lang', sourceLang)
   }
 
-  const response = await fetch('https://api-free.deepl.com/v2/translate', {
+  const apiUrl = config.deeplApiUrl || 'https://api-free.deepl.com'
+
+  const response = await fetch(`${apiUrl}/v2/translate`, {
     method: 'POST',
     headers: {
       Authorization: `DeepL-Auth-Key ${apiKey}`,
@@ -129,7 +134,9 @@ export async function translateTexts(
     params.append('source_lang', sourceLang)
   }
 
-  const response = await fetch('https://api-free.deepl.com/v2/translate', {
+  const apiUrl = config.deeplApiUrl || 'https://api-free.deepl.com'
+
+  const response = await fetch(`${apiUrl}/v2/translate`, {
     method: 'POST',
     headers: {
       Authorization: `DeepL-Auth-Key ${apiKey}`,
@@ -250,7 +257,9 @@ export async function getDeepLUsage(): Promise<{ character_count: number; charac
     throw new Error('DEEPL_API_KEY is not configured')
   }
 
-  const response = await fetch('https://api-free.deepl.com/v2/usage', {
+  const apiUrl = config.deeplApiUrl || 'https://api-free.deepl.com'
+
+  const response = await fetch(`${apiUrl}/v2/usage`, {
     headers: {
       Authorization: `DeepL-Auth-Key ${apiKey}`
     }

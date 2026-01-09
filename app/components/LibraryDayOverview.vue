@@ -185,6 +185,13 @@ interface LibraryContent {
   content_json: any
 }
 
+interface TranslationResult {
+  language: string
+  success: boolean
+  skipped?: boolean
+  error?: string
+}
+
 const props = defineProps<{
   libraryId: number
   dayNumber: number
@@ -355,9 +362,10 @@ async function handleTranslate(options: { sourceLanguage: string; targetLanguage
       }
     })
 
-    const successCount = response.results?.filter((r: any) => r.success && !r.skipped).length || 0
-    const skippedCount = response.results?.filter((r: any) => r.skipped).length || 0
-    const failedCount = response.results?.filter((r: any) => !r.success).length || 0
+    const results = (response.results || []) as TranslationResult[]
+    const successCount = results.filter(r => r.success && !r.skipped).length
+    const skippedCount = results.filter(r => r.skipped).length
+    const failedCount = results.filter(r => !r.success).length
 
     if (failedCount > 0) {
       toast.add({

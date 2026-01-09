@@ -31,7 +31,6 @@ export async function processTranslation(job: Job): Promise<ProcessorResult> {
 
   if (existingTarget && !payload.overwrite) {
     // Already exists and not overwriting - mark as completed (skipped)
-    console.log(`  Translation job ${job.id} skipped: Target already exists for day ${sourceContent.day_number} ${payload.target_language}`)
     return { success: true, data: { skipped: true, reason: 'Target already exists' } }
   }
 
@@ -48,7 +47,6 @@ export async function processTranslation(job: Job): Promise<ProcessorResult> {
     await libraryContentService.updateLibraryContent(existingTarget.id, {
       content_json: translatedJson
     })
-    console.log(`  Translation job ${job.id} completed: Updated day ${sourceContent.day_number} ${payload.target_language}`)
   } else {
     // Create new
     await libraryContentService.createLibraryContent({
@@ -57,7 +55,6 @@ export async function processTranslation(job: Job): Promise<ProcessorResult> {
       language_code: payload.target_language,
       content_json: translatedJson
     })
-    console.log(`  Translation job ${job.id} completed: Created day ${sourceContent.day_number} ${payload.target_language}`)
   }
 
   return {

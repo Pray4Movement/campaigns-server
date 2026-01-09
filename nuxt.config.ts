@@ -88,6 +88,7 @@ export default defineNuxtConfig({
 
     // DeepL Translation API
     deeplApiKey: process.env.DEEPL_API_KEY || '',
+    deeplApiUrl: process.env.DEEPL_API_URL || 'https://api-free.deepl.com',
 
     // Public keys (exposed to the frontend)
     public: {

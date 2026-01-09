@@ -1,9 +1,6 @@
 import { libraryContentService } from '#server/database/library-content'
 import { jobQueueService, type TranslationPayload } from '#server/database/job-queue'
-import { isDeepLConfigured } from '#server/utils/deepl'
-
-// All supported language codes
-const ALL_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
+import { isDeepLConfigured, SUPPORTED_LANGUAGES } from '#server/utils/deepl'
 
 /**
  * Queue bulk translation for an entire library
@@ -60,7 +57,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Determine target languages (all except source)
-  const targetLanguages = ALL_LANGUAGES.filter(lang => lang !== sourceLanguage)
+  const targetLanguages = SUPPORTED_LANGUAGES.filter(lang => lang !== sourceLanguage)
 
   // Create jobs for each source content × target language combination
   let jobCount = 0
