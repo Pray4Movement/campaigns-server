@@ -58,6 +58,28 @@ export interface UpdateLibraryData {
   library_key?: string | null
 }
 
+export interface LibraryExportData {
+  version: string
+  exportedAt: string
+  library: {
+    name: string
+    description: string
+    type: LibraryType
+    repeating: boolean
+    library_key: string | null
+  }
+  content: Array<{
+    day_number: number
+    language_code: string
+    content_json: Record<string, any> | null
+  }>
+  stats: {
+    totalDays: number
+    totalContentItems: number
+    languageCoverage: Record<string, number>
+  }
+}
+
 export class LibraryService {
   private db = getDatabase()
 
@@ -261,6 +283,28 @@ export class LibraryService {
       totalDays: daysResult.count,
       languageStats
     }
+  }
+
+  // Check if library name exists
+  async libraryNameExists(name: string): Promise<boolean> {
+    const stmt = this.db.prepare(`
+      SELECT COUNT(*) as count FROM libraries WHERE name = ?
+    `)
+    const result = await stmt.get(name) as { count: number }
+    return result.count > 0
+  }
+
+  // Generate a unique library name by appending (1), (2), etc.
+  async generateUniqueName(baseName: string): Promise<string> {
+    let name = baseName
+    let counter = 1
+
+    while (await this.libraryNameExists(name)) {
+      name = `${baseName} (${counter})`
+      counter++
+    }
+
+    return name
   }
 
 }

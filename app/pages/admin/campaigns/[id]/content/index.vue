@@ -6,9 +6,14 @@
         <h1 v-if="campaign">{{ campaign.title }} - Content Libraries</h1>
         <p class="subtitle">Manage content libraries specific to this campaign</p>
       </div>
-      <UButton @click="showCreateModal = true" size="lg">
-        + Create Library
-      </UButton>
+      <div class="header-actions">
+        <UButton @click="showImportModal = true" variant="outline" icon="i-lucide-upload">
+          Import
+        </UButton>
+        <UButton @click="showCreateModal = true" size="lg">
+          + Create Library
+        </UButton>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">Loading libraries...</div>
@@ -42,6 +47,13 @@
               <span>{{ library.stats?.totalDays || 0 }} days</span>
             </div>
             <div class="library-actions">
+              <UButton
+                @click.stop="handleExport(library)"
+                variant="ghost"
+                size="xs"
+                icon="i-lucide-download"
+                title="Export"
+              />
               <UButton
                 @click.stop="editLibrary(library)"
                 variant="ghost"
@@ -211,6 +223,13 @@
       @confirm="confirmDelete"
       @cancel="cancelDelete"
     />
+
+    <!-- Import Modal -->
+    <LibraryImportModal
+      v-model:open="showImportModal"
+      :campaign-id="campaignId"
+      @imported="handleImported"
+    />
   </div>
 </template>
 
@@ -260,9 +279,11 @@ const selectedLibrary = ref<Library | null>(null)
 const loading = ref(true)
 const error = ref('')
 const toast = useToast()
+const { exportLibrary } = useLibraryExport()
 
 // Create/Edit modal state
 const showCreateModal = ref(false)
+const showImportModal = ref(false)
 const editingLibrary = ref<Library | null>(null)
 const saving = ref(false)
 
@@ -569,6 +590,14 @@ function closeModal() {
   }
 }
 
+async function handleExport(library: Library) {
+  await exportLibrary(library)
+}
+
+function handleImported() {
+  loadLibraries()
+}
+
 onMounted(async () => {
   await loadCampaign()
   await loadLibraries()
@@ -610,6 +639,12 @@ watch(selectedLanguage, () => {
 .subtitle {
   margin: 0;
   color: var(--ui-text-muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .loading, .error {

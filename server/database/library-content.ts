@@ -304,6 +304,71 @@ export class LibraryContentService {
     const result = await stmt.get(...params) as { count: number }
     return result.count > 0
   }
+
+  // Get all content for export (no pagination)
+  async getAllContentForExport(libraryId: number): Promise<Array<{
+    day_number: number
+    language_code: string
+    content_json: Record<string, any> | null
+  }>> {
+    const stmt = this.db.prepare(`
+      SELECT day_number, language_code, content_json
+      FROM library_content
+      WHERE library_id = ?
+      ORDER BY day_number ASC, language_code ASC
+    `)
+    const rows = await stmt.all(libraryId) as Array<{
+      day_number: number
+      language_code: string
+      content_json: string | null
+    }>
+
+    return rows.map(row => ({
+      day_number: row.day_number,
+      language_code: row.language_code,
+      content_json: row.content_json ? JSON.parse(row.content_json) : null
+    }))
+  }
+
+  // Bulk create content for import
+  async bulkCreateContent(
+    libraryId: number,
+    items: Array<{
+      day_number: number
+      language_code: string
+      content_json: Record<string, any> | null
+    }>
+  ): Promise<{ inserted: number; skipped: number }> {
+    let inserted = 0
+    let skipped = 0
+
+    // Process in batches
+    const batchSize = 100
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize)
+
+      for (const item of batch) {
+        try {
+          const contentJsonString = stringifyContentJson(item.content_json)
+          const stmt = this.db.prepare(`
+            INSERT INTO library_content (library_id, day_number, language_code, content_json)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (library_id, day_number, language_code) DO NOTHING
+          `)
+          const result = await stmt.run(libraryId, item.day_number, item.language_code, contentJsonString)
+          if (result.changes > 0) {
+            inserted++
+          } else {
+            skipped++
+          }
+        } catch (error) {
+          skipped++
+        }
+      }
+    }
+
+    return { inserted, skipped }
+  }
 }
 
 // Export singleton instance
