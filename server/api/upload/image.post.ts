@@ -27,6 +27,15 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Validate file size (5MB max)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
+    if (file.data.length > MAX_FILE_SIZE) {
+      throw createError({
+        statusCode: 413,
+        statusMessage: 'File too large. Maximum size is 5MB.'
+      })
+    }
+
     // Validate file type and get safe extension from MIME type
     const mimeToExtension: Record<string, string> = {
       'image/jpeg': 'jpg',

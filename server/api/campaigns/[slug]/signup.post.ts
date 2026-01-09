@@ -5,6 +5,8 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 import { sendWelcomeEmail } from '#server/utils/welcome-email'
 import { isValidTimezone } from '#server/utils/next-reminder-calculator'
+import { sql } from '#imports'
+import { getClientIp } from '#server/utils/app/get-client-ip'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -79,6 +81,35 @@ export default defineEventHandler(async (event) => {
 
   // Validate and normalize timezone (default to UTC if invalid or missing)
   const timezone = body.timezone && isValidTimezone(body.timezone) ? body.timezone : 'UTC'
+
+  // Rate limit: 5 signup attempts per email per 24 hours
+  if (body.email) {
+    const recentAttempts = await sql`
+      SELECT COUNT(*) as count
+      FROM activity_logs
+      WHERE event_type = 'SIGNUP_ATTEMPT'
+        AND metadata->>'email' = ${body.email.toLowerCase()}
+        AND timestamp > NOW() - INTERVAL '24 hours'
+    `
+
+    if (Number(recentAttempts[0].count) >= 5) {
+      throw createError({
+        statusCode: 429,
+        statusMessage: 'Too many signup attempts for this email. Please try again later.'
+      })
+    }
+
+    // Log this attempt
+    await sql`
+      INSERT INTO activity_logs (event_type, identifier, metadata, timestamp)
+      VALUES (
+        'SIGNUP_ATTEMPT',
+        ${body.email.toLowerCase()},
+        ${JSON.stringify({ email: body.email.toLowerCase(), ip: getClientIp(event) })},
+        NOW()
+      )
+    `
+  }
 
   try {
     // Find or create subscriber
