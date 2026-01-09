@@ -369,6 +369,13 @@ export class LibraryContentService {
 
     return { inserted, skipped }
   }
+
+  // Delete all content for a library (used before overwriting)
+  async deleteAllLibraryContent(libraryId: number): Promise<number> {
+    const stmt = this.db.prepare('DELETE FROM library_content WHERE library_id = ?')
+    const result = await stmt.run(libraryId)
+    return result.changes
+  }
 }
 
 // Export singleton instance

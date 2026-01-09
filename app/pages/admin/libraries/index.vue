@@ -153,6 +153,7 @@
     <!-- Import Modal -->
     <LibraryImportModal
       v-model:open="showImportModal"
+      :existing-libraries="libraries"
       @imported="handleImported"
     />
   </div>

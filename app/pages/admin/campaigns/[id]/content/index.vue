@@ -228,6 +228,7 @@
     <LibraryImportModal
       v-model:open="showImportModal"
       :campaign-id="campaignId"
+      :existing-libraries="libraries"
       @imported="handleImported"
     />
   </div>

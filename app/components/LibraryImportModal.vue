@@ -63,22 +63,47 @@
             </span>
           </div>
 
-          <UFormField label="Library Name" class="name-field">
-            <UInput
-              v-model="importName"
-              placeholder="Enter library name"
+          <!-- Import Mode Selection -->
+          <UFormField label="Import To" class="import-mode-field">
+            <USelect
+              v-model="importMode"
+              :items="importModeOptions"
+              value-key="value"
             />
           </UFormField>
 
-          <UFormField v-if="campaignId" label="Library Key" required class="key-field">
-            <UInput
-              v-model="libraryKey"
-              placeholder="e.g., day_in_life"
+          <!-- Existing Library Selection (when importing to existing) -->
+          <UFormField v-if="importMode === 'existing'" label="Select Library" required class="library-select-field">
+            <USelect
+              v-model="targetLibraryId"
+              :items="existingLibraryOptions"
+              value-key="value"
+              placeholder="Select a library to overwrite"
             />
             <template #hint>
-              Used for internal identification within the campaign
+              <span class="warning-hint">All existing content will be replaced</span>
             </template>
           </UFormField>
+
+          <!-- New Library Options (when creating new) -->
+          <template v-if="importMode === 'new'">
+            <UFormField label="Library Name" class="name-field">
+              <UInput
+                v-model="importName"
+                placeholder="Enter library name"
+              />
+            </UFormField>
+
+            <UFormField v-if="campaignId && needsLibraryKey" label="Library Key" required class="key-field">
+              <UInput
+                v-model="libraryKey"
+                placeholder="e.g., day_in_life"
+              />
+              <template #hint>
+                Used for internal identification within the campaign
+              </template>
+            </UFormField>
+          </template>
 
           <p v-if="importError" class="error-text">{{ importError }}</p>
         </div>
@@ -93,9 +118,12 @@
         <div v-else-if="step === 'complete' && result" class="complete-section">
           <UIcon name="i-lucide-check-circle" class="success-icon" />
           <h3>Import Successful</h3>
-          <p>"{{ result.library.name }}" has been imported.</p>
+          <p>"{{ result.library.name }}" has been {{ importMode === 'existing' ? 'updated' : 'imported' }}.</p>
           <div class="result-stats">
             <span>{{ result.importStats.contentItemsImported }} items imported</span>
+            <span v-if="result.importStats.contentItemsDeleted > 0">
+              {{ result.importStats.contentItemsDeleted }} items replaced
+            </span>
             <span v-if="result.importStats.contentItemsSkipped > 0">
               {{ result.importStats.contentItemsSkipped }} items skipped
             </span>
@@ -119,7 +147,7 @@
           @click="handleImport"
           :disabled="!canImport"
         >
-          Import Library
+          {{ importMode === 'existing' ? 'Replace Content' : 'Import Library' }}
         </UButton>
 
         <UButton
@@ -168,16 +196,27 @@ interface ImportResult {
   importStats: {
     contentItemsImported: number
     contentItemsSkipped: number
+    contentItemsDeleted: number
+  }
+}
+
+interface ExistingLibrary {
+  id: number
+  name: string
+  stats?: {
+    totalDays: number
   }
 }
 
 interface Props {
   open?: boolean
   campaignId?: number
+  existingLibraries?: ExistingLibrary[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  open: false
+  open: false,
+  existingLibraries: () => []
 })
 
 const emit = defineEmits<{
@@ -199,10 +238,38 @@ const fileError = ref('')
 const importError = ref('')
 const importName = ref('')
 const libraryKey = ref('')
+const importMode = ref<'new' | 'existing'>('new')
+const targetLibraryId = ref<number | null>(null)
+
+// Only show library_key field if campaign import AND export file doesn't have one
+const needsLibraryKey = computed(() => {
+  return !preview.value?.library.library_key
+})
+
+const importModeOptions = computed(() => {
+  const options = [
+    { label: 'Create New Library', value: 'new' }
+  ]
+  if (props.existingLibraries.length > 0) {
+    options.push({ label: 'Replace Existing Library Content', value: 'existing' })
+  }
+  return options
+})
+
+const existingLibraryOptions = computed(() => {
+  return props.existingLibraries.map(lib => ({
+    label: `${lib.name} (${lib.stats?.totalDays || 0} days)`,
+    value: lib.id
+  }))
+})
 
 const canImport = computed(() => {
+  if (importMode.value === 'existing') {
+    return !!targetLibraryId.value
+  }
+  // Creating new library
   if (!importName.value.trim()) return false
-  if (props.campaignId && !libraryKey.value.trim()) return false
+  if (props.campaignId && needsLibraryKey.value && !libraryKey.value.trim()) return false
   return true
 })
 
@@ -214,6 +281,8 @@ function resetState() {
   importError.value = ''
   importName.value = ''
   libraryKey.value = ''
+  importMode.value = 'new'
+  targetLibraryId.value = null
   isDragOver.value = false
 }
 
@@ -276,14 +345,26 @@ async function handleImport() {
   step.value = 'importing'
 
   try {
+    const body: Record<string, any> = {
+      data: preview.value
+    }
+
+    if (importMode.value === 'existing' && targetLibraryId.value) {
+      body.target_library_id = targetLibraryId.value
+    } else {
+      body.name = importName.value
+      if (props.campaignId) {
+        body.campaign_id = props.campaignId
+        // Only send library_key if we need one (export file didn't have it)
+        if (needsLibraryKey.value && libraryKey.value) {
+          body.library_key = libraryKey.value
+        }
+      }
+    }
+
     const response = await $fetch<ImportResult>('/api/admin/libraries/import', {
       method: 'POST',
-      body: {
-        data: preview.value,
-        name: importName.value,
-        campaign_id: props.campaignId || undefined,
-        library_key: props.campaignId ? libraryKey.value : undefined
-      }
+      body
     })
 
     result.value = response
@@ -431,9 +512,15 @@ watch(() => props.open, (newValue) => {
   font-size: 0.875rem;
 }
 
+.import-mode-field,
+.library-select-field,
 .name-field,
 .key-field {
   margin-top: 0.5rem;
+}
+
+.warning-hint {
+  color: var(--ui-warning);
 }
 
 .importing-section,

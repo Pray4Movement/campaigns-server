@@ -8,6 +8,7 @@ interface ImportRequestBody {
   name?: string
   campaign_id?: number
   library_key?: string
+  target_library_id?: number  // Import into existing library
 }
 
 function validateExportData(data: unknown): { valid: boolean; errors: string[] } {
@@ -79,14 +80,6 @@ export default defineEventHandler(async (event) => {
 
   const exportData = body.data
 
-  // If campaign_id is provided, library_key is required
-  if (body.campaign_id && !body.library_key) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'library_key is required when importing to a campaign'
-    })
-  }
-
   // Validate language codes in content
   const invalidLanguages = new Set<string>()
   for (const item of exportData.content) {
@@ -102,18 +95,38 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Determine library name (use override or from export, ensure unique)
-  const baseName = body.name || exportData.library.name
-  const uniqueName = await libraryService.generateUniqueName(baseName)
+  let library
+  let contentDeleted = 0
 
-  // Create the library
-  const library = await libraryService.createLibrary({
-    name: uniqueName,
-    description: exportData.library.description,
-    repeating: exportData.library.repeating,
-    campaign_id: body.campaign_id || null,
-    library_key: body.library_key || exportData.library.library_key || null
-  })
+  if (body.target_library_id) {
+    // Import into existing library - delete existing content first
+    library = await libraryService.getLibraryById(body.target_library_id)
+
+    if (!library) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Target library not found'
+      })
+    }
+
+    // Delete existing content
+    contentDeleted = await libraryContentService.deleteAllLibraryContent(library.id)
+  } else {
+    // Create new library
+    const baseName = body.name || exportData.library.name
+    const uniqueName = await libraryService.generateUniqueName(baseName)
+
+    // Use library_key from body if provided, otherwise from export file
+    const libraryKey = body.library_key || exportData.library.library_key || null
+
+    library = await libraryService.createLibrary({
+      name: uniqueName,
+      description: exportData.library.description,
+      repeating: exportData.library.repeating,
+      campaign_id: body.campaign_id || null,
+      library_key: libraryKey
+    })
+  }
 
   // Bulk import content
   const importResult = await libraryContentService.bulkCreateContent(library.id, exportData.content)
@@ -129,7 +142,8 @@ export default defineEventHandler(async (event) => {
     },
     importStats: {
       contentItemsImported: importResult.inserted,
-      contentItemsSkipped: importResult.skipped
+      contentItemsSkipped: importResult.skipped,
+      contentItemsDeleted: contentDeleted
     }
   }
 })
