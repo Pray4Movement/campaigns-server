@@ -17,7 +17,7 @@
         <div class="max-w-4xl mx-auto">
           <div class="flex items-center justify-center gap-3">
             <UButton
-              :to="localePath(`/${slug}/prayer-fuel/${previousDate}`)"
+              :to="localePath(`/${slug}/prayer/${previousDate}`)"
               variant="ghost"
               size="sm"
               icon="i-lucide-chevron-left"
@@ -25,14 +25,14 @@
             <h1 class="text-3xl font-bold text-center">{{ $t('prayerFuel.title') }}</h1>
             <UButton
               v-if="!isNextDateFuture"
-              :to="localePath(`/${slug}/prayer-fuel/${nextDate}`)"
+              :to="localePath(`/${slug}/prayer/${nextDate}`)"
               variant="ghost"
               size="sm"
               icon="i-lucide-chevron-right"
             />
             <UButton
               v-else
-              :to="localePath(`/${slug}/prayer-fuel`)"
+              :to="localePath(`/${slug}/prayer`)"
               variant="ghost"
               size="sm"
               icon="i-lucide-chevron-right"

@@ -27,7 +27,20 @@
   },
   "campaign": {
     "peopleGroup": {
-      "findOutMore": "Find out more"
+      "findOutMore": "Find out more",
+      "overview": {
+        "title": "Overview",
+        "country": "Country:",
+        "population": "Population:",
+        "language": "Language:",
+        "religion": "Religion:",
+        "status": "Status:",
+        "churches": "Churches:"
+      },
+      "prayerStatus": {
+        "title": "Prayer Status",
+        "description": "people praying 10 minutes a day for this people group."
+      }
     },
     "header": {
       "prayFor": "Pray for the {campaign}"
@@ -73,9 +86,9 @@
           "hint": "Select your country and enter your phone number"
         },
         "frequency": {
-          "label": "Prayer Frequency",
-          "daily": "Daily",
-          "weekly": "Weekly"
+          "label": "I will pray...",
+          "daily": "Every Day",
+          "weekly": "Choose Days"
         },
         "daysOfWeek": {
           "label": "Select Days",
@@ -100,12 +113,15 @@
           "searchPlaceholder": "Search timezones..."
         },
         "duration": {
-          "label": "Prayer Duration",
+          "label": "For...",
           "5min": "5 minutes",
           "10min": "10 minutes",
           "15min": "15 minutes",
           "30min": "30 minutes",
           "60min": "1 hour"
+        },
+        "reminderTime": {
+          "label": "Reminder time"
         },
         "submit": "Commit to Prayer",
         "submitting": "Joining...",
@@ -283,6 +299,9 @@
     "thankYou": "Thank you for praying!",
     "meetThePeople": "Meet the People",
     "peopleGroupOfTheDay": "People Group of the Day",
+    "dayInTheLife": "A Day in the Life",
+    "pauseAndPray": "Pause & Pray",
+    "mapTitle": "Map showing location of {name}",
     "pastPrayers": {
       "title": "Past Prayer Content"
     },
@@ -302,6 +321,8 @@
     "next": "Next",
     "previous": "Previous",
     "loading": "Loading...",
-    "minutes": "min"
+    "minutes": "min",
+    "yes": "Yes",
+    "no": "No"
   }
 }

@@ -23,7 +23,7 @@
           <h1>{{ $t('campaign.verify.success.title') }}</h1>
         </div>
         <p class="message">{{ $t('campaign.verify.success.message', { campaign: campaignTitle }) }}</p>
-        <NuxtLink :to="localePath(`/${slug}/prayer-fuel`)" class="btn-grey">
+        <NuxtLink :to="localePath(`/${slug}/prayer`)" class="btn-grey">
           {{ $t('campaign.verify.startPraying') }}
         </NuxtLink>
       </div>

@@ -78,44 +78,50 @@
 
             <!-- Overview Data Block -->
             <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6 md:order-2">
-              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">Overview</h3>
+              <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">{{ $t('campaign.peopleGroup.overview.title') }}</h3>
               <div class="space-y-3 text-sm">
                 <div v-if="peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata?.imb_isoalpha3" class="flex items-center gap-2">
                   <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-muted" />
+                  <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.country') }}</span>
                   <span class="text-muted">{{ peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata.imb_isoalpha3 }}</span>
                 </div>
                 <div v-if="peopleGroup.metadata?.imb_population" class="flex items-center gap-2">
                   <UIcon name="i-lucide-users" class="w-4 h-4 text-muted" />
+                  <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.population') }}</span>
                   <span class="text-muted">{{ Number(peopleGroup.metadata.imb_population).toLocaleString() }}</span>
                 </div>
                 <div v-if="peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata?.imb_reg_of_language" class="flex items-center gap-2">
                   <UIcon name="i-lucide-languages" class="w-4 h-4 text-muted" />
+                  <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.language') }}</span>
                   <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata.imb_reg_of_language }}</span>
                 </div>
                 <div v-if="peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata?.imb_reg_of_religion" class="flex items-center gap-2">
-                  <UIcon name="i-lucide-bookmark" class="w-4 h-4 text-muted" />
+                  <UIcon name="i-lucide-flame" class="w-4 h-4 text-muted" />
+                  <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.religion') }}</span>
                   <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata.imb_reg_of_religion }}</span>
                 </div>
                 <div v-if="peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata?.imb_engagement_status" class="flex items-center gap-2">
                   <UIcon name="i-lucide-target" class="w-4 h-4 text-muted" />
+                  <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.status') }}</span>
                   <span class="text-muted">{{ peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata.imb_engagement_status }}</span>
                 </div>
                 <div v-if="peopleGroup.labels?.imb_congregation_existing || peopleGroup.metadata?.imb_congregation_existing !== undefined" class="flex items-center gap-2">
                   <UIcon name="i-lucide-church" class="w-4 h-4 text-muted" />
-                  <span class="text-muted">Churches: {{ peopleGroup.labels?.imb_congregation_existing || (peopleGroup.metadata.imb_congregation_existing === '1' || peopleGroup.metadata.imb_congregation_existing === 1 ? 'Yes' : 'No') }}</span>
+                  <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.churches') }}</span>
+                  <span class="text-muted">{{ peopleGroup.labels?.imb_congregation_existing || (peopleGroup.metadata.imb_congregation_existing === '1' || peopleGroup.metadata.imb_congregation_existing === 1 ? $t('common.yes') : $t('common.no')) }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Prayer Status Block -->
             <div class="bg-forest-500 rounded-2xl p-6 text-white md:order-1">
-              <h3 class="font-bold uppercase tracking-wide text-center mb-4">Prayer Status</h3>
+              <h3 class="font-bold uppercase tracking-wide text-center mb-4">{{ $t('campaign.peopleGroup.prayerStatus.title') }}</h3>
               <div class="text-center">
                 <div class="text-5xl font-bold mb-2">
                   {{ campaign.people_praying || 0 }} / {{ PRAYER_GOAL }}
                 </div>
                 <p class="text-sage-200 text-sm mb-6">
-                  people praying 10 minutes a day for this people group.
+                  {{ $t('campaign.peopleGroup.prayerStatus.description') }}
                 </p>
                 <!-- Progress Bar -->
                 <div class="w-full bg-forest-600 rounded-full h-3">
@@ -182,7 +188,7 @@
             <div>
               <h2 class="text-2xl font-bold text-default text-center mb-8">{{ $t('campaign.sampleContent.title') }}</h2>
               <UCard>
-                <div class="space-y-5">
+                <div class="space-y-5 p-4">
                   <!-- People Group Name (dynamic) -->
                   <div>
                     <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">
@@ -255,7 +261,7 @@
 
       <!-- Prayer Signup Section -->
       <section id="signup-section" class="py-12 bg-accented">
-        <div class="max-w-4xl mx-auto px-4">
+        <div class="max-w-5xl mx-auto px-4">
           <UCard>
             <template #header>
               <div class="text-center">
@@ -269,7 +275,7 @@
               <div class="space-y-6">
                 <!-- Frequency as visual cards -->
                 <div>
-                  <label class="text-sm font-medium mb-3 block">I will pray...</label>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.frequency.label') }}</label>
                   <div class="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -280,7 +286,7 @@
                         : 'border-default hover:border-(--ui-text-muted)'"
                     >
                       <UIcon name="i-lucide-sun" class="w-8 h-8 mb-2" />
-                      <span class="block font-semibold">Every Day</span>
+                      <span class="block font-semibold">{{ $t('campaign.signup.form.frequency.daily') }}</span>
                       <span v-if="signupForm.frequency === 'daily'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
                       </span>
@@ -294,7 +300,7 @@
                         : 'border-default hover:border-(--ui-text-muted)'"
                     >
                       <UIcon name="i-lucide-calendar-days" class="w-8 h-8 mb-2" />
-                      <span class="block font-semibold">Choose Days</span>
+                      <span class="block font-semibold">{{ $t('campaign.signup.form.frequency.weekly') }}</span>
                       <span v-if="signupForm.frequency === 'weekly'" class="absolute top-2 right-2">
                         <UIcon name="i-lucide-check-circle-2" class="w-5 h-5" />
                       </span>
@@ -319,7 +325,7 @@
 
                 <!-- Duration as slider-style pills -->
                 <div>
-                  <label class="text-sm font-medium mb-3 block">For...</label>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.duration.label') }}</label>
                   <div class="flex rounded-full border border-default p-1 bg-default">
                     <button
                       v-for="dur in [5, 10, 15, 30, 60]"
@@ -338,7 +344,7 @@
 
                 <!-- Time picker -->
                 <div>
-                  <label class="text-sm font-medium mb-3 block">Reminder time</label>
+                  <label class="text-sm font-medium mb-3 block">{{ $t('campaign.signup.form.reminderTime.label') }}</label>
                   <TimePicker
                     v-model="signupForm.reminder_time"
                     size="lg"
@@ -423,7 +429,7 @@
             <h2 class="text-2xl font-bold uppercase tracking-wide mb-3">{{ $t('campaign.prayerFuel.title') }}</h2>
             <p class="text-sage-200 mb-6">{{ $t('campaign.prayerFuel.description') }}</p>
             <UButton
-              :to="localePath(`/${campaign.slug}/prayer-fuel`)"
+              :to="localePath(`/${campaign.slug}/prayer`)"
               size="lg"
               class="bg-sage-300 text-forest-500 hover:bg-sage-400 rounded-full px-8"
             >

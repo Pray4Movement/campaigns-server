@@ -7,7 +7,7 @@ export async function sendWelcomeEmail(
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
-  const campaignUrl = `${baseUrl}/${campaignSlug}/prayer-fuel`
+  const campaignUrl = `${baseUrl}/${campaignSlug}/prayer`
   const profileUrl = `${baseUrl}/subscriber?id=${profileId}`
 
   const html = `

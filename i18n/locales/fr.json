@@ -26,6 +26,22 @@
     "allRightsReserved": "Tous droits réservés"
   },
   "campaign": {
+    "peopleGroup": {
+      "findOutMore": "En savoir plus",
+      "overview": {
+        "title": "Aperçu",
+        "country": "Pays :",
+        "population": "Population :",
+        "language": "Langue :",
+        "religion": "Religion :",
+        "status": "Statut :",
+        "churches": "Églises :"
+      },
+      "prayerStatus": {
+        "title": "État de la Prière",
+        "description": "personnes priant 10 minutes par jour pour ce groupe de personnes."
+      }
+    },
     "header": {
       "prayFor": "Priez pour les {campaign}"
     },
@@ -38,8 +54,8 @@
       "goHome": "Accueil"
     },
     "signup": {
-      "title": "Rejoignez le Mouvement de Prière",
-      "description": "Engagez-vous à prier quotidiennement et recevez des rappels utiles par e-mail.",
+      "title": "Inscrivez-vous pour Prier",
+      "description": "Engagez-vous à prier quotidiennement ou hebdomadairement et recevez des rappels de contenu de prière.",
       "success": "✓ Bienvenue ! Vous avez rejoint le mouvement de prière. Vous recevrez bientôt votre première invitation à la prière.",
       "successEmail": "✓ Presque terminé ! Veuillez vérifier votre e-mail et cliquer sur le lien de vérification pour finaliser votre inscription.",
       "checkSpam": "Vous ne voyez pas l'e-mail ? Vérifiez votre dossier spam.",
@@ -70,9 +86,9 @@
           "hint": "Sélectionnez votre pays et entrez votre numéro de téléphone"
         },
         "frequency": {
-          "label": "Fréquence de Prière",
-          "daily": "Quotidien",
-          "weekly": "Hebdomadaire"
+          "label": "Je vais prier...",
+          "daily": "Chaque Jour",
+          "weekly": "Choisir les Jours"
         },
         "daysOfWeek": {
           "label": "Sélectionner les Jours",
@@ -92,12 +108,20 @@
           "hint": "Votre heure locale"
         },
         "duration": {
-          "label": "Durée de Prière",
+          "label": "Pendant...",
           "5min": "5 minutes",
           "10min": "10 minutes",
           "15min": "15 minutes",
           "30min": "30 minutes",
           "60min": "1 heure"
+        },
+        "reminderTime": {
+          "label": "Heure du rappel"
+        },
+        "timezone": {
+          "label": "Votre Fuseau Horaire",
+          "hint": "Détecté automatiquement depuis votre navigateur",
+          "searchPlaceholder": "Rechercher un fuseau horaire..."
         },
         "submit": "S'engager à Prier",
         "submitting": "Inscription en cours...",
@@ -115,7 +139,30 @@
     "prayerFuel": {
       "title": "Prière du Jour",
       "description": "Accédez au contenu et aux invitations de prière d'aujourd'hui",
-      "button": "Voir la Prière du Jour"
+      "button": "Voir le Contenu de Prière"
+    },
+    "whyPray": {
+      "title": "Pourquoi Prier ?",
+      "noOne": {
+        "title": "Ils N'ont Personne",
+        "description": "De nombreux peuples non atteints n'ont pas d'églises, pas de missionnaires, et souvent pas de croyants."
+      },
+      "opensDoors": {
+        "title": "La Prière Ouvre des Portes",
+        "description": "La prière adoucit les cœurs, ouvre des portes et invite l'œuvre du Saint-Esprit bien avant que l'Évangile soit proclamé."
+      },
+      "changed": {
+        "title": "Faites l'Expérience de la Présence de Dieu",
+        "description": "Dieu a rencontré beaucoup de gens de manière profonde et merveilleuse pendant leurs moments de prière. La prière quotidienne fera grandir votre foi et vous rapprochera de Dieu."
+      }
+    },
+    "sampleContent": {
+      "title": "Recevez du Contenu de Prière Quotidien",
+      "description": "Voici un aperçu du contenu de prière quotidien.",
+      "peopleGroupName": "Groupe de Personnes",
+      "scripture": "Écriture",
+      "prayerPoints": "Points de Prière",
+      "peopleGroupOfDay": "Peuple du Jour"
     },
     "mobileApp": {
       "title": "Téléchargez l'Application Mobile",
@@ -243,11 +290,17 @@
       }
     },
     "button": {
-      "iPrayed": "J'ai Prié",
+      "amen": "Amen",
       "recording": "Enregistrement...",
-      "recorded": "✓ Prière Enregistrée"
+      "recorded": "✓ Prière Enregistrée",
+      "hint": "Cliquez pour terminer votre temps de prière"
     },
     "thankYou": "Merci d'avoir prié ! Votre prière a été enregistrée.",
+    "meetThePeople": "Rencontrez le Peuple",
+    "peopleGroupOfTheDay": "Peuple du Jour",
+    "dayInTheLife": "Une Journée dans la Vie",
+    "pauseAndPray": "Pause et Prière",
+    "mapTitle": "Carte montrant l'emplacement de {name}",
     "pastPrayers": {
       "title": "Prières Passées"
     },
@@ -266,6 +319,9 @@
     "back": "Retour",
     "next": "Suivant",
     "previous": "Précédent",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "minutes": "min",
+    "yes": "Oui",
+    "no": "Non"
   }
 }

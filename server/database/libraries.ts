@@ -30,6 +30,20 @@ export const DAILY_PEOPLE_GROUP_LIBRARY: Library = {
   updated_at: '2025-01-01T00:00:00.000Z'
 }
 
+// Virtual Day in the Life library - displays campaign's day_in_life library content
+export const DAY_IN_LIFE_LIBRARY_ID = -3
+export const DAY_IN_LIFE_LIBRARY: Library = {
+  id: DAY_IN_LIFE_LIBRARY_ID,
+  name: 'Day in the Life',
+  description: 'Displays day in the life content from the campaign\'s day_in_life library',
+  type: 'static',
+  repeating: true,
+  campaign_id: null,
+  library_key: null,
+  created_at: '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z'
+}
+
 export interface Library {
   id: number
   name: string
@@ -117,6 +131,9 @@ export class LibraryService {
     }
     if (id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
       return DAILY_PEOPLE_GROUP_LIBRARY
+    }
+    if (id === DAY_IN_LIFE_LIBRARY_ID) {
+      return DAY_IN_LIFE_LIBRARY
     }
 
     const stmt = database.prepare(`
@@ -240,6 +257,17 @@ export class LibraryService {
     return result.changes > 0
   }
 
+  // Get distinct library keys (for campaign-specific libraries)
+  async getDistinctLibraryKeys(): Promise<string[]> {
+    const stmt = this.db.prepare(`
+      SELECT DISTINCT library_key FROM libraries
+      WHERE library_key IS NOT NULL
+      ORDER BY library_key
+    `)
+    const results = await stmt.all() as Array<{ library_key: string }>
+    return results.map(r => r.library_key)
+  }
+
   // Get library statistics
   // Accepts optional db parameter for transaction support
   async getLibraryStats(id: number, db?: ReturnType<typeof getDatabase>): Promise<{
@@ -248,8 +276,8 @@ export class LibraryService {
   }> {
     const database = db || this.db
 
-    // Virtual People Group libraries have "infinite" days
-    if (id === PEOPLE_GROUP_LIBRARY_ID || id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
+    // Virtual libraries have "infinite" days
+    if (id === PEOPLE_GROUP_LIBRARY_ID || id === DAILY_PEOPLE_GROUP_LIBRARY_ID || id === DAY_IN_LIFE_LIBRARY_ID) {
       return {
         totalDays: -1, // -1 indicates continuous/infinite
         languageStats: {}

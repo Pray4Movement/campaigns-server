@@ -1,4 +1,4 @@
-import { libraryService, PEOPLE_GROUP_LIBRARY, DAILY_PEOPLE_GROUP_LIBRARY } from '#server/database/libraries'
+import { libraryService, PEOPLE_GROUP_LIBRARY, DAILY_PEOPLE_GROUP_LIBRARY, DAY_IN_LIFE_LIBRARY } from '#server/database/libraries'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -38,6 +38,12 @@ export default defineEventHandler(async (event) => {
     librariesWithStats.push({
       ...DAILY_PEOPLE_GROUP_LIBRARY,
       stats: dailyVirtualStats
+    })
+
+    const dayInLifeStats = await libraryService.getLibraryStats(DAY_IN_LIFE_LIBRARY.id)
+    librariesWithStats.push({
+      ...DAY_IN_LIFE_LIBRARY,
+      stats: dayInLifeStats
     })
   }
 
