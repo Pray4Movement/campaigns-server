@@ -1,6 +1,7 @@
 import { libraryService, type LibraryExportData } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
 import { campaignService } from '#server/database/campaigns'
+import { getDatabase } from '#server/database/db'
 import { sanitizeImportContent } from '#server/utils/sanitize-tiptap'
 
 const VALID_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
@@ -124,58 +125,70 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  let library
-  let contentDeleted = 0
-
-  if (body.target_library_id) {
-    // Import into existing library - delete existing content first
-    library = await libraryService.getLibraryById(body.target_library_id)
-
-    if (!library) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Target library not found'
-      })
-    }
-
-    // Delete existing content
-    contentDeleted = await libraryContentService.deleteAllLibraryContent(library.id)
-  } else {
-    // Create new library
-    const baseName = body.name || exportData.library.name
-    const uniqueName = await libraryService.generateUniqueName(baseName)
-
-    // Use library_key from body if provided, otherwise from export file
-    const libraryKey = body.library_key || exportData.library.library_key || null
-
-    library = await libraryService.createLibrary({
-      name: uniqueName,
-      description: exportData.library.description,
-      repeating: exportData.library.repeating,
-      campaign_id: body.campaign_id || null,
-      library_key: libraryKey
-    })
-  }
-
   // Sanitize content before import
   const sanitizedContent = sanitizeImportContent(exportData.content)
 
-  // Bulk import content
-  const importResult = await libraryContentService.bulkCreateContent(library.id, sanitizedContent)
+  // Use a transaction to ensure atomicity of the import operation
+  const db = getDatabase()
 
-  // Get final stats
-  const stats = await libraryService.getLibraryStats(library.id)
+  const result = await db.transaction(async (tx) => {
+    let library
+    let contentDeleted = 0
+
+    if (body.target_library_id) {
+      // Import into existing library - delete existing content first
+      library = await libraryService.getLibraryById(body.target_library_id, tx)
+
+      if (!library) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'Target library not found'
+        })
+      }
+
+      // Delete existing content
+      contentDeleted = await libraryContentService.deleteAllLibraryContent(library.id, tx)
+    } else {
+      // Create new library
+      const baseName = body.name || exportData.library.name
+      const uniqueName = await libraryService.generateUniqueName(baseName)
+
+      // Use library_key from body if provided, otherwise from export file
+      const libraryKey = body.library_key || exportData.library.library_key || null
+
+      library = await libraryService.createLibrary({
+        name: uniqueName,
+        description: exportData.library.description,
+        repeating: exportData.library.repeating,
+        campaign_id: body.campaign_id || null,
+        library_key: libraryKey
+      }, tx)
+    }
+
+    // Bulk import content
+    const importResult = await libraryContentService.bulkCreateContent(library.id, sanitizedContent, tx)
+
+    // Get final stats
+    const stats = await libraryService.getLibraryStats(library.id, tx)
+
+    return {
+      library,
+      stats,
+      contentDeleted,
+      importResult
+    }
+  })
 
   return {
     success: true,
     library: {
-      ...library,
-      stats
+      ...result.library,
+      stats: result.stats
     },
     importStats: {
-      contentItemsImported: importResult.inserted,
-      contentItemsSkipped: importResult.skipped,
-      contentItemsDeleted: contentDeleted
+      contentItemsImported: result.importResult.inserted,
+      contentItemsSkipped: result.importResult.skipped,
+      contentItemsDeleted: result.contentDeleted
     }
   }
 })

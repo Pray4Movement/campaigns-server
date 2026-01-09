@@ -84,10 +84,12 @@ export class LibraryService {
   private db = getDatabase()
 
   // Create library
-  async createLibrary(data: CreateLibraryData): Promise<Library> {
+  // Accepts optional db parameter for transaction support
+  async createLibrary(data: CreateLibraryData, db?: ReturnType<typeof getDatabase>): Promise<Library> {
+    const database = db || this.db
     const { name, description = '', repeating = false, campaign_id = null, library_key = null } = data
 
-    const stmt = this.db.prepare(`
+    const stmt = database.prepare(`
       INSERT INTO libraries (name, description, repeating, campaign_id, library_key)
       VALUES (?, ?, ?, ?, ?)
     `)
@@ -95,7 +97,7 @@ export class LibraryService {
     try {
       const result = await stmt.run(name, description, repeating, campaign_id, library_key)
       const libraryId = result.lastInsertRowid as number
-      return (await this.getLibraryById(libraryId))!
+      return (await this.getLibraryById(libraryId, db))!
     } catch (error: any) {
       if (error.code === '23505') { // PostgreSQL unique violation
         throw new Error('A library with this name already exists')
@@ -105,7 +107,10 @@ export class LibraryService {
   }
 
   // Get library by ID
-  async getLibraryById(id: number): Promise<Library | null> {
+  // Accepts optional db parameter for transaction support
+  async getLibraryById(id: number, db?: ReturnType<typeof getDatabase>): Promise<Library | null> {
+    const database = db || this.db
+
     // Return virtual libraries for special IDs
     if (id === PEOPLE_GROUP_LIBRARY_ID) {
       return PEOPLE_GROUP_LIBRARY
@@ -114,7 +119,7 @@ export class LibraryService {
       return DAILY_PEOPLE_GROUP_LIBRARY
     }
 
-    const stmt = this.db.prepare(`
+    const stmt = database.prepare(`
       SELECT * FROM libraries WHERE id = ?
     `)
     const library = await stmt.get(id) as Library | null
@@ -236,10 +241,13 @@ export class LibraryService {
   }
 
   // Get library statistics
-  async getLibraryStats(id: number): Promise<{
+  // Accepts optional db parameter for transaction support
+  async getLibraryStats(id: number, db?: ReturnType<typeof getDatabase>): Promise<{
     totalDays: number
     languageStats: { [key: string]: number }
   }> {
+    const database = db || this.db
+
     // Virtual People Group libraries have "infinite" days
     if (id === PEOPLE_GROUP_LIBRARY_ID || id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {
       return {
@@ -249,7 +257,7 @@ export class LibraryService {
     }
 
     // Check if this is a people_group library (shouldn't happen anymore, but keep for safety)
-    const library = await this.getLibraryById(id)
+    const library = await this.getLibraryById(id, db)
     if (library?.type === 'people_group') {
       return {
         totalDays: -1,
@@ -258,7 +266,7 @@ export class LibraryService {
     }
 
     // Get total unique days
-    const daysStmt = this.db.prepare(`
+    const daysStmt = database.prepare(`
       SELECT COUNT(DISTINCT day_number) as count
       FROM library_content
       WHERE library_id = ?
@@ -266,7 +274,7 @@ export class LibraryService {
     const daysResult = await daysStmt.get(id) as { count: number }
 
     // Get content count by language
-    const langStmt = this.db.prepare(`
+    const langStmt = database.prepare(`
       SELECT language_code, COUNT(*) as count
       FROM library_content
       WHERE library_id = ?

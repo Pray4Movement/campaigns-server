@@ -79,6 +79,22 @@ class DatabaseWrapper {
   async close(): Promise<void> {
     await this.sql.end()
   }
+
+  /**
+   * Execute a function within a database transaction.
+   * If the function throws, the transaction is rolled back.
+   * If the function succeeds, the transaction is committed.
+   *
+   * @param fn - The function to execute within the transaction.
+   *             Receives a transaction-scoped database wrapper.
+   * @returns The result of the function
+   */
+  async transaction<T>(fn: (tx: DatabaseWrapper) => Promise<T>): Promise<T> {
+    return await (this.sql as any).begin(async (txSql: Sql) => {
+      const txWrapper = new DatabaseWrapper(txSql)
+      return await fn(txWrapper)
+    })
+  }
 }
 
 export function getDatabase(): DatabaseWrapper {

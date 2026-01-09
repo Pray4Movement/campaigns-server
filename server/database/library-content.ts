@@ -331,14 +331,17 @@ export class LibraryContentService {
   }
 
   // Bulk create content for import
+  // Accepts optional db parameter for transaction support
   async bulkCreateContent(
     libraryId: number,
     items: Array<{
       day_number: number
       language_code: string
       content_json: Record<string, any> | null
-    }>
+    }>,
+    db?: ReturnType<typeof getDatabase>
   ): Promise<{ inserted: number; skipped: number }> {
+    const database = db || this.db
     let inserted = 0
     let skipped = 0
 
@@ -350,7 +353,7 @@ export class LibraryContentService {
       for (const item of batch) {
         try {
           const contentJsonString = stringifyContentJson(item.content_json)
-          const stmt = this.db.prepare(`
+          const stmt = database.prepare(`
             INSERT INTO library_content (library_id, day_number, language_code, content_json)
             VALUES (?, ?, ?, ?)
             ON CONFLICT (library_id, day_number, language_code) DO NOTHING
@@ -371,8 +374,10 @@ export class LibraryContentService {
   }
 
   // Delete all content for a library (used before overwriting)
-  async deleteAllLibraryContent(libraryId: number): Promise<number> {
-    const stmt = this.db.prepare('DELETE FROM library_content WHERE library_id = ?')
+  // Accepts optional db parameter for transaction support
+  async deleteAllLibraryContent(libraryId: number, db?: ReturnType<typeof getDatabase>): Promise<number> {
+    const database = db || this.db
+    const stmt = database.prepare('DELETE FROM library_content WHERE library_id = ?')
     const result = await stmt.run(libraryId)
     return result.changes
   }
