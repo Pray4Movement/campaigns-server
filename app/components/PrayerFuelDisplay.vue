@@ -24,7 +24,7 @@
               <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
             </template>
 
-            <p v-if="contentItem.content_type !== 'people_group'" class="text-right text-lg font-bold mt-8 text-secondary-600 uppercase">Pause & Pray</p>
+            <p v-if="contentItem.content_type !== 'people_group'" class="text-right text-lg font-bold mt-8 text-secondary-600 uppercase">{{ $t('prayerFuel.pauseAndPray') }}</p>
           </div>
         </div>
 

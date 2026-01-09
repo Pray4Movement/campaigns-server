@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 interface PeopleGroupData {
   name: string
   image_url: string | null
@@ -80,7 +82,7 @@ const mapEmbedUrl = computed(() => {
       <div v-if="mapEmbedUrl" class="map-container">
         <iframe
           :src="mapEmbedUrl"
-          :title="`Map showing location of ${peopleGroup.name}`"
+          :title="t('prayerFuel.mapTitle', { name: peopleGroup.name })"
           class="map-embed"
           loading="lazy"
           frameborder="0"

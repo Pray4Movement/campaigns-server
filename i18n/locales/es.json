@@ -26,6 +26,22 @@
     "allRightsReserved": "Todos los derechos reservados"
   },
   "campaign": {
+    "peopleGroup": {
+      "findOutMore": "Más información",
+      "overview": {
+        "title": "Resumen",
+        "country": "País:",
+        "population": "Población:",
+        "language": "Idioma:",
+        "religion": "Religión:",
+        "status": "Estado:",
+        "churches": "Iglesias:"
+      },
+      "prayerStatus": {
+        "title": "Estado de Oración",
+        "description": "personas orando 10 minutos al día por este grupo de personas."
+      }
+    },
     "header": {
       "prayFor": "Ora por los {campaign}"
     },
@@ -38,8 +54,8 @@
       "goHome": "Ir al Inicio"
     },
     "signup": {
-      "title": "Únase al Movimiento de Oración",
-      "description": "Comprométase a orar diariamente y reciba recordatorios útiles por correo electrónico.",
+      "title": "Inscríbase para Orar",
+      "description": "Comprométase a orar diaria o semanalmente y reciba recordatorios de contenido de oración.",
       "success": "✓ ¡Bienvenido! Se ha unido al movimiento de oración. Recibirá su primera invitación a orar pronto.",
       "successEmail": "✓ ¡Casi listo! Por favor revise su correo electrónico y haga clic en el enlace de verificación para completar su registro.",
       "checkSpam": "¿No ve el correo? Revise su carpeta de spam.",
@@ -70,9 +86,9 @@
           "hint": "Seleccione su país e ingrese su número de teléfono"
         },
         "frequency": {
-          "label": "Frecuencia de Oración",
-          "daily": "Diario",
-          "weekly": "Semanal"
+          "label": "Voy a orar...",
+          "daily": "Cada Día",
+          "weekly": "Elegir Días"
         },
         "daysOfWeek": {
           "label": "Seleccionar Días",
@@ -92,12 +108,20 @@
           "hint": "Su hora local"
         },
         "duration": {
-          "label": "Duración de la Oración",
+          "label": "Durante...",
           "5min": "5 minutos",
           "10min": "10 minutos",
           "15min": "15 minutos",
           "30min": "30 minutos",
           "60min": "1 hora"
+        },
+        "reminderTime": {
+          "label": "Hora del recordatorio"
+        },
+        "timezone": {
+          "label": "Su Zona Horaria",
+          "hint": "Detectada automáticamente desde su navegador",
+          "searchPlaceholder": "Buscar zonas horarias..."
         },
         "submit": "Comprometerse a Orar",
         "submitting": "Uniéndose...",
@@ -115,7 +139,30 @@
     "prayerFuel": {
       "title": "Oración de Hoy",
       "description": "Acceda al contenido y las invitaciones de oración de hoy",
-      "button": "Ver Oración del Día"
+      "button": "Ver Contenido de Oración"
+    },
+    "whyPray": {
+      "title": "¿Por Qué Orar?",
+      "noOne": {
+        "title": "No Tienen a Nadie",
+        "description": "Muchos grupos de personas no alcanzados no tienen iglesias, ni misioneros, y a menudo ni creyentes."
+      },
+      "opensDoors": {
+        "title": "La Oración Abre Puertas",
+        "description": "La oración ablanda los corazones, abre puertas e invita la obra del Espíritu Santo mucho antes de que el Evangelio sea proclamado."
+      },
+      "changed": {
+        "title": "Experimenta la Presencia de Dios",
+        "description": "Dios ha encontrado a muchos de maneras profundas y maravillosas durante sus tiempos de oración. La oración diaria hará crecer tu fe y te acercará a Dios."
+      }
+    },
+    "sampleContent": {
+      "title": "Reciba Contenido de Oración Diario",
+      "description": "Aquí hay una vista previa del contenido de oración diario.",
+      "peopleGroupName": "Grupo de Personas",
+      "scripture": "Escritura",
+      "prayerPoints": "Puntos de Oración",
+      "peopleGroupOfDay": "Pueblo del Día"
     },
     "mobileApp": {
       "title": "Descargue la Aplicación Móvil",
@@ -243,14 +290,17 @@
       }
     },
     "button": {
-      "iPrayed": "He Orado",
+      "amen": "Amén",
       "recording": "Registrando...",
-      "recorded": "✓ Oración Registrada"
+      "recorded": "✓ Oración Registrada",
+      "hint": "Haga clic para terminar su tiempo de oración"
     },
     "thankYou": "¡Gracias por orar! Su oración ha sido registrada.",
     "meetThePeople": "Conoce al Pueblo",
     "peopleGroupOfTheDay": "Pueblo del Día",
     "dayInTheLife": "Un Día en la Vida",
+    "pauseAndPray": "Pausa y Oración",
+    "mapTitle": "Mapa mostrando la ubicación de {name}",
     "pastPrayers": {
       "title": "Oraciones Pasadas"
     },
@@ -269,6 +319,9 @@
     "back": "Atrás",
     "next": "Siguiente",
     "previous": "Anterior",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "minutes": "min",
+    "yes": "Sí",
+    "no": "No"
   }
 }
