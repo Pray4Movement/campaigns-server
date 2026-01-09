@@ -23,6 +23,8 @@
               <h2 v-if="contentItem.title" class="text-2xl font-bold mb-8">{{ contentItem.title }}</h2>
               <RichTextViewer :content="contentItem.content_json as Record<string, any> | null" :item-id="String(contentItem.id)" />
             </template>
+
+            <p v-if="contentItem.content_type !== 'people_group'" class="text-right text-lg font-bold mt-8 text-secondary-600 uppercase">Pause & Pray</p>
           </div>
         </div>
 
