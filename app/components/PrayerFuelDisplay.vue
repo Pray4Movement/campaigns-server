@@ -83,7 +83,7 @@ defineEmits<{
 <style scoped>
 :deep(h2) {
   text-transform: uppercase;
-  font-size: 1.5rem;
+  font-size: 1.5rem !important;
   font-weight: 700;
 }
 :deep(p) {

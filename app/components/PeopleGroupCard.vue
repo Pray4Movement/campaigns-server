@@ -6,6 +6,7 @@ interface PeopleGroupData {
   population: number | null
   language: string | null
   religion: string | null
+  country: string | null
   lat: number | null
   lng: number | null
 }
@@ -47,9 +48,13 @@ const mapEmbedUrl = computed(() => {
           </div>
 
           <div class="header-content">
-            <h2 class="name">{{ peopleGroup.name }}</h2>
+            <h3 class="name">{{ peopleGroup.name }}</h3>
 
             <div class="info-row">
+              <div v-if="peopleGroup.country" class="info-item">
+                <UIcon name="i-lucide-map-pin" class="icon" />
+                <span>{{ peopleGroup.country }}</span>
+              </div>
               <div v-if="peopleGroup.population" class="info-item">
                 <UIcon name="i-lucide-users" class="icon" />
                 <span>{{ formatPopulation(peopleGroup.population) }}</span>

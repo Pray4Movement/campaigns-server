@@ -51,3 +51,7 @@ export function getLanguageLabel(code: string): string | null {
 export function getReligionLabel(code: string): string | null {
   return getFieldOptionLabel('imb_reg_of_religion_3', code)
 }
+
+export function getCountryLabel(code: string): string | null {
+  return getFieldOptionLabel('imb_isoalpha3', code)
+}
