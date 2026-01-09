@@ -1,6 +1,7 @@
 import { libraryService, type LibraryExportData } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
 import { campaignService } from '#server/database/campaigns'
+import { sanitizeImportContent } from '#server/utils/sanitize-tiptap'
 
 const VALID_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
 
@@ -156,8 +157,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Sanitize content before import
+  const sanitizedContent = sanitizeImportContent(exportData.content)
+
   // Bulk import content
-  const importResult = await libraryContentService.bulkCreateContent(library.id, exportData.content)
+  const importResult = await libraryContentService.bulkCreateContent(library.id, sanitizedContent)
 
   // Get final stats
   const stats = await libraryService.getLibraryStats(library.id)
