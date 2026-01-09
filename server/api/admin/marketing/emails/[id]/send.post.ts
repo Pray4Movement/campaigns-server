@@ -1,5 +1,5 @@
 import { marketingEmailService } from '#server/database/marketing-emails'
-import { marketingEmailQueueService } from '#server/database/marketing-email-queue'
+import { jobQueueService } from '#server/database/job-queue'
 import { contactMethodService } from '#server/database/contact-methods'
 
 export default defineEventHandler(async (event) => {
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
     await marketingEmailService.updateStatus(id, 'queued', user.userId)
     await marketingEmailService.updateStats(id, recipients.length, 0, 0)
 
-    const queuedCount = await marketingEmailQueueService.populateQueue(id, recipients)
+    const queuedCount = await jobQueueService.createMarketingEmailJobs(id, recipients)
 
     return {
       success: true,

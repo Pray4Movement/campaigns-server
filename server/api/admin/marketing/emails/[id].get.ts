@@ -1,5 +1,5 @@
 import { marketingEmailService } from '#server/database/marketing-emails'
-import { marketingEmailQueueService } from '#server/database/marketing-email-queue'
+import { jobQueueService } from '#server/database/job-queue'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -30,7 +30,14 @@ export default defineEventHandler(async (event) => {
 
   let queueStats = null
   if (email.status !== 'draft') {
-    queueStats = await marketingEmailQueueService.getQueueStats(id)
+    const stats = await jobQueueService.getJobStats('marketing_email', id)
+    queueStats = {
+      total: stats.total,
+      pending: stats.pending,
+      processing: stats.processing,
+      sent: stats.completed,
+      failed: stats.failed
+    }
   }
 
   return {
