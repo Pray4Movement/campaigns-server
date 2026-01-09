@@ -74,6 +74,11 @@ export async function translateText(
     params.append('source_lang', sourceLang)
   }
 
+  // Hindi requires quality_optimized model
+  if (targetLanguage === 'hi') {
+    params.append('model', 'quality_optimized')
+  }
+
   const apiUrl = config.deeplApiUrl || 'https://api-free.deepl.com'
 
   const response = await fetch(`${apiUrl}/v2/translate`, {
@@ -132,6 +137,11 @@ export async function translateTexts(
 
   if (sourceLang) {
     params.append('source_lang', sourceLang)
+  }
+
+  // Hindi requires quality_optimized model
+  if (targetLanguage === 'hi') {
+    params.append('model', 'quality_optimized')
   }
 
   const apiUrl = config.deeplApiUrl || 'https://api-free.deepl.com'
