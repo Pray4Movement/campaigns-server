@@ -1,9 +1,10 @@
 import { libraryService, type LibraryExportData, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
+import { campaignService } from '#server/database/campaigns'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
-  await requireAuth(event)
+  const user = await requireAuth(event)
 
   const id = parseInt(event.context.params?.libraryId || '0')
 
@@ -29,6 +30,17 @@ export default defineEventHandler(async (event) => {
       statusCode: 404,
       statusMessage: 'Library not found'
     })
+  }
+
+  // If this is a campaign library, check user has access to the campaign
+  if (library.campaign_id) {
+    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, library.campaign_id)
+    if (!hasAccess) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'You do not have access to this campaign'
+      })
+    }
   }
 
   // Get all content for export

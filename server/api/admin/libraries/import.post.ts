@@ -1,5 +1,6 @@
 import { libraryService, type LibraryExportData } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
+import { campaignService } from '#server/database/campaigns'
 
 const VALID_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
 
@@ -56,9 +57,6 @@ function validateExportData(data: unknown): { valid: boolean; errors: string[] }
 }
 
 export default defineEventHandler(async (event) => {
-  // Require admin authentication
-  await requireAdmin(event)
-
   const body = await readBody<ImportRequestBody>(event)
 
   if (!body.data) {
@@ -66,6 +64,36 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       statusMessage: 'Missing export data'
     })
+  }
+
+  // Determine if this is a campaign import or global import
+  // and apply appropriate authentication
+  let user
+  let targetCampaignId: number | null = null
+
+  if (body.target_library_id) {
+    // Importing into existing library - check what type it is
+    const existingLibrary = await libraryService.getLibraryById(body.target_library_id)
+    if (existingLibrary?.campaign_id) {
+      targetCampaignId = existingLibrary.campaign_id
+    }
+  } else if (body.campaign_id) {
+    targetCampaignId = body.campaign_id
+  }
+
+  if (targetCampaignId) {
+    // Campaign import - require content.edit permission and campaign access
+    user = await requirePermission(event, 'content.edit')
+    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, targetCampaignId)
+    if (!hasAccess) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'You do not have access to this campaign'
+      })
+    }
+  } else {
+    // Global library import - require admin
+    await requireAdmin(event)
   }
 
   // Validate export data structure
