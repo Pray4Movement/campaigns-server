@@ -442,6 +442,12 @@ defineExpose({ loadTranslations })
   font-size: 2rem;
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .day-navigation {
   display: flex;
   gap: 0.75rem;
