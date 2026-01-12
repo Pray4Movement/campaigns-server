@@ -35,14 +35,13 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
       const duration = Math.floor((Date.now() - pageOpenTime.value) / 1000)
       const timestamp = new Date().toISOString()
 
-      await $fetch(`/api/campaigns/${slug}/prayer-session`, {
+      await $fetch(`/api/campaigns/${slug}/prayer-content/${contentDate.value}/session`, {
         method: 'POST',
         body: {
           sessionId: sessionId.value,
           trackingId: trackingId.value || null,
           duration,
-          timestamp,
-          contentDate: contentDate.value
+          timestamp
         }
       })
     } catch (err: any) {
@@ -68,14 +67,13 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
       const duration = Math.min(rawDuration, MAX_DURATION)
       const timestamp = new Date().toISOString()
 
-      await $fetch(`/api/campaigns/${slug}/prayer-session`, {
+      await $fetch(`/api/campaigns/${slug}/prayer-content/${contentDate.value}/session`, {
         method: 'POST',
         body: {
           sessionId: sessionId.value,
           trackingId: trackingId.value || null,
           duration,
-          timestamp,
-          contentDate: contentDate.value
+          timestamp
         }
       })
 

@@ -81,6 +81,9 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Cache for 1 hour at edge (Cloudflare) - people_praying updates daily at 3 AM
+  setResponseHeader(event, 'Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600')
+
   return {
     campaign,
     peopleGroup

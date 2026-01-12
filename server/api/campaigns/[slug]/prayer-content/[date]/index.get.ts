@@ -1,10 +1,9 @@
 import { campaignService } from '#server/database/campaigns'
 import { prayerContentService } from '#server/database/prayer-content'
-import { appConfigService } from '#server/database/app-config'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
-  const dayNumberParam = getRouterParam(event, 'dayNumber')
+  const dateParam = getRouterParam(event, 'date')
   const query = getQuery(event)
 
   if (!slug) {
@@ -14,20 +13,23 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!dayNumberParam) {
+  if (!dateParam) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Day number is required'
+      statusMessage: 'Date is required'
     })
   }
 
-  const dayNumber = parseInt(dayNumberParam)
-  if (isNaN(dayNumber) || dayNumber < 1) {
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+  if (!dateRegex.test(dateParam)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Invalid day number. Must be a positive integer'
+      statusMessage: 'Invalid date format. Expected YYYY-MM-DD'
     })
   }
+
+  const date = dateParam
 
   // Get campaign by slug
   const campaign = await campaignService.getCampaignBySlug(slug)
@@ -47,25 +49,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Convert day number to date
-  const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
-
-  if (!globalStartDate) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Global campaign start date is not configured'
-    })
-  }
-
-  const startDate = new Date(globalStartDate)
-  startDate.setDate(startDate.getDate() + (dayNumber - 1))
-  const date = startDate.toISOString().split('T')[0]!
-
   // Get language preference (default to campaign's default language)
-  const languageCode = (query.language as string) || campaign.default_language || 'en'
-
-  // Get ALL prayer content for the day and language from all libraries
   const defaultLang = campaign.default_language || 'en'
+  const languageCode = (query.language as string) || defaultLang
+
+  // Get ALL prayer content for the date and language from all libraries
   let allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, languageCode)
 
   // If no content found in requested language, fall back to campaign default language
@@ -92,9 +80,14 @@ export default defineEventHandler(async (event) => {
       title: content.title,
       language_code: content.language_code,
       content_json: contentJson,
-      content_date: content.content_date
+      content_date: content.content_date,
+      content_type: content.content_type || 'static',
+      people_group_data: content.people_group_data || null
     }
   })
+
+  // Cache for 24 hours at edge (Cloudflare), allow stale content while revalidating
+  setResponseHeader(event, 'Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=3600')
 
   return {
     campaign: {
@@ -103,7 +96,6 @@ export default defineEventHandler(async (event) => {
       title: campaign.title,
       default_language: campaign.default_language
     },
-    dayNumber,
     date,
     language: languageCode,
     availableLanguages,
