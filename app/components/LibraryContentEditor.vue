@@ -211,7 +211,7 @@ function cancelLeave() {
   pendingNavigation.value = null
 }
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave((_to, _from, next) => {
   // Always allow navigation if content was saved
   if (isSaved.value) {
     next()

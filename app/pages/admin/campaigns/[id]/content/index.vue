@@ -128,7 +128,7 @@
                 :variant="getDayVariant(day)"
                 :color="getDayColor(day)"
                 :title="getDayTooltip(day)"
-                class="aspect-square !p-0 justify-center"
+                class="aspect-square p-0! justify-center"
               >
                 {{ day }}
               </UButton>
@@ -351,8 +351,9 @@ async function loadLibraries() {
     libraries.value = response.libraries
 
     // Auto-select first library if none selected
-    if (response.libraries.length > 0 && !selectedLibrary.value) {
-      selectLibrary(response.libraries[0])
+    const firstLibrary = response.libraries[0]
+    if (firstLibrary && !selectedLibrary.value) {
+      selectLibrary(firstLibrary)
     }
   } catch (err: any) {
     error.value = 'Failed to load libraries'

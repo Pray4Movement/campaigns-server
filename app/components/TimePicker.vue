@@ -169,7 +169,7 @@ const minuteMarkers = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
 // Format time for display
 const displayTime = computed(() => {
   if (!props.modelValue) return ''
-  const [hours, minutes] = props.modelValue.split(':').map(Number)
+  const [hours = 0, minutes = 0] = props.modelValue.split(':').map(Number)
   const period = hours >= 12 ? 'PM' : 'AM'
   const displayHours = hours % 12 || 12
   return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
@@ -213,7 +213,7 @@ function selectMinute(minute: number) {
 // Initialize picker when opened
 watch(showPicker, (isOpen) => {
   if (isOpen && props.modelValue) {
-    const [hours, minutes] = props.modelValue.split(':').map(Number)
+    const [hours = 0, minutes = 0] = props.modelValue.split(':').map(Number)
     selectedHour12.value = hours % 12 || 12
     selectedMinute.value = minutes
     selectedPeriod.value = hours >= 12 ? 'PM' : 'AM'

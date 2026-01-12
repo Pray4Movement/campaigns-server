@@ -54,7 +54,7 @@
             :variant="getDayVariant(day)"
             :color="getDayColor(day)"
             :title="getDayTooltip(day)"
-            class="aspect-square !p-0 justify-center"
+            class="aspect-square p-0! justify-center"
           >
             {{ day }}
           </UButton>
@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { getLanguageName, getLanguageFlag, LANGUAGES } from '~/utils/languages'
+import { getLanguageName, LANGUAGES } from '~/utils/languages'
 
 definePageMeta({
   layout: 'admin',

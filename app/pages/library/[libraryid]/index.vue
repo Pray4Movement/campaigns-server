@@ -47,7 +47,7 @@
               :variant="getDayStatus(day) === 'complete' ? 'solid' : 'outline'"
               :color="getDayStatus(day) === 'complete' ? 'success' : 'neutral'"
               :title="getDayTooltip(day)"
-              class="aspect-square !p-0 justify-center"
+              class="aspect-square p-0! justify-center"
             >
               {{ day }}
             </UButton>

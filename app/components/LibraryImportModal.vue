@@ -239,7 +239,7 @@ const importError = ref('')
 const importName = ref('')
 const libraryKey = ref('')
 const importMode = ref<'new' | 'existing'>('new')
-const targetLibraryId = ref<number | null>(null)
+const targetLibraryId = ref<number | undefined>(undefined)
 
 // Only show library_key field if campaign import AND export file doesn't have one
 const needsLibraryKey = computed(() => {
@@ -282,7 +282,7 @@ function resetState() {
   importName.value = ''
   libraryKey.value = ''
   importMode.value = 'new'
-  targetLibraryId.value = null
+  targetLibraryId.value = undefined
   isDragOver.value = false
 }
 

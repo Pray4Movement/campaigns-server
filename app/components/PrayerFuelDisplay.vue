@@ -60,10 +60,22 @@
 </template>
 
 <script setup lang="ts">
+interface PeopleGroupData {
+  name: string
+  image_url: string | null
+  description: string | null
+  population: number | null
+  language: string | null
+  religion: string | null
+  country: string | null
+  lat: number | null
+  lng: number | null
+}
+
 interface ContentItem {
   id: number
   content_type?: string
-  people_group_data?: Record<string, any> | null
+  people_group_data?: PeopleGroupData | null
   title?: string
   content_json?: Record<string, any> | string | null
 }
