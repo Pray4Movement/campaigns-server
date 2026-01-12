@@ -1,17 +1,11 @@
 import { libraryContentService } from '#server/database/library-content'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   await requireAuth(event)
 
-  const id = parseInt(event.context.params?.id || '0')
-
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid content ID'
-    })
-  }
+  const id = getIntParam(event, 'id')
 
   const content = await libraryContentService.getLibraryContentById(id)
 

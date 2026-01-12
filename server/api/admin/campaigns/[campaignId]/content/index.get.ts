@@ -1,19 +1,13 @@
 import { prayerContentService } from '#server/database/prayer-content'
 import { campaignService } from '#server/database/campaigns'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require content.view permission
   const user = await requirePermission(event, 'content.view')
 
-  const campaignId = parseInt(event.context.params?.campaignId || '0')
+  const campaignId = getIntParam(event, 'campaignId')
   const query = getQuery(event)
-
-  if (!campaignId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid campaign ID'
-    })
-  }
 
   // Check if user has access to this campaign
   const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)

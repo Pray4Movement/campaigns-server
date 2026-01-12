@@ -1,6 +1,6 @@
 import { libraryContentService } from '#server/database/library-content'
 import { translateTiptapContent, isDeepLConfigured } from '#server/utils/deepl'
-import { getErrorMessage } from '#server/utils/api-helpers'
+import { getErrorMessage, getIntParam } from '#server/utils/api-helpers'
 
 /**
  * Translate library content to one or more target languages
@@ -17,15 +17,8 @@ import { getErrorMessage } from '#server/utils/api-helpers'
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.create')
 
-  const libraryId = parseInt(event.context.params?.libraryId || '0')
-  const contentId = parseInt(event.context.params?.id || '0')
-
-  if (!libraryId || !contentId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID or content ID'
-    })
-  }
+  const libraryId = getIntParam(event, 'libraryId')
+  const contentId = getIntParam(event, 'id')
 
   // Check if DeepL is configured
   if (!isDeepLConfigured()) {

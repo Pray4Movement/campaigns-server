@@ -1,18 +1,11 @@
 import { userInvitationService } from '#server/database/user-invitations'
-import { handleApiError } from '#server/utils/api-helpers'
+import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   await requireAuth(event)
 
-  const id = parseInt(getRouterParam(event, 'id') || '0')
-
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid invitation ID'
-    })
-  }
+  const id = getIntParam(event, 'id')
 
   try {
     // Get the invitation

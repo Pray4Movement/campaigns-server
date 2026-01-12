@@ -1,18 +1,11 @@
 import { campaignService } from '#server/database/campaigns'
-import { handleApiError } from '#server/utils/api-helpers'
+import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require campaigns.edit permission
   const user = await requirePermission(event, 'campaigns.edit')
 
-  const campaignId = parseInt(event.context.params?.campaignId || '0')
-
-  if (!campaignId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid campaign ID'
-    })
-  }
+  const campaignId = getIntParam(event, 'campaignId')
 
   // Check if user has access to this campaign
   const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)

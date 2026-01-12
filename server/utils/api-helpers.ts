@@ -1,4 +1,5 @@
-import { createError, H3Error } from 'h3'
+import type { H3Event } from 'h3'
+import { createError, H3Error, getRouterParam } from 'h3'
 
 /**
  * Type guard to check if error is already a Nitro/H3 HTTP error
@@ -47,4 +48,22 @@ export function handleApiError(error: unknown, defaultMessage: string, statusCod
     statusCode,
     statusMessage: getErrorMessage(error) || defaultMessage
   })
+}
+
+/**
+ * Get and validate an integer route parameter.
+ * Throws 400 error if parameter is missing, not a number, or <= 0.
+ */
+export function getIntParam(event: H3Event, paramName: string): number {
+  const raw = getRouterParam(event, paramName)
+  const value = Number(raw)
+
+  if (!raw || isNaN(value) || value <= 0) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Invalid ${paramName}`
+    })
+  }
+
+  return value
 }

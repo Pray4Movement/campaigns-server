@@ -1,15 +1,9 @@
 import { libraryContentService } from '#server/database/library-content'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const libraryId = parseInt(event.context.params?.libraryId || '0')
-  const dayNumber = parseInt(event.context.params?.dayNumber || '0')
-
-  if (!libraryId || !dayNumber) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID or day number'
-    })
-  }
+  const libraryId = getIntParam(event, 'libraryId')
+  const dayNumber = getIntParam(event, 'dayNumber')
 
   const query = getQuery(event)
   const language = query.language as string | undefined

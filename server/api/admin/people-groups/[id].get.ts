@@ -1,16 +1,10 @@
 import { peopleGroupService } from '../../../database/people-groups'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
 
-  const id = parseInt(getRouterParam(event, 'id') || '')
-
-  if (isNaN(id)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid people group ID'
-    })
-  }
+  const id = getIntParam(event, 'id')
 
   const peopleGroup = await peopleGroupService.getPeopleGroupById(id)
 

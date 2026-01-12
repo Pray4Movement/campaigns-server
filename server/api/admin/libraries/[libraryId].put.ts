@@ -1,19 +1,12 @@
 import { libraryService } from '#server/database/libraries'
 import { prayerContentService } from '#server/database/prayer-content'
-import { handleApiError } from '#server/utils/api-helpers'
+import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
   await requireAdmin(event)
 
-  const id = parseInt(event.context.params?.libraryId || '0')
-
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID'
-    })
-  }
+  const id = getIntParam(event, 'libraryId')
 
   const body = await readBody(event)
 

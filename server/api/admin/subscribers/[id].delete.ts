@@ -2,23 +2,16 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignService } from '#server/database/campaigns'
-import { handleApiError } from '#server/utils/api-helpers'
+import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.delete')
 
-  const subscriptionId = getRouterParam(event, 'id')
-
-  if (!subscriptionId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Subscription ID is required'
-    })
-  }
+  const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get subscription data before deletion for logging
-    const subscription = await campaignSubscriptionService.getById(parseInt(subscriptionId))
+    const subscription = await campaignSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({

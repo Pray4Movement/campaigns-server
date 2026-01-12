@@ -1,17 +1,11 @@
 import { libraryContentService } from '#server/database/library-content'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   await requireAuth(event)
 
-  const libraryId = parseInt(event.context.params?.libraryId || '0')
-
-  if (!libraryId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID'
-    })
-  }
+  const libraryId = getIntParam(event, 'libraryId')
 
   const query = getQuery(event)
   const grouped = query.grouped === 'true'

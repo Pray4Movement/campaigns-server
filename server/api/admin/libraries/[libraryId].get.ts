@@ -1,17 +1,11 @@
 import { libraryService } from '#server/database/libraries'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   await requireAuth(event)
 
-  const id = parseInt(event.context.params?.libraryId || '0')
-
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID'
-    })
-  }
+  const id = getIntParam(event, 'libraryId')
 
   const library = await libraryService.getLibraryById(id)
 

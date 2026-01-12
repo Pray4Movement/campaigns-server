@@ -1,4 +1,5 @@
 import { peopleGroupService } from '../../../database/people-groups'
+import { getIntParam } from '#server/utils/api-helpers'
 
 interface UpdateBody {
   name?: string
@@ -9,14 +10,7 @@ interface UpdateBody {
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
 
-  const id = parseInt(getRouterParam(event, 'id') || '')
-
-  if (isNaN(id)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid people group ID'
-    })
-  }
+  const id = getIntParam(event, 'id')
 
   const body = await readBody<UpdateBody>(event)
 

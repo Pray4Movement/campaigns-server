@@ -1,19 +1,13 @@
 import { libraryService, type LibraryExportData, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
 import { campaignService } from '#server/database/campaigns'
+import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   const user = await requireAuth(event)
 
-  const id = parseInt(event.context.params?.libraryId || '0')
-
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID'
-    })
-  }
+  const id = getIntParam(event, 'libraryId')
 
   // Cannot export virtual libraries
   if (id === PEOPLE_GROUP_LIBRARY_ID || id === DAILY_PEOPLE_GROUP_LIBRARY_ID) {

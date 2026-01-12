@@ -1,18 +1,11 @@
 import { libraryContentService } from '#server/database/library-content'
-import { handleApiError } from '#server/utils/api-helpers'
+import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require content.create permission
   await requirePermission(event, 'content.create')
 
-  const libraryId = parseInt(event.context.params?.libraryId || '0')
-
-  if (!libraryId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID'
-    })
-  }
+  const libraryId = getIntParam(event, 'libraryId')
 
   const body = await readBody(event)
 

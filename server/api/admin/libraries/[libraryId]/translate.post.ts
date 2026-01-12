@@ -1,6 +1,7 @@
 import { libraryContentService } from '#server/database/library-content'
 import { jobQueueService, type TranslationPayload } from '#server/database/job-queue'
 import { isDeepLConfigured, SUPPORTED_LANGUAGES } from '#server/utils/deepl'
+import { getIntParam } from '#server/utils/api-helpers'
 
 /**
  * Queue bulk translation for an entire library
@@ -16,14 +17,7 @@ import { isDeepLConfigured, SUPPORTED_LANGUAGES } from '#server/utils/deepl'
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.create')
 
-  const libraryId = parseInt(event.context.params?.libraryId || '0')
-
-  if (!libraryId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid library ID'
-    })
-  }
+  const libraryId = getIntParam(event, 'libraryId')
 
   // Check if DeepL is configured
   if (!isDeepLConfigured()) {
