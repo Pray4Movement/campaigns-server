@@ -1,3 +1,7 @@
+/**
+ * DELETE /api/campaigns/:slug/reminder/:id
+ * Delete a specific reminder for a campaign subscription
+ */
 import { campaignService } from '#server/database/campaigns'
 import { subscriberService } from '#server/database/subscribers'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'

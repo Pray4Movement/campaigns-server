@@ -1,3 +1,7 @@
+/**
+ * GET /api/campaigns
+ * List all active campaigns with people group images
+ */
 import { campaignService } from '#server/database/campaigns'
 import { peopleGroupService } from '#server/database/people-groups'
 

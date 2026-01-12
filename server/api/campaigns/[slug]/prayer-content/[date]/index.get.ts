@@ -1,3 +1,7 @@
+/**
+ * GET /api/campaigns/:slug/prayer-content/:date
+ * Get prayer content for a specific date
+ */
 import { campaignService } from '#server/database/campaigns'
 import { prayerContentService } from '#server/database/prayer-content'
 
