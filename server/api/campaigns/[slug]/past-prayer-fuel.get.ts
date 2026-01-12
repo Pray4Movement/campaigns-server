@@ -1,5 +1,4 @@
 import { campaignService } from '#server/database/campaigns'
-import { prayerContentService } from '#server/database/prayer-content'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -33,52 +32,18 @@ export default defineEventHandler(async (event) => {
   // Get language preference (default to campaign's default language)
   const languageCode = (query.language as string) || campaign.default_language || 'en'
 
-  // Get current date to exclude today and future dates
-  const today = new Date().toISOString().split('T')[0]!
-
-  // Get past prayer content (limit to 30 most recent)
-  const pastContent = await prayerContentService.getCampaignPrayerContent(campaign.id, {
-    endDate: today,
-    language: languageCode,
-    limit: 31 // Get 31 so we can exclude today
-  })
-
-  // Filter out today's content and group by unique dates
-  const dateMap = new Map<string, any>()
-
-  for (const item of pastContent) {
-    const itemDate = typeof item.content_date === 'string'
-      ? item.content_date.split('T')[0]
-      : new Date(item.content_date).toISOString().split('T')[0]
-
-    // Skip today and future dates
-    if (!itemDate || itemDate >= today) continue
-
-    // Only keep first content item for each unique date
-    if (!dateMap.has(itemDate)) {
-      let contentJson = item.content_json
-      if (typeof contentJson === 'string') {
-        try {
-          contentJson = JSON.parse(contentJson)
-        } catch (e) {
-          console.error('Failed to parse content_json:', e)
-        }
-      }
-
-      dateMap.set(itemDate, {
-        id: item.id,
-        title: item.title,
-        content_date: item.content_date,
-        language_code: item.language_code,
-        content_json: contentJson
-      })
-    }
+  // Generate past 7 days (yesterday through 7 days ago)
+  const pastContent: Array<{ id: string; content_date: string }> = []
+  const today = new Date()
+  for (let i = 1; i <= 7; i++) {
+    const pastDate = new Date(today)
+    pastDate.setDate(today.getDate() - i)
+    const dateStr = pastDate.toISOString().split('T')[0]!
+    pastContent.push({
+      id: `${dateStr}-${campaign.id}`,
+      content_date: dateStr
+    })
   }
-
-  // Convert map to array and sort by date DESC
-  const uniqueContent = Array.from(dateMap.values())
-    .sort((a, b) => b.content_date.localeCompare(a.content_date))
-    .slice(0, 30) // Return max 30 unique dates
 
   return {
     campaign: {
@@ -88,6 +53,6 @@ export default defineEventHandler(async (event) => {
       default_language: campaign.default_language
     },
     language: languageCode,
-    content: uniqueContent
+    content: pastContent
   }
 })

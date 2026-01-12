@@ -22,7 +22,7 @@
               size="sm"
               icon="i-lucide-chevron-left"
             />
-            <h1 class="text-3xl font-bold text-center">{{ $t('prayerFuel.title') }}</h1>
+            <h1 class="text-3xl font-bold text-center">{{ formatDate(data.date, selectedLanguage) }}</h1>
             <UButton
               v-if="!isNextDateFuture"
               :to="localePath(`/${slug}/prayer/${nextDate}`)"
@@ -38,7 +38,6 @@
               icon="i-lucide-chevron-right"
             />
           </div>
-          <p class="text-muted text-center mt-2">{{ formatDate(data.date, selectedLanguage) }}</p>
         </div>
       </header>
 
