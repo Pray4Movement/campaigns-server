@@ -45,6 +45,14 @@ export interface MarketingEmailPayload {
   recipient_email: string
 }
 
+export interface TranslationPayload {
+  library_id: number
+  source_content_id: number
+  source_language: string
+  target_language: string
+  overwrite: boolean
+}
+
 class JobQueueService {
   private db = getDatabase()
 

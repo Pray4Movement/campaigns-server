@@ -17,6 +17,15 @@
         <h1>Day {{ dayNumber }}</h1>
         <div class="header-actions">
           <UButton
+            @click="openTranslateAllModal"
+            variant="outline"
+            size="sm"
+            icon="i-lucide-languages"
+            :disabled="languagesWithContent.length === 0"
+          >
+            Translate All
+          </UButton>
+          <UButton
             :to="calendarUrl"
             variant="outline"
             size="sm"
@@ -97,6 +106,14 @@
                 Edit
               </UButton>
               <UButton
+                @click="openTranslateSingleModal(lang.code)"
+                variant="link"
+                size="sm"
+                :disabled="languagesWithContent.length === 0"
+              >
+                Translate
+              </UButton>
+              <UButton
                 @click="promptDeleteTranslation(lang.translation)"
                 variant="link"
                 size="sm"
@@ -106,6 +123,14 @@
               </UButton>
             </template>
             <template v-else>
+              <UButton
+                @click="openTranslateSingleModal(lang.code)"
+                size="sm"
+                variant="outline"
+                :disabled="languagesWithContent.length === 0"
+              >
+                Translate
+              </UButton>
               <UButton
                 @click="$emit('create-translation', lang.code)"
                 size="sm"
@@ -129,6 +154,18 @@
       @confirm="confirmDelete"
       @cancel="cancelDelete"
     />
+
+    <!-- Translation Options Modal -->
+    <TranslationOptionsModal
+      v-model:open="showTranslateModal"
+      :mode="translateMode"
+      :target-language="translateTargetLanguage"
+      :available-languages="languagesWithContent"
+      :existing-languages="languagesWithContent"
+      :loading="translating"
+      @translate="handleTranslate"
+      @cancel="closeTranslateModal"
+    />
   </div>
 </template>
 
@@ -146,6 +183,13 @@ interface LibraryContent {
   day_number: number
   language_code: string
   content_json: any
+}
+
+interface TranslationResult {
+  language: string
+  success: boolean
+  skipped?: boolean
+  error?: string
 }
 
 const props = defineProps<{
@@ -170,6 +214,12 @@ const showDeleteModal = ref(false)
 const translationToDelete = ref<LibraryContent | null>(null)
 const toast = useToast()
 
+// Translation state
+const showTranslateModal = ref(false)
+const translateMode = ref<'single' | 'all'>('all')
+const translateTargetLanguage = ref('')
+const translating = ref(false)
+
 const allLanguagesWithStatus = computed(() => {
   const translationMap = new Map(translations.value.map(t => [t.language_code, t]))
   return LANGUAGES.map(lang => ({
@@ -178,6 +228,11 @@ const allLanguagesWithStatus = computed(() => {
     flag: lang.flag,
     translation: translationMap.get(lang.code) || null
   }))
+})
+
+// Languages that have content (used for both source selection and existing content check)
+const languagesWithContent = computed(() => {
+  return translations.value.map(t => t.language_code)
 })
 
 async function loadTranslations() {
@@ -260,6 +315,81 @@ function getPublicUrl(languageCode: string): string {
   return `/${languageCode}/library/${props.libraryId}/${props.dayNumber}`
 }
 
+// Translation functions
+function openTranslateAllModal() {
+  translateMode.value = 'all'
+  translateTargetLanguage.value = ''
+  showTranslateModal.value = true
+}
+
+function openTranslateSingleModal(targetLang: string) {
+  translateMode.value = 'single'
+  translateTargetLanguage.value = targetLang
+  showTranslateModal.value = true
+}
+
+function closeTranslateModal() {
+  showTranslateModal.value = false
+  translateTargetLanguage.value = ''
+}
+
+async function handleTranslate(options: { sourceLanguage: string; targetLanguages: string[]; overwrite: boolean }) {
+  // Find the source content ID
+  const sourceTranslation = translations.value.find(t => t.language_code === options.sourceLanguage)
+  if (!sourceTranslation) {
+    toast.add({
+      title: 'Translation failed',
+      description: 'Source content not found',
+      color: 'warning'
+    })
+    return
+  }
+
+  translating.value = true
+
+  try {
+    const response = await $fetch(`/api/admin/libraries/${props.libraryId}/content/${sourceTranslation.id}/translate`, {
+      method: 'POST',
+      body: {
+        sourceLanguage: options.sourceLanguage,
+        targetLanguages: options.targetLanguages,
+        overwrite: options.overwrite
+      }
+    })
+
+    const results = (response.results || []) as TranslationResult[]
+    const successCount = results.filter(r => r.success && !r.skipped).length
+    const skippedCount = results.filter(r => r.skipped).length
+    const failedCount = results.filter(r => !r.success).length
+
+    if (failedCount > 0) {
+      toast.add({
+        title: 'Translation partially completed',
+        description: `${successCount} translated, ${skippedCount} skipped, ${failedCount} failed`,
+        color: 'warning'
+      })
+    } else {
+      toast.add({
+        title: 'Translation completed',
+        description: `${successCount} language(s) translated${skippedCount > 0 ? `, ${skippedCount} skipped` : ''}`,
+        color: 'primary'
+      })
+    }
+
+    closeTranslateModal()
+    await loadTranslations()
+  } catch (err: any) {
+    console.error('Translation failed:', err)
+    toast.add({
+      title: 'Translation failed',
+      description: err.data?.statusMessage || 'An error occurred during translation',
+      color: 'error'
+    })
+  } finally {
+    translating.value = false
+  }
+}
+
 watch(() => [props.libraryId, props.dayNumber], () => {
   loadTranslations()
 }, { immediate: true })
@@ -313,6 +443,12 @@ defineExpose({ loadTranslations })
 .header-content h1 {
   margin: 0;
   font-size: 2rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .day-navigation {

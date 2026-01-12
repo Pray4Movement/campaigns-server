@@ -6,6 +6,16 @@
         <h1 v-if="library" class="library-name">{{ library.name }}</h1>
         <p v-if="library && library.description" class="library-description">{{ library.description }}</p>
       </div>
+      <div class="header-actions">
+        <UButton
+          @click="openTranslateAllModal"
+          variant="outline"
+          icon="i-lucide-languages"
+          :disabled="availableSourceLanguages.length === 0"
+        >
+          Translate All Content
+        </UButton>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">Loading library content...</div>
@@ -83,6 +93,25 @@
       </div>
 
     </div>
+
+    <!-- Translation Options Modal -->
+    <TranslationOptionsModal
+      v-model:open="showTranslateModal"
+      mode="all"
+      :available-languages="availableSourceLanguages"
+      :existing-languages="[]"
+      :loading="startingTranslation"
+      @translate="handleStartBulkTranslation"
+      @cancel="showTranslateModal = false"
+    />
+
+    <!-- Translation Progress Modal -->
+    <TranslationProgressModal
+      v-model:open="showProgressModal"
+      :library-id="libraryId"
+      @close="handleProgressClose"
+      @cancelled="handleProgressCancelled"
+    />
   </div>
 </template>
 
@@ -124,6 +153,12 @@ const dayContentMap = ref<Map<number, LibraryContent[]>>(new Map())
 const dayRange = ref({ minDay: 1, maxDay: 365 })
 const currentPage = ref(1)
 const daysPerPage = 100
+const toast = useToast()
+
+// Translation state
+const showTranslateModal = ref(false)
+const showProgressModal = ref(false)
+const startingTranslation = ref(false)
 
 const languageOptions = computed(() => [
   { label: 'All Languages', value: 'all' },
@@ -132,6 +167,15 @@ const languageOptions = computed(() => [
     value: lang.code
   }))
 ])
+
+// Languages that have content in the library (can be used as source)
+const availableSourceLanguages = computed(() => {
+  const languages = new Set<string>()
+  dayContentMap.value.forEach(contents => {
+    contents.forEach(c => languages.add(c.language_code))
+  })
+  return Array.from(languages)
+})
 
 const startDay = computed(() => (currentPage.value - 1) * daysPerPage + 1)
 const endDay = computed(() => Math.min(currentPage.value * daysPerPage, dayRange.value.maxDay || 365))
@@ -247,6 +291,68 @@ function nextPage() {
   currentPage.value++
 }
 
+// Translation functions
+function openTranslateAllModal() {
+  showTranslateModal.value = true
+}
+
+async function handleStartBulkTranslation(options: { sourceLanguage: string; targetLanguages: string[]; overwrite: boolean }) {
+  startingTranslation.value = true
+
+  try {
+    const response = await $fetch(`/api/admin/libraries/${libraryId.value}/translate`, {
+      method: 'POST',
+      body: {
+        sourceLanguage: options.sourceLanguage,
+        overwrite: options.overwrite
+      }
+    })
+
+    if (response.totalJobs === 0) {
+      toast.add({
+        title: 'No translations needed',
+        description: response.message,
+        color: 'primary'
+      })
+      showTranslateModal.value = false
+      return
+    }
+
+    // Show progress modal
+    showTranslateModal.value = false
+    showProgressModal.value = true
+
+    toast.add({
+      title: 'Translation started',
+      description: `Queued ${response.totalJobs} translation job(s)`,
+      color: 'primary'
+    })
+  } catch (err: any) {
+    console.error('Failed to start translation:', err)
+    toast.add({
+      title: 'Failed to start translation',
+      description: err.data?.statusMessage || 'An error occurred',
+      color: 'error'
+    })
+  } finally {
+    startingTranslation.value = false
+  }
+}
+
+function handleProgressClose() {
+  showProgressModal.value = false
+  // Reload content to show newly translated items
+  loadContent()
+}
+
+function handleProgressCancelled() {
+  toast.add({
+    title: 'Translation cancelled',
+    description: 'Remaining translation jobs have been cancelled',
+    color: 'warning'
+  })
+}
+
 onMounted(async () => {
   await loadLibrary()
   await loadContent()
@@ -263,7 +369,14 @@ watch(selectedLanguage, () => {
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 2rem;
+}
+
+.header-actions {
+  flex-shrink: 0;
 }
 
 .back-link {
