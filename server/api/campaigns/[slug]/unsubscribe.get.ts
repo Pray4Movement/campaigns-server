@@ -1,3 +1,7 @@
+/**
+ * GET /api/campaigns/:slug/unsubscribe
+ * Get subscriber info and unsubscribe from campaign reminders
+ */
 import { campaignService } from '#server/database/campaigns'
 import { subscriberService } from '#server/database/subscribers'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'

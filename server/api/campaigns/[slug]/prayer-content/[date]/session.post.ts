@@ -1,3 +1,7 @@
+/**
+ * POST /api/campaigns/:slug/prayer-content/:date/session
+ * Record a prayer session for analytics and tracking
+ */
 import { campaignService } from '#server/database/campaigns'
 import { getDatabase } from '#server/database/db'
 

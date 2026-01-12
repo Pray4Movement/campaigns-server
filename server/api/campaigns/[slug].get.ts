@@ -1,3 +1,7 @@
+/**
+ * GET /api/campaigns/:slug
+ * Get campaign details and associated people group data
+ */
 import { campaignService } from '#server/database/campaigns'
 import { peopleGroupService } from '#server/database/people-groups'
 import { getFieldOptionLabel } from '../../utils/app/field-options'

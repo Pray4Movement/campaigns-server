@@ -87,6 +87,11 @@ async function processJobQueue() {
         marketingEmailIds.add(job.reference_id)
       }
     }
+
+    // Throttle translation jobs to avoid DeepL rate limits
+    if (job.type === 'translation') {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
   }
 
   for (const emailId of marketingEmailIds) {
