@@ -5,36 +5,10 @@
  * Handles both plain text and Tiptap JSON content.
  */
 
-// All supported language codes for translation
-export const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
+import { LANGUAGE_CODES, getDeeplTargetCode, getDeeplSourceCode } from '~/utils/languages'
 
-// Map app language codes to DeepL language codes
-const DEEPL_LANGUAGE_MAP: Record<string, string> = {
-  en: 'EN',
-  es: 'ES',
-  fr: 'FR',
-  pt: 'PT-BR', // Using Brazilian Portuguese as default
-  de: 'DE',
-  it: 'IT',
-  zh: 'ZH-HANS', // Simplified Chinese
-  ar: 'AR',
-  ru: 'RU',
-  hi: 'HI'
-}
-
-// Map DeepL source language codes (some are different)
-const DEEPL_SOURCE_LANGUAGE_MAP: Record<string, string> = {
-  en: 'EN',
-  es: 'ES',
-  fr: 'FR',
-  pt: 'PT',
-  de: 'DE',
-  it: 'IT',
-  zh: 'ZH',
-  ar: 'AR',
-  ru: 'RU',
-  hi: 'HI'
-}
+// Re-export for convenience
+export const SUPPORTED_LANGUAGES = LANGUAGE_CODES
 
 interface DeepLTranslation {
   detected_source_language: string
@@ -60,10 +34,8 @@ export async function translateText(
     throw new Error('DEEPL_API_KEY is not configured')
   }
 
-  const targetLang = DEEPL_LANGUAGE_MAP[targetLanguage] || targetLanguage.toUpperCase()
-  const sourceLang = sourceLanguage
-    ? DEEPL_SOURCE_LANGUAGE_MAP[sourceLanguage] || sourceLanguage.toUpperCase()
-    : undefined
+  const targetLang = getDeeplTargetCode(targetLanguage)
+  const sourceLang = sourceLanguage ? getDeeplSourceCode(sourceLanguage) : undefined
 
   const params = new URLSearchParams({
     text,
@@ -119,10 +91,8 @@ export async function translateTexts(
     throw new Error('DEEPL_API_KEY is not configured')
   }
 
-  const targetLang = DEEPL_LANGUAGE_MAP[targetLanguage] || targetLanguage.toUpperCase()
-  const sourceLang = sourceLanguage
-    ? DEEPL_SOURCE_LANGUAGE_MAP[sourceLanguage] || sourceLanguage.toUpperCase()
-    : undefined
+  const targetLang = getDeeplTargetCode(targetLanguage)
+  const sourceLang = sourceLanguage ? getDeeplSourceCode(sourceLanguage) : undefined
 
   const params = new URLSearchParams({
     target_lang: targetLang

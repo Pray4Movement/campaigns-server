@@ -8,7 +8,7 @@ import { jobQueueService } from '#server/database/job-queue'
  * Returns job statistics for library translation jobs
  */
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
+  await requirePermission(event, 'content.create')
 
   const libraryId = parseInt(event.context.params?.libraryId || '0')
 

@@ -21,7 +21,7 @@
             variant="outline"
             size="sm"
             icon="i-lucide-languages"
-            :disabled="availableSourceLanguages.length === 0"
+            :disabled="languagesWithContent.length === 0"
           >
             Translate All
           </UButton>
@@ -109,7 +109,7 @@
                 @click="openTranslateSingleModal(lang.code)"
                 variant="link"
                 size="sm"
-                :disabled="availableSourceLanguages.length === 0"
+                :disabled="languagesWithContent.length === 0"
               >
                 Translate
               </UButton>
@@ -127,7 +127,7 @@
                 @click="openTranslateSingleModal(lang.code)"
                 size="sm"
                 variant="outline"
-                :disabled="availableSourceLanguages.length === 0"
+                :disabled="languagesWithContent.length === 0"
               >
                 Translate
               </UButton>
@@ -160,8 +160,8 @@
       v-model:open="showTranslateModal"
       :mode="translateMode"
       :target-language="translateTargetLanguage"
-      :available-languages="availableSourceLanguages"
-      :existing-languages="existingLanguages"
+      :available-languages="languagesWithContent"
+      :existing-languages="languagesWithContent"
       :loading="translating"
       @translate="handleTranslate"
       @cancel="closeTranslateModal"
@@ -230,13 +230,8 @@ const allLanguagesWithStatus = computed(() => {
   }))
 })
 
-// Languages that have content (can be used as source)
-const availableSourceLanguages = computed(() => {
-  return translations.value.map(t => t.language_code)
-})
-
-// Languages that already have content
-const existingLanguages = computed(() => {
+// Languages that have content (used for both source selection and existing content check)
+const languagesWithContent = computed(() => {
   return translations.value.map(t => t.language_code)
 })
 
