@@ -99,7 +99,6 @@ export default defineEventHandler(async (event) => {
     const userWithRoles = await getUserWithRoles(verifiedUser.id, verifiedUser.email, verifiedUser.display_name, verifiedUser.verified, verifiedUser.superadmin)
 
     return {
-      success: true,
       user: userWithRoles,
       message: 'Account created successfully'
     }

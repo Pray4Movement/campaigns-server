@@ -74,7 +74,6 @@ export default defineEventHandler(async (event) => {
   // Check if already active
   if (subscription.status === 'active') {
     return {
-      success: true,
       message: 'Subscription is already active',
       already_active: true,
       campaign_title: campaign.title,
@@ -93,7 +92,6 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    success: true,
     message: 'Successfully resubscribed to prayer reminders',
     already_active: false,
     campaign_title: campaign.title,

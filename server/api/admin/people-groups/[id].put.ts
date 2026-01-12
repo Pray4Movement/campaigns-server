@@ -43,7 +43,6 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    success: true,
     peopleGroup: {
       ...updated,
       metadata: updated.metadata ? JSON.parse(updated.metadata) : {}

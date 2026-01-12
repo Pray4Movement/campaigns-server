@@ -119,7 +119,6 @@ export default defineEventHandler(async (event) => {
     )
 
     return {
-      success: true,
       message: `Unsubscribed from all ${unsubscribedCount} reminder(s) for this campaign`,
       already_unsubscribed: false,
       unsubscribed_from_campaign: true,
@@ -150,7 +149,6 @@ export default defineEventHandler(async (event) => {
       .map(formatReminder)
 
     return {
-      success: true,
       message: 'You have already been unsubscribed',
       already_unsubscribed: true,
       unsubscribed_from_campaign: false,
@@ -172,7 +170,6 @@ export default defineEventHandler(async (event) => {
       .map(formatReminder)
 
     return {
-      success: true,
       message: 'You have already been unsubscribed from this reminder',
       already_unsubscribed: true,
       unsubscribed_from_campaign: false,

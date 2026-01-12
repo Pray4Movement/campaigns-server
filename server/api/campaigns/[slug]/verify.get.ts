@@ -67,7 +67,6 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    success: true,
     message: 'Email verified successfully',
     campaign_title: campaign.title,
     campaign_slug: slug

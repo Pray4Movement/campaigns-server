@@ -68,7 +68,6 @@ export default defineEventHandler(async (event) => {
     await stmt.run(campaign.id, sessionId, trackingId || null, duration, timestamp, dateParam)
 
     return {
-      success: true,
       message: 'Prayer session recorded'
     }
   } catch (error) {

@@ -141,7 +141,6 @@ export default defineEventHandler(async (event) => {
       }
       // Return same response as new signup for privacy
       return {
-        success: true,
         message: 'Please check your email to complete your signup'
       }
     }
@@ -166,7 +165,6 @@ export default defineEventHandler(async (event) => {
       }
       // Return same response as new signup for privacy
       return {
-        success: true,
         message: 'Please check your email to complete your signup'
       }
     }
@@ -201,7 +199,6 @@ export default defineEventHandler(async (event) => {
 
       // Return same response for privacy
       return {
-        success: true,
         message: 'Please check your email to complete your signup'
       }
     }
@@ -234,7 +231,6 @@ export default defineEventHandler(async (event) => {
 
       // Always return same response for email signups
       return {
-        success: true,
         message: 'Please check your email to complete your signup'
       }
     }

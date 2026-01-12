@@ -64,7 +64,6 @@ export default defineEventHandler(async (event) => {
     await appConfigService.setConfig('global_campaign_start_date', body.global_start_date)
 
     return {
-      success: true,
       config: {
         ...config,
         globalStartDate: body.global_start_date

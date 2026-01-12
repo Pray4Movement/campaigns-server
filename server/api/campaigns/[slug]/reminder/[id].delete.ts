@@ -82,7 +82,6 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    success: true,
     message: 'Reminder deleted successfully'
   }
 })

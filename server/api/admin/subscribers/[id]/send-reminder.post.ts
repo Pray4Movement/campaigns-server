@@ -97,7 +97,6 @@ export default defineEventHandler(async (event) => {
     }
 
     return {
-      success: true,
       message: `Reminder email sent to ${emailContact.value}`
     }
   } catch (error) {

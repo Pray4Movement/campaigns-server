@@ -67,7 +67,6 @@ export default defineEventHandler(async (event) => {
     }
 
     return {
-      success: true,
       message: 'Invitation email resent successfully'
     }
   } catch (error) {
