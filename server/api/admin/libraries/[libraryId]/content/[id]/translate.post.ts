@@ -1,5 +1,6 @@
 import { libraryContentService } from '#server/database/library-content'
 import { translateTiptapContent, isDeepLConfigured } from '#server/utils/deepl'
+import { getErrorMessage } from '#server/utils/api-helpers'
 
 /**
  * Translate library content to one or more target languages
@@ -126,9 +127,9 @@ export default defineEventHandler(async (event) => {
         continue
       }
 
-      // Translate the content
+      // Translate the content (cast to expected type since we validated it exists)
       const translatedJson = await translateTiptapContent(
-        sourceContent.content_json,
+        sourceContent.content_json as Parameters<typeof translateTiptapContent>[0],
         targetLanguage,
         sourceLanguage
       )
@@ -154,11 +155,11 @@ export default defineEventHandler(async (event) => {
         success: true,
         content: savedContent
       })
-    } catch (error: any) {
+    } catch (error) {
       results.push({
         language: targetLanguage,
         success: false,
-        error: error.message || 'Translation failed'
+        error: getErrorMessage(error)
       })
     }
   }

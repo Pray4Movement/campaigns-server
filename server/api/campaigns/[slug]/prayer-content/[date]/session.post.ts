@@ -4,6 +4,7 @@
  */
 import { campaignService } from '#server/database/campaigns'
 import { getDatabase } from '#server/database/db'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -70,11 +71,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Prayer session recorded'
     }
-  } catch (error: any) {
-    console.error('Failed to record prayer session:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to record prayer session'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to record prayer session')
   }
 })

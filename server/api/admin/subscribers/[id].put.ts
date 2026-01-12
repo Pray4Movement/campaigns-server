@@ -2,6 +2,7 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.edit')
@@ -171,13 +172,7 @@ export default defineEventHandler(async (event) => {
         updated_at: updatedSubscription?.updated_at
       }
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
-
-    console.error('Error updating subscriber:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to update subscriber'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update subscriber')
   }
 })

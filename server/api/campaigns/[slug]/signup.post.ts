@@ -9,6 +9,7 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 import { sendWelcomeEmail } from '#server/utils/welcome-email'
 import { isValidTimezone } from '#server/utils/next-reminder-calculator'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -243,11 +244,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Successfully signed up for prayer reminders'
     }
-  } catch (error: any) {
-    console.error('Signup error:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to create signup'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to create signup')
   }
 })

@@ -1,4 +1,5 @@
 import { updatePrayerStats } from '../../../utils/prayer-stats'
+import { handleApiError } from '#server/utils/api-helpers'
 
 /**
  * API endpoint to manually trigger prayer stats update
@@ -17,13 +18,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Prayer counts updated successfully'
     }
-  } catch (error: any) {
-    console.error('Prayer stats update error:', error)
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Update failed',
-      message: error.message || 'An error occurred while updating prayer counts'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update prayer counts')
   }
 })

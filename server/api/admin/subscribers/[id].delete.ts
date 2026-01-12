@@ -2,6 +2,7 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.delete')
@@ -62,13 +63,7 @@ export default defineEventHandler(async (event) => {
     return {
       success: true
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
-
-    console.error('Error deleting subscription:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to delete subscription'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to delete subscription')
   }
 })

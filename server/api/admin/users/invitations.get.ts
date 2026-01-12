@@ -1,4 +1,5 @@
 import { userInvitationService } from '#server/database/user-invitations'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -11,11 +12,7 @@ export default defineEventHandler(async (event) => {
     return {
       invitations
     }
-  } catch (error: any) {
-    console.error('Error fetching invitations:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to fetch invitations'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch invitations')
   }
 })

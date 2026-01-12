@@ -1,6 +1,7 @@
 import { campaignService } from '#server/database/campaigns'
 import { campaignAccessService } from '#server/database/campaign-access'
 import { roleService } from '#server/database/roles'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require campaigns.create permission - both admins and campaign_editors can create campaigns
@@ -35,10 +36,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       campaign
     }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: error.message || 'Failed to create campaign'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to create campaign', 400)
   }
 })

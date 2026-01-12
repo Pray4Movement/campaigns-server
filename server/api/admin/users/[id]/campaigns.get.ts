@@ -1,5 +1,6 @@
 import { campaignAccessService } from '#server/database/campaign-access'
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -31,12 +32,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       campaigns: campaignsWithAccess
     }
-  } catch (error: any) {
-    console.error('Error fetching user campaigns:', error)
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to fetch user campaigns'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch user campaigns')
   }
 })

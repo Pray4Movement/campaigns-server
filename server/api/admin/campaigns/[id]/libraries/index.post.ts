@@ -1,5 +1,6 @@
 import { libraryService } from '#server/database/libraries'
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require content.edit permission
@@ -53,10 +54,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       library
     }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: error.message || 'Failed to create library'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to create library', 400)
   }
 })

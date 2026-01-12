@@ -1,4 +1,5 @@
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require campaigns.edit permission
@@ -43,10 +44,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       campaign
     }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: error.message || 'Failed to update campaign'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update campaign', 400)
   }
 })

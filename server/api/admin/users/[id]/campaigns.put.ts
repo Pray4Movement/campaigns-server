@@ -1,5 +1,6 @@
 import { campaignAccessService } from '#server/database/campaign-access'
 import { userService } from '#server/database/users'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -48,17 +49,7 @@ export default defineEventHandler(async (event) => {
       message: `User assigned to ${body.campaign_ids.length} campaign(s)`,
       campaign_ids: body.campaign_ids
     }
-  } catch (error: any) {
-    console.error('Error updating user campaigns:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to update user campaigns'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update user campaigns')
   }
 })

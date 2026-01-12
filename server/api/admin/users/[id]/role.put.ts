@@ -1,5 +1,6 @@
 import { roleService, type RoleName } from '#server/database/roles'
 import { userService } from '#server/database/users'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -62,17 +63,7 @@ export default defineEventHandler(async (event) => {
       role: body.role,
       message: `User role updated to ${body.role}`
     }
-  } catch (error: any) {
-    console.error('Error updating user role:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to update user role'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update user role')
   }
 })

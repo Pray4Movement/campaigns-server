@@ -1,4 +1,5 @@
 import { roleService } from '#server/database/roles'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -11,12 +12,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       roles
     }
-  } catch (error: any) {
-    console.error('Error fetching roles:', error)
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to fetch roles'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch roles')
   }
 })

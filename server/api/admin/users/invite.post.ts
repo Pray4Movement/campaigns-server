@@ -1,5 +1,6 @@
 import { userInvitationService } from '#server/database/user-invitations'
 import { userService } from '#server/database/users'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -77,17 +78,7 @@ export default defineEventHandler(async (event) => {
       },
       message: 'Invitation created successfully'
     }
-  } catch (error: any) {
-    console.error('Invitation creation error:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to create invitation'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to create invitation')
   }
 })

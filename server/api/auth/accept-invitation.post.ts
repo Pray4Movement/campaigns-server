@@ -1,6 +1,7 @@
 import { userInvitationService } from '#server/database/user-invitations'
 import { userService } from '#server/database/users'
 import { roleService } from '#server/database/roles'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -102,17 +103,7 @@ export default defineEventHandler(async (event) => {
       user: userWithRoles,
       message: 'Account created successfully'
     }
-  } catch (error: any) {
-    console.error('Error accepting invitation:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to accept invitation'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to accept invitation')
   }
 })

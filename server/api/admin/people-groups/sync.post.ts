@@ -1,4 +1,5 @@
 import { peopleGroupService } from '../../../database/people-groups'
+import { handleApiError } from '#server/utils/api-helpers'
 
 interface DtPeopleGroup {
   dt_id: string
@@ -108,16 +109,7 @@ export default defineEventHandler(async (event) => {
         errors
       }
     }
-  } catch (error: any) {
-    console.error('People groups sync error:', error)
-
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to sync people groups'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to sync people groups')
   }
 })

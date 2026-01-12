@@ -1,4 +1,5 @@
 import { userInvitationService } from '#server/database/user-invitations'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -38,17 +39,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Invitation revoked successfully'
     }
-  } catch (error: any) {
-    console.error('Error revoking invitation:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to revoke invitation'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to revoke invitation')
   }
 })

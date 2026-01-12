@@ -2,6 +2,7 @@ import { defineEventHandler, getRouterParam, createError, getQuery } from 'h3'
 import { appConfigService } from '#server/database/app-config'
 import { libraryContentService } from '#server/database/library-content'
 import { libraryService } from '#server/database/libraries'
+import { handleApiError } from '#server/utils/api-helpers'
 
 interface LibraryConfig {
   libraryId: number
@@ -176,11 +177,7 @@ export default defineEventHandler(async (event) => {
     return {
       content: allContent
     }
-  } catch (error: any) {
-    console.error('Error fetching campaign library content:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to fetch library content for campaign'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch library content for campaign')
   }
 })

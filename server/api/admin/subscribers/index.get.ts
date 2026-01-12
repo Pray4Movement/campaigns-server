@@ -1,6 +1,7 @@
 import { subscriberService } from '#server/database/subscribers'
 import { roleService } from '#server/database/roles'
 import { campaignAccessService } from '#server/database/campaign-access'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -40,12 +41,7 @@ export default defineEventHandler(async (event) => {
     return {
       subscribers
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
-    console.error('Error fetching subscribers:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch subscribers'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch subscribers')
   }
 })

@@ -1,4 +1,5 @@
 import { userService } from '#server/database/users'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -36,16 +37,7 @@ export default defineEventHandler(async (event) => {
     return {
       user: userWithRoles
     }
-  } catch (error: any) {
-    console.error('Error fetching user:', error)
-
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch user'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch user')
   }
 })

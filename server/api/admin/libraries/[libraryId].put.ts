@@ -1,5 +1,6 @@
 import { libraryService } from '#server/database/libraries'
 import { prayerContentService } from '#server/database/prayer-content'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -37,10 +38,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       library
     }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: error.message || 'Failed to update library'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update library', 400)
   }
 })

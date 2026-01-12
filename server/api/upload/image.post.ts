@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
+import { getErrorMessage } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -64,12 +65,12 @@ export default defineEventHandler(async (event) => {
         url: `/uploads/images/${filename}`
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Upload error:', error)
 
     return {
       success: 0,
-      error: error.statusMessage || 'Failed to upload image'
+      error: getErrorMessage(error)
     }
   }
 })

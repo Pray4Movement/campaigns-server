@@ -1,4 +1,5 @@
 import { libraryContentService } from '#server/database/library-content'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -33,10 +34,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       content
     }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: error.message || 'Failed to update content'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update content', 400)
   }
 })

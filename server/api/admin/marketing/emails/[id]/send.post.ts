@@ -1,6 +1,7 @@
 import { marketingEmailService } from '#server/database/marketing-emails'
 import { jobQueueService } from '#server/database/job-queue'
 import { contactMethodService } from '#server/database/contact-methods'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -84,11 +85,8 @@ export default defineEventHandler(async (event) => {
       message: `Email queued for ${queuedCount} recipients`,
       recipient_count: queuedCount
     }
-  } catch (error: any) {
+  } catch (error) {
     await marketingEmailService.updateStatus(id, 'draft')
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to queue email'
-    })
+    handleApiError(error, 'Failed to queue email')
   }
 })

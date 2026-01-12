@@ -2,6 +2,7 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -87,13 +88,7 @@ export default defineEventHandler(async (event) => {
         }))
       }
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
-
-    console.error('Error fetching subscriber:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch subscriber'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch subscriber')
   }
 })

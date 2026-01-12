@@ -1,5 +1,6 @@
 import { defineEventHandler, createError, readBody } from 'h3'
 import { appConfigService } from '#server/database/app-config'
+import { handleApiError } from '#server/utils/api-helpers'
 
 interface LibraryConfig {
   libraryId: number
@@ -69,11 +70,7 @@ export default defineEventHandler(async (event) => {
         globalStartDate: body.global_start_date
       }
     }
-  } catch (error: any) {
-    console.error('Error updating global campaign library config:', error)
-    throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: error.message || 'Failed to update global campaign library configuration'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to update global campaign library configuration')
   }
 })

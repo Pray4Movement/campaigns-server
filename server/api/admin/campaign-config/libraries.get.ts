@@ -1,5 +1,6 @@
 import { defineEventHandler, createError } from 'h3'
 import { appConfigService } from '#server/database/app-config'
+import { handleApiError } from '#server/utils/api-helpers'
 
 /**
  * Get global campaign library configuration
@@ -27,11 +28,7 @@ export default defineEventHandler(async (event) => {
         globalStartDate: startDate
       }
     }
-  } catch (error: any) {
-    console.error('Error fetching global campaign library config:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to fetch global campaign library configuration'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch global campaign library configuration')
   }
 })

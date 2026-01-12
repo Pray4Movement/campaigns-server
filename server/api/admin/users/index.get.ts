@@ -1,5 +1,6 @@
 import { userService } from '#server/database/users'
 import { roleService, ROLES } from '#server/database/roles'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
@@ -26,11 +27,7 @@ export default defineEventHandler(async (event) => {
     return {
       users: usersWithRoles
     }
-  } catch (error: any) {
-    console.error('Error fetching users:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to fetch users'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch users')
   }
 })

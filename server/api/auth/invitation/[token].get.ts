@@ -1,4 +1,5 @@
 import { userInvitationService } from '#server/database/user-invitations'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token')
@@ -29,17 +30,7 @@ export default defineEventHandler(async (event) => {
         expires_at: validation.invitation!.expires_at
       }
     }
-  } catch (error: any) {
-    console.error('Error validating invitation:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to validate invitation'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to validate invitation')
   }
 })

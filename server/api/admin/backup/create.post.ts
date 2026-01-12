@@ -1,4 +1,5 @@
 import { createDatabaseBackup } from '#server/utils/backup'
+import { handleApiError } from '#server/utils/api-helpers'
 
 /**
  * API endpoint to manually trigger a database backup
@@ -31,18 +32,7 @@ export default defineEventHandler(async (event) => {
         location: result.s3Location
       }
     }
-  } catch (error: any) {
-    console.error('Backup endpoint error:', error)
-
-    // If it's already a createError, rethrow it
-    if (error.statusCode) {
-      throw error
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Backup failed',
-      message: error.message || 'An error occurred while creating the backup'
-    })
+  } catch (error) {
+    handleApiError(error, 'Backup failed')
   }
 })

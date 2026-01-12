@@ -3,6 +3,7 @@ import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignService } from '#server/database/campaigns'
 import { sendPrayerReminderEmail } from '#server/utils/prayer-reminder-email'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.edit')
@@ -106,13 +107,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: `Reminder email sent to ${emailContact.value}`
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
-
-    console.error('Error sending reminder:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to send reminder'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to send reminder')
   }
 })

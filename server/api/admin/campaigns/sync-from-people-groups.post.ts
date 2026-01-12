@@ -1,5 +1,6 @@
 import { peopleGroupService } from '../../../database/people-groups'
 import { campaignService } from '../../../database/campaigns'
+import { handleApiError, getErrorMessage } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -55,8 +56,8 @@ export default defineEventHandler(async (event) => {
           })
           created++
         }
-      } catch (err: any) {
-        console.error(`Error processing people group ${group.dt_id}:`, err.message)
+      } catch (err) {
+        console.error(`Error processing people group ${group.dt_id}:`, getErrorMessage(err))
         errors++
       }
     }
@@ -74,12 +75,7 @@ export default defineEventHandler(async (event) => {
         errors
       }
     }
-  } catch (error: any) {
-    console.error('Campaign sync from people groups error:', error)
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || 'Failed to sync campaigns from people groups'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to sync campaigns from people groups')
   }
 })

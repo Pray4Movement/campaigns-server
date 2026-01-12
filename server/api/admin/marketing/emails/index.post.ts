@@ -1,4 +1,5 @@
 import { marketingEmailService } from '#server/database/marketing-emails'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -61,10 +62,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       email
     }
-  } catch (error: any) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: error.message || 'Failed to create email'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to create email', 400)
   }
 })

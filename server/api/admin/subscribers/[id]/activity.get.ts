@@ -1,5 +1,6 @@
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { campaignService } from '#server/database/campaigns'
+import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -141,11 +142,7 @@ export default defineEventHandler(async (event) => {
     return {
       activities: allActivities
     }
-  } catch (error: any) {
-    console.error('Error fetching subscriber activity:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch subscriber activity'
-    })
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch subscriber activity')
   }
 })
