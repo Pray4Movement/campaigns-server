@@ -6,9 +6,14 @@
         <h1 v-if="campaign">{{ campaign.title }} - Content Libraries</h1>
         <p class="subtitle">Manage content libraries specific to this campaign</p>
       </div>
-      <UButton @click="showCreateModal = true" size="lg">
-        + Create Library
-      </UButton>
+      <div class="header-actions">
+        <UButton @click="showImportModal = true" variant="outline" icon="i-lucide-upload">
+          Import
+        </UButton>
+        <UButton @click="showCreateModal = true" size="lg">
+          + Create Library
+        </UButton>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">Loading libraries...</div>
@@ -42,6 +47,13 @@
               <span>{{ library.stats?.totalDays || 0 }} days</span>
             </div>
             <div class="library-actions">
+              <UButton
+                @click.stop="handleExport(library)"
+                variant="ghost"
+                size="xs"
+                icon="i-lucide-download"
+                title="Export"
+              />
               <UButton
                 @click.stop="editLibrary(library)"
                 variant="ghost"
@@ -116,7 +128,7 @@
                 :variant="getDayVariant(day)"
                 :color="getDayColor(day)"
                 :title="getDayTooltip(day)"
-                class="aspect-square !p-0 justify-center"
+                class="aspect-square p-0! justify-center"
               >
                 {{ day }}
               </UButton>
@@ -211,6 +223,14 @@
       @confirm="confirmDelete"
       @cancel="cancelDelete"
     />
+
+    <!-- Import Modal -->
+    <LibraryImportModal
+      v-model:open="showImportModal"
+      :campaign-id="campaignId"
+      :existing-libraries="libraries"
+      @imported="handleImported"
+    />
   </div>
 </template>
 
@@ -260,9 +280,11 @@ const selectedLibrary = ref<Library | null>(null)
 const loading = ref(true)
 const error = ref('')
 const toast = useToast()
+const { exportLibrary } = useLibraryExport()
 
 // Create/Edit modal state
 const showCreateModal = ref(false)
+const showImportModal = ref(false)
 const editingLibrary = ref<Library | null>(null)
 const saving = ref(false)
 
@@ -329,8 +351,9 @@ async function loadLibraries() {
     libraries.value = response.libraries
 
     // Auto-select first library if none selected
-    if (response.libraries.length > 0 && !selectedLibrary.value) {
-      selectLibrary(response.libraries[0])
+    const firstLibrary = response.libraries[0]
+    if (firstLibrary && !selectedLibrary.value) {
+      selectLibrary(firstLibrary)
     }
   } catch (err: any) {
     error.value = 'Failed to load libraries'
@@ -569,6 +592,14 @@ function closeModal() {
   }
 }
 
+async function handleExport(library: Library) {
+  await exportLibrary(library)
+}
+
+function handleImported() {
+  loadLibraries()
+}
+
 onMounted(async () => {
   await loadCampaign()
   await loadLibraries()
@@ -610,6 +641,12 @@ watch(selectedLanguage, () => {
 .subtitle {
   margin: 0;
   color: var(--ui-text-muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .loading, .error {

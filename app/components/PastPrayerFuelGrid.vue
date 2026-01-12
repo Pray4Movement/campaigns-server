@@ -2,15 +2,14 @@
   <section v-if="items && items.length > 0" class="bg-[var(--ui-bg-elevated)] border-t border-[var(--ui-border)] py-12 px-4">
     <div class="max-w-4xl mx-auto">
       <h2 class="text-xl font-bold mb-6 text-center">{{ $t('prayerFuel.pastPrayers.title') }}</h2>
-      <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="flex flex-wrap justify-center gap-3">
         <NuxtLink
           v-for="item in items"
           :key="item.id"
           :to="localePath(`/${slug}/prayer/${item.content_date}`)"
-          class="flex flex-col gap-2 p-4 bg-[var(--ui-bg)] border border-[var(--ui-border)] rounded-lg no-underline text-[var(--ui-text)] transition-all hover:border-[var(--ui-text-muted)] hover:shadow-sm"
+          class="px-4 py-2 bg-[var(--ui-bg)] border border-[var(--ui-border)] rounded-lg no-underline text-[var(--ui-text)] transition-all hover:border-[var(--ui-text-muted)] hover:shadow-sm"
         >
-          <span class="text-sm text-[var(--ui-text-muted)] font-medium">{{ formatPastDate(item.content_date) }}</span>
-          <span class="line-clamp-2">{{ item.title }}</span>
+          {{ formatPastDate(item.content_date) }}
         </NuxtLink>
       </div>
     </div>
@@ -21,7 +20,6 @@
 interface PastPrayerItem {
   id: number | string
   content_date: string
-  title: string
 }
 
 const props = defineProps<{

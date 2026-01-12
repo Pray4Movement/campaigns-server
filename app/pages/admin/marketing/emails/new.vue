@@ -337,7 +337,7 @@ function cancelLeave() {
   pendingNavigation.value = null
 }
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave((_to, _from, next) => {
   if (isSaved.value || !hasActualContent.value) {
     next()
   } else {

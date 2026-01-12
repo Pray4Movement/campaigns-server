@@ -1,3 +1,7 @@
+/**
+ * POST /api/campaigns/:slug/signup
+ * Sign up for prayer reminders for a campaign
+ */
 import { campaignService } from '#server/database/campaigns'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'

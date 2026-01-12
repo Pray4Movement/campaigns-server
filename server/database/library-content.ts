@@ -304,6 +304,83 @@ export class LibraryContentService {
     const result = await stmt.get(...params) as { count: number }
     return result.count > 0
   }
+
+  // Get all content for export (no pagination)
+  async getAllContentForExport(libraryId: number): Promise<Array<{
+    day_number: number
+    language_code: string
+    content_json: Record<string, any> | null
+  }>> {
+    const stmt = this.db.prepare(`
+      SELECT day_number, language_code, content_json
+      FROM library_content
+      WHERE library_id = ?
+      ORDER BY day_number ASC, language_code ASC
+    `)
+    const rows = await stmt.all(libraryId) as Array<{
+      day_number: number
+      language_code: string
+      content_json: string | null
+    }>
+
+    return rows.map(row => ({
+      day_number: row.day_number,
+      language_code: row.language_code,
+      content_json: row.content_json ? JSON.parse(row.content_json) : null
+    }))
+  }
+
+  // Bulk create content for import
+  // Accepts optional db parameter for transaction support
+  async bulkCreateContent(
+    libraryId: number,
+    items: Array<{
+      day_number: number
+      language_code: string
+      content_json: Record<string, any> | null
+    }>,
+    db?: ReturnType<typeof getDatabase>
+  ): Promise<{ inserted: number; skipped: number }> {
+    const database = db || this.db
+    let inserted = 0
+    let skipped = 0
+
+    // Process in batches
+    const batchSize = 100
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize)
+
+      for (const item of batch) {
+        try {
+          const contentJsonString = stringifyContentJson(item.content_json)
+          const stmt = database.prepare(`
+            INSERT INTO library_content (library_id, day_number, language_code, content_json)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (library_id, day_number, language_code) DO NOTHING
+          `)
+          const result = await stmt.run(libraryId, item.day_number, item.language_code, contentJsonString)
+          if (result.changes > 0) {
+            inserted++
+          } else {
+            skipped++
+          }
+        } catch (error) {
+          skipped++
+        }
+      }
+    }
+
+    return { inserted, skipped }
+  }
+
+  // Delete all content for a library (used before overwriting)
+  // Accepts optional db parameter for transaction support
+  async deleteAllLibraryContent(libraryId: number, db?: ReturnType<typeof getDatabase>): Promise<number> {
+    const database = db || this.db
+    const stmt = database.prepare('DELETE FROM library_content WHERE library_id = ?')
+    const result = await stmt.run(libraryId)
+    return result.changes
+  }
 }
 
 // Export singleton instance

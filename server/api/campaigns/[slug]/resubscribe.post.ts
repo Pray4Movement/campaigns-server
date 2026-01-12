@@ -1,3 +1,7 @@
+/**
+ * POST /api/campaigns/:slug/resubscribe
+ * Re-subscribe to campaign reminders after unsubscribing
+ */
 import { campaignService } from '#server/database/campaigns'
 import { subscriberService } from '#server/database/subscribers'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'

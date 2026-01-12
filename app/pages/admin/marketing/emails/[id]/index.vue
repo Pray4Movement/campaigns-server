@@ -313,7 +313,7 @@ async function loadEmail() {
       originalForm.value = JSON.stringify(form.value)
 
       if (response.email.audience_type === 'campaign' && response.email.campaign_id) {
-        loadCampaignCount()
+        void loadCampaignCount()
       }
     } else {
       const previewResponse = await $fetch<{ html: string }>(`/api/admin/marketing/emails/${id}/preview`)
@@ -482,7 +482,7 @@ function cancelLeave() {
   pendingNavigation.value = null
 }
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave((_to, _from, next) => {
   if (isSaved.value || !isDraft.value || !hasUnsavedChanges.value) {
     next()
   } else {

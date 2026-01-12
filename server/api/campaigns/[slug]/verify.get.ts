@@ -1,3 +1,7 @@
+/**
+ * GET /api/campaigns/:slug/verify
+ * Verify email address for campaign subscription
+ */
 import { campaignService } from '#server/database/campaigns'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'

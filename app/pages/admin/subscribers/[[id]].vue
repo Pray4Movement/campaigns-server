@@ -281,7 +281,7 @@
                   </template>
                 </div>
                 <div v-if="activity.eventType === 'PRAYER'" class="prayer-details">
-                  {{ formatPrayerDuration(activity.metadata.duration) }}
+                  {{ formatPrayerDuration(activity.metadata.duration ?? 0) }}
                   <template v-if="activity.metadata.campaignTitle">
                     for {{ activity.metadata.campaignTitle }}
                   </template>
@@ -435,6 +435,9 @@ interface ActivityLogEntry {
     changes?: Record<string, { from: any; to: any }>
     deletedRecord?: Record<string, any>
     source?: string
+    duration?: number
+    campaignTitle?: string
+    sentDate?: string
   }
 }
 const activityLog = ref<ActivityLogEntry[]>([])

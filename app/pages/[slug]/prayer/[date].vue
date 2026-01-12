@@ -22,7 +22,7 @@
               size="sm"
               icon="i-lucide-chevron-left"
             />
-            <h1 class="text-3xl font-bold text-center">{{ $t('prayerFuel.title') }}</h1>
+            <h1 class="text-3xl font-bold text-center">{{ formatDate(data.date, selectedLanguage) }}</h1>
             <UButton
               v-if="!isNextDateFuture"
               :to="localePath(`/${slug}/prayer/${nextDate}`)"
@@ -38,7 +38,6 @@
               icon="i-lucide-chevron-right"
             />
           </div>
-          <p class="text-muted text-center mt-2">{{ formatDate(data.date, selectedLanguage) }}</p>
         </div>
       </header>
 
@@ -53,8 +52,8 @@
 
       <!-- Past Prayer Fuel -->
       <PastPrayerFuelGrid
-        v-if="pastContent?.content"
-        :items="pastContent.content"
+        v-if="pastContent.length"
+        :items="pastContent"
         :slug="slug"
         :language="selectedLanguage"
       />
@@ -84,12 +83,14 @@ const selectedLanguage = ref((route.query.language as string) || locale.value ||
 const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, contentDate)
 
 // Fetch prayer content for specific date
-const { data, pending, error: fetchError, refresh } = await useFetch(`/api/campaigns/${slug}/prayer-fuel`, {
-  query: computed(() => ({
-    userDate: dateParam,
-    language: selectedLanguage.value || undefined
-  }))
-})
+const { data, pending, error: fetchError, refresh } = await useFetch(
+  `/api/campaigns/${slug}/prayer-content/${dateParam}`,
+  {
+    query: computed(() => ({
+      language: selectedLanguage.value || undefined
+    }))
+  }
+)
 
 const error = computed(() => fetchError.value?.message || null)
 
@@ -113,11 +114,17 @@ watch(locale, async (newLang) => {
   }
 })
 
-// Fetch past prayer content
-const { data: pastContent } = await useFetch(`/api/campaigns/${slug}/past-prayer-fuel`, {
-  query: computed(() => ({
-    language: selectedLanguage.value || undefined
-  }))
+// Generate past 7 days (yesterday through 7 days ago)
+const pastContent = computed(() => {
+  const items: Array<{ id: string; content_date: string }> = []
+  const today = new Date()
+  for (let i = 1; i <= 7; i++) {
+    const pastDate = new Date(today)
+    pastDate.setDate(today.getDate() - i)
+    const dateStr = pastDate.toISOString().split('T')[0]!
+    items.push({ id: dateStr, content_date: dateStr })
+  }
+  return items
 })
 
 // Compute previous and next dates for navigation
