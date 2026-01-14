@@ -1,18 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss" theme(static);
 @import "@nuxt/ui";
 
 @theme static {
-  /* Primary: Forest Green - base #3B463D at 500 */
-  --color-forest-50: #ebedef;
-  --color-forest-100: #d7dbda;
-  --color-forest-200: #b3bab6;
-  --color-forest-300: #8a948c;
-  --color-forest-400: #636d65;
-  --color-forest-500: #3B463D;
-  --color-forest-600: #323b34;
-  --color-forest-700: #29302a;
-  --color-forest-800: #202521;
-  --color-forest-900: #171b18;
+  /* Primary: Forest Green - Doxa green palette */
+  --color-forest-50: #92b195;
+  --color-forest-100: #73A17F;
+  --color-forest-200: #798279;
+  --color-forest-300: #6d766e;
+  --color-forest-400: #4e594f;
+  --color-forest-500: #3b463d;
+  --color-forest-600: #2a332a;
+  --color-forest-700: #232b24;
+  --color-forest-800: #1c221d;
+  --color-forest-900: #151916;
   --color-forest-950: #0b0d0c;
 
   /* Secondary: Light Green - base #D1D4CD */
@@ -29,17 +30,22 @@
   --color-sage-950: #1d1e1c;
 
   /* Secondary: Beige - base #CBC5B9 */
-  --color-beige-50: #f9f8f6;
+  --color-beige-50: #F3F3F1;
   --color-beige-100: #f2f0ec;
-  --color-beige-200: #e5e2db;
-  --color-beige-300: #d8d3c9;
+  --color-beige-200: #d1d4cd;
+  --color-beige-300: #cbc5b9;
   --color-beige-400: #CBC5B9;
-  --color-beige-500: #b0a899;
-  --color-beige-600: #958c7a;
+  --color-beige-500: #b4ada3;
+  --color-beige-600: #a59d92;
   --color-beige-700: #7a7264;
   --color-beige-800: #5f594f;
   --color-beige-900: #44403a;
   --color-beige-950: #22201d;
+
+  /* Font Families - Doxa Design System */
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Bebas Neue', ui-sans-serif, sans-serif;
+  --font-button: 'Nunito Sans', ui-sans-serif, sans-serif;
 }
 
 :root {
@@ -128,17 +134,29 @@
   --ui-ring: #8a948c;
 }
 
-/* Button styles */
+/* Button styles - Doxa design */
 button,
 .btn,
-[role="button"] {
+[role="button"],
+a {
   cursor: pointer;
+  font-family: var(--font-button);
+  /* Override primary color for buttons only */
+  --ui-primary: #92b195;
 }
 
-/* Ensure body has theme background */
+/* Body styles - Doxa uses Poppins */
 body {
   background-color: var(--ui-bg);
   color: var(--ui-text);
+  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
+}
+
+/* Heading styles - Doxa uses Bebas Neue */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }

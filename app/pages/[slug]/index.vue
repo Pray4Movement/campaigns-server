@@ -17,7 +17,7 @@
       <div class="max-w-5xl mx-auto px-4 pt-6 flex justify-center">
         <UButton
           size="lg"
-          class="bg-forest-500 text-white hover:bg-forest-600 rounded-full px-8"
+          class="rounded-full px-8"
           @click="scrollToSignup"
         >
           {{ $t('campaign.signupButton') }}
@@ -431,7 +431,7 @@
             <UButton
               :to="localePath(`/${campaign.slug}/prayer`)"
               size="lg"
-              class="bg-sage-300 text-forest-500 hover:bg-sage-400 rounded-full px-8"
+              class="rounded-full px-8"
             >
               {{ $t('campaign.prayerFuel.button') }}
             </UButton>
@@ -449,13 +449,13 @@
             </p>
 
             <div class="flex gap-4 justify-center flex-wrap">
-              <UButton href="#" size="lg" class="bg-forest-500 text-white hover:bg-forest-600 rounded-full px-6" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
+              <UButton href="#" size="lg" class="rounded-full px-6" :aria-label="$t('campaign.mobileApp.appStore.ariaLabel')">
                 <div class="flex flex-col items-start text-left min-w-35">
                   <span class="text-xs opacity-80">{{ $t('campaign.mobileApp.appStore.label') }}</span>
                   <span class="text-lg font-semibold">{{ $t('campaign.mobileApp.appStore.store') }}</span>
                 </div>
               </UButton>
-              <UButton href="#" size="lg" class="bg-forest-500 text-white hover:bg-forest-600 rounded-full px-6" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
+              <UButton href="#" size="lg" class="rounded-full px-6" :aria-label="$t('campaign.mobileApp.googlePlay.ariaLabel')">
                 <div class="flex flex-col items-start text-left min-w-35">
                   <span class="text-xs opacity-80">{{ $t('campaign.mobileApp.googlePlay.label') }}</span>
                   <span class="text-lg font-semibold">{{ $t('campaign.mobileApp.googlePlay.store') }}</span>

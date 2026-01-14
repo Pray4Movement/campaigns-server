@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Prayer Tools is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features campaign management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
+Doka Prayer Campagins is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features campaign management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
 
 This project consumes the base layer: https://github.com/corsacca/nuxt-base
 

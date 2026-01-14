@@ -4,6 +4,11 @@ export default defineAppConfig({
       primary: 'forest',
       secondary: 'sage',
       neutral: 'beige'
+    },
+    button: {
+      slots: {
+        base: 'font-medium uppercase tracking-wide'
+      }
     }
   }
 })
