@@ -145,6 +145,12 @@ a {
   --ui-primary: #92b195;
 }
 
+button:disabled,
+.btn:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 /* Body styles - Doxa uses Poppins */
 body {
   background-color: var(--ui-bg);
