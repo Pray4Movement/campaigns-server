@@ -43,10 +43,11 @@
           @click="$emit('pray')"
           :disabled="prayedMarked"
           :loading="submitting"
+          :icon="prayedMarked ? 'i-lucide-check' : undefined"
           size="xl"
           class="min-w-[200px] justify-center rounded-full"
         >
-          {{ prayedMarked ? $t('prayerFuel.button.recorded') : submitting ? $t('prayerFuel.button.recording') : $t('prayerFuel.button.amen') }}
+          {{ prayedMarked || submitting ? '' : $t('prayerFuel.button.amen') }}
         </UButton>
         <p v-if="!prayedMarked" class="mt-4 text-sm text-[var(--ui-text-muted)]">
           {{ $t('prayerFuel.button.hint') }}

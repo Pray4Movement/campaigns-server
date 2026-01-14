@@ -291,8 +291,6 @@
     },
     "button": {
       "amen": "Amen",
-      "recording": "Enregistrement...",
-      "recorded": "✓ Prière Enregistrée",
       "hint": "Cliquez pour terminer votre temps de prière"
     },
     "thankYou": "Merci d'avoir prié ! Votre prière a été enregistrée.",

@@ -292,8 +292,6 @@
     },
     "button": {
       "amen": "Amen",
-      "recording": "Recording...",
-      "recorded": "✓ Prayer Recorded",
       "hint": "Click to finish your prayer time"
     },
     "thankYou": "Thank you for praying!",

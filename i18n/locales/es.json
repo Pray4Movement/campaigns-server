@@ -291,8 +291,6 @@
     },
     "button": {
       "amen": "Amén",
-      "recording": "Registrando...",
-      "recorded": "✓ Oración Registrada",
       "hint": "Haga clic para terminar su tiempo de oración"
     },
     "thankYou": "¡Gracias por orar! Su oración ha sido registrada.",
