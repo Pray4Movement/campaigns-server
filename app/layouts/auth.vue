@@ -28,9 +28,13 @@
     <!-- Footer -->
     <footer class="bg-forest-500 text-white py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-          <span class="font-bold">{{ config.public.appName }}</span>
-          <p class="text-sm text-sage-300">
+        <div class="flex flex-col items-center gap-4 md:grid md:grid-cols-3">
+          <span class="font-bold md:justify-self-start">{{ config.public.appName }}</span>
+          <div class="flex items-center gap-4 text-sm md:justify-self-center">
+            <a href="https://doxa.life" target="_blank" class="text-sage-300 hover:text-white transition-colors">About Doxa.Life</a>
+            <a href="https://doxa.life/privacy-policy/" target="_blank" class="text-sage-300 hover:text-white transition-colors">Privacy Policy</a>
+          </div>
+          <p class="text-sm text-sage-300 md:justify-self-end">
             &copy; {{ currentYear }} {{ config.public.appName }}. All rights reserved.
           </p>
         </div>
