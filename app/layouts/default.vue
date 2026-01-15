@@ -4,13 +4,27 @@
     <header class="bg-forest-500 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between items-center py-4">
-          <!-- Logo -->
-          <NuxtLink :to="logoLink" class="flex items-center gap-2">
+          <!-- Logo / Back Navigation -->
+          <NuxtLink v-if="isPrayerPage && slug" :to="localePath(`/${slug}`)" class="flex items-center gap-2">
+            <UIcon name="i-lucide-arrow-left" class="w-5 h-5" />
+            <span class="text-xl font-bold tracking-wider">{{ campaignTitle }}</span>
+          </NuxtLink>
+          <NuxtLink v-else-if="!isCampaignPage" :to="logoLink" class="flex items-center gap-2">
             <span class="text-xl font-bold tracking-wider">{{ config.public.appName }}</span>
           </NuxtLink>
+          <div v-else></div>
 
           <!-- Navigation -->
           <div class="flex items-center gap-4 navbar-actions">
+            <a
+              v-if="isCampaignPage && !isPrayerPage"
+              href="https://doxa.life"
+              target="_blank"
+              class="inline-flex items-center gap-1"
+            >
+              <span>Doxa</span>
+              <UIcon name="i-lucide-external-link" class="w-4 h-4" />
+            </a>
             <LanguageSwitcher />
             <ThemeToggle />
             <template v-if="isHomePage">
@@ -69,6 +83,7 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 const route = useRoute()
+const localePath = useLocalePath()
 const currentYear = new Date().getFullYear()
 const { campaignTitle, showCampaignHeader } = useCampaign()
 const { isLoggedIn, checkAuth } = useAuth()
@@ -83,6 +98,7 @@ const isHomePage = computed(() => route.path === '/')
 
 // Show campaign header when on a campaign route and title is set
 const isCampaignPage = computed(() => !!slug.value)
+const isPrayerPage = computed(() => route.path.includes('/prayer'))
 const shouldShowCampaignHeader = computed(() => isCampaignPage.value && showCampaignHeader.value)
 
 onMounted(() => {
