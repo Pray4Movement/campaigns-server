@@ -152,7 +152,7 @@
                   </div>
                   <div>
                     <h3 class="font-semibold text-default mb-1">{{ $t('campaign.whyPray.noOne.title') }}</h3>
-                    <p class="text-sm text-muted leading-relaxed">{{ $t('campaign.whyPray.noOne.description') }}</p>
+                    <p class="text-muted leading-relaxed">{{ $t('campaign.whyPray.noOne.description') }}</p>
                   </div>
                 </div>
               </div>
@@ -165,7 +165,7 @@
                   </div>
                   <div>
                     <h3 class="font-semibold text-default mb-1">{{ $t('campaign.whyPray.opensDoors.title') }}</h3>
-                    <p class="text-sm text-muted leading-relaxed">{{ $t('campaign.whyPray.opensDoors.description') }}</p>
+                    <p class="text-muted leading-relaxed">{{ $t('campaign.whyPray.opensDoors.description') }}</p>
                   </div>
                 </div>
               </div>
@@ -178,7 +178,7 @@
                   </div>
                   <div>
                     <h3 class="font-semibold text-default mb-1">{{ $t('campaign.whyPray.changed.title') }}</h3>
-                    <p class="text-sm text-muted leading-relaxed">{{ $t('campaign.whyPray.changed.description') }}</p>
+                    <p class="text-muted leading-relaxed">{{ $t('campaign.whyPray.changed.description') }}</p>
                   </div>
                 </div>
               </div>
