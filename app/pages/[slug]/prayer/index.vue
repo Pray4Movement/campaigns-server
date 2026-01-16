@@ -41,6 +41,42 @@
 </template>
 
 <script setup lang="ts">
+interface PeopleGroupData {
+  name: string
+  image_url: string | null
+  description: string | null
+  population: number | null
+  language: string | null
+  religion: string | null
+  country: string | null
+  lat: number | null
+  lng: number | null
+}
+
+interface PrayerContentItem {
+  id: number
+  title?: string
+  language_code: string
+  content_json?: Record<string, unknown> | string | null
+  content_date: string
+  content_type?: string
+  people_group_data?: PeopleGroupData | null
+}
+
+interface PrayerContentResponse {
+  campaign: {
+    id: number
+    slug: string
+    title: string
+    default_language: string
+  }
+  date: string
+  language: string
+  availableLanguages: string[]
+  content: PrayerContentItem[]
+  hasContent: boolean
+}
+
 definePageMeta({
   layout: 'default'
 })
@@ -57,11 +93,14 @@ const currentDate = computed(() => new Date().toISOString().split('T')[0] as str
 // Get language preference from global language selector or query param
 const selectedLanguage = ref((route.query.language as string) || locale.value || '')
 
+// Campaign ID for optimized session tracking
+const campaignId = computed(() => data.value?.campaign?.id)
+
 // Use prayer session composable
-const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, currentDate)
+const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, currentDate, campaignId)
 
 // Fetch prayer content
-const { data, pending, error: fetchError, refresh } = await useFetch(
+const { data, pending, error: fetchError, refresh } = await useFetch<PrayerContentResponse>(
   computed(() => `/api/campaigns/${slug}/prayer-content/${currentDate.value}`),
   {
     query: computed(() => ({

@@ -12,7 +12,7 @@ function getAnonymousTrackingId(): string {
   return anonId
 }
 
-export function usePrayerSession(slug: string, contentDate: ComputedRef<string> | Ref<string>) {
+export function usePrayerSession(slug: string, contentDate: ComputedRef<string> | Ref<string>, campaignId?: ComputedRef<number | undefined> | Ref<number | undefined>) {
   const route = useRoute()
   const toast = useToast()
   const { t } = useI18n()
@@ -41,7 +41,8 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
           sessionId: sessionId.value,
           trackingId: trackingId.value || null,
           duration,
-          timestamp
+          timestamp,
+          campaignId: campaignId?.value
         }
       })
     } catch (err: any) {
@@ -73,7 +74,8 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
           sessionId: sessionId.value,
           trackingId: trackingId.value || null,
           duration,
-          timestamp
+          timestamp,
+          campaignId: campaignId?.value
         }
       })
 

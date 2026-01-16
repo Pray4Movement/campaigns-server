@@ -79,8 +79,11 @@ const contentDate = computed(() => dateParam)
 // Get language preference from global language selector or query param
 const selectedLanguage = ref((route.query.language as string) || locale.value || '')
 
+// Campaign ID for optimized session tracking
+const campaignId = computed(() => data.value?.campaign?.id)
+
 // Use prayer session composable
-const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, contentDate)
+const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, contentDate, campaignId)
 
 // Fetch prayer content for specific date
 const { data, pending, error: fetchError, refresh } = await useFetch(

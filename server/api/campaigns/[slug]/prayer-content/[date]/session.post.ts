@@ -34,8 +34,16 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get campaign by slug
-  const campaign = await campaignService.getCampaignBySlug(slug)
+  // Validate request body
+  const { sessionId, trackingId, duration, timestamp, campaignId } = body
+
+  // Use campaignId if provided (faster), otherwise lookup by slug
+  let campaign
+  if (campaignId) {
+    campaign = await campaignService.getCampaignById(campaignId)
+  } else {
+    campaign = await campaignService.getCampaignBySlug(slug)
+  }
 
   if (!campaign) {
     throw createError({
@@ -43,9 +51,6 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Campaign not found'
     })
   }
-
-  // Validate request body
-  const { sessionId, trackingId, duration, timestamp } = body
 
   if (!sessionId || duration === undefined || !timestamp) {
     throw createError({
