@@ -22,7 +22,7 @@
               target="_blank"
               class="inline-flex items-center gap-1"
             >
-              <span>Doxa</span>
+              <span>DOXA</span>
               <UIcon name="i-lucide-external-link" class="w-4 h-4" />
             </a>
             <LanguageSwitcher />

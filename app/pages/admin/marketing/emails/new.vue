@@ -47,9 +47,9 @@
               >
                 <div class="option-header">
                   <input type="radio" v-model="form.audience_type" value="doxa" />
-                  <span class="option-title">Doxa General</span>
+                  <span class="option-title">DOXA General</span>
                 </div>
-                <p class="option-description">Send to all subscribers who opted in to Doxa updates</p>
+                <p class="option-description">Send to all subscribers who opted in to DOXA updates</p>
                 <p class="option-count" v-if="doxaCount !== null">{{ doxaCount }} recipients</p>
               </div>
 

@@ -48,7 +48,7 @@
             <td class="subject-cell">{{ email.subject }}</td>
             <td class="audience-cell">
               <UBadge
-                :label="email.audience_type === 'doxa' ? 'Doxa' : email.campaign_title || 'Campaign'"
+                :label="email.audience_type === 'doxa' ? 'DOXA' : email.campaign_title || 'Campaign'"
                 variant="subtle"
                 color="neutral"
               />
