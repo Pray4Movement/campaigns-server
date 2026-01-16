@@ -181,10 +181,10 @@ class ReminderSignupService {
     return result.count
   }
 
-  // Generate verification token for a signup (24 hour expiry)
+  // Generate verification token for a signup (7 day expiry)
   async generateVerificationToken(signupId: number): Promise<string> {
     const token = randomUUID()
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
     const stmt = this.db.prepare(`
       UPDATE reminder_signups

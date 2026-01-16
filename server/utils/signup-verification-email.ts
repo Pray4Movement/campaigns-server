@@ -57,7 +57,7 @@ export async function sendSignupVerificationEmail(
         </p>
 
         <p style="color: #666666; font-size: 14px; margin-top: 30px;">
-          <strong>Note:</strong> This verification link will expire in 24 hours.
+          <strong>Note:</strong> This verification link will expire in 7 days.
         </p>
 
         <p style="color: #666666; font-size: 14px; margin-top: 20px;">
@@ -82,7 +82,7 @@ Thank you for signing up for prayer reminders for ${campaignTitle}.
 Please verify your email address by visiting this link:
 ${verificationUrl}
 
-Note: This verification link will expire in 24 hours.
+Note: This verification link will expire in 7 days.
 
 If you didn't sign up for prayer reminders, you can safely ignore this email.
 

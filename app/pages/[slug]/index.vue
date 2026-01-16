@@ -397,10 +397,15 @@
                     v-model="signupForm.consent_campaign_updates"
                     :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
                   />
-                  <UCheckbox
-                    v-model="signupForm.consent_doxa_general"
-                    :label="$t('campaign.signup.form.consent.doxaGeneral')"
-                  />
+                  <UCheckbox v-model="signupForm.consent_doxa_general">
+                    <template #label>
+                      <i18n-t keypath="campaign.signup.form.consent.doxaGeneral" tag="span">
+                        <template #link>
+                          <a href="https://doxa.life/" target="_blank" class="text-primary hover:underline">DOXA partnership</a>
+                        </template>
+                      </i18n-t>
+                    </template>
+                  </UCheckbox>
                 </div>
 
                 <UButton

@@ -126,9 +126,9 @@
         "submit": "S'engager à Prier",
         "submitting": "Inscription en cours...",
         "consent": {
-          "description": "Restez connecté (optionnel) :",
-          "campaignUpdates": "M'envoyer des mises à jour sur {campaign}",
-          "doxaGeneral": "Recevoir des nouvelles et mises à jour de Doxa"
+          "description": "En plus des rappels de prière, tenez-moi informé avec :",
+          "campaignUpdates": "Mises à jour sur ce groupe de personnes : {campaign}",
+          "doxaGeneral": "Progrès et actualités du {link}"
         }
       },
       "errors": {

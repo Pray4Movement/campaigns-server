@@ -126,9 +126,9 @@
         "submit": "Commit to Prayer",
         "submitting": "Joining...",
         "consent": {
-          "description": "Stay connected (optional):",
-          "campaignUpdates": "Send me updates about {campaign}",
-          "doxaGeneral": "Hear about progress and updates from Doxa"
+          "description": "In addition to prayer time reminders, keep me informed with:",
+          "campaignUpdates": "Updates about this people group: {campaign}",
+          "doxaGeneral": "Progress and updates from the {link}"
         }
       },
       "errors": {

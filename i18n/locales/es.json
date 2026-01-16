@@ -126,9 +126,9 @@
         "submit": "Comprometerse a Orar",
         "submitting": "Uniéndose...",
         "consent": {
-          "description": "Manténgase conectado (opcional):",
-          "campaignUpdates": "Envíeme actualizaciones sobre {campaign}",
-          "doxaGeneral": "Recibir noticias y actualizaciones de Doxa"
+          "description": "Además de los recordatorios de oración, manténgame informado con:",
+          "campaignUpdates": "Actualizaciones sobre este grupo de personas: {campaign}",
+          "doxaGeneral": "Progreso y actualizaciones de la {link}"
         }
       },
       "errors": {
