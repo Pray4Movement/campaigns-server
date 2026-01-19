@@ -1,181 +1,370 @@
 <script setup lang="ts">
-import { useEditor, EditorContent } from '@tiptap/vue-3'
-import BubbleMenuComponent from './BubbleMenu.vue'
-import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
-import { useEditorSetup } from '~/composables/editor/useEditorSetup'
-import 'tippy.js/dist/tippy.css'
+import ImageResize from 'tiptap-extension-resize-image'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import TextAlign from '@tiptap/extension-text-align'
+import Highlight from '@tiptap/extension-highlight'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Color from '@tiptap/extension-color'
+import Typography from '@tiptap/extension-typography'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import HorizontalRule from '@tiptap/extension-horizontal-rule'
+import Youtube from '@tiptap/extension-youtube'
+import { ImageUploadExtension } from '~/utils/imageUploadExtension'
+import { Spacer } from '~/extensions/spacer'
+import { Vimeo } from '~/extensions/vimeo'
+import { Verse } from '~/extensions/verse'
+import { editorConfig } from '~/config/editor.config'
+import { uploadImage } from '~/composables/editor/useImageUpload'
+import { useEditorHandlers, textColors, highlightColors } from '~/composables/editor/useEditorHandlers'
+import type { Editor } from '@tiptap/core'
 
 const props = defineProps<{
-  modelValue: any // TipTap JSON object (or string for backward compatibility)
+  modelValue: any
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: any] // TipTap JSON object
+  'update:modelValue': [value: any]
 }>()
 
 const { showError } = useModal()
+const { createCustomHandlers } = useEditorHandlers()
 
-// Get editor setup utilities
-const {
-  createEditorExtensions,
-  createEditorProps,
-  parseContent,
-  getReferencedVirtualElement,
-  config
-} = useEditorSetup()
+const content = computed({
+  get: () => parseContent(props.modelValue),
+  set: (value) => emit('update:modelValue', value)
+})
 
-// Create editor instance
-const editor = useEditor({
-  content: parseContent(props.modelValue),
-  extensions: createEditorExtensions(
-    async (error) => {
+function parseContent(value: any) {
+  const emptyDoc = {
+    type: 'doc',
+    content: [{ type: 'paragraph' }]
+  }
+
+  if (!value) return emptyDoc
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value)
+    } catch {
+      return emptyDoc
+    }
+  }
+
+  if (value.type === 'doc' && (!value.content || value.content.length === 0)) {
+    return emptyDoc
+  }
+
+  return value
+}
+
+const customExtensions = [
+  ImageResize.configure({ inline: false }),
+  TaskList,
+  TaskItem.configure({ nested: true }),
+  TextAlign.configure({ types: ['heading', 'paragraph'] }),
+  TextStyle,
+  Color,
+  Highlight.configure({ multicolor: true }),
+  Typography,
+  Subscript,
+  Superscript,
+  HorizontalRule,
+  Spacer.configure({ defaultHeight: 24 }),
+  Verse,
+  Youtube.configure({
+    inline: false,
+    width: 640,
+    height: 360,
+    allowFullscreen: true,
+    autoplay: false,
+    controls: true,
+    nocookie: true
+  }),
+  Vimeo.configure({
+    inline: false,
+    width: 640,
+    height: 360,
+    allowFullscreen: true,
+    autoplay: false,
+    controls: true
+  }),
+  ImageUploadExtension.configure({
+    type: 'imageResize',
+    accept: editorConfig.upload.image.accept,
+    limit: editorConfig.upload.image.limit,
+    maxSize: editorConfig.upload.image.maxSize,
+    upload: uploadImage,
+    onError: async (error: Error) => {
       console.error('Upload error:', error)
       await showError(`Upload failed: ${error.message}`)
     },
-    (url) => {
+    onSuccess: (url: string) => {
       console.log('Upload successful:', url)
     }
-  ),
-  editorProps: createEditorProps(),
-  onUpdate: ({ editor }) => {
-    emit('update:modelValue', editor.getJSON())
+  })
+]
+
+const customHandlers = createCustomHandlers()
+
+const bubbleToolbarItems = computed(() => [
+  [
+    { kind: 'heading', level: 1 },
+    { kind: 'heading', level: 2 },
+    { kind: 'heading', level: 3 }
+  ],
+  [
+    { kind: 'mark', mark: 'bold' },
+    { kind: 'mark', mark: 'italic' },
+    { kind: 'mark', mark: 'underline' },
+    { kind: 'mark', mark: 'strike' }
+  ],
+  [
+    { kind: 'textAlign', align: 'left' },
+    { kind: 'textAlign', align: 'center' },
+    { kind: 'textAlign', align: 'right' },
+    { kind: 'textAlign', align: 'justify' }
+  ],
+  [
+    { kind: 'link' }
+  ],
+  [
+    { kind: 'mark', mark: 'code' }
+  ]
+])
+
+const slashCommandItems = [
+  {
+    label: 'Basic Blocks',
+    commands: [
+      {
+        label: 'Text',
+        description: 'Plain paragraph text',
+        icon: 'i-lucide-text',
+        handler: (editor: Editor) => editor.chain().focus().setNode('paragraph').run()
+      },
+      {
+        label: 'Heading 1',
+        description: 'Large section heading',
+        icon: 'i-lucide-heading-1',
+        handler: (editor: Editor) => editor.chain().focus().setNode('heading', { level: 1 }).run()
+      },
+      {
+        label: 'Heading 2',
+        description: 'Medium section heading',
+        icon: 'i-lucide-heading-2',
+        handler: (editor: Editor) => editor.chain().focus().setNode('heading', { level: 2 }).run()
+      },
+      {
+        label: 'Heading 3',
+        description: 'Small section heading',
+        icon: 'i-lucide-heading-3',
+        handler: (editor: Editor) => editor.chain().focus().setNode('heading', { level: 3 }).run()
+      },
+      {
+        label: 'Quote',
+        description: 'Add a blockquote',
+        icon: 'i-lucide-text-quote',
+        handler: (editor: Editor) => editor.chain().focus().setBlockquote().run()
+      },
+      {
+        label: 'Verse',
+        description: 'Scripture or quoted verse',
+        icon: 'i-lucide-book-open',
+        handler: (editor: Editor) => editor.chain().focus().setVerse().run()
+      },
+      {
+        label: 'Code Block',
+        description: 'Code with syntax highlighting',
+        icon: 'i-lucide-code',
+        handler: (editor: Editor) => editor.chain().focus().setCodeBlock().run()
+      }
+    ]
+  },
+  {
+    label: 'Lists',
+    commands: [
+      {
+        label: 'Bullet List',
+        description: 'Create a simple bullet list',
+        icon: 'i-lucide-list',
+        handler: (editor: Editor) => editor.chain().focus().toggleBulletList().run()
+      },
+      {
+        label: 'Numbered List',
+        description: 'Create a numbered list',
+        icon: 'i-lucide-list-ordered',
+        handler: (editor: Editor) => editor.chain().focus().toggleOrderedList().run()
+      },
+      {
+        label: 'Checkboxes',
+        description: 'Create a checklist',
+        icon: 'i-lucide-list-todo',
+        handler: (editor: Editor) => editor.chain().focus().toggleTaskList().run()
+      }
+    ]
+  },
+  {
+    label: 'Media',
+    commands: [
+      {
+        label: 'Divider',
+        description: 'Add a horizontal line',
+        icon: 'i-lucide-minus',
+        handler: (editor: Editor) => editor.chain().focus().setHorizontalRule().run()
+      },
+      {
+        label: 'Spacer',
+        description: 'Add vertical spacing',
+        icon: 'i-lucide-separator-vertical',
+        handler: (editor: Editor) => editor.chain().focus().setSpacer().run()
+      },
+      {
+        label: 'Image',
+        description: 'Upload an image',
+        icon: 'i-lucide-image',
+        handler: (editor: Editor) => editor.chain().focus().setImageUploadNode().run()
+      },
+      {
+        label: 'Video',
+        description: 'Embed YouTube or Vimeo video',
+        icon: 'i-lucide-video',
+        handler: async (editor: Editor) => {
+          const { showVideoUrlModal } = useVideoEmbed()
+          await showVideoUrlModal(editor)
+        }
+      }
+    ]
   }
-})
+]
 
-// Track the currently hovered node position for drag handle
-const hoveredNodePos = ref<number | null>(null)
+const showColorPicker = ref(false)
+const showHighlightPicker = ref(false)
+const editorRef = ref<{ editor: Editor | undefined }>()
 
-// Handle node change from drag handle
-const onNodeChange = ({ node, editor, pos }: any) => {
-  if (node) {
-    hoveredNodePos.value = pos
+const setColor = (color: string | null) => {
+  const editor = editorRef.value?.editor
+  if (!editor) return
+
+  if (color === null) {
+    editor.chain().focus().unsetColor().run()
   } else {
-    hoveredNodePos.value = null
+    editor.chain().focus().setColor(color).run()
   }
+  showColorPicker.value = false
 }
 
-// Handle plus button click to insert text and trigger slash command
-const handlePlusClick = () => {
-  if (!editor.value) return
+const setHighlight = (color: string | null) => {
+  const editor = editorRef.value?.editor
+  if (!editor) return
 
-  let insertPos: number
-
-  // Use hovered node position if available, otherwise use selection position
-  if (hoveredNodePos.value !== null) {
-    const { state } = editor.value
-    const node = state.doc.nodeAt(hoveredNodePos.value)
-
-    if (node) {
-      // Insert after the entire node (position + node size)
-      insertPos = hoveredNodePos.value + node.nodeSize
-    } else {
-      // Fallback to after current position
-      const resolvedPos = state.doc.resolve(hoveredNodePos.value)
-      insertPos = resolvedPos.after()
-    }
+  if (color === null) {
+    editor.chain().focus().unsetHighlight().run()
   } else {
-    const { state } = editor.value
-    const { $from } = state.selection
-    // For selection, find the top-level block and insert after it
-    const depth = $from.depth
-    insertPos = $from.after(depth)
+    editor.chain().focus().setHighlight({ color }).run()
   }
-
-  // Insert new paragraph with slash after current block to trigger the command menu
-  editor.value.chain()
-    .focus()
-    .insertContentAt(insertPos, {
-      type: 'paragraph',
-      content: [{ type: 'text', text: '/' }]
-    })
-    .run()
+  showHighlightPicker.value = false
 }
-
-// Handle clicks in the editor padding area to focus the editor
-const handleEditorClick = (event: MouseEvent) => {
-  if (!editor.value) return
-
-  const target = event.target as HTMLElement
-
-  if (target.classList.contains('editor-content') || target.classList.contains('editor-wrapper')) {
-    editor.value.chain().focus('end').run()
-  }
-}
-
-// Update editor content when modelValue changes externally
-watch(() => props.modelValue, (value) => {
-  if (!editor.value || !value) return
-
-  const parsedValue = parseContent(value)
-  if (!parsedValue) return
-
-  const currentJson = JSON.stringify(editor.value.getJSON())
-  const newJson = JSON.stringify(parsedValue)
-  const isSame = currentJson === newJson
-
-  if (!isSame) {
-    editor.value.commands.setContent(parsedValue, { emitUpdate: false })
-  }
-})
-
-// Cleanup editor on unmount
-onBeforeUnmount(() => {
-  editor.value?.destroy()
-})
 </script>
 
 <template>
   <div class="editor-wrapper">
-    <BubbleMenuComponent v-if="editor" :editor="editor" />
-
-    <!-- Drag Handle -->
-    <DragHandle
-      v-if="editor"
-      :editor="editor"
-      :onNodeChange="onNodeChange"
-      :getReferencedVirtualElement="getReferencedVirtualElement"
-      :computePositionConfig="{ placement: 'left', strategy: 'absolute' }"
+    <UEditor
+      ref="editorRef"
+      v-model="content"
+      content-type="json"
+      :extensions="customExtensions"
+      :handlers="customHandlers"
+      :placeholder="editorConfig.placeholder.default"
+      class="editor-content"
     >
-      <div class="drag-handle-wrapper">
-        <button class="drag-handle-button" type="button" @click="handlePlusClick">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="7" y1="3" x2="7" y2="11"/>
-            <line x1="3" y1="7" x2="11" y2="7"/>
-          </svg>
-        </button>
-        <div class="drag-handle-grip">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor">
-            <circle cx="2" cy="2" r="1.5"/>
-            <circle cx="7" cy="2" r="1.5"/>
-            <circle cx="2" cy="8" r="1.5"/>
-            <circle cx="7" cy="8" r="1.5"/>
-            <circle cx="2" cy="14" r="1.5"/>
-            <circle cx="7" cy="14" r="1.5"/>
-          </svg>
-        </div>
-      </div>
-    </DragHandle>
+      <template #default="{ editor }">
+        <UEditorToolbar
+          v-if="editor"
+          mode="bubble"
+          :editor="editor"
+          :items="bubbleToolbarItems"
+        >
+          <template #trailing>
+            <UDivider orientation="vertical" class="h-5" />
 
-    <!-- Editor -->
-    <EditorContent :editor="editor" class="editor-content" @click="handleEditorClick" />
+            <UPopover v-model:open="showColorPicker">
+              <UButton
+                variant="ghost"
+                size="xs"
+                icon="i-lucide-palette"
+                class="text-gray-600"
+              />
+              <template #content>
+                <div class="p-2">
+                  <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Text color</div>
+                  <div class="grid grid-cols-3 gap-1">
+                    <button
+                      v-for="color in textColors"
+                      :key="color.name"
+                      class="w-6 h-6 rounded hover:ring-2 hover:ring-gray-300"
+                      :style="{ backgroundColor: color.value || '#000000' }"
+                      :title="color.name"
+                      @click="setColor(color.value)"
+                    />
+                  </div>
+                </div>
+              </template>
+            </UPopover>
+
+            <UPopover v-model:open="showHighlightPicker">
+              <UButton
+                variant="ghost"
+                size="xs"
+                icon="i-lucide-highlighter"
+                class="text-gray-600"
+              />
+              <template #content>
+                <div class="p-2">
+                  <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Background</div>
+                  <div class="grid grid-cols-3 gap-1">
+                    <button
+                      v-for="highlight in highlightColors"
+                      :key="highlight.name"
+                      class="w-6 h-6 rounded border border-gray-200 hover:ring-2 hover:ring-gray-300"
+                      :style="{ backgroundColor: highlight.value || '#FFFFFF' }"
+                      :title="highlight.name"
+                      @click="setHighlight(highlight.value)"
+                    />
+                  </div>
+                </div>
+              </template>
+            </UPopover>
+          </template>
+        </UEditorToolbar>
+
+        <UEditorDragHandle v-if="editor" :editor="editor" />
+
+        <UEditorSuggestionMenu
+          v-if="editor"
+          :editor="editor"
+          :items="slashCommandItems"
+        />
+      </template>
+    </UEditor>
   </div>
 </template>
 
 <style scoped>
 .editor-wrapper {
   background: white;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   overflow: hidden;
   transition: border-color 0.15s ease;
 }
 
 .editor-wrapper:hover {
-  border-color: #D1D5DB;
+  border-color: var(--ui-border-hover);
 }
 
 .editor-wrapper:focus-within {
-  border-color: #9CA3AF;
+  border-color: var(--ui-border-accented);
   box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
 }
 
@@ -185,26 +374,20 @@ onBeforeUnmount(() => {
   cursor: text;
 }
 
-/* Base ProseMirror Styles */
 :deep(.ProseMirror) {
   outline: none;
   font-size: 16px;
   line-height: 1.6;
-  color: #111827;
+  color: var(--ui-text);
 }
 
-/* Placeholder */
 :deep(.ProseMirror p.is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
-  color: #9CA3AF;
+  color: var(--ui-text-muted);
   pointer-events: none;
   font-style: italic;
   float: left;
   height: 0;
-}
-
-:deep(.ProseMirror.ProseMirror-focused p.is-editor-empty:first-child::before) {
-  color: #6B7280;
 }
 
 :deep(.ProseMirror h1) {
@@ -213,18 +396,11 @@ onBeforeUnmount(() => {
   line-height: 1.2;
   margin-top: 2rem;
   margin-bottom: 0.5rem;
-  color: #111827;
-  position: relative;
+  color: var(--ui-text);
 }
 
-:deep(.ProseMirror h1::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
+:deep(.ProseMirror h1:first-child) {
+  margin-top: 0;
 }
 
 :deep(.ProseMirror h2) {
@@ -233,18 +409,11 @@ onBeforeUnmount(() => {
   line-height: 1.3;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  color: #111827;
-  position: relative;
+  color: var(--ui-text);
 }
 
-:deep(.ProseMirror h2::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
+:deep(.ProseMirror h2:first-child) {
+  margin-top: 0;
 }
 
 :deep(.ProseMirror h3) {
@@ -253,41 +422,16 @@ onBeforeUnmount(() => {
   line-height: 1.4;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  color: #111827;
-  position: relative;
+  color: var(--ui-text);
 }
 
-:deep(.ProseMirror h3::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-:deep(.ProseMirror h1:first-child),
-:deep(.ProseMirror h2:first-child),
 :deep(.ProseMirror h3:first-child) {
   margin-top: 0;
 }
 
-/* Paragraphs */
 :deep(.ProseMirror p) {
   margin: 0.75rem 0;
   line-height: 1.6;
-  position: relative;
-}
-
-:deep(.ProseMirror p::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
 }
 
 :deep(.ProseMirror p:first-child) {
@@ -298,22 +442,9 @@ onBeforeUnmount(() => {
   margin-bottom: 0;
 }
 
-/* Lists */
 :deep(.ProseMirror ul),
 :deep(.ProseMirror ol) {
   padding-left: 1rem;
-  position: relative;
-}
-
-:deep(.ProseMirror ul::after),
-:deep(.ProseMirror ol::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
 }
 
 :deep(.ProseMirror ul) {
@@ -332,11 +463,9 @@ onBeforeUnmount(() => {
   margin: 0.25rem 0;
 }
 
-/* Task Lists */
 :deep(.ProseMirror ul[data-type="taskList"]) {
   list-style: none;
   padding-left: 0;
-  position: relative;
 }
 
 :deep(.ProseMirror ul[data-type="taskList"] li) {
@@ -367,7 +496,6 @@ onBeforeUnmount(() => {
   border: 2px solid #6b7280;
   border-radius: 0.25rem;
   background-color: white;
-  background-image: none;
   position: relative;
   transition: all 0.15s ease;
   display: inline-block;
@@ -377,7 +505,6 @@ onBeforeUnmount(() => {
 :deep(.ProseMirror ul[data-type="taskList"] li input[type="checkbox"]:checked) {
   background-color: #000000;
   border-color: #000000;
-  background-image: none;
 }
 
 :deep(.ProseMirror ul[data-type="taskList"] li input[type="checkbox"]:checked::after) {
@@ -393,35 +520,21 @@ onBeforeUnmount(() => {
   transform: rotate(45deg);
 }
 
-/* Strikethrough for checked items */
 :deep(.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div) {
   text-decoration: line-through;
   opacity: 0.6;
 }
 
-/* Blockquote */
 :deep(.ProseMirror blockquote) {
-  border-left: 3px solid #E5E7EB;
+  border-left: 3px solid var(--ui-border);
   padding-left: 1rem;
   margin: 1rem 0;
-  color: #6B7280;
+  color: var(--ui-text-muted);
   font-style: italic;
-  position: relative;
 }
 
-:deep(.ProseMirror blockquote::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* Code */
 :deep(.ProseMirror code) {
-  background: #F3F4F6;
+  background: var(--ui-bg-muted);
   color: #EF4444;
   padding: 0.2em 0.4em;
   border-radius: 4px;
@@ -429,7 +542,6 @@ onBeforeUnmount(() => {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
-/* Code Block */
 :deep(.ProseMirror pre) {
   background: #1F2937;
   color: #F3F4F6;
@@ -437,23 +549,9 @@ onBeforeUnmount(() => {
   border-radius: 8px;
   margin: 1rem 0;
   overflow-x: auto;
-  overflow-y: visible;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
   font-size: 0.875rem;
   line-height: 1.7;
-  position: relative;
-}
-
-:deep(.ProseMirror pre::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: -1rem;
-  width: 60px;
-  height: calc(100% + 2rem);
-  cursor: pointer;
-  pointer-events: auto;
-  z-index: 1;
 }
 
 :deep(.ProseMirror pre code) {
@@ -464,68 +562,33 @@ onBeforeUnmount(() => {
   font-size: inherit;
 }
 
-/* Horizontal Rule */
 :deep(.ProseMirror hr) {
   border: none;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid var(--ui-border);
   margin: 2rem 0;
-  position: relative;
   padding: 12px 0;
   cursor: pointer;
 }
 
-:deep(.ProseMirror hr::before) {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  cursor: pointer;
-}
-
-:deep(.ProseMirror hr::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* Spacer */
 :deep(.ProseMirror div[data-type="spacer"]) {
   position: relative;
   min-height: 12px;
   margin: 0.5rem 0;
   cursor: default;
-  border: 2px dashed #E5E7EB;
+  border: 2px dashed var(--ui-border);
   border-radius: 4px;
 }
 
 :deep(.ProseMirror div[data-type="spacer"].ProseMirror-selectednode) {
-  border-color: #3B82F6;
+  border-color: var(--ui-primary);
   background: rgba(59, 130, 246, 0.05);
 }
 
-:deep(.ProseMirror div[data-type="spacer"]::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* Verse */
 :deep(.ProseMirror div[data-type="verse"]) {
   background-color: var(--ui-primary);
   border-radius: 5px;
   padding: 1rem;
   margin: 1rem 0;
-  position: relative;
 }
 
 :deep(.ProseMirror div[data-type="verse"] p) {
@@ -547,30 +610,16 @@ onBeforeUnmount(() => {
   outline-offset: 2px;
 }
 
-:deep(.ProseMirror div[data-type="verse"]::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* Images */
 :deep(.ProseMirror img) {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
   margin: 1.5rem 0;
   display: block;
-  position: relative;
 }
 
-/* YouTube Video Embeds */
 :deep(.ProseMirror div[data-youtube-video]) {
   margin: 1.5rem 0;
-  position: relative;
   cursor: pointer;
 }
 
@@ -582,24 +631,12 @@ onBeforeUnmount(() => {
 }
 
 :deep(.ProseMirror div[data-youtube-video].ProseMirror-selectednode) {
-  outline: 2px solid #3B82F6;
+  outline: 2px solid var(--ui-primary);
   border-radius: 8px;
 }
 
-:deep(.ProseMirror div[data-youtube-video]::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* Vimeo Video Embeds */
 :deep(.ProseMirror div[data-vimeo-video]) {
   margin: 1.5rem 0;
-  position: relative;
   cursor: pointer;
 }
 
@@ -611,33 +648,21 @@ onBeforeUnmount(() => {
 }
 
 :deep(.ProseMirror div[data-vimeo-video].ProseMirror-selectednode) {
-  outline: 2px solid #3B82F6;
+  outline: 2px solid var(--ui-primary);
   border-radius: 8px;
 }
 
-:deep(.ProseMirror div[data-vimeo-video]::after) {
-  content: '';
-  position: absolute;
-  left: -60px;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* Links */
 :deep(.ProseMirror a) {
-  color: #3B82F6;
+  color: var(--ui-primary);
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.15s ease;
 }
 
 :deep(.ProseMirror a:hover) {
-  color: #2563EB;
+  color: var(--ui-primary-hover);
 }
 
-/* Text Alignment */
 :deep(.ProseMirror [style*="text-align: left"]) {
   text-align: left;
 }
@@ -654,100 +679,13 @@ onBeforeUnmount(() => {
   text-align: justify;
 }
 
-/* Highlight */
 :deep(.ProseMirror mark) {
   background-color: #FEF3C7;
   padding: 0.1em 0.2em;
   border-radius: 2px;
 }
 
-/* Selection */
 :deep(.ProseMirror ::selection) {
   background: #DBEAFE;
-}
-
-/* Override Tippy.js default styles */
-:global(.tippy-box) {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-:global(.tippy-content) {
-  padding: 0 !important;
-}
-
-/* Ensure floating menu doesn't interfere */
-:deep(.ProseMirror-focused) {
-  outline: none;
-}
-
-/* Drag Handle Styles */
-.drag-handle-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-right: 8px;
-}
-
-.drag-handle-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: white;
-  border: 1px solid #E5E7EB;
-  border-radius: 4px;
-  padding: 3px;
-  transition: all 0.15s ease;
-  outline: none;
-}
-
-.drag-handle-button:hover {
-  background: #F3F4F6;
-}
-
-.drag-handle-button:active {
-  background: #E5E7EB;
-}
-
-.drag-handle-button svg {
-  width: 14px;
-  height: 14px;
-  color: #9CA3AF;
-}
-
-.drag-handle-button:hover svg {
-  color: #374151;
-}
-
-.drag-handle-grip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  background: white;
-  border: 1px solid #E5E7EB;
-  border-radius: 4px;
-  padding: 4px;
-  transition: all 0.15s ease;
-}
-
-.drag-handle-grip:hover {
-  background: #F3F4F6;
-}
-
-.drag-handle-grip:active {
-  cursor: grabbing;
-  background: #E5E7EB;
-}
-
-.drag-handle-grip svg {
-  width: 12px;
-  height: 16px;
-  color: #9CA3AF;
-}
-
-.drag-handle-grip:hover svg {
-  color: #374151;
 }
 </style>
