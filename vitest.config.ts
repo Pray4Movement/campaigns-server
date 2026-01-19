@@ -11,7 +11,7 @@ if (env.TEST_DATABASE_URL) {
 }
 
 export default defineVitestConfig({
-  // Externalize bun:test to avoid bundling issues when running under node
+  // Externalize bun:test to avoid bundling issues
   resolve: {
     alias: {
       'bun:test': 'vitest',
