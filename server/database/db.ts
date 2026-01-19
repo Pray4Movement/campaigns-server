@@ -18,16 +18,11 @@ function getTestSql(): ReturnType<typeof postgres> | null {
   return testSql
 }
 
-// Lazy load the production sql connection to avoid #imports issues in tests
-let productionSql: Sql | null = null
+// Get the production sql connection (auto-imported from base layer server/utils/database.ts)
 function getProductionSql(): Sql {
-  if (!productionSql) {
-    // Dynamic import of #imports only when needed (not in test environment)
-    // @ts-ignore - sql is auto-imported from base layer server/utils/database.ts
-    const { sql } = require('#imports')
-    productionSql = sql
-  }
-  return productionSql
+  // sql is auto-imported by Nitro from the base layer's server/utils/database.ts
+  // @ts-ignore - sql is auto-imported
+  return sql
 }
 
 // PostgreSQL query wrapper that mimics better-sqlite3 API
@@ -134,7 +129,7 @@ export function getDatabase(): DatabaseWrapper {
     }
   }
 
-  // Use production sql connection (lazy loaded to avoid #imports issues in tests)
+  // Use production sql connection (auto-imported from base layer)
   return new DatabaseWrapper(getProductionSql() as any)
 }
 
