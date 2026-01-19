@@ -1,10 +1,11 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+We are Jan 2026
 
 ## Project Overview
 
-Doka Prayer Campagins is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features campaign management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
+DOXA Prayer Campagins is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features campaign management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
 
 This project consumes the base layer: https://github.com/corsacca/nuxt-base
 
@@ -31,11 +32,12 @@ Avoid routing conflicts in Nuxt file-based routing:
 ## Development Commands
 
 ```bash
-npm run dev          # Start development server (runs migrations automatically)
-npm run build        # Build for production (runs migrations automatically)
-npm run start        # Start production server
-npm run postinstall  # Nuxt prepare
-npm run migrate      # Run database migrations manually
+bun run dev          # Start development server (runs migrations automatically)
+bun run build        # Build for production
+bun run start        # Start production server (runs migrations automatically)
+bun run postinstall  # Nuxt prepare
+bun run migrate      # Run database migrations manually
+bun install          # Install dependencies
 ```
 
 ## Architecture
@@ -165,6 +167,7 @@ Reference: https://ui.nuxt.com/components
 
 ## Tech Stack
 
+- **Runtime**: Bun
 - **Frontend**: Nuxt 4.1, Vue 3, Nuxt UI v4, Tailwind CSS
 - **Backend**: Nitro (Nuxt server), PostgreSQL
 - **Editor**: Tiptap (rich text)

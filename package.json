@@ -5,12 +5,12 @@
   "scripts": {
     "migrate": "sh -c 'node node_modules/.c12/github_corsacca_nuxt_*/scripts/migrate.mjs'",
     "build": "nuxt build",
-    "dev": "npm run migrate && nuxt dev",
+    "dev": "bun run migrate && nuxt dev",
     "dev:mail": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start": "npm run migrate && node .output/server/index.mjs",
+    "start": "bun run migrate && bun .output/server/index.mjs",
     "mailhog:start": "echo 'ℹ Using shared MailHog from sale/nuxtui project at http://localhost:8025'",
     "mailhog:stop": "echo 'ℹ MailHog is shared with sale/nuxtui project - use that project to stop it'",
     "mailhog:logs": "docker logs nuxtui-mailhog",
@@ -69,5 +69,8 @@
     "@types/nodemailer": "^7.0.1",
     "@types/uuid": "^10.0.0",
     "tsx": "^4.20.6"
-  }
+  },
+  "trustedDependencies": [
+    "@parcel/watcher"
+  ]
 }
