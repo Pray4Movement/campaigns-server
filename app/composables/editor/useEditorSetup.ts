@@ -13,7 +13,6 @@ import Color from '@tiptap/extension-color'
 import Typography from '@tiptap/extension-typography'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
-import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import Youtube from '@tiptap/extension-youtube'
 import { DOMParser } from '@tiptap/pm/model'
 import { ImageUploadExtension } from '~/utils/imageUploadExtension'
@@ -74,7 +73,6 @@ export const createCustomExtensions = (
     Typography,
     Subscript,
     Superscript,
-    HorizontalRule,
     Spacer.configure({ defaultHeight: 24 }),
     Verse,
     Youtube.configure({

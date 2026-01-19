@@ -9,7 +9,6 @@ import Color from '@tiptap/extension-color'
 import Typography from '@tiptap/extension-typography'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
-import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import Youtube from '@tiptap/extension-youtube'
 import { ImageUploadExtension } from '~/utils/imageUploadExtension'
 import { Spacer } from '~/extensions/spacer'
@@ -18,6 +17,8 @@ import { Verse } from '~/extensions/verse'
 import { editorConfig } from '~/config/editor.config'
 import { uploadImage } from '~/composables/editor/useImageUpload'
 import { useEditorHandlers, textColors, highlightColors } from '~/composables/editor/useEditorHandlers'
+import { useVideoEmbed } from '~/composables/editor/useVideoEmbed'
+import { useEditorDragHandle } from '~/composables/editor/useEditorDragHandle'
 import type { Editor } from '@tiptap/core'
 
 const props = defineProps<{
@@ -69,7 +70,6 @@ const customExtensions = [
   Typography,
   Subscript,
   Superscript,
-  HorizontalRule,
   Spacer.configure({ defaultHeight: 24 }),
   Verse,
   Youtube.configure({
@@ -105,142 +105,116 @@ const customExtensions = [
   })
 ]
 
-const customHandlers = createCustomHandlers()
+const { showVideoUrlModal } = useVideoEmbed()
+
+// Editor ref
+const editorRef = ref<{ editor: Editor | undefined }>()
+
+// Custom handlers for items that need special behavior
+// Note: execute should return the chain, caller adds .run()
+const customHandlers = {
+  ...createCustomHandlers(),
+  // Image upload handler
+  imageUpload: {
+    canExecute: (editor: Editor) => editor.can().setImageUploadNode(),
+    execute: (editor: Editor) => editor.chain().focus().setImageUploadNode(),
+    isActive: () => false,
+    isDisabled: (editor: Editor) => !editor.isEditable
+  },
+  // Video embed handler - returns chain but also shows modal
+  video: {
+    canExecute: () => true,
+    execute: (editor: Editor) => {
+      showVideoUrlModal(editor)
+      return editor.chain().focus()
+    },
+    isActive: () => false,
+    isDisabled: (editor: Editor) => !editor.isEditable
+  },
+  // Verse block handler
+  verse: {
+    canExecute: (editor: Editor) => editor.can().setVerse(),
+    execute: (editor: Editor) => editor.chain().focus().setVerse(),
+    isActive: (editor: Editor) => editor.isActive('verse'),
+    isDisabled: (editor: Editor) => !editor.isEditable
+  },
+  // Spacer handler
+  spacer: {
+    canExecute: (editor: Editor) => editor.can().setSpacer(),
+    execute: (editor: Editor) => editor.chain().focus().setSpacer(),
+    isActive: () => false,
+    isDisabled: (editor: Editor) => !editor.isEditable
+  }
+}
+
+// Shared block type options for Turn into and Style menus
+const blockTypeItems = [
+  { kind: 'paragraph', label: 'Paragraph', icon: 'i-lucide-pilcrow' },
+  { kind: 'heading', level: 1, label: 'Heading 1', icon: 'i-lucide-heading-1' },
+  { kind: 'heading', level: 2, label: 'Heading 2', icon: 'i-lucide-heading-2' },
+  { kind: 'heading', level: 3, label: 'Heading 3', icon: 'i-lucide-heading-3' },
+  { kind: 'bulletList', label: 'Bullet List', icon: 'i-lucide-list' },
+  { kind: 'orderedList', label: 'Numbered List', icon: 'i-lucide-list-ordered' },
+  { kind: 'taskList', label: 'Task List', icon: 'i-lucide-list-check' },
+  { kind: 'blockquote', label: 'Quote', icon: 'i-lucide-text-quote' },
+  { kind: 'verse', label: 'Verse', icon: 'i-lucide-book-open' },
+  { kind: 'codeBlock', label: 'Code Block', icon: 'i-lucide-square-code' }
+]
+
+// Insert items for slash commands
+const insertItems = [
+  { kind: 'imageUpload', label: 'Image', icon: 'i-lucide-image' },
+  { kind: 'video', label: 'Video', icon: 'i-lucide-video' },
+  { kind: 'horizontalRule', label: 'Horizontal Rule', icon: 'i-lucide-separator-horizontal' },
+  { kind: 'spacer', label: 'Spacer', icon: 'i-lucide-space' }
+]
 
 const bubbleToolbarItems = computed(() => [
   [
-    { kind: 'heading', level: 1 },
-    { kind: 'heading', level: 2 },
-    { kind: 'heading', level: 3 }
+    {
+      label: 'Turn into',
+      icon: 'i-lucide-pilcrow',
+      items: blockTypeItems
+    }
   ],
   [
-    { kind: 'mark', mark: 'bold' },
-    { kind: 'mark', mark: 'italic' },
-    { kind: 'mark', mark: 'underline' },
-    { kind: 'mark', mark: 'strike' }
+    { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold' },
+    { kind: 'mark', mark: 'italic', icon: 'i-lucide-italic' },
+    { kind: 'mark', mark: 'underline', icon: 'i-lucide-underline' },
+    { kind: 'mark', mark: 'strike', icon: 'i-lucide-strikethrough' }
   ],
   [
-    { kind: 'textAlign', align: 'left' },
-    { kind: 'textAlign', align: 'center' },
-    { kind: 'textAlign', align: 'right' },
-    { kind: 'textAlign', align: 'justify' }
+    { kind: 'textAlign', align: 'left', icon: 'i-lucide-align-left' },
+    { kind: 'textAlign', align: 'center', icon: 'i-lucide-align-center' },
+    { kind: 'textAlign', align: 'right', icon: 'i-lucide-align-right' },
+    { kind: 'textAlign', align: 'justify', icon: 'i-lucide-align-justify' }
   ],
   [
-    { kind: 'link' }
+    { slot: 'link' as const, icon: 'i-lucide-link' },
+    { slot: 'textColor' as const, icon: 'i-lucide-palette' },
+    { slot: 'highlight' as const, icon: 'i-lucide-highlighter' }
   ],
   [
-    { kind: 'mark', mark: 'code' }
+    { kind: 'mark', mark: 'code', icon: 'i-lucide-code' }
   ]
 ])
 
 const slashCommandItems = [
-  {
-    label: 'Basic Blocks',
-    commands: [
-      {
-        label: 'Text',
-        description: 'Plain paragraph text',
-        icon: 'i-lucide-text',
-        handler: (editor: Editor) => editor.chain().focus().setNode('paragraph').run()
-      },
-      {
-        label: 'Heading 1',
-        description: 'Large section heading',
-        icon: 'i-lucide-heading-1',
-        handler: (editor: Editor) => editor.chain().focus().setNode('heading', { level: 1 }).run()
-      },
-      {
-        label: 'Heading 2',
-        description: 'Medium section heading',
-        icon: 'i-lucide-heading-2',
-        handler: (editor: Editor) => editor.chain().focus().setNode('heading', { level: 2 }).run()
-      },
-      {
-        label: 'Heading 3',
-        description: 'Small section heading',
-        icon: 'i-lucide-heading-3',
-        handler: (editor: Editor) => editor.chain().focus().setNode('heading', { level: 3 }).run()
-      },
-      {
-        label: 'Quote',
-        description: 'Add a blockquote',
-        icon: 'i-lucide-text-quote',
-        handler: (editor: Editor) => editor.chain().focus().setBlockquote().run()
-      },
-      {
-        label: 'Verse',
-        description: 'Scripture or quoted verse',
-        icon: 'i-lucide-book-open',
-        handler: (editor: Editor) => editor.chain().focus().setVerse().run()
-      },
-      {
-        label: 'Code Block',
-        description: 'Code with syntax highlighting',
-        icon: 'i-lucide-code',
-        handler: (editor: Editor) => editor.chain().focus().setCodeBlock().run()
-      }
-    ]
-  },
-  {
-    label: 'Lists',
-    commands: [
-      {
-        label: 'Bullet List',
-        description: 'Create a simple bullet list',
-        icon: 'i-lucide-list',
-        handler: (editor: Editor) => editor.chain().focus().toggleBulletList().run()
-      },
-      {
-        label: 'Numbered List',
-        description: 'Create a numbered list',
-        icon: 'i-lucide-list-ordered',
-        handler: (editor: Editor) => editor.chain().focus().toggleOrderedList().run()
-      },
-      {
-        label: 'Checkboxes',
-        description: 'Create a checklist',
-        icon: 'i-lucide-list-todo',
-        handler: (editor: Editor) => editor.chain().focus().toggleTaskList().run()
-      }
-    ]
-  },
-  {
-    label: 'Media',
-    commands: [
-      {
-        label: 'Divider',
-        description: 'Add a horizontal line',
-        icon: 'i-lucide-minus',
-        handler: (editor: Editor) => editor.chain().focus().setHorizontalRule().run()
-      },
-      {
-        label: 'Spacer',
-        description: 'Add vertical spacing',
-        icon: 'i-lucide-separator-vertical',
-        handler: (editor: Editor) => editor.chain().focus().setSpacer().run()
-      },
-      {
-        label: 'Image',
-        description: 'Upload an image',
-        icon: 'i-lucide-image',
-        handler: (editor: Editor) => editor.chain().focus().setImageUploadNode().run()
-      },
-      {
-        label: 'Video',
-        description: 'Embed YouTube or Vimeo video',
-        icon: 'i-lucide-video',
-        handler: async (editor: Editor) => {
-          const { showVideoUrlModal } = useVideoEmbed()
-          await showVideoUrlModal(editor)
-        }
-      }
-    ]
-  }
+  [
+    { type: 'label', label: 'Style' },
+    ...blockTypeItems
+  ],
+  [
+    { type: 'label', label: 'Insert' },
+    ...insertItems
+  ]
 ]
+
+// Enhanced drag handle
+const { getItems: getDragHandleItems, onNodeChange } = useEditorDragHandle(customHandlers)
 
 const showColorPicker = ref(false)
 const showHighlightPicker = ref(false)
-const editorRef = ref<{ editor: Editor | undefined }>()
 
 const setColor = (color: string | null) => {
   const editor = editorRef.value?.editor
@@ -281,28 +255,29 @@ const setHighlight = (color: string | null) => {
       <template #default="{ editor }">
         <UEditorToolbar
           v-if="editor"
-          mode="bubble"
+          layout="bubble"
           :editor="editor"
           :items="bubbleToolbarItems"
         >
-          <template #trailing>
-            <UDivider orientation="vertical" class="h-5" />
+          <template #link>
+            <EditorLinkPopover :editor="editor" />
+          </template>
 
+          <template #textColor>
             <UPopover v-model:open="showColorPicker">
               <UButton
                 variant="ghost"
                 size="xs"
                 icon="i-lucide-palette"
-                class="text-gray-600"
               />
               <template #content>
                 <div class="p-2">
-                  <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Text color</div>
+                  <div class="text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wide mb-2">Text color</div>
                   <div class="grid grid-cols-3 gap-1">
                     <button
                       v-for="color in textColors"
                       :key="color.name"
-                      class="w-6 h-6 rounded hover:ring-2 hover:ring-gray-300"
+                      class="w-6 h-6 rounded hover:ring-2 hover:ring-(--ui-border-accented) cursor-pointer"
                       :style="{ backgroundColor: color.value || '#000000' }"
                       :title="color.name"
                       @click="setColor(color.value)"
@@ -311,22 +286,23 @@ const setHighlight = (color: string | null) => {
                 </div>
               </template>
             </UPopover>
+          </template>
 
+          <template #highlight>
             <UPopover v-model:open="showHighlightPicker">
               <UButton
                 variant="ghost"
                 size="xs"
                 icon="i-lucide-highlighter"
-                class="text-gray-600"
               />
               <template #content>
                 <div class="p-2">
-                  <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Background</div>
+                  <div class="text-xs font-semibold text-(--ui-text-muted) uppercase tracking-wide mb-2">Background</div>
                   <div class="grid grid-cols-3 gap-1">
                     <button
                       v-for="highlight in highlightColors"
                       :key="highlight.name"
-                      class="w-6 h-6 rounded border border-gray-200 hover:ring-2 hover:ring-gray-300"
+                      class="w-6 h-6 rounded border border-(--ui-border) hover:ring-2 hover:ring-(--ui-border-accented) cursor-pointer"
                       :style="{ backgroundColor: highlight.value || '#FFFFFF' }"
                       :title="highlight.name"
                       @click="setHighlight(highlight.value)"
@@ -338,12 +314,18 @@ const setHighlight = (color: string | null) => {
           </template>
         </UEditorToolbar>
 
-        <UEditorDragHandle v-if="editor" :editor="editor" />
+        <UEditorDragHandle
+          v-if="editor"
+          :editor="editor"
+          :items="getDragHandleItems(editor)"
+          @node-change="onNodeChange"
+        />
 
         <UEditorSuggestionMenu
           v-if="editor"
           :editor="editor"
           :items="slashCommandItems"
+          :options="{ placement: 'bottom-start', flip: true, shift: true }"
         />
       </template>
     </UEditor>
@@ -355,7 +337,6 @@ const setHighlight = (color: string | null) => {
   background: white;
   border: 1px solid var(--ui-border);
   border-radius: 8px;
-  overflow: hidden;
   transition: border-color 0.15s ease;
 }
 

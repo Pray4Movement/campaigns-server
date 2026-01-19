@@ -4,6 +4,7 @@
  */
 
 import type { Editor } from '@tiptap/core'
+import { useVideoEmbed } from './useVideoEmbed'
 
 export interface EditorHandler {
   canExecute: (editor: Editor, item?: any) => boolean
