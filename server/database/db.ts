@@ -1,6 +1,34 @@
 import type { Sql } from 'postgres'
-// @ts-ignore - sql is auto-imported from base layer server/utils/database.ts
-import { sql } from '#imports'
+import postgres from 'postgres'
+
+// Test database connection (lazy initialized)
+let testSql: ReturnType<typeof postgres> | null = null
+
+function getTestSql(): ReturnType<typeof postgres> | null {
+  if (testSql) return testSql
+
+  const testUrl = process.env.TEST_DATABASE_URL
+  if (!testUrl) return null
+
+  testSql = postgres(testUrl, {
+    ssl: testUrl.includes('localhost') ? false : { rejectUnauthorized: false },
+    max: 5,
+    idle_timeout: 10,
+  })
+  return testSql
+}
+
+// Lazy load the production sql connection to avoid #imports issues in tests
+let productionSql: Sql | null = null
+function getProductionSql(): Sql {
+  if (!productionSql) {
+    // Dynamic import of #imports only when needed (not in test environment)
+    // @ts-ignore - sql is auto-imported from base layer server/utils/database.ts
+    const { sql } = require('#imports')
+    productionSql = sql
+  }
+  return productionSql
+}
 
 // PostgreSQL query wrapper that mimics better-sqlite3 API
 class PreparedStatement {
@@ -98,7 +126,15 @@ class DatabaseWrapper {
 }
 
 export function getDatabase(): DatabaseWrapper {
-  // sql is auto-imported from base layer's server/utils/database which handles initialization
-  return new DatabaseWrapper(sql as any)
+  // In test environment, use test database
+  if (process.env.VITEST && process.env.TEST_DATABASE_URL) {
+    const testConnection = getTestSql()
+    if (testConnection) {
+      return new DatabaseWrapper(testConnection as any)
+    }
+  }
+
+  // Use production sql connection (lazy loaded to avoid #imports issues in tests)
+  return new DatabaseWrapper(getProductionSql() as any)
 }
 
