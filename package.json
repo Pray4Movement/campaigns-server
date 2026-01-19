@@ -11,6 +11,10 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "start": "bun run migrate && bun .output/server/index.mjs",
+    "test": "vitest --config vitest.unit.config.ts",
+    "test:run": "bun run test:unit && bun run test:e2e",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "test:e2e": "vitest run --config vitest.config.ts",
     "mailhog:start": "echo 'ℹ Using shared MailHog from sale/nuxtui project at http://localhost:8025'",
     "mailhog:stop": "echo 'ℹ MailHog is shared with sale/nuxtui project - use that project to stop it'",
     "mailhog:logs": "docker logs nuxtui-mailhog",
@@ -64,11 +68,17 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@nuxt/test-utils": "^3.23.0",
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/nodemailer": "^7.0.1",
     "@types/uuid": "^10.0.0",
-    "tsx": "^4.20.6"
+    "@vitejs/plugin-vue": "^6.0.3",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.3.3",
+    "playwright-core": "^1.57.0",
+    "tsx": "^4.20.6",
+    "vitest": "^4.0.17"
   },
   "trustedDependencies": [
     "@parcel/watcher"
