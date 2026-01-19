@@ -35,6 +35,7 @@ export async function closeTestDatabase() {
 export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   // Clean up test data created during tests
   // Delete in order respecting foreign key constraints
+  await sql`DELETE FROM reminder_emails_sent WHERE subscription_id IN (SELECT cs.id FROM campaign_subscriptions cs JOIN campaigns c ON c.id = cs.campaign_id WHERE c.slug LIKE 'test-%')`
   await sql`DELETE FROM campaign_subscriptions WHERE campaign_id IN (SELECT id FROM campaigns WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM contact_methods WHERE subscriber_id IN (SELECT id FROM subscribers WHERE name LIKE 'Test %')`
   await sql`DELETE FROM campaigns WHERE slug LIKE 'test-%'`
@@ -260,4 +261,26 @@ export async function getTestSubscriberByEmail(
     WHERE cm.type = 'email' AND LOWER(cm.value) = LOWER(${email})
   `
   return result[0] as { id: number; tracking_id: string; profile_id: string; name: string } | undefined
+}
+
+// Reminder-related test helpers
+
+export async function setNextReminderUtc(
+  sql: ReturnType<typeof postgres>,
+  subscriptionId: number,
+  nextReminderUtc: Date | null
+) {
+  if (nextReminderUtc === null) {
+    await sql`
+      UPDATE campaign_subscriptions
+      SET next_reminder_utc = NULL
+      WHERE id = ${subscriptionId}
+    `
+  } else {
+    await sql`
+      UPDATE campaign_subscriptions
+      SET next_reminder_utc = ${nextReminderUtc.toISOString()}
+      WHERE id = ${subscriptionId}
+    `
+  }
 }
