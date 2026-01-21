@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   // Require content.edit permission
   const user = await requirePermission(event, 'content.edit')
 
-  const campaignId = getIntParam(event, 'id')
+  const campaignId = getIntParam(event, 'campaignId')
 
   // Check if user has access to this campaign
   const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)

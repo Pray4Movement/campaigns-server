@@ -35,12 +35,32 @@ export async function closeTestDatabase() {
 export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   // Clean up test data created during tests
   // Delete in order respecting foreign key constraints
+
+  // Clean library content and libraries
+  await sql`DELETE FROM library_content WHERE library_id IN (SELECT id FROM libraries WHERE name LIKE 'Test Library %')`
+  await sql`DELETE FROM libraries WHERE name LIKE 'Test Library %'`
+
+  // Clean campaign-related data
   await sql`DELETE FROM reminder_emails_sent WHERE subscription_id IN (SELECT cs.id FROM campaign_subscriptions cs JOIN campaigns c ON c.id = cs.campaign_id WHERE c.slug LIKE 'test-%')`
   await sql`DELETE FROM campaign_subscriptions WHERE campaign_id IN (SELECT id FROM campaigns WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM contact_methods WHERE subscriber_id IN (SELECT id FROM subscribers WHERE name LIKE 'Test %')`
+
+  // Clean campaign_users (user-campaign access)
+  await sql`DELETE FROM campaign_users WHERE campaign_id IN (SELECT id FROM campaigns WHERE slug LIKE 'test-%')`
+  await sql`DELETE FROM campaign_users WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
+
   await sql`DELETE FROM campaigns WHERE slug LIKE 'test-%'`
   await sql`DELETE FROM activity_logs WHERE metadata->>'email' LIKE 'test-%@example.com'`
   await sql`DELETE FROM subscribers WHERE name LIKE 'Test %'`
+
+  // Clean user invitations (must be before users due to FK)
+  await sql`DELETE FROM user_invitations WHERE email LIKE 'test-%@example.com'`
+  await sql`DELETE FROM user_invitations WHERE invited_by IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
+
+  // Clean marketing emails (must be before users due to FK)
+  await sql`DELETE FROM marketing_emails WHERE created_by IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
+
+  // Clean users last
   await sql`DELETE FROM users WHERE email LIKE 'test-%@example.com'`
 }
 
@@ -283,4 +303,241 @@ export async function setNextReminderUtc(
       WHERE id = ${subscriptionId}
     `
   }
+}
+
+// User invitation helpers
+
+export interface TestUserInvitation {
+  id: number
+  email: string
+  token: string
+  invited_by: string
+  role: 'admin' | 'campaign_editor' | null
+  status: 'pending' | 'accepted' | 'expired' | 'revoked'
+  expires_at: string
+}
+
+export async function createTestUserInvitation(
+  sql: ReturnType<typeof postgres>,
+  options: {
+    email?: string
+    invited_by: string
+    role?: 'admin' | 'campaign_editor' | null
+    status?: 'pending' | 'accepted' | 'expired' | 'revoked'
+    expires_in_days?: number
+  }
+): Promise<TestUserInvitation> {
+  const email = options.email || `test-${uuidv4().slice(0, 8)}@example.com`
+  const token = uuidv4()
+  const role = options.role ?? null
+  const status = options.status ?? 'pending'
+  const expires_in_days = options.expires_in_days ?? 7
+
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + expires_in_days)
+
+  const result = await sql`
+    INSERT INTO user_invitations (email, token, invited_by, role, status, expires_at)
+    VALUES (${email}, ${token}, ${options.invited_by}, ${role}, ${status}, ${expiresAt.toISOString()})
+    RETURNING id, email, token, invited_by, role, status, expires_at
+  `
+
+  return result[0] as TestUserInvitation
+}
+
+export async function getTestUserInvitation(
+  sql: ReturnType<typeof postgres>,
+  id: number
+): Promise<TestUserInvitation | null> {
+  const result = await sql`
+    SELECT id, email, token, invited_by, role, status, expires_at
+    FROM user_invitations
+    WHERE id = ${id}
+  `
+  return result[0] as TestUserInvitation | null
+}
+
+export async function getTestUserInvitationByEmail(
+  sql: ReturnType<typeof postgres>,
+  email: string
+): Promise<TestUserInvitation | null> {
+  const result = await sql`
+    SELECT id, email, token, invited_by, role, status, expires_at
+    FROM user_invitations
+    WHERE email = ${email}
+    ORDER BY created_at DESC
+    LIMIT 1
+  `
+  return result[0] as TestUserInvitation | null
+}
+
+// Campaign access helpers
+
+export async function assignUserToCampaign(
+  sql: ReturnType<typeof postgres>,
+  userId: string,
+  campaignId: number
+): Promise<void> {
+  await sql`
+    INSERT INTO campaign_users (user_id, campaign_id)
+    VALUES (${userId}, ${campaignId})
+    ON CONFLICT DO NOTHING
+  `
+}
+
+export async function removeUserFromCampaign(
+  sql: ReturnType<typeof postgres>,
+  userId: string,
+  campaignId: number
+): Promise<void> {
+  await sql`
+    DELETE FROM campaign_users
+    WHERE user_id = ${userId} AND campaign_id = ${campaignId}
+  `
+}
+
+export async function getUserCampaignAccess(
+  sql: ReturnType<typeof postgres>,
+  userId: string
+): Promise<number[]> {
+  const result = await sql`
+    SELECT campaign_id FROM campaign_users
+    WHERE user_id = ${userId}
+  `
+  return result.map((r: { campaign_id: number }) => r.campaign_id)
+}
+
+// Library helpers
+
+export interface TestLibrary {
+  id: number
+  name: string
+  description: string
+  type: 'static' | 'people_group'
+  repeating: boolean
+  campaign_id: number | null
+  library_key: string | null
+}
+
+export async function createTestLibrary(
+  sql: ReturnType<typeof postgres>,
+  options: {
+    name?: string
+    description?: string
+    type?: 'static' | 'people_group'
+    repeating?: boolean
+    campaign_id?: number | null
+    library_key?: string | null
+  } = {}
+): Promise<TestLibrary> {
+  const name = options.name || `Test Library ${uuidv4().slice(0, 8)}`
+  const description = options.description ?? ''
+  const type = options.type ?? 'static'
+  const repeating = options.repeating ?? false
+  const campaign_id = options.campaign_id ?? null
+  const library_key = options.library_key ?? null
+
+  const result = await sql`
+    INSERT INTO libraries (name, description, type, repeating, campaign_id, library_key)
+    VALUES (${name}, ${description}, ${type}, ${repeating}, ${campaign_id}, ${library_key})
+    RETURNING id, name, description, type, repeating, campaign_id, library_key
+  `
+
+  return result[0] as TestLibrary
+}
+
+export async function getTestLibrary(
+  sql: ReturnType<typeof postgres>,
+  id: number
+): Promise<TestLibrary | null> {
+  const result = await sql`
+    SELECT id, name, description, type, repeating, campaign_id, library_key
+    FROM libraries
+    WHERE id = ${id}
+  `
+  return result[0] ?? null
+}
+
+// Library content helpers
+
+export interface TestLibraryContent {
+  id: number
+  library_id: number
+  day_number: number
+  language_code: string
+  content_json: Record<string, unknown> | null
+}
+
+export async function createTestLibraryContent(
+  sql: ReturnType<typeof postgres>,
+  libraryId: number,
+  options: {
+    day_number?: number
+    language_code?: string
+    content_json?: Record<string, unknown> | null
+  } = {}
+): Promise<TestLibraryContent> {
+  const day_number = options.day_number ?? 1
+  const language_code = options.language_code ?? 'en'
+  const content_json = options.content_json ?? { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Test content' }] }] }
+
+  const result = await sql`
+    INSERT INTO library_content (library_id, day_number, language_code, content_json)
+    VALUES (${libraryId}, ${day_number}, ${language_code}, ${JSON.stringify(content_json)})
+    RETURNING id, library_id, day_number, language_code, content_json
+  `
+
+  return result[0] as TestLibraryContent
+}
+
+export async function getTestLibraryContent(
+  sql: ReturnType<typeof postgres>,
+  id: number
+): Promise<TestLibraryContent | null> {
+  const result = await sql`
+    SELECT id, library_id, day_number, language_code, content_json
+    FROM library_content
+    WHERE id = ${id}
+  `
+  return result[0] ?? null
+}
+
+// User helpers
+
+export async function getTestUser(
+  sql: ReturnType<typeof postgres>,
+  id: string
+) {
+  const result = await sql`
+    SELECT id, email, display_name, verified, superadmin, role
+    FROM users
+    WHERE id = ${id}
+  `
+  return result[0] as {
+    id: string
+    email: string
+    display_name: string
+    verified: boolean
+    superadmin: boolean
+    role: string | null
+  } | null
+}
+
+export async function getTestUserByEmail(
+  sql: ReturnType<typeof postgres>,
+  email: string
+) {
+  const result = await sql`
+    SELECT id, email, display_name, verified, superadmin, role
+    FROM users
+    WHERE email = ${email}
+  `
+  return result[0] as {
+    id: string
+    email: string
+    display_name: string
+    verified: boolean
+    superadmin: boolean
+    role: string | null
+  } | null
 }
