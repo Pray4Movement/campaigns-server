@@ -3,6 +3,7 @@
  * Get campaign details and associated people group data
  */
 import { campaignService } from '#server/database/campaigns'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { peopleGroupService } from '#server/database/people-groups'
 import { getFieldOptionLabel } from '../../utils/app/field-options'
 
@@ -85,11 +86,18 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Get commitment stats
+  const commitmentStats = await campaignSubscriptionService.getCommitmentStats(campaign.id)
+
   // Cache for 1 hour at edge (Cloudflare) - people_praying updates daily at 3 AM
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600')
 
   return {
-    campaign,
+    campaign: {
+      ...campaign,
+      people_committed: commitmentStats.people_committed,
+      committed_duration: commitmentStats.committed_duration
+    },
     peopleGroup
   }
 })

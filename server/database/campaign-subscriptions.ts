@@ -422,6 +422,68 @@ class CampaignSubscriptionService {
       await this.setInitialNextReminder(sub.id)
     }
   }
+
+  /**
+   * Get commitment stats for a single campaign.
+   * Returns count of active subscriptions and total committed prayer minutes.
+   */
+  async getCommitmentStats(campaignId: number): Promise<{ people_committed: number; committed_duration: number }> {
+    const stmt = this.db.prepare(`
+      SELECT
+        COUNT(*) as people_committed,
+        COALESCE(SUM(prayer_duration), 0) as committed_duration
+      FROM campaign_subscriptions
+      WHERE campaign_id = ? AND status = 'active'
+    `)
+    const result = await stmt.get(campaignId) as { people_committed: number; committed_duration: number }
+    return {
+      people_committed: result.people_committed,
+      committed_duration: result.committed_duration
+    }
+  }
+
+  /**
+   * Get commitment stats for multiple campaigns in a single query.
+   * Returns a Map of campaign_id to stats.
+   */
+  async getCommitmentStatsForCampaigns(campaignIds: number[]): Promise<Map<number, { people_committed: number; committed_duration: number }>> {
+    if (campaignIds.length === 0) {
+      return new Map()
+    }
+
+    const placeholders = campaignIds.map(() => '?').join(', ')
+    const stmt = this.db.prepare(`
+      SELECT
+        campaign_id,
+        COUNT(*) as people_committed,
+        COALESCE(SUM(prayer_duration), 0) as committed_duration
+      FROM campaign_subscriptions
+      WHERE campaign_id IN (${placeholders}) AND status = 'active'
+      GROUP BY campaign_id
+    `)
+    const results = await stmt.all(...campaignIds) as Array<{
+      campaign_id: number
+      people_committed: number
+      committed_duration: number
+    }>
+
+    const statsMap = new Map<number, { people_committed: number; committed_duration: number }>()
+
+    // Initialize all campaign IDs with zeros
+    for (const id of campaignIds) {
+      statsMap.set(id, { people_committed: 0, committed_duration: 0 })
+    }
+
+    // Fill in actual values
+    for (const row of results) {
+      statsMap.set(row.campaign_id, {
+        people_committed: row.people_committed,
+        committed_duration: row.committed_duration
+      })
+    }
+
+    return statsMap
+  }
 }
 
 export const campaignSubscriptionService = new CampaignSubscriptionService()
