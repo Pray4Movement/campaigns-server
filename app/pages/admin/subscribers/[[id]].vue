@@ -218,6 +218,15 @@
                     >
                       Send Reminder
                     </UButton>
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      :loading="sendingFollowup[subscription.id]"
+                      :disabled="subscription.delivery_method !== 'email'"
+                      @click="sendFollowup(subscription)"
+                    >
+                      Send Follow-up
+                    </UButton>
                     <UButton size="xs" variant="ghost" @click="filterByCampaign(subscription)">
                       Filter by Campaign
                     </UButton>
@@ -288,6 +297,12 @@
                 </div>
                 <div v-if="activity.eventType === 'EMAIL'" class="email-details">
                   Day {{ activity.metadata.sentDate }}
+                  <template v-if="activity.metadata.campaignTitle">
+                    · {{ activity.metadata.campaignTitle }}
+                  </template>
+                </div>
+                <div v-if="activity.eventType === 'FOLLOWUP_RESPONSE'" class="followup-details">
+                  {{ formatFollowupResponse(activity.metadata.response ?? '') }}
                   <template v-if="activity.metadata.campaignTitle">
                     · {{ activity.metadata.campaignTitle }}
                   </template>
@@ -438,6 +453,7 @@ interface ActivityLogEntry {
     duration?: number
     campaignTitle?: string
     sentDate?: string
+    response?: string
   }
 }
 const activityLog = ref<ActivityLogEntry[]>([])
@@ -445,6 +461,7 @@ const loadingActivityLog = ref(false)
 
 // Send reminder state
 const sendingReminder = ref<Record<number, boolean>>({})
+const sendingFollowup = ref<Record<number, boolean>>({})
 
 // Options
 const statusOptions = [
@@ -614,6 +631,36 @@ async function sendReminder(subscription: Subscription) {
     })
   } finally {
     sendingReminder.value[subscription.id] = false
+  }
+}
+
+async function sendFollowup(subscription: Subscription) {
+  if (sendingFollowup.value[subscription.id]) return
+
+  try {
+    sendingFollowup.value[subscription.id] = true
+    await $fetch(`/api/admin/subscribers/${subscription.id}/send-followup`, {
+      method: 'POST'
+    })
+
+    toast.add({
+      title: 'Follow-up Sent',
+      description: `Commitment check-in email sent for ${subscription.campaign_title}`,
+      color: 'success'
+    })
+
+    // Refresh activity log to show the new email
+    if (selectedSubscriber.value) {
+      await loadActivityLog(selectedSubscriber.value)
+    }
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.data?.statusMessage || 'Failed to send follow-up',
+      color: 'error'
+    })
+  } finally {
+    sendingFollowup.value[subscription.id] = false
   }
 }
 
@@ -825,7 +872,8 @@ function formatEventType(eventType: string): string {
     'UPDATE': 'Updated',
     'DELETE': 'Deleted',
     'PRAYER': 'Prayed',
-    'EMAIL': 'Email Sent'
+    'EMAIL': 'Email Sent',
+    'FOLLOWUP_RESPONSE': 'Check-in Response'
   }
   return types[eventType] || eventType
 }
@@ -836,7 +884,8 @@ function getEventColor(eventType: string): 'success' | 'warning' | 'error' | 'ne
     'UPDATE': 'warning',
     'DELETE': 'error',
     'PRAYER': 'primary',
-    'EMAIL': 'neutral'
+    'EMAIL': 'neutral',
+    'FOLLOWUP_RESPONSE': 'primary'
   }
   return colors[eventType] || 'neutral'
 }
@@ -845,7 +894,8 @@ function getEventIcon(eventType: string): string | undefined {
   const icons: Record<string, string> = {
     'UPDATE': 'i-lucide-pencil',
     'PRAYER': 'i-lucide-hand-helping',
-    'EMAIL': 'i-lucide-mail'
+    'EMAIL': 'i-lucide-mail',
+    'FOLLOWUP_RESPONSE': 'i-lucide-message-circle'
   }
   return icons[eventType]
 }
@@ -879,6 +929,15 @@ function formatPrayerDuration(seconds: number): string {
     return `${mins} min`
   }
   return `${seconds} sec`
+}
+
+function formatFollowupResponse(response: string): string {
+  const responses: Record<string, string> = {
+    'committed': 'Answered: Yes, still praying',
+    'sometimes': 'Answered: Sometimes',
+    'not_praying': 'Answered: No longer praying'
+  }
+  return responses[response] || response
 }
 
 // Handle URL-based selection
@@ -1060,7 +1119,8 @@ onMounted(async () => {
 }
 
 .prayer-details,
-.email-details {
+.email-details,
+.followup-details {
   font-size: 0.75rem;
   color: var(--ui-text-muted);
   margin-top: 0.25rem;

@@ -323,6 +323,8 @@ class CampaignSubscriptionService {
 
     if (result.changes > 0) {
       await this.setInitialNextReminder(id)
+      // Reset follow-up tracking on reactivation
+      await this.resetFollowupTracking(id)
       return true
     }
     return false
@@ -483,6 +485,82 @@ class CampaignSubscriptionService {
     }
 
     return statsMap
+  }
+
+  /**
+   * Mark that a follow-up email was sent for a subscription.
+   * Increments followup_reminder_count and sets last_followup_at.
+   */
+  async markFollowupSent(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        last_followup_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        followup_reminder_count = followup_reminder_count + 1,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Complete a follow-up cycle (subscriber responded or activity detected).
+   * Increments followup_count and resets followup_reminder_count.
+   */
+  async completeFollowupCycle(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        followup_count = followup_count + 1,
+        followup_reminder_count = 0,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Reset follow-up reminders when activity is detected during escalation.
+   */
+  async resetFollowupReminders(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        followup_reminder_count = 0,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Reset all follow-up tracking when reactivating a subscription.
+   */
+  async resetFollowupTracking(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        followup_count = 0,
+        followup_reminder_count = 0,
+        last_followup_at = NULL,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Get subscription with follow-up details for the API response.
+   */
+  async getSubscriptionWithFollowupDetails(subscriptionId: number): Promise<CampaignSubscription & {
+    last_followup_at: string | null
+    followup_count: number
+    followup_reminder_count: number
+  } | null> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM campaign_subscriptions WHERE id = ?
+    `)
+    return await stmt.get(subscriptionId) as any
   }
 }
 
