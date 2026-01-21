@@ -3,8 +3,8 @@ import { userService } from '#server/database/users'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  // Require authentication
-  const user = await requireAuth(event)
+  // Require admin authentication - only admins can invite users
+  const user = await requireAdmin(event)
 
   // Get request body
   const body = await readBody(event)

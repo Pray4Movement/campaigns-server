@@ -1,0 +1,258 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
+import { setup, $fetch } from '@nuxt/test-utils/e2e'
+import {
+  getTestDatabase,
+  closeTestDatabase,
+  cleanupTestData,
+  createTestCampaign,
+  createTestSubscriber,
+  createTestContactMethod,
+  createTestCampaignSubscription,
+  assignUserToCampaign
+} from '../../../helpers/db'
+import {
+  createAdminUser,
+  createEditorUser,
+  createNoRoleUser
+} from '../../../helpers/auth'
+
+describe('Subscriber CRUD API', async () => {
+  await setup({ server: true, browser: false })
+  const sql = getTestDatabase()
+
+  let adminAuth: { headers: { cookie: string } }
+  let editorAuth: { headers: { cookie: string } }
+  let editorUserId: string
+  let noRoleAuth: { headers: { cookie: string } }
+  let assignedCampaign: { id: number; slug: string }
+  let unassignedCampaign: { id: number; slug: string }
+  let assignedSubscription: { id: number }
+  let unassignedSubscription: { id: number }
+
+  beforeAll(async () => {
+    await cleanupTestData(sql)
+
+    const admin = await createAdminUser(sql)
+    adminAuth = admin.auth
+
+    const editor = await createEditorUser(sql)
+    editorAuth = editor.auth
+    editorUserId = editor.user.id
+
+    const noRole = await createNoRoleUser(sql)
+    noRoleAuth = noRole.auth
+  })
+
+  beforeEach(async () => {
+    // Create fresh data for each test
+    assignedCampaign = await createTestCampaign(sql, { title: 'Assigned Campaign' })
+    unassignedCampaign = await createTestCampaign(sql, { title: 'Unassigned Campaign' })
+
+    await assignUserToCampaign(sql, editorUserId, assignedCampaign.id)
+
+    // Create subscriber in assigned campaign
+    const subscriber1 = await createTestSubscriber(sql, { name: 'Test Assigned Subscriber' })
+    await createTestContactMethod(sql, subscriber1.id, {
+      value: `test-assigned-${Date.now()}@example.com`,
+      verified: true
+    })
+    assignedSubscription = await createTestCampaignSubscription(sql, assignedCampaign.id, subscriber1.id)
+
+    // Create subscriber in unassigned campaign
+    const subscriber2 = await createTestSubscriber(sql, { name: 'Test Unassigned Subscriber' })
+    await createTestContactMethod(sql, subscriber2.id, {
+      value: `test-unassigned-${Date.now()}@example.com`,
+      verified: true
+    })
+    unassignedSubscription = await createTestCampaignSubscription(sql, unassignedCampaign.id, subscriber2.id)
+  })
+
+  afterAll(async () => {
+    await cleanupTestData(sql)
+    await closeTestDatabase()
+  })
+
+  describe('GET /api/admin/subscribers/[id]', () => {
+    describe('Authorization', () => {
+      it('returns 401 for unauthenticated requests', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`).catch((e) => e)
+        expect(error.statusCode).toBe(401)
+      })
+
+      it('returns 403 for users with no role', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, noRoleAuth).catch((e) => e)
+        expect(error.statusCode).toBe(403)
+      })
+    })
+
+    describe('Access control', () => {
+      it('admin can view any subscriber', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, adminAuth)
+        expect(response.subscriber).toBeDefined()
+      })
+
+      it('campaign_editor can view subscriber from assigned campaign', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, editorAuth)
+        expect(response.subscriber).toBeDefined()
+      })
+
+      it('campaign_editor cannot view subscriber from unassigned campaign', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, editorAuth).catch((e) => e)
+        expect(error.statusCode).toBe(403)
+      })
+    })
+
+    describe('Response structure', () => {
+      it('returns subscriber with expected fields', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, adminAuth)
+
+        expect(response.subscriber).toHaveProperty('id')
+        expect(response.subscriber).toHaveProperty('name')
+        expect(response.subscriber).toHaveProperty('email')
+        expect(response.subscriber).toHaveProperty('status')
+      })
+
+      it('returns 404 for non-existent subscription', async () => {
+        const error = await $fetch('/api/admin/subscribers/999999', adminAuth).catch((e) => e)
+        expect(error.statusCode).toBe(404)
+      })
+
+      it('returns 400 for invalid ID', async () => {
+        const error = await $fetch('/api/admin/subscribers/invalid', adminAuth).catch((e) => e)
+        expect(error.statusCode).toBe(400)
+      })
+    })
+  })
+
+  describe('PUT /api/admin/subscribers/[id]', () => {
+    describe('Authorization', () => {
+      it('returns 401 for unauthenticated requests', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'PUT',
+          body: { status: 'inactive' }
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(401)
+      })
+
+      it('returns 403 for users with no role', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'PUT',
+          body: { status: 'inactive' },
+          ...noRoleAuth
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(403)
+      })
+    })
+
+    describe('Access control', () => {
+      it('admin can update any subscriber', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, {
+          method: 'PUT',
+          body: { name: 'Test Unassigned Subscriber', status: 'inactive' },
+          ...adminAuth
+        })
+
+        expect(response.subscriber).toBeDefined()
+      })
+
+      it('campaign_editor can update subscriber from assigned campaign', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'PUT',
+          body: { name: 'Test Assigned Subscriber', status: 'inactive' },
+          ...editorAuth
+        })
+
+        expect(response.subscriber).toBeDefined()
+      })
+
+      it('campaign_editor cannot update subscriber from unassigned campaign', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, {
+          method: 'PUT',
+          body: { name: 'Test Unassigned Subscriber', status: 'inactive' },
+          ...editorAuth
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(403)
+      })
+    })
+
+    describe('Update operations', () => {
+      it('updates status', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'PUT',
+          body: { name: 'Test Assigned Subscriber', status: 'inactive' },
+          ...adminAuth
+        })
+
+        expect(response.subscriber).toBeDefined()
+
+        // Verify update
+        const check = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, adminAuth)
+        expect(check.subscriber.status).toBe('inactive')
+      })
+    })
+  })
+
+  describe('DELETE /api/admin/subscribers/[id]', () => {
+    describe('Authorization', () => {
+      it('returns 401 for unauthenticated requests', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'DELETE'
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(401)
+      })
+
+      it('returns 403 for users with no role', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'DELETE',
+          ...noRoleAuth
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(403)
+      })
+    })
+
+    describe('Access control', () => {
+      it('admin can delete any subscriber', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, {
+          method: 'DELETE',
+          ...adminAuth
+        })
+
+        expect(response.success).toBe(true)
+      })
+
+      it('campaign_editor can delete subscriber from assigned campaign', async () => {
+        const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
+          method: 'DELETE',
+          ...editorAuth
+        })
+
+        expect(response.success).toBe(true)
+      })
+
+      it('campaign_editor cannot delete subscriber from unassigned campaign', async () => {
+        const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, {
+          method: 'DELETE',
+          ...editorAuth
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(403)
+      })
+    })
+
+    describe('Deletion', () => {
+      it('returns 404 for non-existent subscription', async () => {
+        const error = await $fetch('/api/admin/subscribers/999999', {
+          method: 'DELETE',
+          ...adminAuth
+        }).catch((e) => e)
+
+        expect(error.statusCode).toBe(404)
+      })
+    })
+  })
+})

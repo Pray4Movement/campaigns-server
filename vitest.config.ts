@@ -10,6 +10,11 @@ if (env.TEST_DATABASE_URL) {
   process.env.TEST_DATABASE_URL = env.TEST_DATABASE_URL
 }
 
+// Pass JWT_SECRET to test environment for auth helpers
+if (env.JWT_SECRET) {
+  process.env.JWT_SECRET = env.JWT_SECRET
+}
+
 export default defineVitestConfig({
   // Externalize bun:test to avoid bundling issues
   resolve: {

@@ -1,19 +1,13 @@
 import { roleService, type RoleName } from '#server/database/roles'
 import { userService } from '#server/database/users'
-import { handleApiError } from '#server/utils/api-helpers'
+import { handleApiError, getUuidParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
   // Require admin authentication
   await requireAdmin(event)
 
-  // Get user ID from route params (UUID string)
-  const userId = getRouterParam(event, 'id')
-  if (!userId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid user ID'
-    })
-  }
+  // Get and validate user ID from route params (UUID string)
+  const userId = getUuidParam(event, 'id')
 
   // Get request body
   const body = await readBody(event)
