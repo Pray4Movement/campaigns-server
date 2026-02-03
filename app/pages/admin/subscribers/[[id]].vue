@@ -81,6 +81,10 @@
             <UFormField v-if="selectedSubscriber.primary_phone" label="Phone">
               <div class="contact-display">{{ selectedSubscriber.primary_phone }}</div>
             </UFormField>
+
+            <UFormField label="Preferred Language">
+              <div class="contact-display">{{ formatLanguage(selectedSubscriber.preferred_language) }}</div>
+            </UFormField>
           </CrmFormSection>
 
           <!-- Marketing Consents -->
@@ -387,6 +391,7 @@ interface GeneralSubscriber {
   tracking_id: string
   profile_id: string
   name: string
+  preferred_language: string
   created_at: string
   updated_at: string
   contacts: Contact[]
@@ -938,6 +943,22 @@ function formatFollowupResponse(response: string): string {
     'not_praying': 'Answered: No longer praying'
   }
   return responses[response] || response
+}
+
+function formatLanguage(code: string): string {
+  const languages: Record<string, string> = {
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+    'pt': 'Portuguese',
+    'de': 'German',
+    'it': 'Italian',
+    'zh': 'Chinese',
+    'ar': 'Arabic',
+    'ru': 'Russian',
+    'hi': 'Hindi'
+  }
+  return languages[code] || code
 }
 
 // Handle URL-based selection

@@ -110,7 +110,8 @@ async function processSubscription(
     campaign_slug,
     frequency,
     days_of_week,
-    subscriber_profile_id
+    subscriber_profile_id,
+    subscriber_language
   } = subscription
 
   // Calculate when the next followup is due
@@ -148,7 +149,8 @@ async function processSubscription(
       profileId: subscriber_profile_id,
       frequency,
       daysOfWeek: days_of_week ? JSON.parse(days_of_week) : undefined,
-      isReminder: false
+      isReminder: false,
+      locale: subscriber_language || 'en'
     })
 
     if (emailSent) {
@@ -178,7 +180,8 @@ async function processSubscription(
       profileId: subscriber_profile_id,
       frequency,
       daysOfWeek: days_of_week ? JSON.parse(days_of_week) : undefined,
-      isReminder: true
+      isReminder: true,
+      locale: subscriber_language || 'en'
     })
 
     if (emailSent) {

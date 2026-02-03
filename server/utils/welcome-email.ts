@@ -1,33 +1,46 @@
+import { t, localePath } from './translations'
+
 export async function sendWelcomeEmail(
   to: string,
   subscriberName: string,
   campaignTitle: string,
   campaignSlug: string,
-  profileId: string
+  profileId: string,
+  locale: string = 'en'
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
-  const campaignUrl = `${baseUrl}/${campaignSlug}/prayer`
-  const profileUrl = `${baseUrl}/subscriber?id=${profileId}`
+  const appName = config.appName || 'Doxa'
+  const campaignUrl = `${baseUrl}${localePath(`/${campaignSlug}/prayer`, locale)}`
+  const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${profileId}`
+
+  const subject = t('email.welcome.subject', locale, { appName, campaign: campaignTitle })
+  const header = t('email.welcome.header', locale, { appName })
+  const hello = t('email.common.hello', locale, { name: subscriberName })
+  const thankYou = t('email.welcome.thankYou', locale, { campaign: campaignTitle })
+  const startPraying = t('email.welcome.startPraying', locale)
+  const profileInstructions = t('email.welcome.profileInstructions', locale)
+  const managePreferences = t('email.common.managePreferences', locale)
+  const automatedMessage = t('email.common.automatedMessage', locale, { appName })
 
   const html = `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="${locale}">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to Doxa</title>
+      <title>${subject}</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-        <h1 style="margin: 0; font-size: 28px; font-weight: 500;">Welcome to Doxa</h1>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 500;">${header}</h1>
         <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${campaignTitle}</p>
       </div>
 
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">Hello ${subscriberName}!</h2>
+        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">${hello}</h2>
         <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
-          Thank you for signing up to pray. Your email has been verified and you're all set to receive prayer reminders for <strong>${campaignTitle}</strong>.
+          ${thankYou}
         </p>
 
         <div style="text-align: center; margin: 30px 0;">
@@ -42,11 +55,11 @@ export async function sendWelcomeEmail(
             display: inline-block;
             text-align: center;
             border: 2px solid #3B463D;
-          ">Start Praying</a>
+          ">${startPraying}</a>
         </div>
 
         <p style="color: #666666; font-size: 14px; margin-top: 30px;">
-          You can update your profile details and your notifications here:
+          ${profileInstructions}
         </p>
 
         <div style="text-align: center; margin: 20px 0;">
@@ -61,35 +74,35 @@ export async function sendWelcomeEmail(
             display: inline-block;
             text-align: center;
             border: 2px solid #3B463D;
-          ">Manage Preferences</a>
+          ">${managePreferences}</a>
         </div>
 
       </div>
 
       <div style="text-align: center; margin-top: 20px; padding: 20px; color: #666666; font-size: 12px;">
-        <p style="margin: 0;">This is an automated message from Doxa. Please do not reply to this email.</p>
+        <p style="margin: 0;">${automatedMessage}</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-Welcome to Doxa - ${campaignTitle}
+${header} - ${campaignTitle}
 
-Hello ${subscriberName}!
+${hello}
 
-Thank you for signing up to pray. Your email has been verified and you're all set to receive prayer reminders for ${campaignTitle}.
+${thankYou}
 
-Start Praying: ${campaignUrl}
+${startPraying}: ${campaignUrl}
 
-Manage Preferences: ${profileUrl}
+${managePreferences}: ${profileUrl}
 
-This is an automated message from Doxa. Please do not reply to this email.
+${automatedMessage}
   `.trim()
 
   return await sendEmail({
     to,
-    subject: `Welcome to Doxa - ${campaignTitle}`,
+    subject,
     html,
     text
   })

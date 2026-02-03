@@ -224,6 +224,13 @@
       "otherReminders": "You have other reminders for this campaign:",
       "unsubscribeThis": "Unsubscribe",
       "unsubscribeAll": "Unsubscribe from All",
+      "yourSubscriptions": "Your Subscriptions",
+      "active": "active",
+      "unsubscribeButton": "Unsubscribe",
+      "unsubscribeFromAll": "Unsubscribe from all {campaign} reminders",
+      "preferencesUpdated": "Your email preferences have been updated.",
+      "noActiveSubscriptions": "You have no active subscriptions.",
+      "current": "Current",
       "reminderFormat": {
         "daily": "Daily at {time}",
         "weekly": "{days} at {time}"
@@ -330,5 +337,100 @@
     "minutes": "min",
     "yes": "Yes",
     "no": "No"
+  },
+  "followupPage": {
+    "recording": "Recording your response...",
+    "error": {
+      "title": "Something went wrong",
+      "invalidLink": "Invalid link. Missing required parameters.",
+      "invalidResponse": "Invalid response type.",
+      "failed": "Failed to record your response. Please try again."
+    },
+    "goHome": "Go Home",
+    "committed": {
+      "title": "Thank you for your commitment!",
+      "message": "We're so glad to hear that you're staying faithful in prayer. Your dedication is making a difference!",
+      "checkInNotice": "We'll check in again in a few months.",
+      "continueButton": "Continue to Campaign"
+    },
+    "sometimes": {
+      "title": "Thanks for being honest!",
+      "message": "Life can be busy, and it's okay if you haven't been able to pray as often as you'd like.",
+      "suggestion": "Would you like to adjust your prayer schedule to something more manageable?",
+      "adjustButton": "Adjust My Schedule",
+      "continueButton": "Continue to Campaign"
+    },
+    "notPraying": {
+      "title": "We understand",
+      "message": "Your subscription has been paused. You won't receive prayer reminders for now.",
+      "reactivateNotice": "If you'd like to resume praying in the future, you can reactivate your subscription anytime from your profile.",
+      "profileButton": "View My Profile",
+      "visitButton": "Visit Campaign"
+    },
+    "pageTitle": "Prayer Check-In"
+  },
+  "email": {
+    "common": {
+      "hello": "Hello {name}!",
+      "automatedMessage": "This is an automated message from {appName}. Please do not reply to this email.",
+      "managePreferences": "Manage Preferences",
+      "unsubscribe": "Unsubscribe"
+    },
+    "verification": {
+      "subject": "Verify your email for {campaign}",
+      "header": "Verify Your Email",
+      "thankYou": "Thank you for signing up for prayer reminders for {campaign}.",
+      "pleaseVerify": "Please verify your email address by clicking the button below:",
+      "verifyButton": "Verify Email",
+      "linkInstructions": "If the button doesn't work, you can also copy and paste this link into your browser:",
+      "note": "Note:",
+      "expiration": "This verification link will expire in 7 days.",
+      "ignoreMessage": "If you didn't sign up for prayer reminders, you can safely ignore this email."
+    },
+    "welcome": {
+      "subject": "Welcome to {appName} - {campaign}",
+      "header": "Welcome to {appName}",
+      "thankYou": "Thank you for signing up to pray. Your email has been verified and you're all set to receive prayer reminders for {campaign}.",
+      "startPraying": "Start Praying",
+      "profileInstructions": "You can update your profile details and your notifications here:"
+    },
+    "reminder": {
+      "subject": "Prayer Reminder - {campaign}",
+      "header": "Prayer Reminder",
+      "timeForPrayer": "It's time for your {duration}-minute prayer session.",
+      "viewPrayer": "View Today's Prayer",
+      "automatedReminder": "This is an automated prayer reminder from {appName}."
+    },
+    "followup": {
+      "subject": "{campaign}: How is your prayer commitment going?",
+      "subjectReminder": "Reminder: {campaign}: How is your prayer commitment going?",
+      "header": "Prayer Check-In",
+      "reminderIntro": "We sent you a message last week and wanted to follow up.",
+      "standardIntro": "We'd love to hear how your prayer journey is going!",
+      "questionDaily": "Are you still praying daily?",
+      "questionWeekly": "Are you still praying on {days}?",
+      "yesDaily": "Yes, I pray daily",
+      "yesWeekly": "Yes, on my scheduled days",
+      "sometimes": "Sometimes, but not every day",
+      "sometimesWeekly": "Sometimes, but not always",
+      "noLonger": "No, no longer praying",
+      "feedbackHelps": "Your feedback helps us understand how we can better support your prayer journey.",
+      "pauseNotice": "If we don't hear from you, we'll pause your prayer reminders to avoid filling your inbox. You can always reactivate them from your profile.",
+      "commitmentCheckIn": "This is a commitment check-in from {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "{campaign} Updates",
+      "headerDefault": "{appName} Updates",
+      "footer": "You received this email because you opted in to receive updates from {appName}."
+    },
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
   }
 }

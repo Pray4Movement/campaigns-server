@@ -210,6 +210,7 @@
         "title": "Ya Cancelado",
         "message": "Ya ha cancelado la suscripción a este recordatorio."
       },
+      "unsubscribedFromCampaign": "Has sido dado de baja de todos los recordatorios de {campaign}.",
       "resubscribed": {
         "title": "¡Bienvenido de Nuevo!",
         "message": "Se ha re-suscrito a los recordatorios de oración. Recibirá su próximo recordatorio en su hora programada.",
@@ -223,6 +224,13 @@
       "otherReminders": "Tiene otros recordatorios para esta campaña:",
       "unsubscribeThis": "Cancelar",
       "unsubscribeAll": "Cancelar Todos",
+      "yourSubscriptions": "Tus Suscripciones",
+      "active": "activo",
+      "unsubscribeButton": "Cancelar Suscripción",
+      "unsubscribeFromAll": "Cancelar suscripción de todos los recordatorios de {campaign}",
+      "preferencesUpdated": "Tus preferencias de correo han sido actualizadas.",
+      "noActiveSubscriptions": "No tienes suscripciones activas.",
+      "current": "Actual",
       "reminderFormat": {
         "daily": "Diario a las {time}",
         "weekly": "{days} a las {time}"
@@ -301,7 +309,7 @@
       "amen": "Amén",
       "hint": "Haga clic para terminar su tiempo de oración"
     },
-    "thankYou": "¡Gracias por orar! Su oración ha sido registrada.",
+    "thankYou": "¡Gracias por orar!",
     "meetThePeople": "Conoce al Pueblo",
     "peopleGroupOfTheDay": "Pueblo del Día",
     "dayInTheLife": "Un Día en la Vida",
@@ -329,5 +337,100 @@
     "minutes": "min",
     "yes": "Sí",
     "no": "No"
+  },
+  "followupPage": {
+    "recording": "Registrando tu respuesta...",
+    "error": {
+      "title": "Algo salió mal",
+      "invalidLink": "Enlace inválido. Faltan parámetros requeridos.",
+      "invalidResponse": "Tipo de respuesta inválido.",
+      "failed": "No se pudo registrar tu respuesta. Por favor intenta de nuevo."
+    },
+    "goHome": "Ir al inicio",
+    "committed": {
+      "title": "¡Gracias por tu compromiso!",
+      "message": "Nos alegra mucho saber que continúas fiel en la oración. ¡Tu dedicación está haciendo la diferencia!",
+      "checkInNotice": "Volveremos a contactarte en unos meses.",
+      "continueButton": "Continuar a la campaña"
+    },
+    "sometimes": {
+      "title": "¡Gracias por tu honestidad!",
+      "message": "La vida puede ser muy ocupada, y está bien si no has podido orar tan seguido como quisieras.",
+      "suggestion": "¿Te gustaría ajustar tu horario de oración a algo más manejable?",
+      "adjustButton": "Ajustar mi horario",
+      "continueButton": "Continuar a la campaña"
+    },
+    "notPraying": {
+      "title": "Entendemos",
+      "message": "Tu suscripción ha sido pausada. No recibirás recordatorios de oración por ahora.",
+      "reactivateNotice": "Si deseas volver a orar en el futuro, puedes reactivar tu suscripción en cualquier momento desde tu perfil.",
+      "profileButton": "Ver mi perfil",
+      "visitButton": "Visitar campaña"
+    },
+    "pageTitle": "Seguimiento de oración"
+  },
+  "email": {
+    "common": {
+      "hello": "¡Hola {name}!",
+      "automatedMessage": "Este es un mensaje automático de {appName}. Por favor no responda a este correo.",
+      "managePreferences": "Administrar Preferencias",
+      "unsubscribe": "Cancelar Suscripción"
+    },
+    "verification": {
+      "subject": "Verifica tu correo para {campaign}",
+      "header": "Verifica Tu Correo",
+      "thankYou": "Gracias por inscribirte para recibir recordatorios de oración para {campaign}.",
+      "pleaseVerify": "Por favor verifica tu dirección de correo haciendo clic en el botón de abajo:",
+      "verifyButton": "Verificar Correo",
+      "linkInstructions": "Si el botón no funciona, también puedes copiar y pegar este enlace en tu navegador:",
+      "note": "Nota:",
+      "expiration": "Este enlace de verificación expirará en 7 días.",
+      "ignoreMessage": "Si no te inscribiste para recibir recordatorios de oración, puedes ignorar este correo."
+    },
+    "welcome": {
+      "subject": "Bienvenido a {appName} - {campaign}",
+      "header": "Bienvenido a {appName}",
+      "thankYou": "Gracias por inscribirte para orar. Tu correo ha sido verificado y estás listo para recibir recordatorios de oración para {campaign}.",
+      "startPraying": "Comenzar a Orar",
+      "profileInstructions": "Puedes actualizar los detalles de tu perfil y tus notificaciones aquí:"
+    },
+    "reminder": {
+      "subject": "Recordatorio de Oración - {campaign}",
+      "header": "Recordatorio de Oración",
+      "timeForPrayer": "Es hora de tu sesión de oración de {duration} minutos.",
+      "viewPrayer": "Ver la Oración de Hoy",
+      "automatedReminder": "Este es un recordatorio automático de oración de {appName}."
+    },
+    "followup": {
+      "subject": "{campaign}: ¿Cómo va tu compromiso de oración?",
+      "subjectReminder": "Recordatorio: {campaign}: ¿Cómo va tu compromiso de oración?",
+      "header": "Seguimiento de Oración",
+      "reminderIntro": "Te enviamos un mensaje la semana pasada y queríamos hacer seguimiento.",
+      "standardIntro": "¡Nos encantaría saber cómo va tu jornada de oración!",
+      "questionDaily": "¿Sigues orando diariamente?",
+      "questionWeekly": "¿Sigues orando los {days}?",
+      "yesDaily": "Sí, oro diariamente",
+      "yesWeekly": "Sí, en mis días programados",
+      "sometimes": "A veces, pero no todos los días",
+      "sometimesWeekly": "A veces, pero no siempre",
+      "noLonger": "No, ya no estoy orando",
+      "feedbackHelps": "Tu respuesta nos ayuda a entender cómo podemos apoyar mejor tu jornada de oración.",
+      "pauseNotice": "Si no tenemos noticias tuyas, pausaremos tus recordatorios de oración para no llenar tu bandeja de entrada. Siempre puedes reactivarlos desde tu perfil.",
+      "commitmentCheckIn": "Este es un seguimiento de compromiso de {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "Actualizaciones de {campaign}",
+      "headerDefault": "Actualizaciones de {appName}",
+      "footer": "Recibiste este correo porque optaste por recibir actualizaciones de {appName}."
+    },
+    "days": {
+      "sunday": "Domingo",
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado"
+    }
   }
 }

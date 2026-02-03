@@ -210,6 +210,7 @@
         "title": "Déjà Désabonné",
         "message": "Vous avez déjà été désabonné de ce rappel."
       },
+      "unsubscribedFromCampaign": "Vous avez été désabonné de tous les rappels de {campaign}.",
       "resubscribed": {
         "title": "Bon Retour !",
         "message": "Vous avez été réabonné aux rappels de prière. Vous recevrez votre prochain rappel à l'heure prévue.",
@@ -223,6 +224,13 @@
       "otherReminders": "Vous avez d'autres rappels pour cette campagne :",
       "unsubscribeThis": "Désabonner",
       "unsubscribeAll": "Se Désabonner de Tous",
+      "yourSubscriptions": "Vos Abonnements",
+      "active": "actif",
+      "unsubscribeButton": "Se Désabonner",
+      "unsubscribeFromAll": "Se désabonner de tous les rappels de {campaign}",
+      "preferencesUpdated": "Vos préférences de courriel ont été mises à jour.",
+      "noActiveSubscriptions": "Vous n'avez pas d'abonnements actifs.",
+      "current": "Actuel",
       "reminderFormat": {
         "daily": "Quotidien à {time}",
         "weekly": "{days} à {time}"
@@ -301,7 +309,7 @@
       "amen": "Amen",
       "hint": "Cliquez pour terminer votre temps de prière"
     },
-    "thankYou": "Merci d'avoir prié ! Votre prière a été enregistrée.",
+    "thankYou": "Merci d'avoir prié !",
     "meetThePeople": "Rencontrez le Peuple",
     "peopleGroupOfTheDay": "Peuple du Jour",
     "dayInTheLife": "Une Journée dans la Vie",
@@ -329,5 +337,100 @@
     "minutes": "min",
     "yes": "Oui",
     "no": "Non"
+  },
+  "followupPage": {
+    "recording": "Enregistrement de votre réponse...",
+    "error": {
+      "title": "Une erreur s'est produite",
+      "invalidLink": "Lien invalide. Paramètres requis manquants.",
+      "invalidResponse": "Type de réponse invalide.",
+      "failed": "Échec de l'enregistrement de votre réponse. Veuillez réessayer."
+    },
+    "goHome": "Retour à l'accueil",
+    "committed": {
+      "title": "Merci pour votre engagement !",
+      "message": "Nous sommes ravis d'apprendre que vous restez fidèle dans la prière. Votre dévouement fait la différence !",
+      "checkInNotice": "Nous vous recontacterons dans quelques mois.",
+      "continueButton": "Continuer vers la campagne"
+    },
+    "sometimes": {
+      "title": "Merci pour votre honnêteté !",
+      "message": "La vie peut être chargée, et ce n'est pas grave si vous n'avez pas pu prier aussi souvent que vous le souhaitiez.",
+      "suggestion": "Souhaitez-vous ajuster votre programme de prière pour quelque chose de plus gérable ?",
+      "adjustButton": "Ajuster mon programme",
+      "continueButton": "Continuer vers la campagne"
+    },
+    "notPraying": {
+      "title": "Nous comprenons",
+      "message": "Votre abonnement a été mis en pause. Vous ne recevrez plus de rappels de prière pour le moment.",
+      "reactivateNotice": "Si vous souhaitez reprendre la prière à l'avenir, vous pouvez réactiver votre abonnement à tout moment depuis votre profil.",
+      "profileButton": "Voir mon profil",
+      "visitButton": "Visiter la campagne"
+    },
+    "pageTitle": "Suivi de prière"
+  },
+  "email": {
+    "common": {
+      "hello": "Bonjour {name} !",
+      "automatedMessage": "Ceci est un message automatique de {appName}. Veuillez ne pas répondre à cet e-mail.",
+      "managePreferences": "Gérer les Préférences",
+      "unsubscribe": "Se Désabonner"
+    },
+    "verification": {
+      "subject": "Vérifiez votre e-mail pour {campaign}",
+      "header": "Vérifiez Votre E-mail",
+      "thankYou": "Merci de vous être inscrit pour recevoir des rappels de prière pour {campaign}.",
+      "pleaseVerify": "Veuillez vérifier votre adresse e-mail en cliquant sur le bouton ci-dessous :",
+      "verifyButton": "Vérifier l'E-mail",
+      "linkInstructions": "Si le bouton ne fonctionne pas, vous pouvez également copier et coller ce lien dans votre navigateur :",
+      "note": "Note :",
+      "expiration": "Ce lien de vérification expirera dans 7 jours.",
+      "ignoreMessage": "Si vous ne vous êtes pas inscrit pour recevoir des rappels de prière, vous pouvez ignorer cet e-mail."
+    },
+    "welcome": {
+      "subject": "Bienvenue sur {appName} - {campaign}",
+      "header": "Bienvenue sur {appName}",
+      "thankYou": "Merci de vous être inscrit pour prier. Votre e-mail a été vérifié et vous êtes prêt à recevoir des rappels de prière pour {campaign}.",
+      "startPraying": "Commencer à Prier",
+      "profileInstructions": "Vous pouvez mettre à jour les détails de votre profil et vos notifications ici :"
+    },
+    "reminder": {
+      "subject": "Rappel de Prière - {campaign}",
+      "header": "Rappel de Prière",
+      "timeForPrayer": "C'est l'heure de votre session de prière de {duration} minutes.",
+      "viewPrayer": "Voir la Prière d'Aujourd'hui",
+      "automatedReminder": "Ceci est un rappel de prière automatique de {appName}."
+    },
+    "followup": {
+      "subject": "{campaign} : Comment se passe votre engagement de prière ?",
+      "subjectReminder": "Rappel : {campaign} : Comment se passe votre engagement de prière ?",
+      "header": "Suivi de Prière",
+      "reminderIntro": "Nous vous avons envoyé un message la semaine dernière et voulions faire un suivi.",
+      "standardIntro": "Nous aimerions savoir comment se passe votre parcours de prière !",
+      "questionDaily": "Priez-vous toujours quotidiennement ?",
+      "questionWeekly": "Priez-vous toujours les {days} ?",
+      "yesDaily": "Oui, je prie quotidiennement",
+      "yesWeekly": "Oui, les jours prévus",
+      "sometimes": "Parfois, mais pas tous les jours",
+      "sometimesWeekly": "Parfois, mais pas toujours",
+      "noLonger": "Non, je ne prie plus",
+      "feedbackHelps": "Vos commentaires nous aident à comprendre comment nous pouvons mieux soutenir votre parcours de prière.",
+      "pauseNotice": "Si nous n'avons pas de nouvelles de vous, nous mettrons en pause vos rappels de prière pour ne pas encombrer votre boîte de réception. Vous pouvez toujours les réactiver depuis votre profil.",
+      "commitmentCheckIn": "Ceci est un suivi d'engagement de {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "Actualités de {campaign}",
+      "headerDefault": "Actualités de {appName}",
+      "footer": "Vous avez reçu cet e-mail car vous avez choisi de recevoir des mises à jour de {appName}."
+    },
+    "days": {
+      "sunday": "Dimanche",
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi"
+    }
   }
 }

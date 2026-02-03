@@ -3,6 +3,7 @@ import type { ProcessorResult } from './index'
 import { marketingEmailService } from '../../database/marketing-emails'
 import { subscriberService } from '../../database/subscribers'
 import { renderMarketingEmailHtml, tiptapToText } from '../../utils/marketing-email-template'
+import { localePath } from '../../utils/translations'
 
 const emailCache = new Map<number, { email: any; text: string }>()
 
@@ -30,18 +31,20 @@ export async function processMarketingEmail(job: Job): Promise<ProcessorResult> 
 
   const subscriber = await subscriberService.getSubscriberByContactMethodId(payload.contact_method_id)
   const profileId = subscriber?.profile_id || 'unknown'
+  const subscriberLanguage = subscriber?.preferred_language || 'en'
 
   let unsubscribeUrl: string
   if (cached.email.audience_type === 'campaign' && cached.email.campaign_slug) {
-    unsubscribeUrl = `${baseUrl}/unsubscribe?id=${profileId}&type=campaign&slug=${cached.email.campaign_slug}`
+    unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', subscriberLanguage)}?id=${profileId}&type=campaign&slug=${cached.email.campaign_slug}`
   } else {
-    unsubscribeUrl = `${baseUrl}/unsubscribe?id=${profileId}&type=doxa`
+    unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', subscriberLanguage)}?id=${profileId}&type=doxa`
   }
 
   const html = renderMarketingEmailHtml(
     cached.email.content_json,
     cached.email.audience_type === 'campaign' ? cached.email.campaign_title : undefined,
-    unsubscribeUrl
+    unsubscribeUrl,
+    subscriberLanguage
   )
 
   const sent = await sendEmail({

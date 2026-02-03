@@ -536,7 +536,7 @@ definePageMeta({
 
 const route = useRoute()
 const slug = route.params.slug as string
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 // Fetch campaign data
@@ -562,7 +562,7 @@ const formattedStartDate = computed(() => {
   // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
   const [year, month, day] = globalStartDate.value.split('-').map(Number)
   const startDate = new Date(year!, month! - 1, day!)
-  return startDate.toLocaleDateString(undefined, {
+  return startDate.toLocaleDateString(locale.value, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -703,6 +703,7 @@ async function handleSignup() {
         reminder_time: signupForm.value.reminder_time,
         prayer_duration: signupForm.value.prayer_duration,
         timezone: userTimezone.value,
+        language: locale.value,
         consent_campaign_updates: signupForm.value.consent_campaign_updates,
         consent_doxa_general: signupForm.value.consent_doxa_general
       }

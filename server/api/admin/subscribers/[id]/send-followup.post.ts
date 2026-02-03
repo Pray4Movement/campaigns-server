@@ -91,7 +91,8 @@ export default defineEventHandler(async (event) => {
       profileId: subscriber.profile_id,
       frequency: subscription.frequency,
       daysOfWeek,
-      isReminder: false
+      isReminder: false,
+      locale: subscriber.preferred_language
     })
 
     if (!success) {

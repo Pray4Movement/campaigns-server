@@ -31,6 +31,7 @@ export interface SubscriptionDueForReminder extends CampaignSubscription {
   subscriber_name: string
   subscriber_tracking_id: string
   subscriber_profile_id: string
+  subscriber_language: string
   email_value: string
   email_verified: boolean
   campaign_slug: string
@@ -363,6 +364,7 @@ class CampaignSubscriptionService {
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
         s.profile_id as subscriber_profile_id,
+        s.preferred_language as subscriber_language,
         cm.value as email_value,
         cm.verified as email_verified,
         c.slug as campaign_slug,

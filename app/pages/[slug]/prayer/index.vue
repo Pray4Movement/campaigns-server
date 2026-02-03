@@ -130,7 +130,7 @@ const formattedStartDate = computed(() => {
   // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
   const [year, month, day] = globalStartDate.value.split('-').map(Number)
   const startDate = new Date(year!, month! - 1, day!)
-  return startDate.toLocaleDateString(undefined, {
+  return startDate.toLocaleDateString(locale.value, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
