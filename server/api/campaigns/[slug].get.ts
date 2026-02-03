@@ -5,6 +5,7 @@
 import { campaignService } from '#server/database/campaigns'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { peopleGroupService } from '#server/database/people-groups'
+import { appConfigService } from '#server/database/app-config'
 import { getFieldOptionLabel } from '../../utils/app/field-options'
 
 export default defineEventHandler(async (event) => {
@@ -89,6 +90,9 @@ export default defineEventHandler(async (event) => {
   // Get commitment stats
   const commitmentStats = await campaignSubscriptionService.getCommitmentStats(campaign.id)
 
+  // Get global campaign start date
+  const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
+
   // Cache for 1 hour at edge (Cloudflare) - people_praying updates daily at 3 AM
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600')
 
@@ -98,6 +102,7 @@ export default defineEventHandler(async (event) => {
       people_committed: commitmentStats.people_committed,
       committed_duration: commitmentStats.committed_duration
     },
-    peopleGroup
+    peopleGroup,
+    globalStartDate
   }
 })

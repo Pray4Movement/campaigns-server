@@ -267,6 +267,13 @@
               <div class="text-center">
                 <h2 class="text-2xl font-bold">{{ $t('campaign.signup.title') }}</h2>
                 <p class="text-muted mt-2">{{ $t('campaign.signup.description') }}</p>
+                <UAlert
+                  v-if="isStartDateFuture"
+                  color="neutral"
+                  icon="i-lucide-calendar-clock"
+                  :title="$t('campaign.startsOn.message', { date: formattedStartDate })"
+                  class="mt-4 text-left"
+                />
               </div>
             </template>
 
@@ -520,6 +527,7 @@ interface CampaignResponse {
     created_at: string
     updated_at: string
   } | null
+  globalStartDate: string | null
 }
 
 definePageMeta({
@@ -535,6 +543,32 @@ const localePath = useLocalePath()
 const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`)
 const campaign = computed(() => data.value?.campaign)
 const peopleGroup = computed(() => data.value?.peopleGroup)
+const globalStartDate = computed(() => data.value?.globalStartDate)
+
+// Check if the campaign start date is in the future
+const isStartDateFuture = computed(() => {
+  if (!globalStartDate.value) return false
+  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
+  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  const startDate = new Date(year!, month! - 1, day!)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return startDate > today
+})
+
+// Format the start date for display
+const formattedStartDate = computed(() => {
+  if (!globalStartDate.value) return ''
+  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
+  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  const startDate = new Date(year!, month! - 1, day!)
+  return startDate.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
 
 // Campaign title management
 const { setCampaignTitle } = useCampaign()

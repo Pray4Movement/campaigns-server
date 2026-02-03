@@ -53,6 +53,10 @@
       "message": "La campaña que busca no existe o no está disponible.",
       "goHome": "Ir al Inicio"
     },
+    "startsOn": {
+      "message": "La oración comienza el {date}",
+      "signupEarly": "¡Inscríbase ahora y esté listo cuando comience la oración!"
+    },
     "signup": {
       "title": "Inscríbase para Orar",
       "description": "Comprométase a orar diaria o semanalmente y reciba recordatorios de contenido de oración.",
@@ -282,6 +286,10 @@
     "noContent": {
       "title": "No Hay Contenido de Oración Hoy",
       "message": "Vuelva mañana para nuevo contenido de oración."
+    },
+    "startsOn": {
+      "title": "Contenido de Oración Próximamente",
+      "message": "El contenido diario de oración comenzará el {date}. ¡Inscríbase ahora para recibir recordatorios cuando comience!"
     },
     "dateView": {
       "noContent": {

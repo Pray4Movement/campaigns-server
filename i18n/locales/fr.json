@@ -53,6 +53,10 @@
       "message": "La campagne que vous recherchez n'existe pas ou n'est pas disponible.",
       "goHome": "Accueil"
     },
+    "startsOn": {
+      "message": "La prière commence le {date}",
+      "signupEarly": "Inscrivez-vous maintenant et soyez prêt quand la prière commence !"
+    },
     "signup": {
       "title": "Inscrivez-vous pour Prier",
       "description": "Engagez-vous à prier quotidiennement ou hebdomadairement et recevez des rappels de contenu de prière.",
@@ -282,6 +286,10 @@
     "noContent": {
       "title": "Pas de Contenu de Prière Aujourd'hui",
       "message": "Revenez demain pour un nouveau contenu de prière."
+    },
+    "startsOn": {
+      "title": "Contenu de Prière Bientôt Disponible",
+      "message": "Le contenu quotidien de prière commencera le {date}. Inscrivez-vous maintenant pour recevoir des rappels quand il commencera !"
     },
     "dateView": {
       "noContent": {

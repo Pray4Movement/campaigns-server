@@ -4,6 +4,7 @@
  */
 import { campaignService } from '#server/database/campaigns'
 import { prayerContentService } from '#server/database/prayer-content'
+import { appConfigService } from '#server/database/app-config'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -90,6 +91,9 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  // Get global campaign start date
+  const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
+
   // Cache for 24 hours at edge (Cloudflare), allow stale content while revalidating
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=3600')
 
@@ -104,6 +108,7 @@ export default defineEventHandler(async (event) => {
     language: languageCode,
     availableLanguages,
     content: parsedContent,
-    hasContent: parsedContent.length > 0
+    hasContent: parsedContent.length > 0,
+    globalStartDate
   }
 })

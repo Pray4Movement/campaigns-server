@@ -53,6 +53,10 @@
       "message": "The campaign you're looking for doesn't exist or is not available.",
       "goHome": "Go Home"
     },
+    "startsOn": {
+      "message": "Prayer begins on {date}",
+      "signupEarly": "Sign up now and be ready when prayer starts!"
+    },
     "signup": {
       "title": "Sign up to Pray",
       "description": "Commit to praying daily or weekly and receive prayer content reminders.",
@@ -283,6 +287,10 @@
     "noContent": {
       "title": "No Prayer Content Today",
       "message": "Check back tomorrow for new prayer content."
+    },
+    "startsOn": {
+      "title": "Prayer Content Coming Soon",
+      "message": "Daily prayer content will begin on {date}. Sign up now to receive reminders when it starts!"
     },
     "dateView": {
       "noContent": {
