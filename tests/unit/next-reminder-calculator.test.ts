@@ -6,14 +6,21 @@ import {
   type NextReminderOptions
 } from '../../server/utils/next-reminder-calculator'
 
+// Mock the appConfigService
+vi.mock('../../server/database/app-config', () => ({
+  appConfigService: {
+    getConfig: vi.fn().mockResolvedValue(null)
+  }
+}))
+
 describe('next-reminder-calculator', () => {
   describe('calculateNextReminderUtc - Daily', () => {
-    it('returns today at specified time when time has not passed', () => {
+    it('returns today at specified time when time has not passed', async () => {
       // Mock: it's 8:00 AM UTC, user wants 9:00 AM UTC
       const mockNow = new Date('2024-03-15T08:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'daily'
@@ -26,12 +33,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCMinutes()).toBe(0)
     })
 
-    it('returns tomorrow when time has already passed', () => {
+    it('returns tomorrow when time has already passed', async () => {
       // Mock: it's 10:00 AM UTC, user wants 9:00 AM UTC
       const mockNow = new Date('2024-03-15T10:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'daily'
@@ -44,12 +51,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCMinutes()).toBe(0)
     })
 
-    it('returns tomorrow when current time equals scheduled time', () => {
+    it('returns tomorrow when current time equals scheduled time', async () => {
       // Mock: it's exactly 9:00 AM UTC
       const mockNow = new Date('2024-03-15T09:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'daily'
@@ -61,12 +68,12 @@ describe('next-reminder-calculator', () => {
   })
 
   describe('calculateNextReminderUtc - Weekly', () => {
-    it('returns today when today is scheduled day and time not passed', () => {
+    it('returns today when today is scheduled day and time not passed', async () => {
       // Friday March 15, 2024 at 8:00 AM UTC
       const mockNow = new Date('2024-03-15T08:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'weekly',
@@ -77,12 +84,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(9)
     })
 
-    it('returns next scheduled day when today\'s time passed', () => {
+    it('returns next scheduled day when today\'s time passed', async () => {
       // Friday March 15, 2024 at 10:00 AM UTC
       const mockNow = new Date('2024-03-15T10:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'weekly',
@@ -94,12 +101,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCDay()).toBe(1) // Monday
     })
 
-    it('returns next scheduled day when today is not in daysOfWeek', () => {
+    it('returns next scheduled day when today is not in daysOfWeek', async () => {
       // Friday March 15, 2024
       const mockNow = new Date('2024-03-15T08:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'weekly',
@@ -111,12 +118,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCDay()).toBe(1)
     })
 
-    it('handles single day per week correctly', () => {
+    it('handles single day per week correctly', async () => {
       // Friday March 15, 2024 at 10:00 AM - time already passed
       const mockNow = new Date('2024-03-15T10:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'weekly',
@@ -128,12 +135,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCDay()).toBe(5)
     })
 
-    it('wraps around week boundary (Saturday to Monday)', () => {
+    it('wraps around week boundary (Saturday to Monday)', async () => {
       // Saturday March 16, 2024
       const mockNow = new Date('2024-03-16T08:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'weekly',
@@ -147,12 +154,12 @@ describe('next-reminder-calculator', () => {
   })
 
   describe('Timezone Conversion', () => {
-    it('handles America/New_York in winter (EST = UTC-5)', () => {
+    it('handles America/New_York in winter (EST = UTC-5)', async () => {
       // User in New York wants 9 AM local, it's 8 AM local in January (winter = EST = UTC-5)
       const mockNow = new Date('2024-01-15T13:00:00Z') // 8 AM in EST (winter)
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'America/New_York',
         timePreference: '09:00',
         frequency: 'daily'
@@ -162,12 +169,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(14)
     })
 
-    it('handles America/New_York in summer (EDT = UTC-4)', () => {
+    it('handles America/New_York in summer (EDT = UTC-4)', async () => {
       // User in New York wants 9 AM local, it's 8 AM local in July (summer = EDT = UTC-4)
       const mockNow = new Date('2024-07-15T12:00:00Z') // 8 AM in EDT (summer)
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'America/New_York',
         timePreference: '09:00',
         frequency: 'daily'
@@ -177,12 +184,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(13)
     })
 
-    it('handles Europe/London in winter (GMT = UTC+0)', () => {
+    it('handles Europe/London in winter (GMT = UTC+0)', async () => {
       // Winter: January 15 - London is UTC+0
       const mockNow = new Date('2024-01-15T08:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'Europe/London',
         timePreference: '09:00',
         frequency: 'daily'
@@ -192,12 +199,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(9)
     })
 
-    it('handles Europe/London in summer (BST = UTC+1)', () => {
+    it('handles Europe/London in summer (BST = UTC+1)', async () => {
       // Summer: July 15 - London is UTC+1 (British Summer Time)
       const mockNow = new Date('2024-07-15T07:00:00Z') // 8 AM in BST
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'Europe/London',
         timePreference: '09:00',
         frequency: 'daily'
@@ -207,12 +214,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(8)
     })
 
-    it('handles Asia/Tokyo (UTC+9, no DST)', () => {
+    it('handles Asia/Tokyo (UTC+9, no DST)', async () => {
       // User in Tokyo at midnight UTC (9 AM JST)
       const mockNow = new Date('2024-03-15T00:00:00Z') // 9 AM in Tokyo
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'Asia/Tokyo',
         timePreference: '10:00',
         frequency: 'daily'
@@ -222,11 +229,11 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(1)
     })
 
-    it('handles UTC directly', () => {
+    it('handles UTC directly', async () => {
       const mockNow = new Date('2024-03-15T08:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'daily'
@@ -235,12 +242,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(9)
     })
 
-    it('handles America/Los_Angeles in winter (PST = UTC-8)', () => {
+    it('handles America/Los_Angeles in winter (PST = UTC-8)', async () => {
       // User in LA at 7 AM local (3 PM UTC on Dec 15)
       const mockNow = new Date('2024-12-15T15:00:00Z') // 7 AM PST
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'America/Los_Angeles',
         timePreference: '09:00',
         frequency: 'daily'
@@ -250,12 +257,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(17)
     })
 
-    it('handles America/Los_Angeles in summer (PDT = UTC-7)', () => {
+    it('handles America/Los_Angeles in summer (PDT = UTC-7)', async () => {
       // User in LA at 7 AM local (2 PM UTC on July 15)
       const mockNow = new Date('2024-07-15T14:00:00Z') // 7 AM PDT
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'America/Los_Angeles',
         timePreference: '09:00',
         frequency: 'daily'
@@ -265,12 +272,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCHours()).toBe(16)
     })
 
-    it('handles Asia/Kolkata (UTC+5:30 - half-hour offset)', () => {
+    it('handles Asia/Kolkata (UTC+5:30 - half-hour offset)', async () => {
       // User in India
       const mockNow = new Date('2024-03-15T02:00:00Z') // 7:30 AM IST
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'Asia/Kolkata',
         timePreference: '09:00',
         frequency: 'daily'
@@ -359,11 +366,11 @@ describe('next-reminder-calculator', () => {
   })
 
   describe('Edge Cases', () => {
-    it('handles midnight (00:00) time preference', () => {
+    it('handles midnight (00:00) time preference', async () => {
       const mockNow = new Date('2024-03-15T23:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '00:00',
         frequency: 'daily'
@@ -375,11 +382,11 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCMinutes()).toBe(0)
     })
 
-    it('handles end of day (23:59) time preference', () => {
+    it('handles end of day (23:59) time preference', async () => {
       const mockNow = new Date('2024-03-15T12:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '23:59',
         frequency: 'daily'
@@ -391,12 +398,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCMinutes()).toBe(59)
     })
 
-    it('handles month boundary', () => {
+    it('handles month boundary', async () => {
       // March 31, 2024 at 10 PM UTC
       const mockNow = new Date('2024-03-31T22:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'daily'
@@ -407,12 +414,12 @@ describe('next-reminder-calculator', () => {
       expect(result.getUTCDate()).toBe(1)
     })
 
-    it('handles year boundary', () => {
+    it('handles year boundary', async () => {
       // December 31, 2024 at 10 PM UTC
       const mockNow = new Date('2024-12-31T22:00:00Z')
       vi.setSystemTime(mockNow)
 
-      const result = calculateNextReminderUtc({
+      const result = await calculateNextReminderUtc({
         timezone: 'UTC',
         timePreference: '09:00',
         frequency: 'daily'
@@ -425,11 +432,76 @@ describe('next-reminder-calculator', () => {
     })
   })
 
+  describe('Global Start Date', () => {
+    it('schedules reminder for start date when current date is before start', async () => {
+      // Import the mock so we can change its return value
+      const { appConfigService } = await import('../../server/database/app-config')
+      vi.mocked(appConfigService.getConfig).mockResolvedValueOnce('2024-04-01')
+
+      // Current date is March 15
+      const mockNow = new Date('2024-03-15T08:00:00Z')
+      vi.setSystemTime(mockNow)
+
+      const result = await calculateNextReminderUtc({
+        timezone: 'UTC',
+        timePreference: '09:00',
+        frequency: 'daily'
+      })
+
+      // Should be April 1 (the start date), not March 15
+      expect(result.getUTCMonth()).toBe(3) // April
+      expect(result.getUTCDate()).toBe(1)
+      expect(result.getUTCHours()).toBe(9)
+    })
+
+    it('weekly: finds first matching day on or after start date', async () => {
+      const { appConfigService } = await import('../../server/database/app-config')
+      // Start date is April 1, 2024 (Monday)
+      vi.mocked(appConfigService.getConfig).mockResolvedValueOnce('2024-04-01')
+
+      // Current date is March 15 (Friday)
+      const mockNow = new Date('2024-03-15T08:00:00Z')
+      vi.setSystemTime(mockNow)
+
+      const result = await calculateNextReminderUtc({
+        timezone: 'UTC',
+        timePreference: '09:00',
+        frequency: 'weekly',
+        daysOfWeek: [3, 5] // Wednesday and Friday
+      })
+
+      // Start date April 1 is Monday, first Wednesday after is April 3
+      expect(result.getUTCMonth()).toBe(3) // April
+      expect(result.getUTCDate()).toBe(3) // Wednesday April 3
+      expect(result.getUTCDay()).toBe(3) // Wednesday
+    })
+
+    it('ignores start date when current date is after start', async () => {
+      const { appConfigService } = await import('../../server/database/app-config')
+      vi.mocked(appConfigService.getConfig).mockResolvedValueOnce('2024-03-01')
+
+      // Current date is March 15 (after start date)
+      const mockNow = new Date('2024-03-15T08:00:00Z')
+      vi.setSystemTime(mockNow)
+
+      const result = await calculateNextReminderUtc({
+        timezone: 'UTC',
+        timePreference: '09:00',
+        frequency: 'daily'
+      })
+
+      // Should be today (March 15) since we're past the start date
+      expect(result.getUTCMonth()).toBe(2) // March
+      expect(result.getUTCDate()).toBe(15)
+    })
+  })
+
   beforeEach(() => {
     vi.useFakeTimers()
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.clearAllMocks()
   })
 })

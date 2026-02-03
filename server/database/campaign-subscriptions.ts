@@ -1,6 +1,7 @@
 import { getDatabase } from './db'
 import { calculateNextReminderUtc, calculateNextReminderAfterSend } from '../utils/next-reminder-calculator'
 import { contactMethodService } from './contact-methods'
+import { appConfigService } from './app-config'
 
 export interface CampaignSubscription {
   id: number
@@ -343,8 +344,19 @@ class CampaignSubscriptionService {
    * - status = 'active'
    * - delivery_method = 'email' (for now)
    * - The subscriber has a verified email
+   * - The global campaign start date has been reached (if configured)
    */
   async getSubscriptionsDueForReminder(): Promise<SubscriptionDueForReminder[]> {
+    // Check if we've reached the global campaign start date
+    const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
+    if (globalStartDate) {
+      const today = new Date().toISOString().split('T')[0]
+      if (today! < globalStartDate) {
+        // Campaign hasn't started yet - no reminders to send
+        return []
+      }
+    }
+
     const stmt = this.db.prepare(`
       SELECT
         cs.*,
@@ -383,7 +395,7 @@ class CampaignSubscriptionService {
 
     const daysOfWeek = subscription.days_of_week ? JSON.parse(subscription.days_of_week) : undefined
 
-    const nextUtc = calculateNextReminderUtc({
+    const nextUtc = await calculateNextReminderUtc({
       timezone: subscription.timezone || 'UTC',
       timePreference: subscription.time_preference,
       frequency: subscription.frequency,
