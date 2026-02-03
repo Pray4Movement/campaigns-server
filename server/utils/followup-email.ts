@@ -50,9 +50,9 @@ export async function sendFollowupEmail(data: FollowupEmailData): Promise<boolea
 
   const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${data.profileId}`
 
-  // Build response URLs
+  // Build response URLs (include profile_id for authentication)
   const buildResponseUrl = (response: string) =>
-    `${baseUrl}${localePath('/followup', locale)}?sid=${data.subscriptionId}&response=${response}`
+    `${baseUrl}${localePath('/followup', locale)}?sid=${data.subscriptionId}&response=${response}&id=${data.profileId}`
 
   const committedUrl = buildResponseUrl('committed')
   const sometimesUrl = buildResponseUrl('sometimes')

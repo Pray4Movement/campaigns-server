@@ -6,11 +6,21 @@ import { campaignService } from '#server/database/campaigns'
 export default defineEventHandler(async (event) => {
   const subscriptionId = getRouterParam(event, 'id')
   const body = await readBody(event)
+  const query = getQuery(event)
 
   if (!subscriptionId) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Subscription ID is required'
+    })
+  }
+
+  // Require profile_id for authentication
+  const profileId = query.id as string
+  if (!profileId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Profile ID is required'
     })
   }
 
@@ -21,6 +31,15 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       statusMessage: 'Invalid response. Must be one of: committed, sometimes, not_praying'
+    })
+  }
+
+  // Get subscriber by profile_id first
+  const subscriber = await subscriberService.getSubscriberByProfileId(profileId)
+  if (!subscriber) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Access denied'
     })
   }
 
@@ -36,12 +55,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get subscriber for profile_id
-  const subscriber = await subscriberService.getSubscriberById(subscription.subscriber_id)
-  if (!subscriber) {
+  // Verify the subscription belongs to this subscriber
+  if (subscription.subscriber_id !== subscriber.id) {
     throw createError({
-      statusCode: 404,
-      statusMessage: 'Subscriber not found'
+      statusCode: 403,
+      statusMessage: 'Access denied'
     })
   }
 

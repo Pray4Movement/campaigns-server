@@ -94,6 +94,7 @@ const localePath = useLocalePath()
 
 const subscriptionId = route.query.sid as string
 const responseParam = route.query.response as string
+const idParam = route.query.id as string
 
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -102,7 +103,7 @@ const profileId = ref<string | null>(null)
 const campaignSlug = ref<string | null>(null)
 
 async function recordResponse() {
-  if (!subscriptionId || !responseParam) {
+  if (!subscriptionId || !responseParam || !idParam) {
     error.value = t('followupPage.error.invalidLink')
     loading.value = false
     return
@@ -121,7 +122,7 @@ async function recordResponse() {
       message: string
       profile_id: string
       campaign_slug: string
-    }>(`/api/subscriptions/${subscriptionId}/followup-response`, {
+    }>(`/api/subscriptions/${subscriptionId}/followup-response?id=${idParam}`, {
       method: 'POST',
       body: { response: responseParam }
     })
