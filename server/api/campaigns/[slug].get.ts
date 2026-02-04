@@ -7,6 +7,7 @@ import { campaignSubscriptionService } from '#server/database/campaign-subscript
 import { peopleGroupService } from '#server/database/people-groups'
 import { appConfigService } from '#server/database/app-config'
 import { getFieldOptionLabel } from '../../utils/app/field-options'
+import { generatePeopleGroupDescription } from '../../utils/app/people-group-description'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -79,10 +80,18 @@ export default defineEventHandler(async (event) => {
         labels.imb_gsec = getFieldOptionLabel('imb_gsec', String(metadata.imb_gsec))
       }
 
+      // Generate description from template
+      const generatedDescription = generatePeopleGroupDescription({
+        name: pg.name,
+        people_desc: pg.people_desc,
+        metadata
+      })
+
       peopleGroup = {
         ...pg,
         metadata,
-        labels
+        labels,
+        generatedDescription
       }
     }
   }

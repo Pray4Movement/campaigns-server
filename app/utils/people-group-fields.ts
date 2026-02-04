@@ -32,7 +32,8 @@ export const peopleGroupFieldCategories: FieldCategory[] = [
       { key: 'imb_display_name', label: 'Display Name', type: 'text' },
       { key: 'imb_alternate_name', label: 'Alternate Name', type: 'text' },
       { key: 'imb_people_name', label: 'People Name (ROP3)', type: 'text' },
-      { key: 'imb_people_description', label: 'Description', type: 'textarea' },
+      { key: 'people_desc', label: 'People Description (from IMB)', type: 'textarea', description: 'Imported from IMB CSV via PEID' },
+      { key: 'imb_people_description', label: 'Description (from API)', type: 'textarea' },
       { key: 'imb_location_description', label: 'Location Description', type: 'textarea' }
     ]
   },
@@ -162,7 +163,7 @@ export function getFieldByKey(key: string): FieldDefinition | undefined {
 }
 
 // Fields stored directly on the people_groups table (not in metadata)
-export const tableFields = ['name', 'image_url', 'dt_id']
+export const tableFields = ['name', 'image_url', 'dt_id', 'people_desc']
 
 // Helper to determine if a field is in metadata
 export function isMetadataField(key: string): boolean {

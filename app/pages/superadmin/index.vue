@@ -67,6 +67,20 @@
               <p><strong>Errors:</strong> {{ syncStats.errors }}</p>
             </div>
           </UCard>
+
+          <!-- Import Descriptions -->
+          <div class="border-t border-[var(--ui-border)] pt-8 mt-8">
+            <h3 class="text-lg font-medium mb-2">Import People Descriptions</h3>
+            <p class="text-[var(--ui-text-muted)] mb-4">Import PeopleDesc values from a CSV file. Matches by PEID to the imb_peid metadata field.</p>
+
+            <UButton
+              to="/superadmin/people-groups/import-descriptions"
+              variant="outline"
+              icon="i-lucide-upload"
+            >
+              Import Descriptions
+            </UButton>
+          </div>
         </div>
 
         <!-- Campaigns Tab -->

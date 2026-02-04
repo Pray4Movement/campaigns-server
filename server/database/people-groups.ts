@@ -6,6 +6,7 @@ export interface PeopleGroup {
   name: string
   image_url: string | null
   metadata: string | null
+  people_desc: string | null
   random_order: number | null
   created_at: string
   updated_at: string
@@ -22,6 +23,7 @@ export interface UpdatePeopleGroupData {
   dt_id?: string
   name?: string
   image_url?: string | null
+  people_desc?: string | null
   metadata?: string | null
 }
 
@@ -129,6 +131,11 @@ export class PeopleGroupService {
     if (data.metadata !== undefined) {
       updates.push('metadata = ?')
       values.push(data.metadata)
+    }
+
+    if (data.people_desc !== undefined) {
+      updates.push('people_desc = ?')
+      values.push(data.people_desc)
     }
 
     if (updates.length === 0) {

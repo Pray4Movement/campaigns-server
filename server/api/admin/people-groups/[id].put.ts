@@ -4,6 +4,7 @@ import { getIntParam } from '#server/utils/api-helpers'
 interface UpdateBody {
   name?: string
   image_url?: string | null
+  people_desc?: string | null
   metadata?: Record<string, any>
 }
 
@@ -18,6 +19,7 @@ export default defineEventHandler(async (event) => {
   const updateData: {
     name?: string
     image_url?: string | null
+    people_desc?: string | null
     metadata?: string
   } = {}
 
@@ -27,6 +29,10 @@ export default defineEventHandler(async (event) => {
 
   if (body.image_url !== undefined) {
     updateData.image_url = body.image_url
+  }
+
+  if (body.people_desc !== undefined) {
+    updateData.people_desc = body.people_desc
   }
 
   if (body.metadata !== undefined) {

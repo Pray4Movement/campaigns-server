@@ -44,8 +44,8 @@
               <h2 class="text-2xl md:text-3xl font-bold text-default mb-4">
                 {{ peopleGroup.name }}
               </h2>
-              <p v-if="peopleGroup.metadata?.imb_people_description" class="text-muted leading-relaxed mb-4">
-                {{ peopleGroup.metadata.imb_people_description }}
+              <p v-if="peopleGroup.generatedDescription" class="text-muted leading-relaxed mb-4">
+                {{ peopleGroup.generatedDescription }}
               </p>
               <UButton
                 :href="`https://doxa.life/research/${slug}/`"
@@ -524,6 +524,8 @@ interface CampaignResponse {
     image_url: string | null
     metadata: Record<string, any>
     labels: Record<string, string | null>
+    generatedDescription: string
+    people_desc: string | null
     created_at: string
     updated_at: string
   } | null
