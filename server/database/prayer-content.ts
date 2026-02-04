@@ -4,7 +4,7 @@ import { libraryContentService } from './library-content'
 import { libraryService, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID, DAY_IN_LIFE_LIBRARY_ID } from './libraries'
 import { peopleGroupService } from './people-groups'
 import { campaignService } from './campaigns'
-import { getLanguageLabel, getReligionLabel, getCountryLabel } from '../utils/app/field-options'
+import { getFieldOptionLabel, getReligionLabel, getCountryLabel } from '../utils/app/field-options'
 
 export interface PeopleGroupData {
   name: string
@@ -286,7 +286,7 @@ export class PrayerContentService {
         const religionCode = metadata.imb_reg_of_religion_3
         const countryCode = metadata.imb_isoalpha3
 
-        language = langCode ? (getLanguageLabel(langCode) || langCode) : null
+        language = langCode ? (getFieldOptionLabel('imb_reg_of_language', langCode) || langCode) : null
         religion = religionCode ? (getReligionLabel(religionCode) || religionCode) : null
         country = countryCode ? (getCountryLabel(countryCode) || countryCode) : null
 
@@ -378,7 +378,7 @@ export class PrayerContentService {
         const religionCode = metadata.imb_reg_of_religion_3
         const countryCode = metadata.imb_isoalpha3
 
-        language = langCode ? (getLanguageLabel(langCode) || langCode) : null
+        language = langCode ? (getFieldOptionLabel('imb_reg_of_language', langCode) || langCode) : null
         religion = religionCode ? (getReligionLabel(religionCode) || religionCode) : null
         country = countryCode ? (getCountryLabel(countryCode) || countryCode) : null
 

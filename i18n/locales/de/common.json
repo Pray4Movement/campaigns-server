@@ -1,0 +1,436 @@
+{
+  "welcome": "Willkommen",
+  "hello": "Hallo",
+  "language": "Sprache",
+  "app": {
+    "title": "App"
+  },
+  "theme": {
+    "toggle": "Design wechseln",
+    "light": "Heller Modus",
+    "dark": "Dunkler Modus"
+  },
+  "login": {
+    "title": "Administrator-Anmeldung",
+    "email": "E-Mail",
+    "emailPlaceholder": "Geben Sie Ihre E-Mail ein",
+    "password": "Passwort",
+    "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
+    "signIn": "Anmelden",
+    "signingIn": "Anmeldung läuft...",
+    "error": {
+      "failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "Alle Rechte vorbehalten"
+  },
+  "campaign": {
+    "peopleGroup": {
+      "findOutMore": "Mehr erfahren",
+      "overview": {
+        "title": "Überblick",
+        "country": "Land:",
+        "population": "Bevölkerung:",
+        "language": "Sprache:",
+        "religion": "Religion:",
+        "status": "Status:",
+        "churches": "Gemeinden:"
+      },
+      "prayerStatus": {
+        "title": "Gebetsstatus",
+        "description": "Personen beten 10 Minuten täglich für diese Volksgruppe."
+      }
+    },
+    "header": {
+      "prayFor": "Bete für die {campaign}"
+    },
+    "pageTitle": "Kampagne",
+    "signupButton": "Anmelden zum Beten",
+    "loading": "Kampagne wird geladen...",
+    "notFound": {
+      "title": "Kampagne nicht gefunden",
+      "message": "Die gesuchte Kampagne existiert nicht oder ist nicht verfügbar.",
+      "goHome": "Zur Startseite"
+    },
+    "startsOn": {
+      "message": "Das Gebet beginnt am {date}",
+      "signupEarly": "Melden Sie sich jetzt an und seien Sie bereit, wenn das Gebet beginnt!"
+    },
+    "signup": {
+      "title": "Anmelden zum Beten",
+      "description": "Verpflichten Sie sich zum täglichen oder wöchentlichen Gebet und erhalten Sie Gebetserinnerungen.",
+      "success": "✓ Willkommen! Sie haben sich der Gebetsbewegung angeschlossen. Sie werden bald Ihre erste Gebetsaufforderung erhalten.",
+      "successEmail": "✓ Fast geschafft! Bitte überprüfen Sie Ihre E-Mail und klicken Sie auf den Bestätigungslink, um Ihre Anmeldung abzuschließen.",
+      "checkSpam": "Keine E-Mail erhalten? Überprüfen Sie Ihren Spam-Ordner.",
+      "modal": {
+        "title": "Überprüfen Sie Ihre E-Mail",
+        "message": "Wir haben einen Bestätigungslink gesendet an:",
+        "hint": "Klicken Sie auf den Link in der E-Mail, um Ihre Anmeldung abzuschließen. Vergessen Sie nicht, Ihren Spam-Ordner zu überprüfen. Wenn Ihre E-Mail bereits bestätigt ist, erhalten Sie eine Bestätigungs-E-Mail.",
+        "button": "Verstanden"
+      },
+      "form": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Ihr Name"
+        },
+        "deliveryMethod": {
+          "label": "Wie möchten Sie Ihre täglichen Gebetsaufforderungen erhalten?",
+          "placeholder": "Methode auswählen...",
+          "email": "E-Mail",
+          "whatsapp": "WhatsApp",
+          "app": "Mobile App"
+        },
+        "email": {
+          "label": "E-Mail-Adresse",
+          "placeholder": "ihre{'@'}email.de"
+        },
+        "phone": {
+          "label": "Telefonnummer",
+          "hint": "Wählen Sie Ihr Land und geben Sie Ihre Telefonnummer ein"
+        },
+        "frequency": {
+          "label": "Ich werde beten...",
+          "daily": "Jeden Tag",
+          "weekly": "Tage auswählen"
+        },
+        "daysOfWeek": {
+          "label": "Tage auswählen",
+          "error": "Bitte wählen Sie mindestens einen Tag",
+          "days": {
+            "sun": "So",
+            "mon": "Mo",
+            "tue": "Di",
+            "wed": "Mi",
+            "thu": "Do",
+            "fri": "Fr",
+            "sat": "Sa"
+          }
+        },
+        "time": {
+          "label": "Erinnerungszeit",
+          "hint": "Wann möchten Sie Ihre Gebetserinnerung erhalten?"
+        },
+        "timezone": {
+          "label": "Ihre Zeitzone",
+          "hint": "Automatisch von Ihrem Browser erkannt",
+          "searchPlaceholder": "Zeitzonen suchen..."
+        },
+        "duration": {
+          "label": "Für...",
+          "5min": "5 Minuten",
+          "10min": "10 Minuten",
+          "15min": "15 Minuten",
+          "30min": "30 Minuten",
+          "60min": "1 Stunde"
+        },
+        "reminderTime": {
+          "label": "Erinnerungszeit"
+        },
+        "submit": "Zum Gebet verpflichten",
+        "submitting": "Anmeldung läuft...",
+        "consent": {
+          "description": "Zusätzlich zu Gebetserinnerungen möchte ich informiert werden über:",
+          "campaignUpdates": "Updates über diese Volksgruppe: {campaign}",
+          "doxaGeneral": "Fortschritte und Neuigkeiten von {link}"
+        }
+      },
+      "errors": {
+        "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein",
+        "failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
+      }
+    },
+    "prayerFuel": {
+      "title": "Heutiges Gebet",
+      "description": "Zugang zu heutigen Gebetsinhalten und -anregungen",
+      "button": "Gebetsinhalt ansehen"
+    },
+    "whyPray": {
+      "title": "Warum beten?",
+      "noOne": {
+        "title": "Sie haben niemanden",
+        "description": "Viele unerreichte Volksgruppen haben keine Gemeinden, keine Missionare und oft keine Gläubigen."
+      },
+      "opensDoors": {
+        "title": "Gebet öffnet Türen",
+        "description": "Gebet erweicht Herzen, öffnet Türen und lädt das Wirken des Heiligen Geistes ein, lange bevor das Evangelium verkündet wird."
+      },
+      "changed": {
+        "title": "Erleben Sie Gottes Gegenwart",
+        "description": "Gott hat viele Menschen auf tiefe und wunderbare Weise während ihrer Gebetszeiten begegnet. Tägliches Gebet wird Ihren Glauben stärken und Sie Gott näher bringen."
+      }
+    },
+    "sampleContent": {
+      "title": "Tägliche Gebetsinhalte erhalten",
+      "description": "Hier ist eine Vorschau der täglichen Gebetsinhalte.",
+      "peopleGroupName": "Volksgruppe",
+      "scripture": "Bibelvers",
+      "prayerPoints": "Gebetsanliegen",
+      "peopleGroupOfDay": "Volksgruppe des Tages"
+    },
+    "mobileApp": {
+      "title": "Mobile App herunterladen",
+      "description": "Laden Sie unsere mobile App für ein besseres Gebetserlebnis herunter",
+      "appStore": {
+        "label": "Laden im",
+        "store": "App Store",
+        "ariaLabel": "Im App Store laden"
+      },
+      "googlePlay": {
+        "label": "Jetzt bei",
+        "store": "Google Play",
+        "ariaLabel": "Bei Google Play herunterladen"
+      }
+    },
+    "verify": {
+      "pageTitle": "E-Mail bestätigen",
+      "verifying": "E-Mail wird bestätigt...",
+      "success": {
+        "title": "E-Mail bestätigt!",
+        "message": "Ihre E-Mail wurde erfolgreich bestätigt. Sie werden nun Gebetserinnerungen für {campaign} erhalten."
+      },
+      "error": {
+        "title": "Bestätigung fehlgeschlagen",
+        "generic": "E-Mail konnte nicht bestätigt werden. Dieser Link wurde möglicherweise bereits verwendet oder ist abgelaufen."
+      },
+      "backToCampaign": "Zurück zur Kampagne",
+      "startPraying": "Mit dem Beten beginnen"
+    },
+    "unsubscribe": {
+      "pageTitle": "Abmelden",
+      "processing": "Ihre Anfrage wird bearbeitet...",
+      "success": {
+        "title": "Abgemeldet",
+        "message": "Sie wurden von dieser Erinnerung abgemeldet.",
+        "campaign": "Kampagne: {title}",
+        "resubscribe": "Erneut anmelden",
+        "resubscribing": "Anmeldung läuft..."
+      },
+      "alreadyDone": {
+        "title": "Bereits abgemeldet",
+        "message": "Sie wurden bereits von dieser Erinnerung abgemeldet."
+      },
+      "unsubscribedFromCampaign": "Sie wurden von allen {campaign}-Erinnerungen abgemeldet.",
+      "resubscribed": {
+        "title": "Willkommen zurück!",
+        "message": "Sie wurden wieder für Gebetserinnerungen angemeldet. Sie erhalten Ihre nächste Erinnerung zur geplanten Zeit.",
+        "viewCampaign": "Kampagne ansehen"
+      },
+      "error": {
+        "title": "Fehler",
+        "message": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+        "goHome": "Zur Startseite"
+      },
+      "otherReminders": "Sie haben weitere Erinnerungen für diese Kampagne:",
+      "unsubscribeThis": "Abmelden",
+      "unsubscribeAll": "Von allen abmelden",
+      "yourSubscriptions": "Ihre Abonnements",
+      "active": "aktiv",
+      "unsubscribeButton": "Abmelden",
+      "unsubscribeFromAll": "Von allen {campaign}-Erinnerungen abmelden",
+      "preferencesUpdated": "Ihre E-Mail-Einstellungen wurden aktualisiert.",
+      "noActiveSubscriptions": "Sie haben keine aktiven Abonnements.",
+      "current": "Aktuell",
+      "reminderFormat": {
+        "daily": "Täglich um {time}",
+        "weekly": "{days} um {time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "Einstellungen verwalten",
+      "title": "Erinnerungseinstellungen",
+      "greeting": "Hallo {name}, verwalten Sie hier Ihre Gebetserinnerungseinstellungen.",
+      "save": "Änderungen speichern",
+      "saving": "Wird gespeichert...",
+      "success": "Ihre Einstellungen wurden aktualisiert.",
+      "emailChanged": "Wir haben eine Bestätigungs-E-Mail an Ihre neue Adresse gesendet. Bitte bestätigen Sie diese, um weiterhin Erinnerungen zu erhalten.",
+      "emailNotVerified": "Ihre E-Mail ist nicht bestätigt. Bitte überprüfen Sie Ihren Posteingang auf den Bestätigungslink, um Erinnerungen zu erhalten.",
+      "emailHint": "Eine Änderung Ihrer E-Mail erfordert eine erneute Bestätigung.",
+      "sections": {
+        "account": "Konto",
+        "schedule": "Erinnerungszeitplan",
+        "prayer": "Gebetseinstellungen",
+        "emailPreferences": "Kommunikationseinstellungen"
+      },
+      "emailPreferences": {
+        "description": "Wählen Sie, welche Mitteilungen Sie erhalten möchten:",
+        "campaignUpdates": "Updates über {campaign}",
+        "doxaGeneral": "Allgemeine Updates von Doxa",
+        "doxaGeneralHint": "Fortschrittsupdates und Neuigkeiten von Doxa"
+      },
+      "consentUpdated": "Kommunikationseinstellungen aktualisiert.",
+      "subscriptions": "Ihre Abonnements",
+      "saveAccount": "Konto speichern",
+      "unsubscribed": "Abgemeldet",
+      "current": "Aktuell",
+      "viewCampaign": "Kampagne ansehen",
+      "unsubscribeButton": "Abmelden",
+      "resubscribeButton": "Erneut anmelden",
+      "unsubscribeConfirm": "Sind Sie sicher, dass Sie sich von {campaign} abmelden möchten?",
+      "unsubscribeSuccess": "Sie wurden abgemeldet.",
+      "resubscribeSuccess": "Sie wurden wieder angemeldet.",
+      "reminders": "Erinnerungen",
+      "reminder": "Erinnerung",
+      "deleteReminderConfirm": "Sind Sie sicher, dass Sie diese Erinnerung löschen möchten?",
+      "deleteReminderSuccess": "Erinnerung gelöscht.",
+      "error": {
+        "title": "Fehler",
+        "notFound": "Abonnement nicht gefunden.",
+        "failed": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut."
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Gebetsinhalt",
+    "title": "Heutiges Gebet",
+    "loading": "Heutiges Gebet wird geladen...",
+    "backTo": "Zurück zu {campaign}",
+    "backToToday": "Zurück zum heutigen Gebet",
+    "error": {
+      "title": "Gebet konnte nicht geladen werden",
+      "backToCampaign": "Zurück zur Kampagne",
+      "recordFailed": "Gebet konnte nicht aufgezeichnet werden. Bitte versuchen Sie es erneut."
+    },
+    "noContent": {
+      "title": "Heute kein Gebetsinhalt",
+      "message": "Schauen Sie morgen für neue Gebetsinhalte vorbei."
+    },
+    "startsOn": {
+      "title": "Gebetsinhalt kommt bald",
+      "message": "Tägliche Gebetsinhalte beginnen am {date}. Melden Sie sich jetzt an, um Erinnerungen zu erhalten, wenn es losgeht!"
+    },
+    "dateView": {
+      "noContent": {
+        "title": "Kein Gebetsinhalt",
+        "message": "Für dieses Datum ist kein Gebetsinhalt verfügbar."
+      }
+    },
+    "button": {
+      "amen": "Amen",
+      "hint": "Klicken Sie, um Ihre Gebetszeit zu beenden"
+    },
+    "thankYou": "Danke fürs Beten!",
+    "meetThePeople": "Lernen Sie das Volk kennen",
+    "peopleGroupOfTheDay": "Volksgruppe des Tages",
+    "dayInTheLife": "Ein Tag im Leben",
+    "pauseAndPray": "Innehalten & Beten",
+    "mapTitle": "Karte mit dem Standort von {name}",
+    "pastPrayers": {
+      "title": "Vergangene Gebetsinhalte"
+    },
+    "navigation": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "today": "Heute"
+    }
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "loading": "Wird geladen...",
+    "minutes": "Min",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "followupPage": {
+    "recording": "Ihre Antwort wird aufgezeichnet...",
+    "error": {
+      "title": "Etwas ist schiefgelaufen",
+      "invalidLink": "Ungültiger Link. Erforderliche Parameter fehlen.",
+      "invalidResponse": "Ungültiger Antworttyp.",
+      "failed": "Ihre Antwort konnte nicht aufgezeichnet werden. Bitte versuchen Sie es erneut."
+    },
+    "goHome": "Zur Startseite",
+    "committed": {
+      "title": "Danke für Ihre Treue!",
+      "message": "Wir freuen uns zu hören, dass Sie treu im Gebet bleiben. Ihr Engagement macht einen Unterschied!",
+      "checkInNotice": "Wir melden uns in ein paar Monaten wieder.",
+      "continueButton": "Zur Kampagne"
+    },
+    "sometimes": {
+      "title": "Danke für Ihre Ehrlichkeit!",
+      "message": "Das Leben kann hektisch sein, und es ist in Ordnung, wenn Sie nicht so oft beten konnten, wie Sie wollten.",
+      "suggestion": "Möchten Sie Ihren Gebetsplan anpassen?",
+      "adjustButton": "Meinen Zeitplan anpassen",
+      "continueButton": "Zur Kampagne"
+    },
+    "notPraying": {
+      "title": "Wir verstehen",
+      "message": "Ihr Abonnement wurde pausiert. Sie werden vorerst keine Gebetserinnerungen erhalten.",
+      "reactivateNotice": "Wenn Sie in Zukunft wieder beten möchten, können Sie Ihr Abonnement jederzeit in Ihrem Profil reaktivieren.",
+      "profileButton": "Mein Profil ansehen",
+      "visitButton": "Kampagne besuchen"
+    },
+    "pageTitle": "Gebets-Check-In"
+  },
+  "email": {
+    "common": {
+      "hello": "Hallo {name}!",
+      "automatedMessage": "Dies ist eine automatische Nachricht von {appName}. Bitte antworten Sie nicht auf diese E-Mail.",
+      "managePreferences": "Einstellungen verwalten",
+      "unsubscribe": "Abmelden"
+    },
+    "verification": {
+      "subject": "Bestätigen Sie Ihre E-Mail für {campaign}",
+      "header": "Bestätigen Sie Ihre E-Mail",
+      "thankYou": "Vielen Dank für Ihre Anmeldung zu Gebetserinnerungen für {campaign}.",
+      "pleaseVerify": "Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie auf die Schaltfläche unten klicken:",
+      "verifyButton": "E-Mail bestätigen",
+      "linkInstructions": "Wenn die Schaltfläche nicht funktioniert, können Sie auch diesen Link kopieren und in Ihren Browser einfügen:",
+      "note": "Hinweis:",
+      "expiration": "Dieser Bestätigungslink läuft in 7 Tagen ab.",
+      "ignoreMessage": "Wenn Sie sich nicht für Gebetserinnerungen angemeldet haben, können Sie diese E-Mail ignorieren."
+    },
+    "welcome": {
+      "subject": "Willkommen bei {appName} - {campaign}",
+      "header": "Willkommen bei {appName}",
+      "thankYou": "Vielen Dank für Ihre Anmeldung zum Beten. Ihre E-Mail wurde bestätigt und Sie sind bereit, Gebetserinnerungen für {campaign} zu erhalten.",
+      "startPraying": "Mit dem Beten beginnen",
+      "profileInstructions": "Sie können Ihre Profildaten und Benachrichtigungen hier aktualisieren:"
+    },
+    "reminder": {
+      "subject": "Gebetserinnerung - {campaign}",
+      "header": "Gebetserinnerung",
+      "timeForPrayer": "Es ist Zeit für Ihre {duration}-minütige Gebetszeit.",
+      "viewPrayer": "Heutiges Gebet ansehen",
+      "automatedReminder": "Dies ist eine automatische Gebetserinnerung von {appName}."
+    },
+    "followup": {
+      "subject": "{campaign}: Wie geht es mit Ihrem Gebetsengagement?",
+      "subjectReminder": "Erinnerung: {campaign}: Wie geht es mit Ihrem Gebetsengagement?",
+      "header": "Gebets-Check-In",
+      "reminderIntro": "Wir haben Ihnen letzte Woche eine Nachricht gesendet und wollten nachfragen.",
+      "standardIntro": "Wir würden gerne hören, wie Ihre Gebetsreise verläuft!",
+      "questionDaily": "Beten Sie noch täglich?",
+      "questionWeekly": "Beten Sie noch {days}?",
+      "yesDaily": "Ja, ich bete täglich",
+      "yesWeekly": "Ja, an meinen geplanten Tagen",
+      "sometimes": "Manchmal, aber nicht jeden Tag",
+      "sometimesWeekly": "Manchmal, aber nicht immer",
+      "noLonger": "Nein, ich bete nicht mehr",
+      "feedbackHelps": "Ihr Feedback hilft uns zu verstehen, wie wir Ihre Gebetsreise besser unterstützen können.",
+      "pauseNotice": "Wenn wir nichts von Ihnen hören, pausieren wir Ihre Gebetserinnerungen, um Ihren Posteingang nicht zu überfüllen. Sie können sie jederzeit in Ihrem Profil reaktivieren.",
+      "commitmentCheckIn": "Dies ist ein Engagement-Check-In von {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "{campaign} Updates",
+      "headerDefault": "{appName} Updates",
+      "footer": "Sie haben diese E-Mail erhalten, weil Sie sich für Updates von {appName} angemeldet haben."
+    },
+    "days": {
+      "sunday": "Sonntag",
+      "monday": "Montag",
+      "tuesday": "Dienstag",
+      "wednesday": "Mittwoch",
+      "thursday": "Donnerstag",
+      "friday": "Freitag",
+      "saturday": "Samstag"
+    }
+  }
+}

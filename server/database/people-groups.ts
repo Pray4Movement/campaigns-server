@@ -7,6 +7,17 @@ export interface PeopleGroup {
   image_url: string | null
   metadata: string | null
   random_order: number | null
+  // Normalized columns
+  country_code: string | null
+  region: string | null
+  latitude: number | null
+  longitude: number | null
+  population: number | null
+  evangelical_pct: number | null
+  engagement_status: string | null
+  primary_religion: string | null
+  primary_language: string | null
+  descriptions: Record<string, string> | null
   created_at: string
   updated_at: string
 }
@@ -23,6 +34,17 @@ export interface UpdatePeopleGroupData {
   name?: string
   image_url?: string | null
   metadata?: string | null
+  // Normalized columns
+  country_code?: string | null
+  region?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  population?: number | null
+  evangelical_pct?: number | null
+  engagement_status?: string | null
+  primary_religion?: string | null
+  primary_language?: string | null
+  descriptions?: Record<string, string> | null
 }
 
 export class PeopleGroupService {
@@ -129,6 +151,57 @@ export class PeopleGroupService {
     if (data.metadata !== undefined) {
       updates.push('metadata = ?')
       values.push(data.metadata)
+    }
+
+    // Normalized columns
+    if (data.country_code !== undefined) {
+      updates.push('country_code = ?')
+      values.push(data.country_code)
+    }
+
+    if (data.region !== undefined) {
+      updates.push('region = ?')
+      values.push(data.region)
+    }
+
+    if (data.latitude !== undefined) {
+      updates.push('latitude = ?')
+      values.push(data.latitude)
+    }
+
+    if (data.longitude !== undefined) {
+      updates.push('longitude = ?')
+      values.push(data.longitude)
+    }
+
+    if (data.population !== undefined) {
+      updates.push('population = ?')
+      values.push(data.population)
+    }
+
+    if (data.evangelical_pct !== undefined) {
+      updates.push('evangelical_pct = ?')
+      values.push(data.evangelical_pct)
+    }
+
+    if (data.engagement_status !== undefined) {
+      updates.push('engagement_status = ?')
+      values.push(data.engagement_status)
+    }
+
+    if (data.primary_religion !== undefined) {
+      updates.push('primary_religion = ?')
+      values.push(data.primary_religion)
+    }
+
+    if (data.primary_language !== undefined) {
+      updates.push('primary_language = ?')
+      values.push(data.primary_language)
+    }
+
+    if (data.descriptions !== undefined) {
+      updates.push('descriptions = ?')
+      values.push(JSON.stringify(data.descriptions))
     }
 
     if (updates.length === 0) {

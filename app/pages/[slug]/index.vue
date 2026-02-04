@@ -44,8 +44,8 @@
               <h2 class="text-2xl md:text-3xl font-bold text-default mb-4">
                 {{ peopleGroup.name }}
               </h2>
-              <p v-if="peopleGroup.metadata?.imb_people_description" class="text-muted leading-relaxed mb-4">
-                {{ peopleGroup.metadata.imb_people_description }}
+              <p v-if="peopleGroup.generatedDescription" class="text-muted leading-relaxed mb-4">
+                {{ peopleGroup.generatedDescription }}
               </p>
               <UButton
                 :href="`https://doxa.life/research/${slug}/`"
@@ -524,6 +524,7 @@ interface CampaignResponse {
     image_url: string | null
     metadata: Record<string, any>
     labels: Record<string, string | null>
+    generatedDescription: string
     created_at: string
     updated_at: string
   } | null
@@ -539,8 +540,11 @@ const slug = route.params.slug as string
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-// Fetch campaign data
-const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`)
+// Fetch campaign data with locale for translated labels
+const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`, {
+  query: { locale },
+  watch: [locale]
+})
 const campaign = computed(() => data.value?.campaign)
 const peopleGroup = computed(() => data.value?.peopleGroup)
 const globalStartDate = computed(() => data.value?.globalStartDate)

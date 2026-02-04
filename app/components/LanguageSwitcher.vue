@@ -15,14 +15,16 @@
 </template>
 
 <script setup lang="ts">
-import { getLanguageFlag } from '~/utils/languages'
+import { getLanguageFlag, LANGUAGE_CODES } from '~/utils/languages'
 
 const { locale, locales } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
 const router = useRouter()
 
 const selectedLanguage = ref(locale.value)
-const availableLocales = computed(() => locales.value)
+const availableLocales = computed(() =>
+  locales.value.filter(l => LANGUAGE_CODES.includes(l.code))
+)
 
 // Watch for locale changes to update selected language
 watch(locale, (newLang) => {

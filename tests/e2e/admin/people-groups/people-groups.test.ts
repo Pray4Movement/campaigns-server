@@ -66,9 +66,27 @@ describe('People Groups API', async () => {
       expect(error.statusCode).toBe(401)
     })
 
-    it('returns field options for authenticated users', async () => {
+    it('returns field options with categories and fields for authenticated users', async () => {
       const response = await $fetch('/api/admin/people-groups/field-options', adminAuth)
       expect(response).toBeDefined()
+      expect(response.categories).toBeDefined()
+      expect(response.fields).toBeDefined()
+      expect(response.fieldsByCategory).toBeDefined()
+      expect(Array.isArray(response.categories)).toBe(true)
+      expect(Array.isArray(response.fields)).toBe(true)
+    })
+
+    it('returns options for a specific field', async () => {
+      const response = await $fetch('/api/admin/people-groups/field-options?field=imb_region', adminAuth)
+      expect(response).toBeDefined()
+      expect(response.options).toBeDefined()
+      expect(Array.isArray(response.options)).toBe(true)
+    })
+
+    it('indicates optionsSource for dynamic fields', async () => {
+      const response = await $fetch('/api/admin/people-groups/field-options?field=imb_isoalpha3', adminAuth)
+      expect(response).toBeDefined()
+      expect(response.optionsSource).toBe('countries')
     })
   })
 
