@@ -1,56 +1,4 @@
-import { readFileSync } from 'fs'
-import { join } from 'path'
-
-interface FieldOption {
-  label: string
-}
-
-interface FieldDefinition {
-  key: string
-  type: string
-  options?: Record<string, FieldOption> | FieldOption[]
-}
-
-interface FieldOptionsFile {
-  fields: FieldDefinition[]
-}
-
-// Cache the processed options
-let cachedOptions: Record<string, { value: string; label: string }[]> | null = null
-
-function loadFieldOptions(): Record<string, { value: string; label: string }[]> {
-  if (cachedOptions) {
-    return cachedOptions
-  }
-
-  const filePath = join(process.cwd(), 'data', 'field_options.json')
-  const fileContent = readFileSync(filePath, 'utf-8')
-  const data: FieldOptionsFile = JSON.parse(fileContent)
-
-  const options: Record<string, { value: string; label: string }[]> = {}
-
-  for (const field of data.fields) {
-    if (field.type === 'key_select' && field.options) {
-      if (Array.isArray(field.options)) {
-        // Array format: [{"label": "No"}, {"label": "Yes"}]
-        // Use index as value
-        options[field.key] = field.options.map((opt, index) => ({
-          value: String(index),
-          label: opt.label
-        }))
-      } else {
-        // Object format: {"key": {"label": "Label"}}
-        options[field.key] = Object.entries(field.options).map(([key, opt]) => ({
-          value: key,
-          label: opt.label
-        }))
-      }
-    }
-  }
-
-  cachedOptions = options
-  return options
-}
+import { allFields, getField, categories } from '../../../../app/utils/people-group-fields'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -58,17 +6,43 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const fieldKey = query.field as string | undefined
 
-  const allOptions = loadFieldOptions()
-
   if (fieldKey) {
     // Return options for a specific field
-    return {
-      options: allOptions[fieldKey] || []
+    const field = getField(fieldKey)
+    if (!field) {
+      return { options: [] }
     }
+
+    // If the field uses dynamic options source, indicate that
+    if (field.optionsSource) {
+      return {
+        optionsSource: field.optionsSource,
+        options: []
+      }
+    }
+
+    // Return static options with labelKeys for client-side translation
+    const options = field.options?.map(opt => ({
+      value: opt.value,
+      labelKey: opt.labelKey
+    })) || []
+
+    return { options }
   }
 
-  // Return all field options
+  // Return all field definitions and categories
+  const fieldsByCategory: Record<string, typeof allFields> = {}
+
+  for (const field of allFields) {
+    if (!fieldsByCategory[field.category]) {
+      fieldsByCategory[field.category] = []
+    }
+    fieldsByCategory[field.category].push(field)
+  }
+
   return {
-    options: allOptions
+    categories,
+    fieldsByCategory,
+    fields: allFields
   }
 })

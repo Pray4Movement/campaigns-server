@@ -541,8 +541,11 @@ const slug = route.params.slug as string
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-// Fetch campaign data
-const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`)
+// Fetch campaign data with locale for translated labels
+const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`, {
+  query: { locale },
+  watch: [locale]
+})
 const campaign = computed(() => data.value?.campaign)
 const peopleGroup = computed(() => data.value?.peopleGroup)
 const globalStartDate = computed(() => data.value?.globalStartDate)

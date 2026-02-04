@@ -1,6 +1,6 @@
-import en from '../../i18n/locales/en.json'
-import es from '../../i18n/locales/es.json'
-import fr from '../../i18n/locales/fr.json'
+import en from '../../i18n/locales/en/common.json'
+import es from '../../i18n/locales/es/common.json'
+import fr from '../../i18n/locales/fr/common.json'
 
 const translations: Record<string, any> = { en, es, fr }
 

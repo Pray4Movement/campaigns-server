@@ -1,0 +1,436 @@
+{
+  "welcome": "Benvenuto",
+  "hello": "Ciao",
+  "language": "Lingua",
+  "app": {
+    "title": "App"
+  },
+  "theme": {
+    "toggle": "Cambia Tema",
+    "light": "Modalita Chiara",
+    "dark": "Modalita Scura"
+  },
+  "login": {
+    "title": "Accesso Amministratore",
+    "email": "Email",
+    "emailPlaceholder": "Inserisci la tua email",
+    "password": "Password",
+    "passwordPlaceholder": "Inserisci la tua password",
+    "signIn": "Accedi",
+    "signingIn": "Accesso in corso...",
+    "error": {
+      "failed": "Accesso fallito. Controlla le tue credenziali."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "Tutti i diritti riservati"
+  },
+  "campaign": {
+    "peopleGroup": {
+      "findOutMore": "Scopri di piu",
+      "overview": {
+        "title": "Panoramica",
+        "country": "Paese:",
+        "population": "Popolazione:",
+        "language": "Lingua:",
+        "religion": "Religione:",
+        "status": "Stato:",
+        "churches": "Chiese:"
+      },
+      "prayerStatus": {
+        "title": "Stato della Preghiera",
+        "description": "persone pregano 10 minuti al giorno per questo gruppo etnico."
+      }
+    },
+    "header": {
+      "prayFor": "Prega per {campaign}"
+    },
+    "pageTitle": "Campagna",
+    "signupButton": "Iscriviti per pregare",
+    "loading": "Caricamento campagna...",
+    "notFound": {
+      "title": "Campagna Non Trovata",
+      "message": "La campagna che stai cercando non esiste o non e disponibile.",
+      "goHome": "Vai alla Home"
+    },
+    "startsOn": {
+      "message": "La preghiera inizia il {date}",
+      "signupEarly": "Iscriviti ora e sii pronto quando iniziera la preghiera!"
+    },
+    "signup": {
+      "title": "Iscriviti per Pregare",
+      "description": "Impegnati a pregare ogni giorno o ogni settimana e ricevi promemoria con contenuti di preghiera.",
+      "success": "Benvenuto! Ti sei unito al movimento di preghiera. Riceverai presto il tuo primo spunto di preghiera.",
+      "successEmail": "Ci siamo quasi! Controlla la tua email e clicca sul link di verifica per completare l'iscrizione.",
+      "checkSpam": "Non vedi l'email? Controlla la cartella spam.",
+      "modal": {
+        "title": "Controlla la Tua Email",
+        "message": "Abbiamo inviato un link di verifica a:",
+        "hint": "Clicca sul link nell'email per completare l'iscrizione. Non dimenticare di controllare la cartella spam. Se la tua email e gia verificata, riceverai un'email di conferma.",
+        "button": "Ho Capito"
+      },
+      "form": {
+        "name": {
+          "label": "Nome",
+          "placeholder": "Il tuo nome"
+        },
+        "deliveryMethod": {
+          "label": "Come vorresti ricevere i tuoi spunti di preghiera quotidiani?",
+          "placeholder": "Seleziona un metodo...",
+          "email": "Email",
+          "whatsapp": "WhatsApp",
+          "app": "App Mobile"
+        },
+        "email": {
+          "label": "Indirizzo Email",
+          "placeholder": "tua{'@'}email.com"
+        },
+        "phone": {
+          "label": "Numero di Telefono",
+          "hint": "Seleziona il tuo paese e inserisci il tuo numero di telefono"
+        },
+        "frequency": {
+          "label": "Preghero...",
+          "daily": "Ogni Giorno",
+          "weekly": "Scegli i Giorni"
+        },
+        "daysOfWeek": {
+          "label": "Seleziona i Giorni",
+          "error": "Seleziona almeno un giorno",
+          "days": {
+            "sun": "Dom",
+            "mon": "Lun",
+            "tue": "Mar",
+            "wed": "Mer",
+            "thu": "Gio",
+            "fri": "Ven",
+            "sat": "Sab"
+          }
+        },
+        "time": {
+          "label": "Orario del Promemoria",
+          "hint": "Quando vorresti ricevere il tuo promemoria di preghiera?"
+        },
+        "timezone": {
+          "label": "Il Tuo Fuso Orario",
+          "hint": "Rilevato automaticamente dal tuo browser",
+          "searchPlaceholder": "Cerca fusi orari..."
+        },
+        "duration": {
+          "label": "Per...",
+          "5min": "5 minuti",
+          "10min": "10 minuti",
+          "15min": "15 minuti",
+          "30min": "30 minuti",
+          "60min": "1 ora"
+        },
+        "reminderTime": {
+          "label": "Orario del promemoria"
+        },
+        "submit": "Impegnati a Pregare",
+        "submitting": "Iscrizione in corso...",
+        "consent": {
+          "description": "Oltre ai promemoria per la preghiera, tienimi informato con:",
+          "campaignUpdates": "Aggiornamenti su questo gruppo etnico: {campaign}",
+          "doxaGeneral": "Progressi e aggiornamenti da {link}"
+        }
+      },
+      "errors": {
+        "invalidPhone": "Inserisci un numero di telefono valido",
+        "failed": "Iscrizione fallita. Riprova."
+      }
+    },
+    "prayerFuel": {
+      "title": "Preghiera di Oggi",
+      "description": "Accedi ai contenuti e agli spunti di preghiera di oggi",
+      "button": "Vedi Contenuti di Preghiera"
+    },
+    "whyPray": {
+      "title": "Perche Pregare?",
+      "noOne": {
+        "title": "Non Hanno Nessuno",
+        "description": "Molti gruppi etnici non raggiunti non hanno chiese, missionari e spesso nemmeno credenti."
+      },
+      "opensDoors": {
+        "title": "La Preghiera Apre le Porte",
+        "description": "La preghiera ammorbidisce i cuori, apre le porte e invita l'opera dello Spirito Santo molto prima che il Vangelo venga proclamato."
+      },
+      "changed": {
+        "title": "Sperimenta la Presenza di Dio",
+        "description": "Dio ha incontrato molti in modi profondi e meravigliosi durante i loro momenti di preghiera. La preghiera quotidiana fara crescere la tua fede e ti avvicinera a Dio."
+      }
+    },
+    "sampleContent": {
+      "title": "Ricevi Contenuti di Preghiera Quotidiani",
+      "description": "Ecco un'anteprima dei contenuti di preghiera quotidiani.",
+      "peopleGroupName": "Gruppo Etnico",
+      "scripture": "Scrittura",
+      "prayerPoints": "Punti di Preghiera",
+      "peopleGroupOfDay": "Gruppo Etnico del Giorno"
+    },
+    "mobileApp": {
+      "title": "Scarica l'App Mobile",
+      "description": "Scarica la nostra app mobile per una migliore esperienza di preghiera",
+      "appStore": {
+        "label": "Scarica su",
+        "store": "App Store",
+        "ariaLabel": "Scarica su App Store"
+      },
+      "googlePlay": {
+        "label": "Disponibile su",
+        "store": "Google Play",
+        "ariaLabel": "Disponibile su Google Play"
+      }
+    },
+    "verify": {
+      "pageTitle": "Verifica Email",
+      "verifying": "Verifica della tua email in corso...",
+      "success": {
+        "title": "Email Verificata!",
+        "message": "La tua email e stata verificata con successo. Ora riceverai promemoria di preghiera per {campaign}."
+      },
+      "error": {
+        "title": "Verifica Fallita",
+        "generic": "Impossibile verificare la tua email. Questo link potrebbe essere gia stato usato o e scaduto."
+      },
+      "backToCampaign": "Torna alla Campagna",
+      "startPraying": "Inizia a Pregare"
+    },
+    "unsubscribe": {
+      "pageTitle": "Annulla Iscrizione",
+      "processing": "Elaborazione della tua richiesta...",
+      "success": {
+        "title": "Iscrizione Annullata",
+        "message": "La tua iscrizione a questo promemoria e stata annullata.",
+        "campaign": "Campagna: {title}",
+        "resubscribe": "Iscriviti di nuovo",
+        "resubscribing": "Reiscrizione in corso..."
+      },
+      "alreadyDone": {
+        "title": "Iscrizione Gia Annullata",
+        "message": "La tua iscrizione a questo promemoria e stata gia annullata."
+      },
+      "unsubscribedFromCampaign": "La tua iscrizione a tutti i promemoria di {campaign} e stata annullata.",
+      "resubscribed": {
+        "title": "Bentornato!",
+        "message": "Ti sei reiscritto ai promemoria di preghiera. Riceverai il prossimo promemoria all'orario programmato.",
+        "viewCampaign": "Visualizza Campagna"
+      },
+      "error": {
+        "title": "Errore",
+        "message": "Qualcosa e andato storto. Riprova.",
+        "goHome": "Vai alla Home"
+      },
+      "otherReminders": "Hai altri promemoria per questa campagna:",
+      "unsubscribeThis": "Annulla iscrizione",
+      "unsubscribeAll": "Annulla tutte le iscrizioni",
+      "yourSubscriptions": "Le Tue Iscrizioni",
+      "active": "attiva",
+      "unsubscribeButton": "Annulla iscrizione",
+      "unsubscribeFromAll": "Annulla l'iscrizione da tutti i promemoria di {campaign}",
+      "preferencesUpdated": "Le tue preferenze email sono state aggiornate.",
+      "noActiveSubscriptions": "Non hai iscrizioni attive.",
+      "current": "Corrente",
+      "reminderFormat": {
+        "daily": "Ogni giorno alle {time}",
+        "weekly": "{days} alle {time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "Gestisci Preferenze",
+      "title": "Impostazioni Promemoria",
+      "greeting": "Ciao {name}, gestisci le tue preferenze per i promemoria di preghiera qui sotto.",
+      "save": "Salva Modifiche",
+      "saving": "Salvataggio...",
+      "success": "Le tue preferenze sono state aggiornate.",
+      "emailChanged": "Abbiamo inviato un'email di verifica al tuo nuovo indirizzo. Verifica per continuare a ricevere i promemoria.",
+      "emailNotVerified": "La tua email non e verificata. Controlla la tua casella di posta per il link di verifica per ricevere i promemoria.",
+      "emailHint": "Cambiare la tua email richiedera una nuova verifica.",
+      "sections": {
+        "account": "Account",
+        "schedule": "Programmazione Promemoria",
+        "prayer": "Preferenze di Preghiera",
+        "emailPreferences": "Preferenze di Comunicazione"
+      },
+      "emailPreferences": {
+        "description": "Scegli quali comunicazioni desideri ricevere:",
+        "campaignUpdates": "Aggiornamenti su {campaign}",
+        "doxaGeneral": "Aggiornamenti generali da Doxa",
+        "doxaGeneralHint": "Aggiornamenti sui progressi e notizie da Doxa"
+      },
+      "consentUpdated": "Preferenze di comunicazione aggiornate.",
+      "subscriptions": "Le Tue Iscrizioni",
+      "saveAccount": "Salva Account",
+      "unsubscribed": "Iscrizione annullata",
+      "current": "Corrente",
+      "viewCampaign": "Visualizza Campagna",
+      "unsubscribeButton": "Annulla iscrizione",
+      "resubscribeButton": "Iscriviti di nuovo",
+      "unsubscribeConfirm": "Sei sicuro di voler annullare l'iscrizione da {campaign}?",
+      "unsubscribeSuccess": "La tua iscrizione e stata annullata.",
+      "resubscribeSuccess": "Ti sei reiscritto.",
+      "reminders": "promemoria",
+      "reminder": "Promemoria",
+      "deleteReminderConfirm": "Sei sicuro di voler eliminare questo promemoria?",
+      "deleteReminderSuccess": "Promemoria eliminato.",
+      "error": {
+        "title": "Errore",
+        "notFound": "Iscrizione non trovata.",
+        "failed": "Salvataggio delle modifiche fallito. Riprova."
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Contenuti di Preghiera",
+    "title": "Preghiera di Oggi",
+    "loading": "Caricamento della preghiera di oggi...",
+    "backTo": "Torna a {campaign}",
+    "backToToday": "Torna alla Preghiera di Oggi",
+    "error": {
+      "title": "Impossibile Caricare la Preghiera",
+      "backToCampaign": "Torna alla Campagna",
+      "recordFailed": "Registrazione della preghiera fallita. Riprova."
+    },
+    "noContent": {
+      "title": "Nessun Contenuto di Preghiera Oggi",
+      "message": "Torna domani per nuovi contenuti di preghiera."
+    },
+    "startsOn": {
+      "title": "Contenuti di Preghiera in Arrivo",
+      "message": "I contenuti di preghiera quotidiani inizieranno il {date}. Iscriviti ora per ricevere promemoria quando inizieranno!"
+    },
+    "dateView": {
+      "noContent": {
+        "title": "Nessun Contenuto di Preghiera",
+        "message": "Nessun contenuto di preghiera disponibile per questa data."
+      }
+    },
+    "button": {
+      "amen": "Amen",
+      "hint": "Clicca per terminare il tuo momento di preghiera"
+    },
+    "thankYou": "Grazie per aver pregato!",
+    "meetThePeople": "Incontra il Popolo",
+    "peopleGroupOfTheDay": "Gruppo Etnico del Giorno",
+    "dayInTheLife": "Un Giorno nella Vita",
+    "pauseAndPray": "Fermati e Prega",
+    "mapTitle": "Mappa che mostra la posizione di {name}",
+    "pastPrayers": {
+      "title": "Contenuti di Preghiera Passati"
+    },
+    "navigation": {
+      "previous": "Precedente",
+      "next": "Successivo",
+      "today": "Oggi"
+    }
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "create": "Crea",
+    "back": "Indietro",
+    "next": "Avanti",
+    "previous": "Precedente",
+    "loading": "Caricamento...",
+    "minutes": "min",
+    "yes": "Si",
+    "no": "No"
+  },
+  "followupPage": {
+    "recording": "Registrazione della tua risposta...",
+    "error": {
+      "title": "Qualcosa e andato storto",
+      "invalidLink": "Link non valido. Parametri richiesti mancanti.",
+      "invalidResponse": "Tipo di risposta non valido.",
+      "failed": "Registrazione della risposta fallita. Riprova."
+    },
+    "goHome": "Vai alla Home",
+    "committed": {
+      "title": "Grazie per il tuo impegno!",
+      "message": "Siamo felici di sapere che stai rimanendo fedele nella preghiera. La tua dedizione sta facendo la differenza!",
+      "checkInNotice": "Ti contatteremo di nuovo tra qualche mese.",
+      "continueButton": "Continua alla Campagna"
+    },
+    "sometimes": {
+      "title": "Grazie per la tua onesta!",
+      "message": "La vita puo essere impegnativa, e va bene se non sei riuscito a pregare quanto avresti voluto.",
+      "suggestion": "Vorresti modificare il tuo programma di preghiera con qualcosa di piu gestibile?",
+      "adjustButton": "Modifica il Mio Programma",
+      "continueButton": "Continua alla Campagna"
+    },
+    "notPraying": {
+      "title": "Capiamo",
+      "message": "La tua iscrizione e stata messa in pausa. Non riceverai promemoria di preghiera per ora.",
+      "reactivateNotice": "Se vorrai riprendere a pregare in futuro, potrai riattivare la tua iscrizione in qualsiasi momento dal tuo profilo.",
+      "profileButton": "Visualizza il Mio Profilo",
+      "visitButton": "Visita la Campagna"
+    },
+    "pageTitle": "Verifica Preghiera"
+  },
+  "email": {
+    "common": {
+      "hello": "Ciao {name}!",
+      "automatedMessage": "Questo e un messaggio automatico da {appName}. Si prega di non rispondere a questa email.",
+      "managePreferences": "Gestisci Preferenze",
+      "unsubscribe": "Annulla iscrizione"
+    },
+    "verification": {
+      "subject": "Verifica la tua email per {campaign}",
+      "header": "Verifica la Tua Email",
+      "thankYou": "Grazie per esserti iscritto ai promemoria di preghiera per {campaign}.",
+      "pleaseVerify": "Verifica il tuo indirizzo email cliccando il pulsante qui sotto:",
+      "verifyButton": "Verifica Email",
+      "linkInstructions": "Se il pulsante non funziona, puoi anche copiare e incollare questo link nel tuo browser:",
+      "note": "Nota:",
+      "expiration": "Questo link di verifica scadra tra 7 giorni.",
+      "ignoreMessage": "Se non ti sei iscritto ai promemoria di preghiera, puoi ignorare questa email."
+    },
+    "welcome": {
+      "subject": "Benvenuto su {appName} - {campaign}",
+      "header": "Benvenuto su {appName}",
+      "thankYou": "Grazie per esserti iscritto per pregare. La tua email e stata verificata e sei pronto per ricevere i promemoria di preghiera per {campaign}.",
+      "startPraying": "Inizia a Pregare",
+      "profileInstructions": "Puoi aggiornare i dettagli del tuo profilo e le tue notifiche qui:"
+    },
+    "reminder": {
+      "subject": "Promemoria di Preghiera - {campaign}",
+      "header": "Promemoria di Preghiera",
+      "timeForPrayer": "E ora della tua sessione di preghiera di {duration} minuti.",
+      "viewPrayer": "Vedi la Preghiera di Oggi",
+      "automatedReminder": "Questo e un promemoria di preghiera automatico da {appName}."
+    },
+    "followup": {
+      "subject": "{campaign}: Come sta andando il tuo impegno di preghiera?",
+      "subjectReminder": "Promemoria: {campaign}: Come sta andando il tuo impegno di preghiera?",
+      "header": "Verifica Preghiera",
+      "reminderIntro": "Ti abbiamo inviato un messaggio la settimana scorsa e volevamo fare un seguito.",
+      "standardIntro": "Ci piacerebbe sapere come sta andando il tuo percorso di preghiera!",
+      "questionDaily": "Stai ancora pregando ogni giorno?",
+      "questionWeekly": "Stai ancora pregando il {days}?",
+      "yesDaily": "Si, prego ogni giorno",
+      "yesWeekly": "Si, nei giorni programmati",
+      "sometimes": "A volte, ma non ogni giorno",
+      "sometimesWeekly": "A volte, ma non sempre",
+      "noLonger": "No, non prego piu",
+      "feedbackHelps": "Il tuo feedback ci aiuta a capire come possiamo supportare meglio il tuo percorso di preghiera.",
+      "pauseNotice": "Se non riceviamo tue notizie, metteremo in pausa i tuoi promemoria di preghiera per evitare di riempire la tua casella di posta. Puoi sempre riattivarli dal tuo profilo.",
+      "commitmentCheckIn": "Questa e una verifica dell'impegno da {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "Aggiornamenti su {campaign}",
+      "headerDefault": "Aggiornamenti da {appName}",
+      "footer": "Hai ricevuto questa email perche hai scelto di ricevere aggiornamenti da {appName}."
+    },
+    "days": {
+      "sunday": "Domenica",
+      "monday": "Lunedi",
+      "tuesday": "Martedi",
+      "wednesday": "Mercoledi",
+      "thursday": "Giovedi",
+      "friday": "Venerdi",
+      "saturday": "Sabato"
+    }
+  }
+}

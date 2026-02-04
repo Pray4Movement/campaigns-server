@@ -29,9 +29,16 @@ export default defineNuxtConfig({
 
   i18n: {
     locales: [
-      { code: 'en', name: 'English', file: 'en.json' },
-      { code: 'es', name: 'Español', file: 'es.json' },
-      { code: 'fr', name: 'Français', file: 'fr.json' }
+      { code: 'en', name: 'English', files: ['en/common.json', 'en/people-groups.json', 'en/languages.json'] },
+      { code: 'es', name: 'Español', files: ['es/common.json', 'es/people-groups.json', 'es/languages.json'] },
+      { code: 'fr', name: 'Français', files: ['fr/common.json', 'fr/people-groups.json', 'fr/languages.json'] },
+      { code: 'pt', name: 'Português', files: ['pt/common.json', 'pt/people-groups.json', 'pt/languages.json'] },
+      { code: 'de', name: 'Deutsch', files: ['de/common.json', 'de/people-groups.json', 'de/languages.json'] },
+      { code: 'it', name: 'Italiano', files: ['it/common.json', 'it/people-groups.json', 'it/languages.json'] },
+      { code: 'zh', name: '中文', files: ['zh/common.json', 'zh/people-groups.json', 'zh/languages.json'] },
+      { code: 'ar', name: 'العربية', dir: 'rtl', files: ['ar/common.json', 'ar/people-groups.json', 'ar/languages.json'] },
+      { code: 'ru', name: 'Русский', files: ['ru/common.json', 'ru/people-groups.json', 'ru/languages.json'] },
+      { code: 'hi', name: 'हिन्दी', files: ['hi/common.json', 'hi/people-groups.json', 'hi/languages.json'] }
     ],
     defaultLocale: 'en',
     langDir: 'locales',
@@ -42,7 +49,6 @@ export default defineNuxtConfig({
       redirectOn: 'root',
       alwaysRedirect: true
     },
-    types: 'composition',
     vueI18n: './i18n.config.ts'
   },
 
