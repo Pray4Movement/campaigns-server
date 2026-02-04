@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
+import { generateI18nLocales } from './config/languages'
 
 const appTitle = process.env.APP_TITLE || 'Base'
 const baseLayerUrl = process.env.BASE_LAYER_URL || 'github:corsacca/nuxt-base#master'
@@ -28,18 +29,7 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/i18n', '@nuxt/icon'],
 
   i18n: {
-    locales: [
-      { code: 'en', name: 'English', files: ['en/common.json', 'en/people-groups.json', 'en/languages.json'] },
-      { code: 'es', name: 'Español', files: ['es/common.json', 'es/people-groups.json', 'es/languages.json'] },
-      { code: 'fr', name: 'Français', files: ['fr/common.json', 'fr/people-groups.json', 'fr/languages.json'] },
-      { code: 'pt', name: 'Português', files: ['pt/common.json', 'pt/people-groups.json', 'pt/languages.json'] },
-      { code: 'de', name: 'Deutsch', files: ['de/common.json', 'de/people-groups.json', 'de/languages.json'] },
-      { code: 'it', name: 'Italiano', files: ['it/common.json', 'it/people-groups.json', 'it/languages.json'] },
-      { code: 'zh', name: '中文', files: ['zh/common.json', 'zh/people-groups.json', 'zh/languages.json'] },
-      { code: 'ar', name: 'العربية', dir: 'rtl', files: ['ar/common.json', 'ar/people-groups.json', 'ar/languages.json'] },
-      { code: 'ru', name: 'Русский', files: ['ru/common.json', 'ru/people-groups.json', 'ru/languages.json'] },
-      { code: 'hi', name: 'हिन्दी', files: ['hi/common.json', 'hi/people-groups.json', 'hi/languages.json'] }
-    ],
+    locales: generateI18nLocales(),
     defaultLocale: 'en',
     langDir: 'locales',
     strategy: 'prefix_except_default',
