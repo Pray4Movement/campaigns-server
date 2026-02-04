@@ -109,7 +109,7 @@ export default defineEventHandler(async (event): Promise<ImportResult> => {
 
         matched++
 
-        // Update people_desc if we have a description
+        // Update descriptions->en if we have a description
         if (desc) {
           // Log first few updates for verification
           if (updated < 3) {
@@ -117,7 +117,8 @@ export default defineEventHandler(async (event): Promise<ImportResult> => {
           }
           const updateStmt = db.prepare(`
             UPDATE people_groups
-            SET people_desc = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+            SET descriptions = COALESCE(descriptions, '{}'::jsonb) || jsonb_build_object('en', ?::text),
+                updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
             WHERE id = ?
           `)
           await updateStmt.run(desc, result.id)

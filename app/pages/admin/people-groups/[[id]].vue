@@ -169,7 +169,6 @@ interface PeopleGroup {
   dt_id: string
   name: string
   image_url: string | null
-  people_desc: string | null
   descriptions: Record<string, string> | null
   metadata: Record<string, any>
   created_at: string
@@ -280,7 +279,6 @@ function initializeForm(group: PeopleGroup) {
     name: group.name,
     image_url: group.image_url,
     dt_id: group.dt_id,
-    people_desc: group.people_desc,
     descriptions: group.descriptions || {},
     ...group.metadata
   }
@@ -315,7 +313,7 @@ async function saveChanges() {
   try {
     saving.value = true
 
-    const { name, image_url, dt_id, people_desc, descriptions, ...metadataFields } = formData.value
+    const { name, image_url, dt_id, descriptions, ...metadataFields } = formData.value
 
     const response = await $fetch<{ success: boolean; peopleGroup: PeopleGroup }>(
       `/api/admin/people-groups/${selectedGroup.value.id}`,
@@ -324,7 +322,6 @@ async function saveChanges() {
         body: {
           name,
           image_url,
-          people_desc,
           descriptions,
           metadata: metadataFields
         }

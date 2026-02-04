@@ -6,7 +6,6 @@ export interface PeopleGroup {
   name: string
   image_url: string | null
   metadata: string | null
-  people_desc: string | null
   random_order: number | null
   // Normalized columns
   country_code: string | null
@@ -34,7 +33,6 @@ export interface UpdatePeopleGroupData {
   dt_id?: string
   name?: string
   image_url?: string | null
-  people_desc?: string | null
   metadata?: string | null
   // Normalized columns
   country_code?: string | null
@@ -153,11 +151,6 @@ export class PeopleGroupService {
     if (data.metadata !== undefined) {
       updates.push('metadata = ?')
       values.push(data.metadata)
-    }
-
-    if (data.people_desc !== undefined) {
-      updates.push('people_desc = ?')
-      values.push(data.people_desc)
     }
 
     // Normalized columns

@@ -1,5 +1,22 @@
 {
   "peopleGroups": {
+    "descriptionTemplates": {
+      "nameCountryPopulationEngagement": "I {name} di {country}, che contano circa {population} persone, sono {engagementStatus}.",
+      "nameCountryPopulation": "I {name} di {country} contano circa {population} persone.",
+      "namePopulation": "I {name} contano circa {population} persone.",
+      "peopleDescWithAltNames": "Sono {peopleDesc} e possono anche essere conosciuti come {altNames}.",
+      "peopleDesc": "Sono {peopleDesc}.",
+      "indigenousClusterBloc": "Sono un popolo Indigeno, nel cluster di popoli {cluster} del blocco di affinità {bloc}.",
+      "diasporaClusterBloc": "Sono un popolo della Diaspora, nel cluster di popoli {cluster} del blocco di affinità {bloc}.",
+      "indigenousBloc": "Sono un popolo Indigeno, nel blocco di affinità {bloc}.",
+      "diasporaBloc": "Sono un popolo della Diaspora, nel blocco di affinità {bloc}.",
+      "indigenousOnly": "Sono un popolo Indigeno.",
+      "diasporaOnly": "Sono un popolo della Diaspora.",
+      "blocOnly": "Fanno parte del blocco di affinità {bloc}.",
+      "religion": "La loro religione principale è {religion}.",
+      "language": "Parlano principalmente {language}.",
+      "andUnreached": "e Non Raggiunti"
+    },
     "categories": {
       "basic": "Informazioni di Base",
       "identifiers": "Identificatori",

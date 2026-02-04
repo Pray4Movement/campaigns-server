@@ -1,5 +1,22 @@
 {
   "peopleGroups": {
+    "descriptionTemplates": {
+      "nameCountryPopulationEngagement": "Die {name} aus {country}, mit etwa {population} Menschen, sind {engagementStatus}.",
+      "nameCountryPopulation": "Die {name} aus {country} zählen etwa {population} Menschen.",
+      "namePopulation": "Die {name} zählen etwa {population} Menschen.",
+      "peopleDescWithAltNames": "Sie sind {peopleDesc} und können auch als {altNames} bekannt sein.",
+      "peopleDesc": "Sie sind {peopleDesc}.",
+      "indigenousClusterBloc": "Sie sind ein indigenes Volk, im Volkscluster {cluster} des Affinitätsblocks {bloc}.",
+      "diasporaClusterBloc": "Sie sind ein Diaspora-Volk, im Volkscluster {cluster} des Affinitätsblocks {bloc}.",
+      "indigenousBloc": "Sie sind ein indigenes Volk, im Affinitätsblock {bloc}.",
+      "diasporaBloc": "Sie sind ein Diaspora-Volk, im Affinitätsblock {bloc}.",
+      "indigenousOnly": "Sie sind ein indigenes Volk.",
+      "diasporaOnly": "Sie sind ein Diaspora-Volk.",
+      "blocOnly": "Sie gehören zum Affinitätsblock {bloc}.",
+      "religion": "Ihre Hauptreligion ist {religion}.",
+      "language": "Sie sprechen hauptsächlich {language}.",
+      "andUnreached": "und Unerreicht"
+    },
     "categories": {
       "basic": "Grundinformationen",
       "identifiers": "Kennungen",

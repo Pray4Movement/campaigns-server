@@ -1,5 +1,22 @@
 {
   "peopleGroups": {
+    "descriptionTemplates": {
+      "nameCountryPopulationEngagement": "{country}的{name}人，约有{population}人，{engagementStatus}。",
+      "nameCountryPopulation": "{country}的{name}人约有{population}人。",
+      "namePopulation": "{name}人约有{population}人。",
+      "peopleDescWithAltNames": "他们是{peopleDesc}，也被称为{altNames}。",
+      "peopleDesc": "他们是{peopleDesc}。",
+      "indigenousClusterBloc": "他们是原住民族群，属于{bloc}亲缘集团中的{cluster}族群群。",
+      "diasporaClusterBloc": "他们是散居族群，属于{bloc}亲缘集团中的{cluster}族群群。",
+      "indigenousBloc": "他们是原住民族群，属于{bloc}亲缘集团。",
+      "diasporaBloc": "他们是散居族群，属于{bloc}亲缘集团。",
+      "indigenousOnly": "他们是原住民族群。",
+      "diasporaOnly": "他们是散居族群。",
+      "blocOnly": "他们属于{bloc}亲缘集团。",
+      "religion": "他们的主要宗教是{religion}。",
+      "language": "他们主要使用{language}。",
+      "andUnreached": "且未得之民"
+    },
     "categories": {
       "basic": "基本信息",
       "identifiers": "标识符",

@@ -86,11 +86,12 @@ export default defineEventHandler(async (event) => {
       }
 
       // Generate description from template
+      const descriptions = pg.descriptions ? (typeof pg.descriptions === 'string' ? JSON.parse(pg.descriptions) : pg.descriptions) : null
       const generatedDescription = generatePeopleGroupDescription({
         name: pg.name,
-        people_desc: pg.people_desc,
+        descriptions,
         metadata
-      })
+      }, locale)
 
       peopleGroup = {
         ...pg,

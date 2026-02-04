@@ -1,5 +1,22 @@
 {
   "peopleGroups": {
+    "descriptionTemplates": {
+      "nameCountryPopulationEngagement": "Народ {name} из {country}, численностью около {population} человек, {engagementStatus}.",
+      "nameCountryPopulation": "Народ {name} из {country} насчитывает около {population} человек.",
+      "namePopulation": "Народ {name} насчитывает около {population} человек.",
+      "peopleDescWithAltNames": "Они {peopleDesc} и также могут быть известны как {altNames}.",
+      "peopleDesc": "Они {peopleDesc}.",
+      "indigenousClusterBloc": "Они являются коренным народом, в кластере народов {cluster} аффинитетного блока {bloc}.",
+      "diasporaClusterBloc": "Они являются диаспорным народом, в кластере народов {cluster} аффинитетного блока {bloc}.",
+      "indigenousBloc": "Они являются коренным народом, в аффинитетном блоке {bloc}.",
+      "diasporaBloc": "Они являются диаспорным народом, в аффинитетном блоке {bloc}.",
+      "indigenousOnly": "Они являются коренным народом.",
+      "diasporaOnly": "Они являются диаспорным народом.",
+      "blocOnly": "Они принадлежат к аффинитетному блоку {bloc}.",
+      "religion": "Их основная религия — {religion}.",
+      "language": "Они в основном говорят на {language}.",
+      "andUnreached": "и Недостигнутые"
+    },
     "categories": {
       "basic": "Основная информация",
       "identifiers": "Идентификаторы",

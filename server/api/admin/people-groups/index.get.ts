@@ -13,10 +13,11 @@ export default defineEventHandler(async (event) => {
     peopleGroupService.countPeopleGroups(search)
   ])
 
-  // Parse metadata for each group
+  // Parse metadata and descriptions for each group
   const groupsWithParsedMetadata = peopleGroups.map(group => ({
     ...group,
-    metadata: group.metadata ? JSON.parse(group.metadata) : {}
+    metadata: group.metadata ? JSON.parse(group.metadata) : {},
+    descriptions: group.descriptions ? (typeof group.descriptions === 'string' ? JSON.parse(group.descriptions) : group.descriptions) : {}
   }))
 
   return {

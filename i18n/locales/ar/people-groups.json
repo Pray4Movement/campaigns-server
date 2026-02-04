@@ -1,5 +1,22 @@
 {
   "peopleGroups": {
+    "descriptionTemplates": {
+      "nameCountryPopulationEngagement": "يبلغ عدد {name} في {country} حوالي {population} شخص، وهم {engagementStatus}.",
+      "nameCountryPopulation": "يبلغ عدد {name} في {country} حوالي {population} شخص.",
+      "namePopulation": "يبلغ عدد {name} حوالي {population} شخص.",
+      "peopleDescWithAltNames": "هم {peopleDesc} ويمكن أن يُعرفوا أيضاً باسم {altNames}.",
+      "peopleDesc": "هم {peopleDesc}.",
+      "indigenousClusterBloc": "هم شعب أصلي، في مجموعة شعوب {cluster} من كتلة التقارب {bloc}.",
+      "diasporaClusterBloc": "هم شعب مهجري، في مجموعة شعوب {cluster} من كتلة التقارب {bloc}.",
+      "indigenousBloc": "هم شعب أصلي، في كتلة التقارب {bloc}.",
+      "diasporaBloc": "هم شعب مهجري، في كتلة التقارب {bloc}.",
+      "indigenousOnly": "هم شعب أصلي.",
+      "diasporaOnly": "هم شعب مهجري.",
+      "blocOnly": "هم في كتلة التقارب {bloc}.",
+      "religion": "ديانتهم الرئيسية هي {religion}.",
+      "language": "يتحدثون بشكل رئيسي {language}.",
+      "andUnreached": "وغير مُبلَّغين"
+    },
     "categories": {
       "basic": "المعلومات الأساسية",
       "identifiers": "المعرّفات",

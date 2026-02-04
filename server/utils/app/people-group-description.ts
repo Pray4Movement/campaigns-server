@@ -1,4 +1,4 @@
-import { getFieldOptionLabel } from './field-options'
+import { getFieldOptionLabel, getTranslatedLabel } from './field-options'
 
 interface PeopleGroupMetadata {
   imb_isoalpha3?: string
@@ -17,12 +17,21 @@ interface PeopleGroupMetadata {
 
 interface PeopleGroupData {
   name: string
-  people_desc?: string | null
+  descriptions?: Record<string, string> | null
   metadata: PeopleGroupMetadata
 }
 
 /**
+ * Gets a description template string and interpolates values into it.
+ */
+function getTemplate(key: string, locale: string, values: Record<string, string>): string {
+  const template = getTranslatedLabel(`peopleGroups.descriptionTemplates.${key}`, locale)
+  return template.replace(/\{(\w+)\}/g, (_, k) => values[k] || '')
+}
+
+/**
  * Generates a description for a people group using a template and field values.
+ * Supports localization through the locale parameter.
  *
  * Template:
  * The {name} of {country}, numbering approximately {population} people, are {engagementStatus}.
@@ -31,15 +40,17 @@ interface PeopleGroupData {
  * Their primary religion is {religion}.
  * They primarily speak {language}.
  */
-export function generatePeopleGroupDescription(peopleGroup: PeopleGroupData): string {
-  const { name, people_desc, metadata } = peopleGroup
+export function generatePeopleGroupDescription(peopleGroup: PeopleGroupData, locale: string = 'en'): string {
+  const { name, descriptions, metadata } = peopleGroup
+  // Get description for the requested locale, falling back to English
+  const peopleDesc = descriptions?.[locale] || descriptions?.['en'] || null
 
   const parts: string[] = []
 
   // First sentence: name, country, population, engagement status
-  const country = getFieldOptionLabel('imb_isoalpha3', metadata.imb_isoalpha3 || '') || metadata.imb_isoalpha3
-  const population = metadata.imb_population ? Number(metadata.imb_population).toLocaleString() : null
-  const engagementLabel = getFieldOptionLabel('imb_engagement_status', metadata.imb_engagement_status || '') || metadata.imb_engagement_status
+  const country = getFieldOptionLabel('imb_isoalpha3', metadata.imb_isoalpha3 || '', locale) || metadata.imb_isoalpha3
+  const population = metadata.imb_population ? Number(metadata.imb_population).toLocaleString(locale) : null
+  const engagementLabel = getFieldOptionLabel('imb_engagement_status', metadata.imb_engagement_status || '', locale) || metadata.imb_engagement_status
 
   // GSEC 0-3 = Unreached (< 2% evangelical)
   const gsecValue = metadata.imb_gsec !== undefined ? Number(metadata.imb_gsec) : null
@@ -48,59 +59,61 @@ export function generatePeopleGroupDescription(peopleGroup: PeopleGroupData): st
   // Combine engagement status with unreached status
   let engagementStatus = engagementLabel
   if (engagementStatus && isUnreached) {
-    engagementStatus = `${engagementStatus} and Unreached`
+    const andUnreached = getTranslatedLabel('peopleGroups.descriptionTemplates.andUnreached', locale)
+    engagementStatus = `${engagementStatus} ${andUnreached}`
   }
 
   if (country && population && engagementStatus) {
-    parts.push(`The ${name} of ${country}, numbering approximately ${population} people, are ${engagementStatus}.`)
+    parts.push(getTemplate('nameCountryPopulationEngagement', locale, { name, country, population, engagementStatus }))
   } else if (country && population) {
-    parts.push(`The ${name} of ${country} number approximately ${population} people.`)
+    parts.push(getTemplate('nameCountryPopulation', locale, { name, country, population }))
   } else if (population) {
-    parts.push(`The ${name} number approximately ${population} people.`)
+    parts.push(getTemplate('namePopulation', locale, { name, population }))
   }
 
-  // Second sentence: people description (from imported CSV) with alternate names
-  if (people_desc) {
+  // Second sentence: people description with alternate names
+  if (peopleDesc) {
     const altNames = metadata.imb_alternate_name
     if (altNames) {
-      parts.push(`They are ${people_desc} and can also be known as ${altNames}.`)
+      parts.push(getTemplate('peopleDescWithAltNames', locale, { peopleDesc, altNames }))
     } else {
-      parts.push(`They are ${people_desc}.`)
+      parts.push(getTemplate('peopleDesc', locale, { peopleDesc }))
     }
   }
 
   // Third sentence: indigenous status, people cluster, and affinity bloc
   // imb_is_indigenous: "1" = Indigenous, "0" = Diaspora
   const indigenousRaw = metadata.imb_is_indigenous
-  const indigenousStatus = indigenousRaw === '1' || indigenousRaw === 1 ? 'Indigenous' : indigenousRaw === '0' || indigenousRaw === 0 ? 'Diaspora' : null
-  const peopleCluster = getFieldOptionLabel('imb_reg_of_people_2', metadata.imb_reg_of_people_2 || '') || null
-  const affinityBloc = getFieldOptionLabel('imb_reg_of_people_1', metadata.imb_reg_of_people_1 || '') || null
+  const isIndigenous = indigenousRaw === '1' || indigenousRaw === 1
+  const isDiaspora = indigenousRaw === '0' || indigenousRaw === 0
+  const peopleCluster = getFieldOptionLabel('imb_reg_of_people_2', metadata.imb_reg_of_people_2 || '', locale) || null
+  const affinityBloc = getFieldOptionLabel('imb_reg_of_people_1', metadata.imb_reg_of_people_1 || '', locale) || null
 
-  if (indigenousStatus && peopleCluster && affinityBloc) {
-    const indigenousArticle = indigenousStatus.toLowerCase().startsWith('i') ? 'an' : 'a'
-    parts.push(`They are ${indigenousArticle} ${indigenousStatus} people, in the ${peopleCluster} people cluster of the ${affinityBloc} affinity bloc.`)
-  } else if (indigenousStatus && affinityBloc) {
-    const indigenousArticle = indigenousStatus.toLowerCase().startsWith('i') ? 'an' : 'a'
-    parts.push(`They are ${indigenousArticle} ${indigenousStatus} people, in the ${affinityBloc} affinity bloc.`)
-  } else if (indigenousStatus) {
-    const indigenousArticle = indigenousStatus.toLowerCase().startsWith('i') ? 'an' : 'a'
-    parts.push(`They are ${indigenousArticle} ${indigenousStatus} people.`)
+  if ((isIndigenous || isDiaspora) && peopleCluster && affinityBloc) {
+    const templateKey = isIndigenous ? 'indigenousClusterBloc' : 'diasporaClusterBloc'
+    parts.push(getTemplate(templateKey, locale, { cluster: peopleCluster, bloc: affinityBloc }))
+  } else if ((isIndigenous || isDiaspora) && affinityBloc) {
+    const templateKey = isIndigenous ? 'indigenousBloc' : 'diasporaBloc'
+    parts.push(getTemplate(templateKey, locale, { bloc: affinityBloc }))
+  } else if (isIndigenous || isDiaspora) {
+    const templateKey = isIndigenous ? 'indigenousOnly' : 'diasporaOnly'
+    parts.push(getTemplate(templateKey, locale, {}))
   } else if (affinityBloc) {
-    parts.push(`They are in the ${affinityBloc} affinity bloc.`)
+    parts.push(getTemplate('blocOnly', locale, { bloc: affinityBloc }))
   }
 
   // Fourth sentence: religion
-  const religion = getFieldOptionLabel('imb_reg_of_religion', metadata.imb_reg_of_religion || '')
-    || getFieldOptionLabel('imb_reg_of_religion_3', metadata.imb_reg_of_religion_3 || '')
+  const religion = getFieldOptionLabel('imb_reg_of_religion', metadata.imb_reg_of_religion || '', locale)
+    || getFieldOptionLabel('imb_reg_of_religion_3', metadata.imb_reg_of_religion_3 || '', locale)
     || metadata.imb_reg_of_religion
   if (religion) {
-    parts.push(`Their primary religion is ${religion}.`)
+    parts.push(getTemplate('religion', locale, { religion }))
   }
 
   // Fifth sentence: language
-  const language = getFieldOptionLabel('imb_reg_of_language', metadata.imb_reg_of_language || '') || metadata.imb_reg_of_language
+  const language = getFieldOptionLabel('imb_reg_of_language', metadata.imb_reg_of_language || '', locale) || metadata.imb_reg_of_language
   if (language) {
-    parts.push(`They primarily speak ${language}.`)
+    parts.push(getTemplate('language', locale, { language }))
   }
 
   return parts.join(' ')

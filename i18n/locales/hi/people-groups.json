@@ -1,5 +1,22 @@
 {
   "peopleGroups": {
+    "descriptionTemplates": {
+      "nameCountryPopulationEngagement": "{country} के {name}, जिनकी संख्या लगभग {population} है, {engagementStatus} हैं।",
+      "nameCountryPopulation": "{country} के {name} की संख्या लगभग {population} है।",
+      "namePopulation": "{name} की संख्या लगभग {population} है।",
+      "peopleDescWithAltNames": "वे {peopleDesc} हैं और उन्हें {altNames} के नाम से भी जाना जाता है।",
+      "peopleDesc": "वे {peopleDesc} हैं।",
+      "indigenousClusterBloc": "वे एक स्वदेशी जनसमूह हैं, जो {bloc} संबंध समूह के {cluster} जनसमूह समूह में हैं।",
+      "diasporaClusterBloc": "वे एक प्रवासी जनसमूह हैं, जो {bloc} संबंध समूह के {cluster} जनसमूह समूह में हैं।",
+      "indigenousBloc": "वे एक स्वदेशी जनसमूह हैं, जो {bloc} संबंध समूह में हैं।",
+      "diasporaBloc": "वे एक प्रवासी जनसमूह हैं, जो {bloc} संबंध समूह में हैं।",
+      "indigenousOnly": "वे एक स्वदेशी जनसमूह हैं।",
+      "diasporaOnly": "वे एक प्रवासी जनसमूह हैं।",
+      "blocOnly": "वे {bloc} संबंध समूह में हैं।",
+      "religion": "उनका प्राथमिक धर्म {religion} है।",
+      "language": "वे मुख्य रूप से {language} बोलते हैं।",
+      "andUnreached": "और अप्राप्त"
+    },
     "categories": {
       "basic": "मूल जानकारी",
       "identifiers": "पहचानकर्ता",

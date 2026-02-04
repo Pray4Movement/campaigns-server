@@ -525,7 +525,6 @@ interface CampaignResponse {
     metadata: Record<string, any>
     labels: Record<string, string | null>
     generatedDescription: string
-    people_desc: string | null
     created_at: string
     updated_at: string
   } | null

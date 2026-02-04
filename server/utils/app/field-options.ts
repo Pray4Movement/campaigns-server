@@ -95,16 +95,11 @@ export function getFieldOptionLabel(fieldKey: string, optionKey: string, locale:
 }
 
 // Get translated label from translation files
-function getTranslatedLabel(labelKey: string, locale: string): string {
+export function getTranslatedLabel(labelKey: string, locale: string): string {
   const translations = loadTranslations(locale)
 
   // Parse the labelKey (e.g., 'peopleGroups.options.religion.MSN')
   const parts = labelKey.split('.')
-
-  // Remove 'peopleGroups' prefix if present (since our file is people-groups.json)
-  if (parts[0] === 'peopleGroups') {
-    parts.shift()
-  }
 
   // Navigate to the value
   let value: any = translations
