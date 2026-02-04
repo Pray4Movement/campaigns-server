@@ -81,6 +81,56 @@
               Import Descriptions
             </UButton>
           </div>
+
+          <!-- Batch Translation -->
+          <div class="border-t border-[var(--ui-border)] pt-8 mt-8">
+            <h3 class="text-lg font-medium mb-2">Batch Translation</h3>
+            <p class="text-[var(--ui-text-muted)] mb-4">Translate a translatable field from English to all other languages for all people groups.</p>
+
+            <div class="flex flex-wrap items-end gap-4">
+              <div class="w-64">
+                <label class="block text-sm font-medium mb-1">Field to translate</label>
+                <USelect
+                  v-model="selectedTranslateField"
+                  :items="translatableFieldOptions"
+                  placeholder="Select a field"
+                />
+              </div>
+
+              <UCheckbox
+                v-model="translateOverwrite"
+                label="Overwrite existing translations"
+              />
+
+              <UButton
+                @click="showTranslateConfirmModal = true"
+                :disabled="!selectedTranslateField"
+                variant="outline"
+                icon="i-lucide-languages"
+              >
+                Translate Field
+              </UButton>
+            </div>
+
+            <UAlert
+              v-if="translateMessage"
+              :color="translateMessage.type === 'success' ? 'success' : 'error'"
+              :title="translateMessage.text"
+              class="mt-4"
+            />
+
+            <UCard v-if="translateStats" class="mt-6">
+              <template #header>
+                <h3 class="font-semibold">Translation Results</h3>
+              </template>
+              <div class="space-y-2">
+                <p><strong>Total with English content:</strong> {{ translateStats.total }}</p>
+                <p><strong>Translated:</strong> {{ translateStats.translated }}</p>
+                <p><strong>Skipped (already translated):</strong> {{ translateStats.skipped }}</p>
+                <p><strong>Errors:</strong> {{ translateStats.errors }}</p>
+              </div>
+            </UCard>
+          </div>
         </div>
 
         <!-- Campaigns Tab -->
@@ -144,10 +194,69 @@
         </div>
       </template>
     </UTabs>
+
+    <!-- Translation Confirmation Modal -->
+    <UModal v-model:open="showTranslateConfirmModal" title="Confirm Batch Translation" :close="!isTranslating">
+      <template #body>
+        <div class="p-6 space-y-4">
+          <!-- Pre-translation info -->
+          <template v-if="!isTranslating">
+            <p>
+              This will translate the <strong>{{ selectedFieldLabel }}</strong> field from English to all other languages for all people groups that have English content.
+            </p>
+            <p v-if="translateOverwrite" class="text-amber-600 dark:text-amber-400">
+              Existing translations will be overwritten.
+            </p>
+            <p v-else>
+              Existing translations will be preserved (only missing languages will be translated).
+            </p>
+          </template>
+
+          <!-- Progress display -->
+          <template v-else>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-lucide-loader-2" class="w-5 h-5 animate-spin text-primary" />
+                <span class="font-medium">{{ translateProgress.message }}</span>
+              </div>
+
+              <UProgress
+                v-if="translateProgress.percent !== undefined"
+                :value="translateProgress.percent"
+                size="sm"
+              />
+
+              <p v-if="translateProgress.detail" class="text-sm text-[var(--ui-text-muted)]">
+                {{ translateProgress.detail }}
+              </p>
+            </div>
+          </template>
+
+          <div class="flex gap-2 justify-end pt-4">
+            <UButton
+              v-if="!isTranslating"
+              variant="outline"
+              @click="showTranslateConfirmModal = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              v-if="!isTranslating"
+              @click="translateField"
+              color="primary"
+            >
+              Start Translation
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
+import { allFields } from '~/utils/people-group-fields'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'superadmin'
@@ -174,6 +283,30 @@ const prayerCountsMessage = ref<{ text: string; type: 'success' | 'error' } | nu
 const isSyncingCampaigns = ref(false)
 const campaignSyncMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 const campaignSyncStats = ref<{ total: number; created: number; updated: number; skipped: number; errors: number } | null>(null)
+
+// Translation state
+const selectedTranslateField = ref<string | null>(null)
+const translateOverwrite = ref(false)
+const showTranslateConfirmModal = ref(false)
+const isTranslating = ref(false)
+const translateMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
+const translateStats = ref<{ total: number; translated: number; skipped: number; errors: number } | null>(null)
+const translateProgress = ref<{ message: string; detail?: string; percent?: number }>({ message: 'Starting...' })
+
+// Filter to only translatable fields
+const translatableFieldOptions = computed(() =>
+  allFields
+    .filter(f => f.type === 'translatable')
+    .map(f => ({
+      label: f.key,
+      value: f.key
+    }))
+)
+
+const selectedFieldLabel = computed(() => {
+  const field = allFields.find(f => f.key === selectedTranslateField.value)
+  return field?.key || selectedTranslateField.value
+})
 
 async function createBackup() {
   isCreatingBackup.value = true
@@ -293,6 +426,97 @@ async function syncCampaignsFromPeopleGroups() {
     }
   } finally {
     isSyncingCampaigns.value = false
+  }
+}
+
+async function translateField() {
+  if (!selectedTranslateField.value) return
+
+  isTranslating.value = true
+  translateMessage.value = null
+  translateStats.value = null
+  translateProgress.value = { message: 'Starting translation...' }
+
+  try {
+    const response = await fetch('/api/admin/people-groups/translate-field', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        fieldKey: selectedTranslateField.value,
+        overwrite: translateOverwrite.value
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`)
+    }
+
+    const reader = response.body?.getReader()
+    if (!reader) {
+      throw new Error('No response body')
+    }
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+
+      // Parse SSE events from buffer
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+      let eventType = ''
+      for (const line of lines) {
+        if (line.startsWith('event: ')) {
+          eventType = line.slice(7)
+        } else if (line.startsWith('data: ')) {
+          const data = JSON.parse(line.slice(6))
+
+          if (eventType === 'progress') {
+            translateProgress.value = {
+              message: data.message,
+              detail: data.saved && data.totalPeopleGroups
+                ? `${data.saved} of ${data.totalPeopleGroups}`
+                : data.languageIndex && data.totalLanguages
+                  ? `Language ${data.languageIndex} of ${data.totalLanguages}`
+                  : undefined,
+              percent: data.saved && data.totalPeopleGroups
+                ? Math.round((data.saved / data.totalPeopleGroups) * 100)
+                : data.languageIndex && data.totalLanguages
+                  ? Math.round((data.languageIndex / data.totalLanguages) * 100)
+                  : undefined
+            }
+          } else if (eventType === 'complete') {
+            translateMessage.value = {
+              text: data.message,
+              type: data.success ? 'success' : 'error'
+            }
+            translateStats.value = data.stats
+            showTranslateConfirmModal.value = false
+          } else if (eventType === 'error') {
+            translateMessage.value = {
+              text: data.message,
+              type: 'error'
+            }
+            showTranslateConfirmModal.value = false
+          }
+        }
+      }
+    }
+  } catch (error: any) {
+    console.error('Translation error:', error)
+    translateMessage.value = {
+      text: error.message || 'Translation failed. Please try again.',
+      type: 'error'
+    }
+    showTranslateConfirmModal.value = false
+  } finally {
+    isTranslating.value = false
   }
 }
 </script>

@@ -134,6 +134,7 @@
                   v-else-if="field.type === 'translatable'"
                   :model-value="getFieldValue(field.key)"
                   @update:model-value="setFieldValue(field.key, $event)"
+                  @save="saveChanges"
                   :rows="3"
                 />
 
