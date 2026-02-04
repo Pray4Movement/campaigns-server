@@ -19,6 +19,7 @@
       "imb_alternate_name": "Альтернативное название",
       "imb_people_name": "Название народа (ROP3)",
       "people_desc": "Описание народа (из IMB)",
+      "descriptions": "Описание народа",
       "imb_people_description": "Описание (из API)",
       "imb_location_description": "Описание местоположения",
       "dt_id": "ID Disciple Tools",

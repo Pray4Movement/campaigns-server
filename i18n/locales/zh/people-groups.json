@@ -19,6 +19,7 @@
       "imb_alternate_name": "别名",
       "imb_people_name": "族群名称 (ROP3)",
       "people_desc": "族群描述 (来自IMB)",
+      "descriptions": "族群描述",
       "imb_people_description": "描述 (来自API)",
       "imb_location_description": "位置描述",
       "dt_id": "Disciple Tools ID",

@@ -19,6 +19,7 @@
       "imb_alternate_name": "Nome Alternativo",
       "imb_people_name": "Nome del Popolo (ROP3)",
       "people_desc": "Descrizione del Popolo (da IMB)",
+      "descriptions": "Descrizione del Gruppo Etnico",
       "imb_people_description": "Descrizione (da API)",
       "imb_location_description": "Descrizione della Posizione",
       "dt_id": "ID Disciple Tools",

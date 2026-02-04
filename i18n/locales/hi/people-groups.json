@@ -19,6 +19,7 @@
       "imb_alternate_name": "वैकल्पिक नाम",
       "imb_people_name": "लोगों का नाम (ROP3)",
       "people_desc": "जनसमूह का विवरण (IMB से)",
+      "descriptions": "जनसमूह का विवरण",
       "imb_people_description": "विवरण (API से)",
       "imb_location_description": "स्थान का विवरण",
       "dt_id": "Disciple Tools आईडी",

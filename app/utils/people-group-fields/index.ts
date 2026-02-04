@@ -7,7 +7,7 @@ import { field as name } from './fields/name'
 import { field as imbDisplayName } from './fields/imb-display-name'
 import { field as imbAlternateName } from './fields/imb-alternate-name'
 import { field as imbPeopleName } from './fields/imb-people-name'
-import { field as peopleDesc } from './fields/people-desc'
+import { field as descriptions } from './fields/descriptions'
 import { field as imbPeopleDescription } from './fields/imb-people-description'
 import { field as imbLocationDescription } from './fields/imb-location-description'
 
@@ -88,7 +88,7 @@ export const allFields: FieldDefinition[] = [
   imbDisplayName,
   imbAlternateName,
   imbPeopleName,
-  peopleDesc,
+  descriptions,
   imbPeopleDescription,
   imbLocationDescription,
   // Identifiers

@@ -84,7 +84,7 @@
                 :key="field.key"
                 :label="field.label"
                 :hint="field.description"
-                :class="{ 'full-width': field.type === 'textarea' }"
+                :class="{ 'full-width': field.type === 'textarea' || field.type === 'translatable' }"
               >
                 <!-- Read-only field -->
                 <div v-if="field.readOnly" class="readonly-field">
@@ -130,12 +130,11 @@
                   class="w-full"
                 />
                 <!-- Translatable field (multi-language textarea) -->
-                <UTextarea
+                <TranslatableField
                   v-else-if="field.type === 'translatable'"
                   :model-value="getFieldValue(field.key)"
                   @update:model-value="setFieldValue(field.key, $event)"
                   :rows="3"
-                  class="w-full"
                 />
 
                 <!-- Boolean -->
@@ -171,6 +170,7 @@ interface PeopleGroup {
   name: string
   image_url: string | null
   people_desc: string | null
+  descriptions: Record<string, string> | null
   metadata: Record<string, any>
   created_at: string
   updated_at: string
@@ -281,13 +281,19 @@ function initializeForm(group: PeopleGroup) {
     image_url: group.image_url,
     dt_id: group.dt_id,
     people_desc: group.people_desc,
+    descriptions: group.descriptions || {},
     ...group.metadata
   }
 }
 
 // Get field value from form data
 function getFieldValue(key: string): any {
-  return formData.value[key] ?? ''
+  const value = formData.value[key]
+  // For translatable fields (like descriptions), return the object or empty object
+  if (key === 'descriptions') {
+    return value || {}
+  }
+  return value ?? ''
 }
 
 // Set field value in form data
@@ -309,7 +315,7 @@ async function saveChanges() {
   try {
     saving.value = true
 
-    const { name, image_url, dt_id, people_desc, ...metadataFields } = formData.value
+    const { name, image_url, dt_id, people_desc, descriptions, ...metadataFields } = formData.value
 
     const response = await $fetch<{ success: boolean; peopleGroup: PeopleGroup }>(
       `/api/admin/people-groups/${selectedGroup.value.id}`,
@@ -319,6 +325,7 @@ async function saveChanges() {
           name,
           image_url,
           people_desc,
+          descriptions,
           metadata: metadataFields
         }
       }
