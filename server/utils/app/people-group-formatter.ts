@@ -265,6 +265,21 @@ export function formatPeopleGroupForDetail(pg: PeopleGroupRecord, lang: string =
     // Skip fields we've already handled
     if (['name', 'image_url'].includes(key)) continue
 
+    // Handle special fields
+    if (key === 'imb_people_description') {
+      result[key] = generatePeopleGroupDescription({
+        name: pg.name,
+        descriptions: pg.descriptions,
+        metadata: meta as any
+      }, lang)
+      continue
+    }
+
+    if (key === 'descriptions') {
+      result[key] = pg.descriptions?.[lang] || pg.descriptions?.['en'] || null
+      continue
+    }
+
     // Get the value
     let value: string | null = null
 

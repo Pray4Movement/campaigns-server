@@ -156,10 +156,11 @@ export const allFields: FieldDefinition[] = [
 // Fields grouped by category
 export const fieldsByCategory: Record<string, FieldDefinition[]> = allFields.reduce(
   (acc, field) => {
-    if (!acc[field.category]) {
-      acc[field.category] = []
+    const category = field.category
+    if (!acc[category]) {
+      acc[category] = []
     }
-    acc[field.category].push(field)
+    acc[category]!.push(field)
     return acc
   },
   {} as Record<string, FieldDefinition[]>

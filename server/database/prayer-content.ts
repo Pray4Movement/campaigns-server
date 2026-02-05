@@ -5,6 +5,7 @@ import { libraryService, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID,
 import { peopleGroupService } from './people-groups'
 import { campaignService } from './campaigns'
 import { getFieldOptionLabel, getReligionLabel, getCountryLabel } from '../utils/app/field-options'
+import { generatePeopleGroupDescription } from '../utils/app/people-group-description'
 
 export interface PeopleGroupData {
   name: string
@@ -278,7 +279,12 @@ export class PrayerContentService {
     if (peopleGroup.metadata) {
       try {
         const metadata = JSON.parse(peopleGroup.metadata)
-        description = metadata.imb_statement_of_need || metadata.imb_people_description || metadata.description || null
+        // Use generated description with locale support
+        description = generatePeopleGroupDescription({
+          name: peopleGroup.name,
+          descriptions: peopleGroup.descriptions,
+          metadata
+        }, languageCode)
         population = metadata.imb_population ? parseInt(metadata.imb_population, 10) : null
 
         // Look up labels from field options
@@ -286,9 +292,9 @@ export class PrayerContentService {
         const religionCode = metadata.imb_reg_of_religion_3
         const countryCode = metadata.imb_isoalpha3
 
-        language = langCode ? (getFieldOptionLabel('imb_reg_of_language', langCode) || langCode) : null
-        religion = religionCode ? (getReligionLabel(religionCode) || religionCode) : null
-        country = countryCode ? (getCountryLabel(countryCode) || countryCode) : null
+        language = langCode ? (getFieldOptionLabel('imb_reg_of_language', langCode, languageCode) || langCode) : null
+        religion = religionCode ? (getReligionLabel(religionCode, languageCode) || religionCode) : null
+        country = countryCode ? (getCountryLabel(countryCode, languageCode) || countryCode) : null
 
         // Extract coordinates
         lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
@@ -370,7 +376,12 @@ export class PrayerContentService {
     if (peopleGroup.metadata) {
       try {
         const metadata = JSON.parse(peopleGroup.metadata)
-        description = metadata.imb_statement_of_need || metadata.imb_people_description || metadata.description || null
+        // Use generated description with locale support
+        description = generatePeopleGroupDescription({
+          name: peopleGroup.name,
+          descriptions: peopleGroup.descriptions,
+          metadata
+        }, languageCode)
         population = metadata.imb_population ? parseInt(metadata.imb_population, 10) : null
 
         // Look up labels from field options
@@ -378,9 +389,9 @@ export class PrayerContentService {
         const religionCode = metadata.imb_reg_of_religion_3
         const countryCode = metadata.imb_isoalpha3
 
-        language = langCode ? (getFieldOptionLabel('imb_reg_of_language', langCode) || langCode) : null
-        religion = religionCode ? (getReligionLabel(religionCode) || religionCode) : null
-        country = countryCode ? (getCountryLabel(countryCode) || countryCode) : null
+        language = langCode ? (getFieldOptionLabel('imb_reg_of_language', langCode, languageCode) || langCode) : null
+        religion = religionCode ? (getReligionLabel(religionCode, languageCode) || religionCode) : null
+        country = countryCode ? (getCountryLabel(countryCode, languageCode) || countryCode) : null
 
         // Extract coordinates
         lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
