@@ -4,6 +4,7 @@ export interface PeopleGroup {
   id: number
   dt_id: string
   name: string
+  slug: string | null
   image_url: string | null
   metadata: string | null
   random_order: number | null
@@ -91,6 +92,14 @@ export class PeopleGroupService {
       SELECT * FROM people_groups WHERE random_order = ?
     `)
     const peopleGroup = await stmt.get(randomOrder) as PeopleGroup | null
+    return peopleGroup
+  }
+
+  async getPeopleGroupBySlug(slug: string): Promise<PeopleGroup | null> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM people_groups WHERE slug = ?
+    `)
+    const peopleGroup = await stmt.get(slug) as PeopleGroup | null
     return peopleGroup
   }
 

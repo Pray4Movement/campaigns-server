@@ -137,7 +137,7 @@ Email templates in `server/utils/`: `prayer-reminder-email.ts`, `welcome-email.t
 
 ## Internationalization
 
-- 10 languages: en, es, fr, pt, de, it, zh, ar, ru, hi
+- languages, see config/languages.ts
 - Translation files: `i18n/locales/*.json`
 - URL strategy: `prefix_except_default` (English has no prefix)
 - Use `$t('key')` in templates, `useI18n()` in scripts
