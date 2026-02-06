@@ -1,5 +1,4 @@
 import { describe, it, expect, afterAll, afterEach } from 'vitest'
-import { setup } from '@nuxt/test-utils/e2e'
 import {
   getTestDatabase,
   closeTestDatabase,
@@ -13,11 +12,6 @@ import {
 import { campaignSubscriptionService } from '../../server/database/campaign-subscriptions'
 
 describe('getSubscriptionsDueForReminder', async () => {
-  await setup({
-    server: true,
-    browser: false,
-  })
-
   const sql = getTestDatabase()
 
   afterEach(async () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
-import { setup, $fetch } from '@nuxt/test-utils/e2e'
+import { $fetch } from '@nuxt/test-utils/e2e'
 import {
   getTestDatabase,
   closeTestDatabase,
@@ -11,11 +11,6 @@ import {
   getTestSubscription,
   getAllTestSubscriptions
 } from '../helpers/db'
-
-await setup({
-  server: true,
-  browser: false,
-})
 
 const sql = getTestDatabase()
 

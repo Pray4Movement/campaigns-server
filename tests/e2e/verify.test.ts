@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
-import { setup, $fetch } from '@nuxt/test-utils/e2e'
+import { $fetch } from '@nuxt/test-utils/e2e'
 import { v4 as uuidv4 } from 'uuid'
 import {
   getTestDatabase,
@@ -15,11 +15,6 @@ import {
 } from '../helpers/db'
 
 describe('GET /api/campaigns/[slug]/verify', async () => {
-  await setup({
-    server: true,
-    browser: false,
-  })
-
   const sql = getTestDatabase()
 
   afterEach(async () => {

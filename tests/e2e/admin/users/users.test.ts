@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { setup, $fetch } from '@nuxt/test-utils/e2e'
+import { $fetch } from '@nuxt/test-utils/e2e'
 import {
   getTestDatabase,
   closeTestDatabase,
@@ -12,7 +12,6 @@ import {
 } from '../../../helpers/auth'
 
 describe('GET /api/admin/users', async () => {
-  await setup({ server: true, browser: false })
   const sql = getTestDatabase()
 
   let adminAuth: { headers: { cookie: string } }

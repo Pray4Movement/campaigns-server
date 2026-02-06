@@ -1,5 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
+import { extname } from 'node:path'
 import { generateI18nLocales } from './config/languages'
 
 const appTitle = process.env.APP_TITLE || 'Base'
@@ -52,6 +54,20 @@ export default defineNuxtConfig({
       // These utilities are accessed through server/utils re-exports only
       exclude: [
         '**/server/utils/app/**'
+      ]
+    },
+    rollupConfig: {
+      plugins: [
+        {
+          name: 'resolve-base-layer-ts',
+          resolveId(source: string) {
+            if (source.includes('.c12') && !extname(source)) {
+              const tsPath = source + '.ts'
+              if (existsSync(tsPath)) return tsPath
+            }
+            return null
+          }
+        }
       ]
     }
   },

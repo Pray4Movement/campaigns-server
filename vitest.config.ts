@@ -27,6 +27,7 @@ export default defineVitestConfig({
     include: ['tests/**/*.test.ts'],
     exclude: ['tests/unit/**'],
     testTimeout: 60000,
+    globalSetup: ['tests/e2e/global-setup.ts'],
     fileParallelism: false,
     sequence: {
       hooks: 'list',

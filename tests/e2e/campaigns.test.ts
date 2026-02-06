@@ -1,13 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
-import { setup, $fetch } from '@nuxt/test-utils/e2e'
+import { $fetch } from '@nuxt/test-utils/e2e'
 import { getTestDatabase, closeTestDatabase, cleanupTestData, createTestCampaign } from '../helpers/db'
 
 describe('GET /api/campaigns', async () => {
-  await setup({
-    server: true,
-    browser: false,
-  })
-
   const sql = getTestDatabase()
 
   afterEach(async () => {
