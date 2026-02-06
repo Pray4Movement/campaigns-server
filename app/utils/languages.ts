@@ -27,3 +27,8 @@ export function getLanguageFlag(code: string): string {
   const language = getLanguageByCode(code)
   return language ? language.flag : '🌐'
 }
+
+export function getBibleId(code: string): string | undefined {
+  const lang = getLanguageByCode(code)
+  return lang?.bibleId
+}

@@ -565,32 +565,6 @@ const setHighlight = (color: string | null) => {
   background: rgba(59, 130, 246, 0.05);
 }
 
-:deep(.ProseMirror div[data-type="verse"]) {
-  background-color: var(--ui-primary);
-  border-radius: 5px;
-  padding: 1rem;
-  margin: 1rem 0;
-}
-
-:deep(.ProseMirror div[data-type="verse"] p) {
-  text-align: center;
-  color: white;
-  margin: 0.5rem 0;
-}
-
-:deep(.ProseMirror div[data-type="verse"] p:first-child) {
-  margin-top: 0;
-}
-
-:deep(.ProseMirror div[data-type="verse"] p:last-child) {
-  margin-bottom: 0;
-}
-
-:deep(.ProseMirror div[data-type="verse"].ProseMirror-selectednode) {
-  outline: 2px solid var(--ui-primary);
-  outline-offset: 2px;
-}
-
 :deep(.ProseMirror img) {
   max-width: 100%;
   height: auto;
