@@ -1,9 +1,11 @@
 /**
  * Verse Extension for TipTap
- * A styled block for scripture or quoted verses
+ * A styled block for scripture or quoted verses with optional Bible Brain integration
  */
 
 import { Node, mergeAttributes } from '@tiptap/core'
+import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import VerseNode from '~/components/VerseNode.vue'
 
 export interface VerseOptions {
   HTMLAttributes: Record<string, any>
@@ -12,13 +14,7 @@ export interface VerseOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     verse: {
-      /**
-       * Set a verse block
-       */
-      setVerse: () => ReturnType
-      /**
-       * Toggle a verse block
-       */
+      setVerse: (attrs?: { reference?: string }) => ReturnType
       toggleVerse: () => ReturnType
     }
   }
@@ -36,6 +32,19 @@ export const Verse = Node.create<VerseOptions>({
   addOptions() {
     return {
       HTMLAttributes: {}
+    }
+  },
+
+  addAttributes() {
+    return {
+      reference: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-reference'),
+        renderHTML: attributes => {
+          if (!attributes.reference) return {}
+          return { 'data-reference': attributes.reference }
+        }
+      }
     }
   },
 
@@ -61,10 +70,14 @@ export const Verse = Node.create<VerseOptions>({
     ]
   },
 
+  addNodeView() {
+    return VueNodeViewRenderer(VerseNode)
+  },
+
   addCommands() {
     return {
-      setVerse: () => ({ commands }) => {
-        return commands.wrapIn(this.name)
+      setVerse: (attrs) => ({ commands }) => {
+        return commands.wrapIn(this.name, attrs)
       },
       toggleVerse: () => ({ commands }) => {
         return commands.toggleWrap(this.name)

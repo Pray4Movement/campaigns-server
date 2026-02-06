@@ -5,7 +5,9 @@
  * Handles both plain text and Tiptap JSON content.
  */
 
-import { LANGUAGE_CODES, getDeeplTargetCode, getDeeplSourceCode } from '~/utils/languages'
+import { LANGUAGE_CODES, getDeeplTargetCode, getDeeplSourceCode, getBibleId } from '~/utils/languages'
+import { parseReference } from '../../config/bible-books'
+import { fetchVerseText, isBibleBrainConfigured } from './app/bible-brain'
 
 // Re-export for convenience
 export const SUPPORTED_LANGUAGES = LANGUAGE_CODES
@@ -71,7 +73,7 @@ export async function translateText(
     throw new Error('No translation returned from DeepL')
   }
 
-  return data.translations[0].text
+  return data.translations[0]!.text
 }
 
 /**
@@ -147,11 +149,19 @@ interface TiptapNode {
 }
 
 /**
- * Extract all text content from Tiptap JSON
- * Returns array of { path, text } for reconstruction
+ * Extract all text content from Tiptap JSON, skipping specified node types.
+ * Returns array of { path, text } for reconstruction.
  */
-function extractTexts(node: TiptapNode, path: number[] = []): Array<{ path: number[]; text: string }> {
+function extractTexts(
+  node: TiptapNode,
+  path: number[] = [],
+  skipNodeTypes: Set<string> = new Set()
+): Array<{ path: number[]; text: string }> {
   const results: Array<{ path: number[]; text: string }> = []
+
+  if (skipNodeTypes.has(node.type)) {
+    return results
+  }
 
   if (node.type === 'text' && node.text) {
     results.push({ path: [...path], text: node.text })
@@ -159,7 +169,7 @@ function extractTexts(node: TiptapNode, path: number[] = []): Array<{ path: numb
 
   if (node.content && Array.isArray(node.content)) {
     node.content.forEach((child, index) => {
-      results.push(...extractTexts(child, [...path, index]))
+      results.push(...extractTexts(child, [...path, index], skipNodeTypes))
     })
   }
 
@@ -175,7 +185,7 @@ function setTextAtPath(node: TiptapNode, path: number[], text: string): void {
     return
   }
 
-  const [index, ...rest] = path
+  const [index, ...rest] = path as [number, ...number[]]
   if (node.content && node.content[index]) {
     setTextAtPath(node.content[index], rest, text)
   }
@@ -183,7 +193,8 @@ function setTextAtPath(node: TiptapNode, path: number[], text: string): void {
 
 /**
  * Translate Tiptap JSON content
- * Preserves structure, marks, and attributes while translating text nodes
+ * Preserves structure, marks, and attributes while translating text nodes.
+ * Verse nodes are never sent to DeepL — they are fetched from Bible Brain instead.
  */
 export async function translateTiptapContent(
   contentJson: TiptapNode,
@@ -193,25 +204,75 @@ export async function translateTiptapContent(
   // Deep clone the content to avoid mutating the original
   const cloned: TiptapNode = JSON.parse(JSON.stringify(contentJson))
 
-  // Extract all text nodes with their paths
-  const textEntries = extractTexts(cloned)
+  // Extract all text nodes, skipping verse nodes entirely
+  const skipNodes = new Set(['verse'])
+  const textEntries = extractTexts(cloned, [], skipNodes)
 
-  if (textEntries.length === 0) {
-    return cloned
+  if (textEntries.length > 0) {
+    const textsToTranslate = textEntries.map(e => e.text)
+    const translatedTexts = await translateTexts(textsToTranslate, targetLanguage, sourceLanguage)
+
+    textEntries.forEach((entry, i) => {
+      setTextAtPath(cloned, entry.path, translatedTexts[i]!)
+    })
   }
 
-  // Get all texts to translate
-  const textsToTranslate = textEntries.map(e => e.text)
-
-  // Translate all texts in batch
-  const translatedTexts = await translateTexts(textsToTranslate, targetLanguage, sourceLanguage)
-
-  // Put translated texts back into the cloned structure
-  textEntries.forEach((entry, index) => {
-    setTextAtPath(cloned, entry.path, translatedTexts[index])
-  })
+  // Handle verse nodes: fetch from Bible Brain in the target language
+  await translateVerseNodes(cloned, targetLanguage)
 
   return cloned
+}
+
+/**
+ * Walk the Tiptap tree and replace verse node content with Bible Brain text
+ * in the target language. If fetching fails or no bibleId is configured,
+ * the verse content is left untouched.
+ */
+async function translateVerseNodes(node: TiptapNode, targetLanguage: string): Promise<void> {
+  if (!node.content) return
+
+  for (const child of node.content) {
+    if (child.type === 'verse') {
+      const reference = child.attrs?.reference
+      if (!reference) continue
+
+      const bibleId = getBibleId(targetLanguage)
+      if (!bibleId) {
+        console.warn(`[Bible Brain] No bibleId configured for language "${targetLanguage}", skipping verse translation`)
+        continue
+      }
+
+      if (!isBibleBrainConfigured()) {
+        console.warn('[Bible Brain] API key not configured, skipping verse translation')
+        continue
+      }
+
+      const parsed = parseReference(reference)
+      if (!parsed) {
+        console.warn(`[Bible Brain] Could not parse reference "${reference}", skipping`)
+        continue
+      }
+
+      try {
+        const text = await fetchVerseText({
+          bibleId,
+          bookId: parsed.bookId,
+          chapter: parsed.chapter,
+          verseStart: parsed.verseStart,
+          verseEnd: parsed.verseEnd
+        })
+
+        child.content = [{
+          type: 'paragraph',
+          content: [{ type: 'text', text }]
+        }]
+      } catch (e) {
+        console.warn(`[Bible Brain] Failed to fetch verse "${reference}" for language "${targetLanguage}":`, e)
+      }
+    } else {
+      await translateVerseNodes(child, targetLanguage)
+    }
+  }
 }
 
 /**

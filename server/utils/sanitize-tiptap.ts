@@ -55,7 +55,8 @@ const ALLOWED_NODE_ATTRS: Record<string, Set<string>> = {
   codeBlock: new Set(['language']),
   spacer: new Set(['height']),
   paragraph: new Set(['textAlign']),
-  listItem: new Set([])
+  listItem: new Set([]),
+  verse: new Set(['reference'])
 }
 
 // Allowed attributes for marks
@@ -199,6 +200,12 @@ function sanitizeAttrs(
           /^rgb\(\d{1,3},\s*\d{1,3},\s*\d{1,3}\)$/.test(colorValue) ||
           /^[a-zA-Z]+$/.test(colorValue)) {
         sanitized[key] = colorValue
+      }
+    } else if (key === 'reference') {
+      // Bible reference string, max 100 chars, alphanumeric + spaces, colons, dashes
+      const refValue = String(value).trim()
+      if (refValue.length > 0 && refValue.length <= 100 && /^[\w\s:,\-–—.]+$/.test(refValue)) {
+        sanitized[key] = refValue
       }
     } else if (key === 'style') {
       // For image style, only allow specific style properties

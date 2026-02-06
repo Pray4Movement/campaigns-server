@@ -473,25 +473,4 @@ onBeforeUnmount(() => {
   display: block;
 }
 
-/* Verse */
-:deep(.prose div[data-type="verse"]) {
-  background-color: var(--ui-primary);
-  border-radius: 5px;
-  padding: 1rem;
-  margin: 1.5em 0;
-}
-
-:deep(.prose div[data-type="verse"] p) {
-  text-align: center;
-  color: white;
-  margin: 0.5rem 0;
-}
-
-:deep(.prose div[data-type="verse"] p:first-child) {
-  margin-top: 0;
-}
-
-:deep(.prose div[data-type="verse"] p:last-child) {
-  margin-bottom: 0;
-}
 </style>

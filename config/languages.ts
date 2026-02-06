@@ -9,13 +9,14 @@ export interface Language {
   dir?: 'ltr' | 'rtl'    // Text direction (defaults to 'ltr')
   deeplTarget: string    // DeepL target language code
   deeplSource: string    // DeepL source language code (sometimes different)
+  bibleId?: string       // Bible Brain fileset ID for verse lookups
 }
 
 // Enable/disable languages by commenting/uncommenting entries
 export const LANGUAGES: Language[] = [
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', deeplTarget: 'EN', deeplSource: 'EN' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', deeplTarget: 'ES', deeplSource: 'ES' },
-  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', deeplTarget: 'FR', deeplSource: 'FR' },
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', deeplTarget: 'EN', deeplSource: 'EN', bibleId: 'ENGNKJV' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', deeplTarget: 'ES', deeplSource: 'ES', bibleId: 'SPARVC' },
+  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', deeplTarget: 'FR', deeplSource: 'FR', bibleId: 'FRNTLS' },
   // { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹', deeplTarget: 'PT-BR', deeplSource: 'PT' },
   // { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', deeplTarget: 'DE', deeplSource: 'DE' },
   // { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', deeplTarget: 'IT', deeplSource: 'IT' },
