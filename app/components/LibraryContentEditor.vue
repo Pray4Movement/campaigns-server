@@ -78,6 +78,8 @@ const effectiveLanguageCode = computed(() =>
 )
 const selectedLanguage = computed(() => getLanguageByCode(effectiveLanguageCode.value))
 
+provide('editorLanguage', effectiveLanguageCode)
+
 const form = ref({
   content_json: {
     type: 'doc',

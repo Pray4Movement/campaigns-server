@@ -4,13 +4,15 @@ import { getBibleId } from '~/utils/languages'
 
 const props = defineProps<NodeViewProps>()
 
+const language = inject<Ref<string>>('editorLanguage', ref('en'))
+
 const reference = ref(props.node.attrs.reference || '')
 const loading = ref(false)
 const error = ref('')
 
 const savedReference = computed(() => props.node.attrs.reference || '')
 const translationLabel = computed(() => {
-  const id = getBibleId('en')
+  const id = getBibleId(language.value)
   return id ? id.slice(3) : ''
 })
 
@@ -28,7 +30,7 @@ async function fetchVerse() {
 
   try {
     const data = await $fetch('/api/admin/bible/verse', {
-      params: { reference: ref, language: 'en' }
+      params: { reference: ref, language: language.value }
     })
 
     if (data.text) {
