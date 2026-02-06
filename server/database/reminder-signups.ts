@@ -278,7 +278,7 @@ class ReminderSignupService {
 
     const daysOfWeek = signup.days_of_week ? JSON.parse(signup.days_of_week) : undefined
 
-    const nextUtc = calculateNextReminderUtc({
+    const nextUtc = await calculateNextReminderUtc({
       timezone: signup.timezone || 'UTC',
       timePreference: signup.time_preference,
       frequency: signup.frequency,

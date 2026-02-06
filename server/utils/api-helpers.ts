@@ -67,3 +67,30 @@ export function getIntParam(event: H3Event, paramName: string): number {
 
   return value
 }
+
+/**
+ * Get and validate a UUID route parameter.
+ * Throws 400 error if parameter is missing or not a valid UUID format.
+ */
+export function getUuidParam(event: H3Event, paramName: string): string {
+  const raw = getRouterParam(event, paramName)
+
+  if (!raw) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Invalid ${paramName}`
+    })
+  }
+
+  // UUID regex pattern (accepts any valid UUID format)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+  if (!uuidRegex.test(raw)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Invalid ${paramName}`
+    })
+  }
+
+  return raw
+}

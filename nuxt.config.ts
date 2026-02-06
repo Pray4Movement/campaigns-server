@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath } from 'node:url'
+import { generateI18nLocales } from './config/languages'
 
 const appTitle = process.env.APP_TITLE || 'Base'
 const baseLayerUrl = process.env.BASE_LAYER_URL || 'github:corsacca/nuxt-base#master'
@@ -28,11 +29,7 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/i18n', '@nuxt/icon'],
 
   i18n: {
-    locales: [
-      { code: 'en', name: 'English', file: 'en.json' },
-      { code: 'es', name: 'Español', file: 'es.json' },
-      { code: 'fr', name: 'Français', file: 'fr.json' }
-    ],
+    locales: generateI18nLocales(),
     defaultLocale: 'en',
     langDir: 'locales',
     strategy: 'prefix_except_default',
@@ -42,7 +39,6 @@ export default defineNuxtConfig({
       redirectOn: 'root',
       alwaysRedirect: true
     },
-    types: 'composition',
     vueI18n: './i18n.config.ts'
   },
 

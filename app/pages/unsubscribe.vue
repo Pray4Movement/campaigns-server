@@ -26,7 +26,7 @@
         <UIcon name="i-lucide-check-circle" class="w-12 h-12 mx-auto mb-4 text-green-500" />
         <h1 class="text-2xl font-bold mb-2">{{ $t('campaign.unsubscribe.success.title') }}</h1>
         <p class="text-[var(--ui-text-muted)]">
-          Your email preferences have been updated.
+          {{ $t('campaign.unsubscribe.preferencesUpdated') }}
         </p>
       </UCard>
 
@@ -75,7 +75,7 @@
       <div v-if="doxaLocalCampaigns.length > 0" class="mt-6">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
           <UIcon name="i-lucide-bell" class="w-5 h-5" />
-          Your Subscriptions
+          {{ $t('campaign.unsubscribe.yourSubscriptions') }}
         </h2>
 
         <div class="space-y-4">
@@ -84,7 +84,7 @@
               <div class="flex items-center justify-between">
                 <span class="font-medium">{{ campaign.title }}</span>
                 <UBadge color="neutral" size="xs">
-                  {{ doxaActiveRemindersCount(campaign) }} active
+                  {{ doxaActiveRemindersCount(campaign) }} {{ $t('campaign.unsubscribe.active') }}
                 </UBadge>
               </div>
             </template>
@@ -110,7 +110,7 @@
                   :loading="doxaUnsubscribingId === reminder.id"
                   @click="doxaUnsubscribeFromReminder(campaign.slug, campaign.id, reminder.id)"
                 >
-                  Unsubscribe
+                  {{ $t('campaign.unsubscribe.unsubscribeButton') }}
                 </UButton>
                 <UButton
                   v-else
@@ -134,7 +134,7 @@
                 @click="doxaUnsubscribeFromEntireCampaign(campaign)"
                 class="w-full"
               >
-                Unsubscribe from all {{ campaign.title }} reminders
+                {{ $t('campaign.unsubscribe.unsubscribeFromAll', { campaign: campaign.title }) }}
               </UButton>
             </div>
           </UCard>
@@ -190,7 +190,7 @@
       <div v-if="allCampaigns.length > 0">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
           <UIcon name="i-lucide-bell" class="w-5 h-5" />
-          Your Subscriptions
+          {{ $t('campaign.unsubscribe.yourSubscriptions') }}
         </h2>
 
         <div class="space-y-4">
@@ -199,10 +199,10 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <span class="font-medium">{{ campaign.title }}</span>
-                  <UBadge v-if="campaign.id === data.campaign.id" color="primary" size="xs">Current</UBadge>
+                  <UBadge v-if="campaign.id === data.campaign.id" color="primary" size="xs">{{ $t('campaign.unsubscribe.current') }}</UBadge>
                 </div>
                 <UBadge color="neutral" size="xs">
-                  {{ activeRemindersCount(campaign) }} active
+                  {{ activeRemindersCount(campaign) }} {{ $t('campaign.unsubscribe.active') }}
                 </UBadge>
               </div>
             </template>
@@ -228,7 +228,7 @@
                   :loading="unsubscribingId === reminder.id"
                   @click="unsubscribeFromReminder(campaign.slug, campaign.id, reminder.id)"
                 >
-                  Unsubscribe
+                  {{ $t('campaign.unsubscribe.unsubscribeButton') }}
                 </UButton>
                 <UButton
                   v-else
@@ -252,7 +252,7 @@
                 @click="unsubscribeFromEntireCampaign(campaign)"
                 class="w-full"
               >
-                Unsubscribe from all {{ campaign.title }} reminders
+                {{ $t('campaign.unsubscribe.unsubscribeFromAll', { campaign: campaign.title }) }}
               </UButton>
             </div>
           </UCard>
@@ -261,7 +261,7 @@
 
       <!-- No subscriptions message -->
       <div v-else class="text-center text-[var(--ui-text-muted)] mt-6">
-        <p>You have no active subscriptions.</p>
+        <p>{{ $t('campaign.unsubscribe.noActiveSubscriptions') }}</p>
       </div>
 
       <!-- Communication Preferences -->

@@ -12,30 +12,45 @@
     </div>
 
     <div v-else-if="data" class="flex flex-col flex-1">
-      <!-- Campaign Header -->
-      <header class="border-b border-default py-8 px-4">
-        <div class="max-w-4xl mx-auto">
-          <h1 class="text-3xl font-bold mb-2 text-center">{{ $t('prayerFuel.title') }}</h1>
-          <p class="text-muted text-center">{{ formatDate(data.date, selectedLanguage) }}</p>
+      <!-- Future Start Date Message -->
+      <template v-if="isStartDateFuture">
+        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center p-8">
+          <UIcon name="i-lucide-calendar-clock" class="w-16 h-16 text-muted mb-6" />
+          <h2 class="text-2xl font-bold mb-4">{{ $t('prayerFuel.startsOn.title') }}</h2>
+          <p class="text-muted mb-8 max-w-md">{{ $t('prayerFuel.startsOn.message', { date: formattedStartDate }) }}</p>
+          <UButton :to="localePath(`/${slug}`)" size="lg" class="rounded-full">
+            {{ $t('campaign.signupButton') }}
+          </UButton>
         </div>
-      </header>
+      </template>
 
-      <!-- Content Display -->
-      <PrayerFuelDisplay
-        :content="data.content"
-        :has-content="data.hasContent"
-        :prayed-marked="prayedMarked"
-        :submitting="submitting"
-        @pray="markAsPrayed"
-      />
+      <!-- Regular Content -->
+      <template v-else>
+        <!-- Campaign Header -->
+        <header class="border-b border-default py-8 px-4">
+          <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold mb-2 text-center">{{ $t('prayerFuel.title') }}</h1>
+            <p class="text-muted text-center">{{ formatDate(data.date, selectedLanguage) }}</p>
+          </div>
+        </header>
 
-      <!-- Past Prayer Fuel -->
-      <PastPrayerFuelGrid
-        v-if="pastContent.length"
-        :items="pastContent"
-        :slug="slug"
-        :language="selectedLanguage"
-      />
+        <!-- Content Display -->
+        <PrayerFuelDisplay
+          :content="data.content"
+          :has-content="data.hasContent"
+          :prayed-marked="prayedMarked"
+          :submitting="submitting"
+          @pray="markAsPrayed"
+        />
+
+        <!-- Past Prayer Fuel -->
+        <PastPrayerFuelGrid
+          v-if="pastContent.length"
+          :items="pastContent"
+          :slug="slug"
+          :language="selectedLanguage"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -75,6 +90,7 @@ interface PrayerContentResponse {
   availableLanguages: string[]
   content: PrayerContentItem[]
   hasContent: boolean
+  globalStartDate: string | null
 }
 
 definePageMeta({
@@ -95,6 +111,32 @@ const selectedLanguage = ref((route.query.language as string) || locale.value ||
 
 // Campaign ID for optimized session tracking
 const campaignId = computed(() => data.value?.campaign?.id)
+
+// Check if the campaign start date is in the future
+const globalStartDate = computed(() => data.value?.globalStartDate)
+const isStartDateFuture = computed(() => {
+  if (!globalStartDate.value) return false
+  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
+  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  const startDate = new Date(year!, month! - 1, day!)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return startDate > today
+})
+
+// Format the start date for display
+const formattedStartDate = computed(() => {
+  if (!globalStartDate.value) return ''
+  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
+  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  const startDate = new Date(year!, month! - 1, day!)
+  return startDate.toLocaleDateString(locale.value, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
 
 // Use prayer session composable
 const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, currentDate, campaignId)

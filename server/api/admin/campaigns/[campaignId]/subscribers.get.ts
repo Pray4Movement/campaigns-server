@@ -1,20 +1,14 @@
 import { campaignService } from '#server/database/campaigns'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { contactMethodService } from '#server/database/contact-methods'
+import { getIntParam, handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = requireAuth(event)
-  const campaignId = getRouterParam(event, 'campaignId')
-
-  if (!campaignId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Campaign ID is required'
-    })
-  }
+  const user = await requireAuth(event)
+  const campaignId = getIntParam(event, 'campaignId')
 
   // Check if user has access to this campaign
-  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, parseInt(campaignId))
+  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
@@ -24,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Get all subscriptions for this campaign with subscriber details
-    const subscriptions = await campaignSubscriptionService.getCampaignSubscriptions(parseInt(campaignId))
+    const subscriptions = await campaignSubscriptionService.getCampaignSubscriptions(campaignId)
 
     // Enrich with contact info
     const subscribersWithContacts = await Promise.all(
@@ -65,10 +59,6 @@ export default defineEventHandler(async (event) => {
       subscribers: subscribersWithContacts
     }
   } catch (error) {
-    console.error('Error fetching subscribers:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch subscribers'
-    })
+    handleApiError(error, 'Failed to fetch subscribers')
   }
 })

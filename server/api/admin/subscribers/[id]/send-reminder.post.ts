@@ -86,7 +86,8 @@ export default defineEventHandler(async (event) => {
       profileId: subscriber.profile_id,
       subscriptionId: subscription.id,
       prayerDuration: subscription.prayer_duration || 10,
-      prayerContent: null
+      prayerContent: null,
+      locale: subscriber.preferred_language
     })
 
     if (!success) {

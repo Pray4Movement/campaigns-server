@@ -8,6 +8,7 @@ export interface Subscriber {
   tracking_id: string
   profile_id: string
   name: string
+  preferred_language: string
   created_at: string
   updated_at: string
 }
@@ -38,16 +39,16 @@ export interface SubscriberWithSubscriptions extends SubscriberWithContacts {
 class SubscriberService {
   private db = getDatabase()
 
-  async createSubscriber(name: string): Promise<Subscriber> {
+  async createSubscriber(name: string, language: string = 'en'): Promise<Subscriber> {
     const tracking_id = randomUUID()
     const profile_id = randomUUID()
 
     const stmt = this.db.prepare(`
-      INSERT INTO subscribers (tracking_id, profile_id, name)
-      VALUES (?, ?, ?)
+      INSERT INTO subscribers (tracking_id, profile_id, name, preferred_language)
+      VALUES (?, ?, ?, ?)
     `)
 
-    const result = await stmt.run(tracking_id, profile_id, name)
+    const result = await stmt.run(tracking_id, profile_id, name, language)
     return (await this.getSubscriberById(result.lastInsertRowid as number))!
   }
 
@@ -89,13 +90,18 @@ class SubscriberService {
     }
   }
 
-  async updateSubscriber(id: number, updates: { name?: string }): Promise<Subscriber | null> {
+  async updateSubscriber(id: number, updates: { name?: string; preferred_language?: string }): Promise<Subscriber | null> {
     const fields: string[] = []
     const values: any[] = []
 
     if (updates.name !== undefined) {
       fields.push('name = ?')
       values.push(updates.name)
+    }
+
+    if (updates.preferred_language !== undefined) {
+      fields.push('preferred_language = ?')
+      values.push(updates.preferred_language)
     }
 
     if (fields.length === 0) {
@@ -129,6 +135,7 @@ class SubscriberService {
     email?: string
     phone?: string
     name: string
+    language?: string
   }): Promise<{ subscriber: Subscriber; isNew: boolean }> {
     // 1. Try to find by email (case-insensitive)
     if (input.email) {
@@ -153,7 +160,7 @@ class SubscriberService {
     }
 
     // 3. Create new subscriber with contact methods
-    const subscriber = await this.createSubscriber(input.name)
+    const subscriber = await this.createSubscriber(input.name, input.language)
 
     if (input.email) {
       await contactMethodService.addContactMethod(subscriber.id, 'email', input.email)

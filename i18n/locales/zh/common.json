@@ -1,0 +1,436 @@
+{
+  "welcome": "欢迎",
+  "hello": "你好",
+  "language": "语言",
+  "app": {
+    "title": "应用"
+  },
+  "theme": {
+    "toggle": "切换主题",
+    "light": "浅色模式",
+    "dark": "深色模式"
+  },
+  "login": {
+    "title": "管理员登录",
+    "email": "电子邮箱",
+    "emailPlaceholder": "输入您的电子邮箱",
+    "password": "密码",
+    "passwordPlaceholder": "输入您的密码",
+    "signIn": "登录",
+    "signingIn": "正在登录...",
+    "error": {
+      "failed": "登录失败。请检查您的凭据。"
+    }
+  },
+  "footer": {
+    "allRightsReserved": "版权所有"
+  },
+  "campaign": {
+    "peopleGroup": {
+      "findOutMore": "了解更多",
+      "overview": {
+        "title": "概览",
+        "country": "国家：",
+        "population": "人口：",
+        "language": "语言：",
+        "religion": "宗教：",
+        "status": "状态：",
+        "churches": "教会："
+      },
+      "prayerStatus": {
+        "title": "祷告状态",
+        "description": "人每天为这个族群祷告10分钟。"
+      }
+    },
+    "header": {
+      "prayFor": "为{campaign}祷告"
+    },
+    "pageTitle": "活动",
+    "signupButton": "注册祷告",
+    "loading": "正在加载活动...",
+    "notFound": {
+      "title": "未找到活动",
+      "message": "您正在寻找的活动不存在或不可用。",
+      "goHome": "返回首页"
+    },
+    "startsOn": {
+      "message": "祷告将于{date}开始",
+      "signupEarly": "立即注册，准备好开始祷告！"
+    },
+    "signup": {
+      "title": "注册祷告",
+      "description": "承诺每日或每周祷告，并接收祷告内容提醒。",
+      "success": "欢迎！您已加入祷告运动。您将很快收到第一个祷告提示。",
+      "successEmail": "快完成了！请查看您的电子邮件并点击验证链接以完成注册。",
+      "checkSpam": "没有看到邮件？请检查您的垃圾邮件文件夹。",
+      "modal": {
+        "title": "请查看您的电子邮件",
+        "message": "我们已向以下地址发送了验证链接：",
+        "hint": "点击邮件中的链接完成注册。别忘了检查垃圾邮件文件夹。如果您的电子邮箱已验证，您将收到确认邮件。",
+        "button": "知道了"
+      },
+      "form": {
+        "name": {
+          "label": "姓名",
+          "placeholder": "您的姓名"
+        },
+        "deliveryMethod": {
+          "label": "您希望如何接收每日祷告提示？",
+          "placeholder": "选择方式...",
+          "email": "电子邮件",
+          "whatsapp": "WhatsApp",
+          "app": "手机应用"
+        },
+        "email": {
+          "label": "电子邮箱地址",
+          "placeholder": "your{'@'}email.com"
+        },
+        "phone": {
+          "label": "电话号码",
+          "hint": "选择您的国家并输入电话号码"
+        },
+        "frequency": {
+          "label": "我将祷告...",
+          "daily": "每天",
+          "weekly": "选择天数"
+        },
+        "daysOfWeek": {
+          "label": "选择天数",
+          "error": "请至少选择一天",
+          "days": {
+            "sun": "周日",
+            "mon": "周一",
+            "tue": "周二",
+            "wed": "周三",
+            "thu": "周四",
+            "fri": "周五",
+            "sat": "周六"
+          }
+        },
+        "time": {
+          "label": "提醒时间",
+          "hint": "您希望什么时候收到祷告提醒？"
+        },
+        "timezone": {
+          "label": "您的时区",
+          "hint": "已从浏览器自动检测",
+          "searchPlaceholder": "搜索时区..."
+        },
+        "duration": {
+          "label": "时长...",
+          "5min": "5分钟",
+          "10min": "10分钟",
+          "15min": "15分钟",
+          "30min": "30分钟",
+          "60min": "1小时"
+        },
+        "reminderTime": {
+          "label": "提醒时间"
+        },
+        "submit": "承诺祷告",
+        "submitting": "正在加入...",
+        "consent": {
+          "description": "除了祷告提醒，请向我发送：",
+          "campaignUpdates": "关于这个族群的更新：{campaign}",
+          "doxaGeneral": "{link}的进展和更新"
+        }
+      },
+      "errors": {
+        "invalidPhone": "请输入有效的电话号码",
+        "failed": "注册失败。请重试。"
+      }
+    },
+    "prayerFuel": {
+      "title": "今日祷告",
+      "description": "获取今天的祷告内容和提示",
+      "button": "查看祷告内容"
+    },
+    "whyPray": {
+      "title": "为什么要祷告？",
+      "noOne": {
+        "title": "他们无人关注",
+        "description": "许多未被接触的族群没有教会、没有宣教士，往往也没有信徒。"
+      },
+      "opensDoors": {
+        "title": "祷告开启大门",
+        "description": "祷告软化人心，打开大门，在福音传扬之前就邀请圣灵动工。"
+      },
+      "changed": {
+        "title": "经历神的同在",
+        "description": "神在祷告中以深刻而奇妙的方式与许多人相遇。每日祷告将增长您的信心，使您更亲近神。"
+      }
+    },
+    "sampleContent": {
+      "title": "接收每日祷告内容",
+      "description": "这是每日祷告内容的预览。",
+      "peopleGroupName": "族群",
+      "scripture": "经文",
+      "prayerPoints": "祷告要点",
+      "peopleGroupOfDay": "今日族群"
+    },
+    "mobileApp": {
+      "title": "获取手机应用",
+      "description": "下载我们的手机应用，获得更好的祷告体验",
+      "appStore": {
+        "label": "下载于",
+        "store": "App Store",
+        "ariaLabel": "在App Store下载"
+      },
+      "googlePlay": {
+        "label": "下载于",
+        "store": "Google Play",
+        "ariaLabel": "在Google Play下载"
+      }
+    },
+    "verify": {
+      "pageTitle": "验证邮箱",
+      "verifying": "正在验证您的邮箱...",
+      "success": {
+        "title": "邮箱已验证！",
+        "message": "您的邮箱已成功验证。您现在将收到{campaign}的祷告提醒。"
+      },
+      "error": {
+        "title": "验证失败",
+        "generic": "无法验证您的邮箱。此链接可能已被使用或已过期。"
+      },
+      "backToCampaign": "返回活动",
+      "startPraying": "开始祷告"
+    },
+    "unsubscribe": {
+      "pageTitle": "取消订阅",
+      "processing": "正在处理您的请求...",
+      "success": {
+        "title": "已取消订阅",
+        "message": "您已取消订阅此提醒。",
+        "campaign": "活动：{title}",
+        "resubscribe": "重新订阅",
+        "resubscribing": "正在重新订阅..."
+      },
+      "alreadyDone": {
+        "title": "已取消订阅",
+        "message": "您已取消订阅此提醒。"
+      },
+      "unsubscribedFromCampaign": "您已取消订阅所有{campaign}提醒。",
+      "resubscribed": {
+        "title": "欢迎回来！",
+        "message": "您已重新订阅祷告提醒。您将在预定时间收到下一次提醒。",
+        "viewCampaign": "查看活动"
+      },
+      "error": {
+        "title": "错误",
+        "message": "出现问题。请重试。",
+        "goHome": "返回首页"
+      },
+      "otherReminders": "您还有此活动的其他提醒：",
+      "unsubscribeThis": "取消订阅",
+      "unsubscribeAll": "取消所有订阅",
+      "yourSubscriptions": "您的订阅",
+      "active": "活跃",
+      "unsubscribeButton": "取消订阅",
+      "unsubscribeFromAll": "取消所有{campaign}提醒",
+      "preferencesUpdated": "您的邮件偏好设置已更新。",
+      "noActiveSubscriptions": "您没有活跃的订阅。",
+      "current": "当前",
+      "reminderFormat": {
+        "daily": "每天{time}",
+        "weekly": "{days}{time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "管理偏好设置",
+      "title": "提醒设置",
+      "greeting": "你好{name}，在下方管理您的祷告提醒偏好设置。",
+      "save": "保存更改",
+      "saving": "正在保存...",
+      "success": "您的偏好设置已更新。",
+      "emailChanged": "我们已向您的新地址发送了验证邮件。请验证以继续接收提醒。",
+      "emailNotVerified": "您的邮箱尚未验证。请查看收件箱中的验证链接以接收提醒。",
+      "emailHint": "更改邮箱需要重新验证。",
+      "sections": {
+        "account": "账户",
+        "schedule": "提醒时间表",
+        "prayer": "祷告偏好设置",
+        "emailPreferences": "通讯偏好设置"
+      },
+      "emailPreferences": {
+        "description": "选择您希望接收的通讯内容：",
+        "campaignUpdates": "关于{campaign}的更新",
+        "doxaGeneral": "Doxa的一般更新",
+        "doxaGeneralHint": "Doxa的进展更新和新闻"
+      },
+      "consentUpdated": "通讯偏好设置已更新。",
+      "subscriptions": "您的订阅",
+      "saveAccount": "保存账户",
+      "unsubscribed": "已取消订阅",
+      "current": "当前",
+      "viewCampaign": "查看活动",
+      "unsubscribeButton": "取消订阅",
+      "resubscribeButton": "重新订阅",
+      "unsubscribeConfirm": "您确定要取消订阅{campaign}吗？",
+      "unsubscribeSuccess": "您已取消订阅。",
+      "resubscribeSuccess": "您已重新订阅。",
+      "reminders": "提醒",
+      "reminder": "提醒",
+      "deleteReminderConfirm": "您确定要删除此提醒吗？",
+      "deleteReminderSuccess": "提醒已删除。",
+      "error": {
+        "title": "错误",
+        "notFound": "未找到订阅。",
+        "failed": "保存更改失败。请重试。"
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "祷告内容",
+    "title": "今日祷告",
+    "loading": "正在加载今日祷告...",
+    "backTo": "返回{campaign}",
+    "backToToday": "返回今日祷告",
+    "error": {
+      "title": "无法加载祷告",
+      "backToCampaign": "返回活动",
+      "recordFailed": "记录祷告失败。请重试。"
+    },
+    "noContent": {
+      "title": "今日无祷告内容",
+      "message": "请明天再来查看新的祷告内容。"
+    },
+    "startsOn": {
+      "title": "祷告内容即将推出",
+      "message": "每日祷告内容将于{date}开始。立即注册以在开始时接收提醒！"
+    },
+    "dateView": {
+      "noContent": {
+        "title": "无祷告内容",
+        "message": "此日期没有可用的祷告内容。"
+      }
+    },
+    "button": {
+      "amen": "阿门",
+      "hint": "点击完成您的祷告时间"
+    },
+    "thankYou": "感谢您的祷告！",
+    "meetThePeople": "认识这些人",
+    "peopleGroupOfTheDay": "今日族群",
+    "dayInTheLife": "一天的生活",
+    "pauseAndPray": "暂停祷告",
+    "mapTitle": "显示{name}位置的地图",
+    "pastPrayers": {
+      "title": "过往祷告内容"
+    },
+    "navigation": {
+      "previous": "上一页",
+      "next": "下一页",
+      "today": "今天"
+    }
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "loading": "正在加载...",
+    "minutes": "分钟",
+    "yes": "是",
+    "no": "否"
+  },
+  "followupPage": {
+    "recording": "正在记录您的回复...",
+    "error": {
+      "title": "出现问题",
+      "invalidLink": "无效链接。缺少必需的参数。",
+      "invalidResponse": "无效的响应类型。",
+      "failed": "记录您的回复失败。请重试。"
+    },
+    "goHome": "返回首页",
+    "committed": {
+      "title": "感谢您的承诺！",
+      "message": "很高兴听到您在祷告中保持忠诚。您的奉献正在产生影响！",
+      "checkInNotice": "我们将在几个月后再次跟进。",
+      "continueButton": "继续到活动"
+    },
+    "sometimes": {
+      "title": "感谢您的诚实！",
+      "message": "生活可能很忙碌，如果您无法像期望的那样经常祷告，这没关系。",
+      "suggestion": "您是否想调整祷告时间表，使其更易于管理？",
+      "adjustButton": "调整我的时间表",
+      "continueButton": "继续到活动"
+    },
+    "notPraying": {
+      "title": "我们理解",
+      "message": "您的订阅已暂停。您暂时不会收到祷告提醒。",
+      "reactivateNotice": "如果您将来想继续祷告，可以随时从您的个人资料中重新激活订阅。",
+      "profileButton": "查看我的个人资料",
+      "visitButton": "访问活动"
+    },
+    "pageTitle": "祷告回访"
+  },
+  "email": {
+    "common": {
+      "hello": "你好{name}！",
+      "automatedMessage": "这是来自{appName}的自动消息。请勿回复此邮件。",
+      "managePreferences": "管理偏好设置",
+      "unsubscribe": "取消订阅"
+    },
+    "verification": {
+      "subject": "验证您的{campaign}邮箱",
+      "header": "验证您的邮箱",
+      "thankYou": "感谢您注册{campaign}的祷告提醒。",
+      "pleaseVerify": "请点击下方按钮验证您的邮箱地址：",
+      "verifyButton": "验证邮箱",
+      "linkInstructions": "如果按钮无法使用，您也可以复制并粘贴此链接到浏览器：",
+      "note": "注意：",
+      "expiration": "此验证链接将在7天后过期。",
+      "ignoreMessage": "如果您没有注册祷告提醒，可以安全地忽略此邮件。"
+    },
+    "welcome": {
+      "subject": "欢迎来到{appName} - {campaign}",
+      "header": "欢迎来到{appName}",
+      "thankYou": "感谢您注册祷告。您的邮箱已验证，您已准备好接收{campaign}的祷告提醒。",
+      "startPraying": "开始祷告",
+      "profileInstructions": "您可以在这里更新您的个人资料和通知设置："
+    },
+    "reminder": {
+      "subject": "祷告提醒 - {campaign}",
+      "header": "祷告提醒",
+      "timeForPrayer": "是时候进行您的{duration}分钟祷告了。",
+      "viewPrayer": "查看今日祷告",
+      "automatedReminder": "这是来自{appName}的自动祷告提醒。"
+    },
+    "followup": {
+      "subject": "{campaign}：您的祷告承诺进展如何？",
+      "subjectReminder": "提醒：{campaign}：您的祷告承诺进展如何？",
+      "header": "祷告回访",
+      "reminderIntro": "我们上周给您发送了一条消息，想跟进一下。",
+      "standardIntro": "我们很想听听您的祷告旅程进展如何！",
+      "questionDaily": "您还在每天祷告吗？",
+      "questionWeekly": "您还在{days}祷告吗？",
+      "yesDaily": "是的，我每天祷告",
+      "yesWeekly": "是的，按预定的日子",
+      "sometimes": "有时候，但不是每天",
+      "sometimesWeekly": "有时候，但不总是",
+      "noLonger": "不，不再祷告了",
+      "feedbackHelps": "您的反馈帮助我们了解如何更好地支持您的祷告旅程。",
+      "pauseNotice": "如果我们没有收到您的回复，我们将暂停您的祷告提醒以避免填满您的收件箱。您可以随时从您的个人资料中重新激活它们。",
+      "commitmentCheckIn": "这是来自{appName}的承诺回访。"
+    },
+    "marketing": {
+      "headerCampaign": "{campaign}更新",
+      "headerDefault": "{appName}更新",
+      "footer": "您收到此邮件是因为您选择接收来自{appName}的更新。"
+    },
+    "days": {
+      "sunday": "周日",
+      "monday": "周一",
+      "tuesday": "周二",
+      "wednesday": "周三",
+      "thursday": "周四",
+      "friday": "周五",
+      "saturday": "周六"
+    }
+  }
+}

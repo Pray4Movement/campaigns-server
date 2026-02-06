@@ -128,8 +128,38 @@ export default defineEventHandler(async (event) => {
       }
     }))
 
+    // Fetch follow-up responses for this subscription
+    const followupResponses = await sql`
+      SELECT
+        fr.id,
+        fr.response,
+        fr.followup_sent_at,
+        fr.responded_at,
+        c.title as campaign_title
+      FROM followup_responses fr
+      JOIN campaign_subscriptions cs ON fr.subscription_id = cs.id
+      JOIN campaigns c ON cs.campaign_id = c.id
+      WHERE fr.subscription_id = ${subscriptionId}
+      ORDER BY fr.responded_at DESC
+      LIMIT 50
+    `
+
+    // Format follow-up responses
+    const formattedFollowups = followupResponses.map((fr: any) => ({
+      id: `followup-${fr.id}`,
+      timestamp: new Date(fr.responded_at).getTime(),
+      eventType: 'FOLLOWUP_RESPONSE',
+      tableName: 'followup_responses',
+      userId: null,
+      userName: null,
+      metadata: {
+        response: fr.response,
+        campaignTitle: fr.campaign_title
+      }
+    }))
+
     // Combine and sort by timestamp descending
-    const allActivities = [...formattedActivities, ...formattedPrayer, ...formattedEmails]
+    const allActivities = [...formattedActivities, ...formattedPrayer, ...formattedEmails, ...formattedFollowups]
       .sort((a, b) => b.timestamp - a.timestamp)
 
     return {

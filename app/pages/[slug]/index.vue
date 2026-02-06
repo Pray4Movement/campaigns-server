@@ -44,8 +44,8 @@
               <h2 class="text-2xl md:text-3xl font-bold text-default mb-4">
                 {{ peopleGroup.name }}
               </h2>
-              <p v-if="peopleGroup.metadata?.imb_people_description" class="text-muted leading-relaxed mb-4">
-                {{ peopleGroup.metadata.imb_people_description }}
+              <p v-if="peopleGroup.generatedDescription" class="text-muted leading-relaxed mb-4">
+                {{ peopleGroup.generatedDescription }}
               </p>
               <UButton
                 :href="`https://doxa.life/research/${slug}/`"
@@ -267,6 +267,13 @@
               <div class="text-center">
                 <h2 class="text-2xl font-bold">{{ $t('campaign.signup.title') }}</h2>
                 <p class="text-muted mt-2">{{ $t('campaign.signup.description') }}</p>
+                <UAlert
+                  v-if="isStartDateFuture"
+                  color="neutral"
+                  icon="i-lucide-calendar-clock"
+                  :title="$t('campaign.startsOn.message', { date: formattedStartDate })"
+                  class="mt-4 text-left"
+                />
               </div>
             </template>
 
@@ -517,9 +524,11 @@ interface CampaignResponse {
     image_url: string | null
     metadata: Record<string, any>
     labels: Record<string, string | null>
+    generatedDescription: string
     created_at: string
     updated_at: string
   } | null
+  globalStartDate: string | null
 }
 
 definePageMeta({
@@ -528,13 +537,42 @@ definePageMeta({
 
 const route = useRoute()
 const slug = route.params.slug as string
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-// Fetch campaign data
-const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`)
+// Fetch campaign data with locale for translated labels
+const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`, {
+  query: { locale },
+  watch: [locale]
+})
 const campaign = computed(() => data.value?.campaign)
 const peopleGroup = computed(() => data.value?.peopleGroup)
+const globalStartDate = computed(() => data.value?.globalStartDate)
+
+// Check if the campaign start date is in the future
+const isStartDateFuture = computed(() => {
+  if (!globalStartDate.value) return false
+  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
+  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  const startDate = new Date(year!, month! - 1, day!)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return startDate > today
+})
+
+// Format the start date for display
+const formattedStartDate = computed(() => {
+  if (!globalStartDate.value) return ''
+  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
+  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  const startDate = new Date(year!, month! - 1, day!)
+  return startDate.toLocaleDateString(locale.value, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
 
 // Campaign title management
 const { setCampaignTitle } = useCampaign()
@@ -669,6 +707,7 @@ async function handleSignup() {
         reminder_time: signupForm.value.reminder_time,
         prayer_duration: signupForm.value.prayer_duration,
         timezone: userTimezone.value,
+        language: locale.value,
         consent_campaign_updates: signupForm.value.consent_campaign_updates,
         consent_doxa_general: signupForm.value.consent_doxa_general
       }

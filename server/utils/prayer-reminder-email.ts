@@ -1,3 +1,5 @@
+import { t, localePath } from './translations'
+
 export interface PrayerReminderEmailData {
   to: string
   subscriberName: string
@@ -10,6 +12,7 @@ export interface PrayerReminderEmailData {
   prayerContent: Array<{
     content_json: string | null
   }> | null
+  locale?: string
 }
 
 /**
@@ -157,15 +160,25 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const appName = config.appName || 'Prayer Tools'
+  const locale = data.locale || 'en'
 
-  const unsubscribeUrl = `${baseUrl}/unsubscribe?slug=${data.campaignSlug}&id=${data.profileId}&sid=${data.subscriptionId}`
-  const profileUrl = `${baseUrl}/subscriber?id=${data.profileId}`
-  const prayerFuelUrl = `${baseUrl}/${data.campaignSlug}/prayer?uid=${data.trackingId}`
+  const unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', locale)}?slug=${data.campaignSlug}&id=${data.profileId}&sid=${data.subscriptionId}`
+  const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${data.profileId}`
+  const prayerFuelUrl = `${baseUrl}${localePath(`/${data.campaignSlug}/prayer`, locale)}?uid=${data.trackingId}`
+
+  const subject = t('email.reminder.subject', locale, { campaign: data.campaignTitle })
+  const header = t('email.reminder.header', locale)
+  const hello = t('email.common.hello', locale, { name: data.subscriberName })
+  const timeForPrayer = t('email.reminder.timeForPrayer', locale, { duration: data.prayerDuration })
+  const viewPrayer = t('email.reminder.viewPrayer', locale)
+  const automatedReminder = t('email.reminder.automatedReminder', locale, { appName })
+  const managePreferences = t('email.common.managePreferences', locale)
+  const unsubscribe = t('email.common.unsubscribe', locale)
 
   // Build content HTML - just a reminder with link to prayer fuel
   const contentHtml = `
     <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
-      It's time for your ${data.prayerDuration}-minute prayer session.
+      ${timeForPrayer}
     </p>
     <div style="text-align: center; margin: 30px 0;">
       <a href="${prayerFuelUrl}" style="
@@ -179,37 +192,37 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
         display: inline-block;
         text-align: center;
         border: 2px solid #3B463D;
-      ">View Today's Prayer</a>
+      ">${viewPrayer}</a>
     </div>
   `
-  const contentText = `It's time for your ${data.prayerDuration}-minute prayer session.\n\nView today's prayer:\n${prayerFuelUrl}\n\n`
+  const contentText = `${timeForPrayer}\n\n${viewPrayer}:\n${prayerFuelUrl}\n\n`
 
   const html = `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="${locale}">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Prayer Reminder - ${data.campaignTitle}</title>
+      <title>${subject}</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-        <h1 style="margin: 0; font-size: 28px; font-weight: 500;">Prayer Reminder</h1>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 500;">${header}</h1>
         <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${data.campaignTitle}</p>
       </div>
 
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">Hello ${data.subscriberName}!</h2>
+        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">${hello}</h2>
 
         ${contentHtml}
       </div>
 
       <div style="text-align: center; margin-top: 20px; padding: 20px; color: #666666; font-size: 12px;">
-        <p style="margin: 0 0 10px;">This is an automated prayer reminder from ${appName}.</p>
+        <p style="margin: 0 0 10px;">${automatedReminder}</p>
         <p style="margin: 0;">
-          <a href="${profileUrl}" style="color: #666666; text-decoration: underline;">Manage Preferences</a>
+          <a href="${profileUrl}" style="color: #666666; text-decoration: underline;">${managePreferences}</a>
           &nbsp;|&nbsp;
-          <a href="${unsubscribeUrl}" style="color: #666666; text-decoration: underline;">Unsubscribe</a>
+          <a href="${unsubscribeUrl}" style="color: #666666; text-decoration: underline;">${unsubscribe}</a>
         </p>
       </div>
     </body>
@@ -217,20 +230,20 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
   `
 
   const text = `
-Prayer Reminder - ${data.campaignTitle}
+${subject}
 
-Hello ${data.subscriberName}!
+${hello}
 
 ${contentText}
 ---
-This is an automated prayer reminder from ${appName}.
-Manage Preferences: ${profileUrl}
-Unsubscribe: ${unsubscribeUrl}
+${automatedReminder}
+${managePreferences}: ${profileUrl}
+${unsubscribe}: ${unsubscribeUrl}
   `.trim()
 
   return await sendEmail({
     to: data.to,
-    subject: `Prayer Reminder - ${data.campaignTitle}`,
+    subject,
     html,
     text
   })

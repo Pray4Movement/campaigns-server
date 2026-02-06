@@ -1,37 +1,52 @@
+import { t, localePath } from './translations'
+
 export async function sendSignupVerificationEmail(
   to: string,
   verificationToken: string,
   campaignSlug: string,
   campaignTitle: string,
-  subscriberName: string
+  subscriberName: string,
+  locale: string = 'en'
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const appName = config.appName || 'Prayer Tools'
-  const verificationUrl = `${baseUrl}/${campaignSlug}/verify?token=${verificationToken}`
+  const verificationUrl = `${baseUrl}${localePath(`/${campaignSlug}/verify`, locale)}?token=${verificationToken}`
+
+  const subject = t('email.verification.subject', locale, { campaign: campaignTitle })
+  const header = t('email.verification.header', locale)
+  const hello = t('email.common.hello', locale, { name: subscriberName })
+  const thankYou = t('email.verification.thankYou', locale, { campaign: campaignTitle })
+  const pleaseVerify = t('email.verification.pleaseVerify', locale)
+  const verifyButton = t('email.verification.verifyButton', locale)
+  const linkInstructions = t('email.verification.linkInstructions', locale)
+  const note = t('email.verification.note', locale)
+  const expiration = t('email.verification.expiration', locale)
+  const ignoreMessage = t('email.verification.ignoreMessage', locale)
+  const automatedMessage = t('email.common.automatedMessage', locale, { appName })
 
   const html = `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="${locale}">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Verify your email for ${campaignTitle}</title>
+      <title>${subject}</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-        <h1 style="margin: 0; font-size: 28px; font-weight: 500;">Verify Your Email</h1>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 500;">${header}</h1>
         <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${campaignTitle}</p>
       </div>
 
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">Hello ${subscriberName}!</h2>
+        <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">${hello}</h2>
         <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
-          Thank you for signing up for prayer reminders for <strong>${campaignTitle}</strong>.
+          ${thankYou}
         </p>
 
         <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
-          Please verify your email address by clicking the button below:
+          ${pleaseVerify}
         </p>
 
         <div style="text-align: center; margin: 30px 0;">
@@ -46,52 +61,52 @@ export async function sendSignupVerificationEmail(
             display: inline-block;
             text-align: center;
             border: 2px solid #3B463D;
-          ">Verify Email</a>
+          ">${verifyButton}</a>
         </div>
 
         <p style="color: #666666; font-size: 14px; margin-top: 30px;">
-          If the button doesn't work, you can also copy and paste this link into your browser:
+          ${linkInstructions}
         </p>
         <p style="background: #f5f5f5; border: 1px solid #cccccc; padding: 10px; border-radius: 4px; word-break: break-all; font-size: 14px; color: #333333;">
           ${verificationUrl}
         </p>
 
         <p style="color: #666666; font-size: 14px; margin-top: 30px;">
-          <strong>Note:</strong> This verification link will expire in 7 days.
+          <strong>${note}</strong> ${expiration}
         </p>
 
         <p style="color: #666666; font-size: 14px; margin-top: 20px;">
-          If you didn't sign up for prayer reminders, you can safely ignore this email.
+          ${ignoreMessage}
         </p>
       </div>
 
       <div style="text-align: center; margin-top: 20px; padding: 20px; color: #666666; font-size: 12px;">
-        <p style="margin: 0;">This is an automated message from ${appName}. Please do not reply to this email.</p>
+        <p style="margin: 0;">${automatedMessage}</p>
       </div>
     </body>
     </html>
   `
 
   const text = `
-Verify Your Email for ${campaignTitle}
+${header} - ${campaignTitle}
 
-Hello ${subscriberName}!
+${hello}
 
-Thank you for signing up for prayer reminders for ${campaignTitle}.
+${thankYou}
 
-Please verify your email address by visiting this link:
+${pleaseVerify}
 ${verificationUrl}
 
-Note: This verification link will expire in 7 days.
+${note} ${expiration}
 
-If you didn't sign up for prayer reminders, you can safely ignore this email.
+${ignoreMessage}
 
-This is an automated message from ${appName}. Please do not reply to this email.
+${automatedMessage}
   `.trim()
 
   return await sendEmail({
     to,
-    subject: `Verify your email for ${campaignTitle}`,
+    subject,
     html,
     text
   })

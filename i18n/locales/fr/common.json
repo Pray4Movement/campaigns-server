@@ -1,0 +1,436 @@
+{
+  "welcome": "Bienvenue",
+  "hello": "Bonjour",
+  "language": "Langue",
+  "app": {
+    "title": "App"
+  },
+  "theme": {
+    "toggle": "Changer de thème",
+    "light": "Mode clair",
+    "dark": "Mode sombre"
+  },
+  "login": {
+    "title": "Connexion Administrateur",
+    "email": "E-mail",
+    "emailPlaceholder": "Entrez votre e-mail",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours...",
+    "error": {
+      "failed": "Échec de la connexion. Veuillez vérifier vos identifiants."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "Tous droits réservés"
+  },
+  "campaign": {
+    "peopleGroup": {
+      "findOutMore": "En savoir plus",
+      "overview": {
+        "title": "Aperçu",
+        "country": "Pays :",
+        "population": "Population :",
+        "language": "Langue :",
+        "religion": "Religion :",
+        "status": "Statut :",
+        "churches": "Églises :"
+      },
+      "prayerStatus": {
+        "title": "État de la Prière",
+        "description": "personnes priant 10 minutes par jour pour ce groupe de personnes."
+      }
+    },
+    "header": {
+      "prayFor": "Priez pour les {campaign}"
+    },
+    "pageTitle": "Campagne",
+    "signupButton": "Inscrivez-vous pour prier",
+    "loading": "Chargement de la campagne...",
+    "notFound": {
+      "title": "Campagne Introuvable",
+      "message": "La campagne que vous recherchez n'existe pas ou n'est pas disponible.",
+      "goHome": "Accueil"
+    },
+    "startsOn": {
+      "message": "La prière commence le {date}",
+      "signupEarly": "Inscrivez-vous maintenant et soyez prêt quand la prière commence !"
+    },
+    "signup": {
+      "title": "Inscrivez-vous pour Prier",
+      "description": "Engagez-vous à prier quotidiennement ou hebdomadairement et recevez des rappels de contenu de prière.",
+      "success": "✓ Bienvenue ! Vous avez rejoint le mouvement de prière. Vous recevrez bientôt votre première invitation à la prière.",
+      "successEmail": "✓ Presque terminé ! Veuillez vérifier votre e-mail et cliquer sur le lien de vérification pour finaliser votre inscription.",
+      "checkSpam": "Vous ne voyez pas l'e-mail ? Vérifiez votre dossier spam.",
+      "modal": {
+        "title": "Vérifiez vos E-mails",
+        "message": "Nous avons envoyé un lien de vérification à :",
+        "hint": "Cliquez sur le lien dans l'e-mail pour finaliser votre inscription. N'oubliez pas de vérifier votre dossier spam. Si votre e-mail est déjà vérifié, vous recevrez un e-mail de confirmation.",
+        "button": "Compris"
+      },
+      "form": {
+        "name": {
+          "label": "Nom",
+          "placeholder": "Votre nom"
+        },
+        "deliveryMethod": {
+          "label": "Comment souhaitez-vous recevoir vos invitations quotidiennes à la prière ?",
+          "placeholder": "Sélectionnez une méthode...",
+          "email": "E-mail",
+          "whatsapp": "WhatsApp",
+          "app": "Application Mobile"
+        },
+        "email": {
+          "label": "Adresse E-mail",
+          "placeholder": "votre{'@'}email.com"
+        },
+        "phone": {
+          "label": "Numéro de Téléphone",
+          "hint": "Sélectionnez votre pays et entrez votre numéro de téléphone"
+        },
+        "frequency": {
+          "label": "Je vais prier...",
+          "daily": "Chaque Jour",
+          "weekly": "Choisir les Jours"
+        },
+        "daysOfWeek": {
+          "label": "Sélectionner les Jours",
+          "error": "Veuillez sélectionner au moins un jour",
+          "days": {
+            "sun": "Dim",
+            "mon": "Lun",
+            "tue": "Mar",
+            "wed": "Mer",
+            "thu": "Jeu",
+            "fri": "Ven",
+            "sat": "Sam"
+          }
+        },
+        "time": {
+          "label": "Heure Préférée",
+          "hint": "Votre heure locale"
+        },
+        "duration": {
+          "label": "Pendant...",
+          "5min": "5 minutes",
+          "10min": "10 minutes",
+          "15min": "15 minutes",
+          "30min": "30 minutes",
+          "60min": "1 heure"
+        },
+        "reminderTime": {
+          "label": "Heure du rappel"
+        },
+        "timezone": {
+          "label": "Votre Fuseau Horaire",
+          "hint": "Détecté automatiquement depuis votre navigateur",
+          "searchPlaceholder": "Rechercher un fuseau horaire..."
+        },
+        "submit": "S'engager à Prier",
+        "submitting": "Inscription en cours...",
+        "consent": {
+          "description": "En plus des rappels de prière, tenez-moi informé avec :",
+          "campaignUpdates": "Mises à jour sur ce groupe de personnes : {campaign}",
+          "doxaGeneral": "Progrès et actualités du {link}"
+        }
+      },
+      "errors": {
+        "invalidPhone": "Veuillez entrer un numéro de téléphone valide",
+        "failed": "Échec de l'inscription. Veuillez réessayer."
+      }
+    },
+    "prayerFuel": {
+      "title": "Prière du Jour",
+      "description": "Accédez au contenu et aux invitations de prière d'aujourd'hui",
+      "button": "Voir le Contenu de Prière"
+    },
+    "whyPray": {
+      "title": "Pourquoi Prier ?",
+      "noOne": {
+        "title": "Ils N'ont Personne",
+        "description": "De nombreux peuples non atteints n'ont pas d'églises, pas de missionnaires, et souvent pas de croyants."
+      },
+      "opensDoors": {
+        "title": "La Prière Ouvre des Portes",
+        "description": "La prière adoucit les cœurs, ouvre des portes et invite l'œuvre du Saint-Esprit bien avant que l'Évangile soit proclamé."
+      },
+      "changed": {
+        "title": "Faites l'Expérience de la Présence de Dieu",
+        "description": "Dieu a rencontré beaucoup de gens de manière profonde et merveilleuse pendant leurs moments de prière. La prière quotidienne fera grandir votre foi et vous rapprochera de Dieu."
+      }
+    },
+    "sampleContent": {
+      "title": "Recevez du Contenu de Prière Quotidien",
+      "description": "Voici un aperçu du contenu de prière quotidien.",
+      "peopleGroupName": "Groupe de Personnes",
+      "scripture": "Écriture",
+      "prayerPoints": "Points de Prière",
+      "peopleGroupOfDay": "Peuple du Jour"
+    },
+    "mobileApp": {
+      "title": "Téléchargez l'Application Mobile",
+      "description": "Téléchargez notre application mobile pour une meilleure expérience de prière",
+      "appStore": {
+        "label": "Télécharger sur",
+        "store": "App Store",
+        "ariaLabel": "Télécharger sur l'App Store"
+      },
+      "googlePlay": {
+        "label": "Disponible sur",
+        "store": "Google Play",
+        "ariaLabel": "Disponible sur Google Play"
+      }
+    },
+    "verify": {
+      "pageTitle": "Vérifier l'E-mail",
+      "verifying": "Vérification de votre e-mail...",
+      "success": {
+        "title": "E-mail Vérifié !",
+        "message": "Votre e-mail a été vérifié avec succès. Vous recevrez désormais des rappels de prière pour {campaign}."
+      },
+      "error": {
+        "title": "Échec de la Vérification",
+        "generic": "Impossible de vérifier votre e-mail. Ce lien a peut-être déjà été utilisé ou a expiré."
+      },
+      "backToCampaign": "Retour à la Campagne",
+      "startPraying": "Commencer à Prier"
+    },
+    "unsubscribe": {
+      "pageTitle": "Se Désabonner",
+      "processing": "Traitement de votre demande...",
+      "success": {
+        "title": "Désabonné",
+        "message": "Vous avez été désabonné de ce rappel.",
+        "campaign": "Campagne : {title}",
+        "resubscribe": "Se Réabonner",
+        "resubscribing": "Réabonnement..."
+      },
+      "alreadyDone": {
+        "title": "Déjà Désabonné",
+        "message": "Vous avez déjà été désabonné de ce rappel."
+      },
+      "unsubscribedFromCampaign": "Vous avez été désabonné de tous les rappels de {campaign}.",
+      "resubscribed": {
+        "title": "Bon Retour !",
+        "message": "Vous avez été réabonné aux rappels de prière. Vous recevrez votre prochain rappel à l'heure prévue.",
+        "viewCampaign": "Voir la Campagne"
+      },
+      "error": {
+        "title": "Erreur",
+        "message": "Une erreur s'est produite. Veuillez réessayer.",
+        "goHome": "Retour à l'Accueil"
+      },
+      "otherReminders": "Vous avez d'autres rappels pour cette campagne :",
+      "unsubscribeThis": "Désabonner",
+      "unsubscribeAll": "Se Désabonner de Tous",
+      "yourSubscriptions": "Vos Abonnements",
+      "active": "actif",
+      "unsubscribeButton": "Se Désabonner",
+      "unsubscribeFromAll": "Se désabonner de tous les rappels de {campaign}",
+      "preferencesUpdated": "Vos préférences de courriel ont été mises à jour.",
+      "noActiveSubscriptions": "Vous n'avez pas d'abonnements actifs.",
+      "current": "Actuel",
+      "reminderFormat": {
+        "daily": "Quotidien à {time}",
+        "weekly": "{days} à {time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "Gérer les Préférences",
+      "title": "Paramètres de Rappel",
+      "greeting": "Bonjour {name}, gérez vos préférences de rappels de prière ci-dessous.",
+      "save": "Enregistrer les Modifications",
+      "saving": "Enregistrement...",
+      "success": "Vos préférences ont été mises à jour.",
+      "emailChanged": "Nous avons envoyé un e-mail de vérification à votre nouvelle adresse. Veuillez le vérifier pour continuer à recevoir des rappels.",
+      "emailNotVerified": "Votre e-mail n'est pas vérifié. Veuillez vérifier votre boîte de réception pour le lien de vérification.",
+      "emailHint": "La modification de votre e-mail nécessitera une nouvelle vérification.",
+      "sections": {
+        "account": "Compte",
+        "schedule": "Horaire des Rappels",
+        "prayer": "Préférences de Prière",
+        "emailPreferences": "Préférences de Communication"
+      },
+      "emailPreferences": {
+        "description": "Choisissez les communications que vous souhaitez recevoir :",
+        "campaignUpdates": "Mises à jour sur {campaign}",
+        "doxaGeneral": "Mises à jour générales de Doxa",
+        "doxaGeneralHint": "Nouvelles et mises à jour de Doxa"
+      },
+      "consentUpdated": "Préférences de communication mises à jour.",
+      "subscriptions": "Vos Abonnements",
+      "saveAccount": "Enregistrer le Compte",
+      "unsubscribed": "Désabonné",
+      "current": "Actuel",
+      "viewCampaign": "Voir la Campagne",
+      "unsubscribeButton": "Se Désabonner",
+      "resubscribeButton": "Se Réabonner",
+      "unsubscribeConfirm": "Êtes-vous sûr de vouloir vous désabonner de {campaign} ?",
+      "unsubscribeSuccess": "Vous avez été désabonné.",
+      "resubscribeSuccess": "Vous avez été réabonné.",
+      "reminders": "rappels",
+      "reminder": "Rappel",
+      "deleteReminderConfirm": "Êtes-vous sûr de vouloir supprimer ce rappel ?",
+      "deleteReminderSuccess": "Rappel supprimé.",
+      "error": {
+        "title": "Erreur",
+        "notFound": "Abonnement introuvable.",
+        "failed": "Échec de l'enregistrement des modifications. Veuillez réessayer."
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Contenu de Prière",
+    "title": "Prière du Jour",
+    "loading": "Chargement de la prière du jour...",
+    "backTo": "Retour à {campaign}",
+    "backToToday": "Retour à la Prière d'Aujourd'hui",
+    "error": {
+      "title": "Impossible de Charger la Prière",
+      "backToCampaign": "Retour à la Campagne",
+      "recordFailed": "Échec de l'enregistrement de la prière. Veuillez réessayer."
+    },
+    "noContent": {
+      "title": "Pas de Contenu de Prière Aujourd'hui",
+      "message": "Revenez demain pour un nouveau contenu de prière."
+    },
+    "startsOn": {
+      "title": "Contenu de Prière Bientôt Disponible",
+      "message": "Le contenu quotidien de prière commencera le {date}. Inscrivez-vous maintenant pour recevoir des rappels quand il commencera !"
+    },
+    "dateView": {
+      "noContent": {
+        "title": "Pas de Contenu de Prière",
+        "message": "Aucun contenu de prière disponible pour cette date."
+      }
+    },
+    "button": {
+      "amen": "Amen",
+      "hint": "Cliquez pour terminer votre temps de prière"
+    },
+    "thankYou": "Merci d'avoir prié !",
+    "meetThePeople": "Rencontrez le Peuple",
+    "peopleGroupOfTheDay": "Peuple du Jour",
+    "dayInTheLife": "Une Journée dans la Vie",
+    "pauseAndPray": "Pause et Prière",
+    "mapTitle": "Carte montrant l'emplacement de {name}",
+    "pastPrayers": {
+      "title": "Prières Passées"
+    },
+    "navigation": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "today": "Aujourd'hui"
+    }
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "loading": "Chargement...",
+    "minutes": "min",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "followupPage": {
+    "recording": "Enregistrement de votre réponse...",
+    "error": {
+      "title": "Une erreur s'est produite",
+      "invalidLink": "Lien invalide. Paramètres requis manquants.",
+      "invalidResponse": "Type de réponse invalide.",
+      "failed": "Échec de l'enregistrement de votre réponse. Veuillez réessayer."
+    },
+    "goHome": "Retour à l'accueil",
+    "committed": {
+      "title": "Merci pour votre engagement !",
+      "message": "Nous sommes ravis d'apprendre que vous restez fidèle dans la prière. Votre dévouement fait la différence !",
+      "checkInNotice": "Nous vous recontacterons dans quelques mois.",
+      "continueButton": "Continuer vers la campagne"
+    },
+    "sometimes": {
+      "title": "Merci pour votre honnêteté !",
+      "message": "La vie peut être chargée, et ce n'est pas grave si vous n'avez pas pu prier aussi souvent que vous le souhaitiez.",
+      "suggestion": "Souhaitez-vous ajuster votre programme de prière pour quelque chose de plus gérable ?",
+      "adjustButton": "Ajuster mon programme",
+      "continueButton": "Continuer vers la campagne"
+    },
+    "notPraying": {
+      "title": "Nous comprenons",
+      "message": "Votre abonnement a été mis en pause. Vous ne recevrez plus de rappels de prière pour le moment.",
+      "reactivateNotice": "Si vous souhaitez reprendre la prière à l'avenir, vous pouvez réactiver votre abonnement à tout moment depuis votre profil.",
+      "profileButton": "Voir mon profil",
+      "visitButton": "Visiter la campagne"
+    },
+    "pageTitle": "Suivi de prière"
+  },
+  "email": {
+    "common": {
+      "hello": "Bonjour {name} !",
+      "automatedMessage": "Ceci est un message automatique de {appName}. Veuillez ne pas répondre à cet e-mail.",
+      "managePreferences": "Gérer les Préférences",
+      "unsubscribe": "Se Désabonner"
+    },
+    "verification": {
+      "subject": "Vérifiez votre e-mail pour {campaign}",
+      "header": "Vérifiez Votre E-mail",
+      "thankYou": "Merci de vous être inscrit pour recevoir des rappels de prière pour {campaign}.",
+      "pleaseVerify": "Veuillez vérifier votre adresse e-mail en cliquant sur le bouton ci-dessous :",
+      "verifyButton": "Vérifier l'E-mail",
+      "linkInstructions": "Si le bouton ne fonctionne pas, vous pouvez également copier et coller ce lien dans votre navigateur :",
+      "note": "Note :",
+      "expiration": "Ce lien de vérification expirera dans 7 jours.",
+      "ignoreMessage": "Si vous ne vous êtes pas inscrit pour recevoir des rappels de prière, vous pouvez ignorer cet e-mail."
+    },
+    "welcome": {
+      "subject": "Bienvenue sur {appName} - {campaign}",
+      "header": "Bienvenue sur {appName}",
+      "thankYou": "Merci de vous être inscrit pour prier. Votre e-mail a été vérifié et vous êtes prêt à recevoir des rappels de prière pour {campaign}.",
+      "startPraying": "Commencer à Prier",
+      "profileInstructions": "Vous pouvez mettre à jour les détails de votre profil et vos notifications ici :"
+    },
+    "reminder": {
+      "subject": "Rappel de Prière - {campaign}",
+      "header": "Rappel de Prière",
+      "timeForPrayer": "C'est l'heure de votre session de prière de {duration} minutes.",
+      "viewPrayer": "Voir la Prière d'Aujourd'hui",
+      "automatedReminder": "Ceci est un rappel de prière automatique de {appName}."
+    },
+    "followup": {
+      "subject": "{campaign} : Comment se passe votre engagement de prière ?",
+      "subjectReminder": "Rappel : {campaign} : Comment se passe votre engagement de prière ?",
+      "header": "Suivi de Prière",
+      "reminderIntro": "Nous vous avons envoyé un message la semaine dernière et voulions faire un suivi.",
+      "standardIntro": "Nous aimerions savoir comment se passe votre parcours de prière !",
+      "questionDaily": "Priez-vous toujours quotidiennement ?",
+      "questionWeekly": "Priez-vous toujours les {days} ?",
+      "yesDaily": "Oui, je prie quotidiennement",
+      "yesWeekly": "Oui, les jours prévus",
+      "sometimes": "Parfois, mais pas tous les jours",
+      "sometimesWeekly": "Parfois, mais pas toujours",
+      "noLonger": "Non, je ne prie plus",
+      "feedbackHelps": "Vos commentaires nous aident à comprendre comment nous pouvons mieux soutenir votre parcours de prière.",
+      "pauseNotice": "Si nous n'avons pas de nouvelles de vous, nous mettrons en pause vos rappels de prière pour ne pas encombrer votre boîte de réception. Vous pouvez toujours les réactiver depuis votre profil.",
+      "commitmentCheckIn": "Ceci est un suivi d'engagement de {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "Actualités de {campaign}",
+      "headerDefault": "Actualités de {appName}",
+      "footer": "Vous avez reçu cet e-mail car vous avez choisi de recevoir des mises à jour de {appName}."
+    },
+    "days": {
+      "sunday": "Dimanche",
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi"
+    }
+  }
+}

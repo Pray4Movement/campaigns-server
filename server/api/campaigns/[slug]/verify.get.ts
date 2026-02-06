@@ -60,7 +60,8 @@ export default defineEventHandler(async (event) => {
           subscriber.name,
           campaign.title,
           slug,
-          subscriber.profile_id
+          subscriber.profile_id,
+          subscriber.preferred_language || 'en'
         ).catch(err => console.error('Failed to send welcome email:', err))
       }
     }

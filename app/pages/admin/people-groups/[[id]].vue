@@ -84,7 +84,7 @@
                 :key="field.key"
                 :label="field.label"
                 :hint="field.description"
-                :class="{ 'full-width': field.type === 'textarea' }"
+                :class="{ 'full-width': field.type === 'textarea' || field.type === 'translatable' }"
               >
                 <!-- Read-only field -->
                 <div v-if="field.readOnly" class="readonly-field">
@@ -129,13 +129,13 @@
                   :virtualize="field.options.length > 50"
                   class="w-full"
                 />
-                <!-- Select loading placeholder -->
-                <UInput
-                  v-else-if="field.type === 'select' && field.optionsKey && !field.options"
+                <!-- Translatable field (multi-language textarea) -->
+                <TranslatableField
+                  v-else-if="field.type === 'translatable'"
                   :model-value="getFieldValue(field.key)"
-                  disabled
-                  placeholder="Loading options..."
-                  class="w-full"
+                  @update:model-value="setFieldValue(field.key, $event)"
+                  @save="saveChanges"
+                  :rows="3"
                 />
 
                 <!-- Boolean -->
@@ -158,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { peopleGroupFieldCategories, type FieldCategory, type SelectOption } from '~/utils/people-group-fields'
+import { allFields, fieldsByCategory, categories, type FieldDefinition } from '~/utils/people-group-fields'
 
 definePageMeta({
   layout: 'admin',
@@ -170,6 +170,7 @@ interface PeopleGroup {
   dt_id: string
   name: string
   image_url: string | null
+  descriptions: Record<string, string> | null
   metadata: Record<string, any>
   created_at: string
   updated_at: string
@@ -186,9 +187,6 @@ const total = ref(0)
 // Form state
 const formData = ref<Record<string, any>>({})
 
-// Field options loaded from API
-const fieldOptions = ref<Record<string, SelectOption[]>>({})
-
 // UI state
 const loading = ref(true)
 const error = ref('')
@@ -196,32 +194,36 @@ const saving = ref(false)
 const syncing = ref(false)
 const searchQuery = ref('')
 
-// Field categories with loaded options merged in
-const fieldCategories = computed<FieldCategory[]>(() => {
-  return peopleGroupFieldCategories.map(category => ({
-    ...category,
-    fields: category.fields.map(field => {
-      if (field.optionsKey && fieldOptions.value[field.optionsKey]) {
-        return {
-          ...field,
-          options: fieldOptions.value[field.optionsKey]
-        }
-      }
-      return field
-    })
+// i18n and localized options
+const { t } = useI18n()
+const { countryOptions } = useLocalizedOptions()
+
+// Field categories computed from new structure
+const fieldCategories = computed(() => {
+  return categories.map(category => ({
+    key: category.key,
+    label: t(category.labelKey),
+    fields: (fieldsByCategory[category.key] || []).map(field => ({
+      ...field,
+      label: t(field.labelKey),
+      options: getOptionsForField(field)
+    }))
   }))
 })
 
-// Load field options from API
-async function loadFieldOptions() {
-  try {
-    const response = await $fetch<{ options: Record<string, SelectOption[]> }>(
-      '/api/admin/people-groups/field-options'
-    )
-    fieldOptions.value = response.options
-  } catch (err) {
-    console.error('Failed to load field options:', err)
+// Get options for a field, handling dynamic sources
+function getOptionsForField(field: FieldDefinition): { value: string; label: string }[] | undefined {
+  if (field.optionsSource === 'countries') {
+    return countryOptions.value
   }
+  if (field.options) {
+    return field.options.map(opt => ({
+      value: opt.value,
+      // Use direct label if available, otherwise translate labelKey
+      label: opt.label || (opt.labelKey ? t(opt.labelKey) : opt.value)
+    }))
+  }
+  return undefined
 }
 
 // Load people groups
@@ -278,13 +280,19 @@ function initializeForm(group: PeopleGroup) {
     name: group.name,
     image_url: group.image_url,
     dt_id: group.dt_id,
+    descriptions: group.descriptions || {},
     ...group.metadata
   }
 }
 
 // Get field value from form data
 function getFieldValue(key: string): any {
-  return formData.value[key] ?? ''
+  const value = formData.value[key]
+  // For translatable fields (like descriptions), return the object or empty object
+  if (key === 'descriptions') {
+    return value || {}
+  }
+  return value ?? ''
 }
 
 // Set field value in form data
@@ -306,7 +314,7 @@ async function saveChanges() {
   try {
     saving.value = true
 
-    const { name, image_url, dt_id, ...metadataFields } = formData.value
+    const { name, image_url, dt_id, descriptions, ...metadataFields } = formData.value
 
     const response = await $fetch<{ success: boolean; peopleGroup: PeopleGroup }>(
       `/api/admin/people-groups/${selectedGroup.value.id}`,
@@ -315,6 +323,7 @@ async function saveChanges() {
         body: {
           name,
           image_url,
+          descriptions,
           metadata: metadataFields
         }
       }
@@ -398,10 +407,7 @@ function handleUrlSelection() {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    loadFieldOptions(),
-    loadPeopleGroups(true)
-  ])
+  await loadPeopleGroups(true)
   handleUrlSelection()
 })
 </script>

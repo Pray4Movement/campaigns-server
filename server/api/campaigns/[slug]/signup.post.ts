@@ -85,17 +85,31 @@ export default defineEventHandler(async (event) => {
   // Validate and normalize timezone (default to UTC if invalid or missing)
   const timezone = body.timezone && isValidTimezone(body.timezone) ? body.timezone : 'UTC'
 
+  // Normalize language (default to 'en' if invalid or missing)
+  const language = body.language && ['en', 'es', 'fr'].includes(body.language) ? body.language : 'en'
+
   try {
     // Find or create subscriber
     const { subscriber, isNew } = await subscriberService.findOrCreateSubscriber({
       email: body.email,
       phone: body.phone,
-      name: body.name
+      name: body.name,
+      language
     })
 
-    // Update name if subscriber exists and provided a different name
-    if (!isNew && body.name && body.name !== subscriber.name) {
-      await subscriberService.updateSubscriber(subscriber.id, { name: body.name })
+    // Update name and language if subscriber exists
+    if (!isNew) {
+      const updates: { name?: string; preferred_language?: string } = {}
+      if (body.name && body.name !== subscriber.name) {
+        updates.name = body.name
+      }
+      // Update language if provided (allow users to change their preferred language)
+      if (language && language !== subscriber.preferred_language) {
+        updates.preferred_language = language
+      }
+      if (Object.keys(updates).length > 0) {
+        await subscriberService.updateSubscriber(subscriber.id, updates)
+      }
     }
 
     // Handle consent preferences (stored on the contact method)
@@ -136,7 +150,8 @@ export default defineEventHandler(async (event) => {
           body.name,
           campaign.title,
           slug,
-          subscriber.profile_id
+          subscriber.profile_id,
+          language
         )
       }
       // Return same response as new signup for privacy
@@ -160,7 +175,8 @@ export default defineEventHandler(async (event) => {
           body.name,
           campaign.title,
           slug,
-          subscriber.profile_id
+          subscriber.profile_id,
+          language
         )
       }
       // Return same response as new signup for privacy
@@ -191,9 +207,9 @@ export default defineEventHandler(async (event) => {
         const emailContact = await contactMethodService.getByValue('email', body.email)
         if (emailContact && !emailContact.verified) {
           const token = await contactMethodService.generateVerificationToken(emailContact.id)
-          await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name)
+          await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name, language)
         } else if (emailContact?.verified) {
-          await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id)
+          await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id, language)
         }
       }
 
@@ -222,11 +238,11 @@ export default defineEventHandler(async (event) => {
       if (emailContact?.verified) {
         // Email already verified - set next reminder and send welcome
         await campaignSubscriptionService.setInitialNextReminder(subscription.id)
-        await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id)
+        await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id, language)
       } else if (emailContact) {
         // Email not verified - send verification email
         const token = await contactMethodService.generateVerificationToken(emailContact.id)
-        await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name)
+        await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name, language)
       }
 
       // Always return same response for email signups

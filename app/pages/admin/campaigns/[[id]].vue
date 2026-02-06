@@ -38,6 +38,12 @@
             :color="campaign.status === 'active' ? 'primary' : 'neutral'"
             size="xs"
           />
+          <span class="committed-count" :title="`${campaign.people_committed} people committed to pray`">
+            {{ campaign.people_committed }} committed
+          </span>
+          <span class="committed-duration" :title="`${campaign.committed_duration}m of prayer pledged daily`">
+            {{ campaign.committed_duration }}m pledged
+          </span>
           <span class="praying-count" :title="`${campaign.people_praying} praying daily (7-day avg)`">
             {{ campaign.people_praying }} praying
           </span>
@@ -181,6 +187,8 @@ interface Campaign {
   updated_at: string
   people_praying: number
   daily_prayer_duration: number
+  people_committed: number
+  committed_duration: number
 }
 
 const route = useRoute()
@@ -472,6 +480,8 @@ onMounted(async () => {
   font-size: 0.75rem;
 }
 
+.committed-count,
+.committed-duration,
 .praying-count,
 .prayer-duration {
   color: var(--ui-text-muted);

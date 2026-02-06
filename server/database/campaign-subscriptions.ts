@@ -1,6 +1,7 @@
 import { getDatabase } from './db'
 import { calculateNextReminderUtc, calculateNextReminderAfterSend } from '../utils/next-reminder-calculator'
 import { contactMethodService } from './contact-methods'
+import { appConfigService } from './app-config'
 
 export interface CampaignSubscription {
   id: number
@@ -30,6 +31,7 @@ export interface SubscriptionDueForReminder extends CampaignSubscription {
   subscriber_name: string
   subscriber_tracking_id: string
   subscriber_profile_id: string
+  subscriber_language: string
   email_value: string
   email_verified: boolean
   campaign_slug: string
@@ -323,6 +325,8 @@ class CampaignSubscriptionService {
 
     if (result.changes > 0) {
       await this.setInitialNextReminder(id)
+      // Reset follow-up tracking on reactivation
+      await this.resetFollowupTracking(id)
       return true
     }
     return false
@@ -341,14 +345,26 @@ class CampaignSubscriptionService {
    * - status = 'active'
    * - delivery_method = 'email' (for now)
    * - The subscriber has a verified email
+   * - The global campaign start date has been reached (if configured)
    */
   async getSubscriptionsDueForReminder(): Promise<SubscriptionDueForReminder[]> {
+    // Check if we've reached the global campaign start date
+    const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
+    if (globalStartDate) {
+      const today = new Date().toISOString().split('T')[0]
+      if (today! < globalStartDate) {
+        // Campaign hasn't started yet - no reminders to send
+        return []
+      }
+    }
+
     const stmt = this.db.prepare(`
       SELECT
         cs.*,
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
         s.profile_id as subscriber_profile_id,
+        s.preferred_language as subscriber_language,
         cm.value as email_value,
         cm.verified as email_verified,
         c.slug as campaign_slug,
@@ -381,7 +397,7 @@ class CampaignSubscriptionService {
 
     const daysOfWeek = subscription.days_of_week ? JSON.parse(subscription.days_of_week) : undefined
 
-    const nextUtc = calculateNextReminderUtc({
+    const nextUtc = await calculateNextReminderUtc({
       timezone: subscription.timezone || 'UTC',
       timePreference: subscription.time_preference,
       frequency: subscription.frequency,
@@ -421,6 +437,144 @@ class CampaignSubscriptionService {
     for (const sub of subscriptions) {
       await this.setInitialNextReminder(sub.id)
     }
+  }
+
+  /**
+   * Get commitment stats for a single campaign.
+   * Returns count of active subscriptions and total committed prayer minutes.
+   */
+  async getCommitmentStats(campaignId: number): Promise<{ people_committed: number; committed_duration: number }> {
+    const stmt = this.db.prepare(`
+      SELECT
+        COUNT(*) as people_committed,
+        COALESCE(SUM(prayer_duration), 0) as committed_duration
+      FROM campaign_subscriptions
+      WHERE campaign_id = ? AND status = 'active'
+    `)
+    const result = await stmt.get(campaignId) as { people_committed: number; committed_duration: number }
+    return {
+      people_committed: result.people_committed,
+      committed_duration: result.committed_duration
+    }
+  }
+
+  /**
+   * Get commitment stats for multiple campaigns in a single query.
+   * Returns a Map of campaign_id to stats.
+   */
+  async getCommitmentStatsForCampaigns(campaignIds: number[]): Promise<Map<number, { people_committed: number; committed_duration: number }>> {
+    if (campaignIds.length === 0) {
+      return new Map()
+    }
+
+    const placeholders = campaignIds.map(() => '?').join(', ')
+    const stmt = this.db.prepare(`
+      SELECT
+        campaign_id,
+        COUNT(*) as people_committed,
+        COALESCE(SUM(prayer_duration), 0) as committed_duration
+      FROM campaign_subscriptions
+      WHERE campaign_id IN (${placeholders}) AND status = 'active'
+      GROUP BY campaign_id
+    `)
+    const results = await stmt.all(...campaignIds) as Array<{
+      campaign_id: number
+      people_committed: number
+      committed_duration: number
+    }>
+
+    const statsMap = new Map<number, { people_committed: number; committed_duration: number }>()
+
+    // Initialize all campaign IDs with zeros
+    for (const id of campaignIds) {
+      statsMap.set(id, { people_committed: 0, committed_duration: 0 })
+    }
+
+    // Fill in actual values
+    for (const row of results) {
+      statsMap.set(row.campaign_id, {
+        people_committed: row.people_committed,
+        committed_duration: row.committed_duration
+      })
+    }
+
+    return statsMap
+  }
+
+  /**
+   * Mark that a follow-up email was sent for a subscription.
+   * Increments followup_reminder_count and sets last_followup_at.
+   */
+  async markFollowupSent(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        last_followup_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        followup_reminder_count = followup_reminder_count + 1,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Complete a follow-up cycle (subscriber responded or activity detected).
+   * Increments followup_count and resets followup_reminder_count.
+   */
+  async completeFollowupCycle(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        followup_count = followup_count + 1,
+        followup_reminder_count = 0,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Reset follow-up reminders when activity is detected during escalation.
+   */
+  async resetFollowupReminders(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        followup_reminder_count = 0,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Reset all follow-up tracking when reactivating a subscription.
+   */
+  async resetFollowupTracking(subscriptionId: number): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE campaign_subscriptions
+      SET
+        followup_count = 0,
+        followup_reminder_count = 0,
+        last_followup_at = NULL,
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      WHERE id = ?
+    `)
+    await stmt.run(subscriptionId)
+  }
+
+  /**
+   * Get subscription with follow-up details for the API response.
+   */
+  async getSubscriptionWithFollowupDetails(subscriptionId: number): Promise<CampaignSubscription & {
+    last_followup_at: string | null
+    followup_count: number
+    followup_reminder_count: number
+  } | null> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM campaign_subscriptions WHERE id = ?
+    `)
+    return await stmt.get(subscriptionId) as any
   }
 }
 

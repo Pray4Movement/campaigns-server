@@ -1,5 +1,3 @@
-import { sql } from '#imports'
-
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
 

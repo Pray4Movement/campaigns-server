@@ -1,3 +1,5 @@
+import { t } from './translations'
+
 /**
  * Convert Tiptap JSON content to plain HTML for email.
  */
@@ -165,18 +167,23 @@ function extractText(nodes: any[]): string {
 export function renderMarketingEmailHtml(
   contentJson: string,
   campaignTitle?: string,
-  unsubscribeUrl?: string
+  unsubscribeUrl?: string,
+  locale: string = 'en'
 ): string {
   const config = useRuntimeConfig()
   const appName = config.appName || 'Prayer Tools'
 
   const contentHtml = tiptapToHtml(contentJson)
 
-  const headerTitle = campaignTitle ? `${campaignTitle} Updates` : `${appName} Updates`
+  const headerTitle = campaignTitle
+    ? t('email.marketing.headerCampaign', locale, { campaign: campaignTitle })
+    : t('email.marketing.headerDefault', locale, { appName })
+  const footer = t('email.marketing.footer', locale, { appName })
+  const unsubscribeText = t('email.common.unsubscribe', locale)
 
   return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="${locale}">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -192,8 +199,8 @@ export function renderMarketingEmailHtml(
       </div>
 
       <div style="text-align: center; margin-top: 20px; padding: 20px; color: #666666; font-size: 12px;">
-        <p style="margin: 0 0 10px;">You received this email because you opted in to receive updates from ${appName}.</p>
-        ${unsubscribeUrl ? `<p style="margin: 0;"><a href="${unsubscribeUrl}" style="color: #666666; text-decoration: underline;">Unsubscribe</a></p>` : ''}
+        <p style="margin: 0 0 10px;">${footer}</p>
+        ${unsubscribeUrl ? `<p style="margin: 0;"><a href="${unsubscribeUrl}" style="color: #666666; text-decoration: underline;">${unsubscribeText}</a></p>` : ''}
       </div>
     </body>
     </html>

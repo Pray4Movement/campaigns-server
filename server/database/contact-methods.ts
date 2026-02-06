@@ -138,11 +138,11 @@ class ContactMethodService {
   }
 
   /**
-   * Generate a verification token for a contact method (24 hour expiry)
+   * Generate a verification token for a contact method (7 day expiry)
    */
   async generateVerificationToken(contactMethodId: number): Promise<string> {
     const token = randomUUID()
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
     const stmt = this.db.prepare(`
       UPDATE contact_methods

@@ -3,13 +3,18 @@
  * List all active campaigns with people group images
  */
 import { campaignService } from '#server/database/campaigns'
+import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { peopleGroupService } from '#server/database/people-groups'
 
 export default defineEventHandler(async (event) => {
   // Only return active campaigns to the public
   const campaigns = await campaignService.getAllCampaigns('active')
 
-  // Enrich campaigns with people group image URLs
+  // Get commitment stats for all campaigns
+  const campaignIds = campaigns.map(c => c.id)
+  const commitmentStats = await campaignSubscriptionService.getCommitmentStatsForCampaigns(campaignIds)
+
+  // Enrich campaigns with people group image URLs and commitment stats
   const enrichedCampaigns = await Promise.all(
     campaigns.map(async (campaign) => {
       let image_url = null
@@ -17,7 +22,13 @@ export default defineEventHandler(async (event) => {
         const pg = await peopleGroupService.getPeopleGroupByDtId(campaign.dt_id)
         image_url = pg?.image_url || null
       }
-      return { ...campaign, image_url }
+      const stats = commitmentStats.get(campaign.id) || { people_committed: 0, committed_duration: 0 }
+      return {
+        ...campaign,
+        image_url,
+        people_committed: stats.people_committed,
+        committed_duration: stats.committed_duration
+      }
     })
   )
 

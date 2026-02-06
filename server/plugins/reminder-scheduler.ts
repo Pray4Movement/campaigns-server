@@ -127,7 +127,8 @@ async function processReminders() {
             profileId: subscription.subscriber_profile_id,
             subscriptionId: subscription.id,
             prayerDuration: subscription.prayer_duration,
-            prayerContent: prayerContent.length > 0 ? prayerContent : null
+            prayerContent: prayerContent.length > 0 ? prayerContent : null,
+            locale: subscription.subscriber_language || 'en'
           })
 
           if (emailSent) {
