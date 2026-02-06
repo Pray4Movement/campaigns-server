@@ -56,6 +56,22 @@ export default defineNuxtConfig({
     }
   },
 
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@tiptap/pm/state',
+        '@tiptap/pm/view',
+        '@tiptap/pm/model',
+        '@tiptap/pm/transform',
+        '@tiptap/pm/commands',
+        '@tiptap/pm/schema-list',
+        '@tiptap/pm/dropcursor',
+        '@tiptap/pm/gapcursor',
+        '@tiptap/pm/history'
+      ]
+    }
+  },
+
   runtimeConfig: {
     // Private keys (only available on the server-side)
     // Base layer config
