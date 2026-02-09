@@ -16,7 +16,29 @@
         <NuxtLink :to="backUrl" class="back-link">
           ← Back to Day {{ dayNumber }}
         </NuxtLink>
-        <div class="flex gap-2">
+        <div class="flex items-center gap-2">
+          <UButton
+            v-if="mode === 'edit'"
+            @click="navigateDay(-1)"
+            :disabled="dayNumber <= 1 || navigating"
+            variant="outline"
+            icon="i-lucide-chevron-left"
+            size="sm"
+          >
+            Prev Day
+          </UButton>
+          <UButton
+            v-if="mode === 'edit'"
+            @click="navigateDay(1)"
+            :disabled="navigating"
+            variant="outline"
+            icon="i-lucide-chevron-right"
+            trailing
+            size="sm"
+          >
+            Next Day
+          </UButton>
+          <div class="mx-2 h-6 w-px bg-(--ui-border)" />
           <UButton @click="cancel" variant="outline">
             Cancel
           </UButton>
@@ -36,7 +58,7 @@
       </div>
     </template>
 
-    <!-- Unsaved Changes Modal -->
+    <!-- Unsaved Changes Modal (route leave) -->
     <ConfirmModal
       v-model:open="showUnsavedChangesModal"
       title="Leave Without Saving?"
@@ -46,6 +68,28 @@
       @confirm="confirmLeave"
       @cancel="cancelLeave"
     />
+
+    <!-- Unsaved Changes Modal (day navigation) -->
+    <UModal v-model:open="showDayNavModal" title="Unsaved Changes">
+      <template #body>
+        <p>You have unsaved changes. What would you like to do?</p>
+      </template>
+      <template #footer>
+        <div class="flex justify-between items-center gap-3 w-full">
+          <UButton @click="showDayNavModal = false" variant="outline">
+            Cancel
+          </UButton>
+          <div class="flex gap-2">
+            <UButton @click="discardAndNavigate" color="error" variant="soft">
+              Discard Changes
+            </UButton>
+            <UButton @click="saveAndNavigate" :loading="saving" color="primary">
+              Save & Continue
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -93,7 +137,10 @@ const saving = ref(false)
 const isSaved = ref(false)
 const hasUnsavedChanges = ref(false)
 const showUnsavedChangesModal = ref(false)
+const showDayNavModal = ref(false)
 const pendingNavigation = ref<any>(null)
+const navigating = ref(false)
+const pendingDayDirection = ref(0)
 
 const isValid = computed(() => true)
 
@@ -192,6 +239,85 @@ async function saveContent() {
     toast.add({
       title: 'Failed to save content',
       description: err.data?.statusMessage || 'An error occurred while saving your content.',
+      color: 'error'
+    })
+  } finally {
+    saving.value = false
+  }
+}
+
+async function navigateDay(direction: number) {
+  const targetDay = props.dayNumber + direction
+  if (targetDay < 1) return
+
+  const shouldWarn = props.mode === 'new'
+    ? hasActualContent.value
+    : hasUnsavedChanges.value
+
+  if (shouldWarn) {
+    pendingDayDirection.value = direction
+    showDayNavModal.value = true
+    return
+  }
+
+  await performDayNavigation(direction)
+}
+
+async function performDayNavigation(direction: number) {
+  const targetDay = props.dayNumber + direction
+  navigating.value = true
+
+  try {
+    const response = await $fetch<{ content: Array<{ id: number; language_code: string }> }>(
+      `/api/admin/libraries/${props.libraryId}/content/day/${targetDay}`
+    )
+
+    const match = response.content.find(c => c.language_code === effectiveLanguageCode.value)
+
+    isSaved.value = true
+    hasUnsavedChanges.value = false
+
+    if (match) {
+      await navigateTo(`/admin/libraries/${props.libraryId}/days/${targetDay}/content/${match.id}`)
+    } else {
+      await navigateTo(`/admin/libraries/${props.libraryId}/days/${targetDay}`)
+    }
+  } catch {
+    await navigateTo(`/admin/libraries/${props.libraryId}/days/${targetDay}`)
+  } finally {
+    navigating.value = false
+  }
+}
+
+async function discardAndNavigate() {
+  showDayNavModal.value = false
+  await performDayNavigation(pendingDayDirection.value)
+}
+
+async function saveAndNavigate() {
+  if (!isValid.value) return
+
+  try {
+    saving.value = true
+
+    if (props.mode === 'edit' && props.contentId) {
+      await $fetch(`/api/admin/libraries/${props.libraryId}/content/${props.contentId}`, {
+        method: 'PUT',
+        body: { content_json: form.value.content_json }
+      })
+    }
+
+    toast.add({
+      title: 'Content saved',
+      color: 'success'
+    })
+
+    showDayNavModal.value = false
+    await performDayNavigation(pendingDayDirection.value)
+  } catch (err: any) {
+    toast.add({
+      title: 'Failed to save',
+      description: err.data?.statusMessage || 'An error occurred while saving.',
       color: 'error'
     })
   } finally {
