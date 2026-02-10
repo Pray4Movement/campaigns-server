@@ -98,8 +98,8 @@
       </form>
     </UCard>
 
-    <!-- API Keys -->
-    <UCard class="mb-6">
+    <!-- API Keys (admin only) -->
+    <UCard v-if="isAdmin" class="mb-6">
       <template #header>
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">API Keys</h2>
@@ -208,7 +208,7 @@ definePageMeta({
   middleware: ['auth']
 })
 
-const { user, logout, checkAuth } = useAuthUser()
+const { user, logout, checkAuth, isAdmin } = useAuthUser()
 const toast = useToast()
 
 // --- Display Name ---
@@ -417,6 +417,8 @@ async function handleLogout() {
 }
 
 onMounted(() => {
-  fetchApiKeys()
+  if (isAdmin.value) {
+    fetchApiKeys()
+  }
 })
 </script>

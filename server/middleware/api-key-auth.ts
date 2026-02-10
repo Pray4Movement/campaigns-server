@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   const candidates = await apiKeyService.findActiveKeysByPrefix(prefix)
 
   for (const candidate of candidates) {
-    const match = await apiKeyService.verifyKey(rawKey, candidate.key_hash)
+    const match = apiKeyService.verifyKey(rawKey, candidate.key_hash)
     if (match) {
       const user = await userService.getUserById(candidate.user_id)
       if (user) {
@@ -39,8 +39,9 @@ export default defineEventHandler(async (event) => {
           display_name: user.display_name
         }
 
-        // Fire-and-forget last used update
-        apiKeyService.updateLastUsed(candidate.id).catch(() => {})
+        apiKeyService.updateLastUsed(candidate.id).catch(e =>
+          console.error('Failed to update API key last_used:', e)
+        )
       }
       return
     }

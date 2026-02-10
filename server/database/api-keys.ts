@@ -1,8 +1,6 @@
 import { getDatabase } from './db'
-import bcrypt from 'bcrypt'
-import { randomBytes } from 'crypto'
+import { randomBytes, createHash, timingSafeEqual } from 'crypto'
 
-const SALT_ROUNDS = 12
 const KEY_PREFIX = 'dxk_'
 
 export interface ApiKey {
@@ -21,27 +19,30 @@ export interface ApiKeyCandidate {
   key_hash: string
 }
 
+function sha256(input: string): string {
+  return createHash('sha256').update(input).digest('hex')
+}
+
 export class ApiKeyService {
   private db = getDatabase()
 
-  generateKey(): { key: string; keyPrefix: string; keyHash: Promise<string> } {
+  generateKey(): { key: string; keyPrefix: string; keyHash: string } {
     const raw = randomBytes(20).toString('hex') // 40 hex chars
     const key = `${KEY_PREFIX}${raw}`
     const keyPrefix = key.substring(0, 8)
-    const keyHash = bcrypt.hash(key, SALT_ROUNDS)
+    const keyHash = sha256(key)
     return { key, keyPrefix, keyHash }
   }
 
   async createApiKey(userId: string, name: string): Promise<{ apiKey: ApiKey; plaintextKey: string }> {
     const { key, keyPrefix, keyHash } = this.generateKey()
-    const hash = await keyHash
 
     const stmt = this.db.prepare(`
       INSERT INTO api_keys (user_id, name, key_hash, key_prefix)
       VALUES (?, ?, ?, ?)
     `)
 
-    const result = await stmt.run(userId, name, hash, keyPrefix)
+    const result = await stmt.run(userId, name, keyHash, keyPrefix)
 
     const apiKey = await this.db.prepare(`
       SELECT id, user_id, name, key_prefix, created_at, last_used_at, revoked_at
@@ -72,8 +73,11 @@ export class ApiKeyService {
     return await stmt.all(prefix) as ApiKeyCandidate[]
   }
 
-  async verifyKey(rawKey: string, keyHash: string): Promise<boolean> {
-    return bcrypt.compare(rawKey, keyHash)
+  verifyKey(rawKey: string, keyHash: string): boolean {
+    const rawHash = Buffer.from(sha256(rawKey), 'hex')
+    const storedHash = Buffer.from(keyHash, 'hex')
+    if (rawHash.length !== storedHash.length) return false
+    return timingSafeEqual(rawHash, storedHash)
   }
 
   async updateLastUsed(id: number): Promise<void> {

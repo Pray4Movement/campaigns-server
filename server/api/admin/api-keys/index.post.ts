@@ -1,7 +1,7 @@
 import { apiKeyService } from '#server/database/api-keys'
 
 export default defineEventHandler(async (event) => {
-  const user = checkAuth(event)
+  const user = await requireAdmin(event)
   const body = await readBody(event)
 
   const name = body?.name?.trim()
