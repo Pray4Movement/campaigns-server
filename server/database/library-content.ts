@@ -373,6 +373,39 @@ export class LibraryContentService {
     return { inserted, skipped }
   }
 
+  // Bulk upsert content — inserts or overwrites translations in a single operation
+  async bulkUpsertContent(
+    libraryId: number,
+    items: Array<{
+      day_number: number
+      language_code: string
+      content_json: Record<string, any> | null
+    }>
+  ): Promise<{ upserted: number }> {
+    let upserted = 0
+    const batchSize = 100
+
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize)
+
+      for (const item of batch) {
+        const contentJsonString = stringifyContentJson(item.content_json)
+        const stmt = this.db.prepare(`
+          INSERT INTO library_content (library_id, day_number, language_code, content_json)
+          VALUES (?, ?, ?, ?)
+          ON CONFLICT (library_id, day_number, language_code)
+          DO UPDATE SET content_json = EXCLUDED.content_json, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+        `)
+        const result = await stmt.run(libraryId, item.day_number, item.language_code, contentJsonString)
+        if (result.changes > 0) {
+          upserted++
+        }
+      }
+    }
+
+    return { upserted }
+  }
+
   // Delete all content for a library (used before overwriting)
   // Accepts optional db parameter for transaction support
   async deleteAllLibraryContent(libraryId: number, db?: ReturnType<typeof getDatabase>): Promise<number> {

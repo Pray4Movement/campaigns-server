@@ -133,6 +133,84 @@
           </div>
         </div>
 
+        <!-- Libraries Tab -->
+        <div v-if="item.value === 'libraries'" class="py-6">
+          <h2 class="text-xl font-semibold mb-2">Translate Day in Life Content</h2>
+          <p class="text-[var(--ui-text-muted)] mb-6">
+            Translate all "Day in the Life" library content from English to all configured languages.
+            This creates batch translation jobs for every day_in_life library that has English content.
+          </p>
+
+          <div class="flex flex-wrap items-end gap-4">
+            <UCheckbox
+              v-model="dinlOverwrite"
+              label="Overwrite existing translations"
+            />
+
+            <UButton
+              @click="showDinlConfirmModal = true"
+              :disabled="isDinlTranslating"
+              variant="outline"
+              icon="i-lucide-languages"
+            >
+              Start Translation
+            </UButton>
+          </div>
+
+          <UAlert
+            v-if="dinlMessage"
+            :color="dinlMessage.type === 'success' ? 'success' : 'error'"
+            :title="dinlMessage.text"
+            class="mt-4"
+          />
+
+          <!-- Progress card shown while translating -->
+          <UCard v-if="isDinlTranslating && dinlBatchId" class="mt-6">
+            <template #header>
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold">Translation Progress</h3>
+                <UButton
+                  size="xs"
+                  variant="outline"
+                  color="error"
+                  @click="cancelDinlTranslation"
+                  :loading="isCancellingDinl"
+                >
+                  Cancel
+                </UButton>
+              </div>
+            </template>
+            <div class="space-y-3">
+              <UProgress
+                :value="dinlProgress.completed + dinlProgress.failed"
+                :max="dinlProgress.total"
+                size="sm"
+              />
+              <div class="flex justify-between text-sm text-[var(--ui-text-muted)]">
+                <span>{{ dinlProgress.completed + dinlProgress.failed }} of {{ dinlProgress.total }} jobs</span>
+                <span v-if="dinlProgress.failed > 0" class="text-red-500">{{ dinlProgress.failed }} failed</span>
+              </div>
+              <div class="flex gap-4 text-sm">
+                <span>Completed: {{ dinlProgress.completed }}</span>
+                <span>Processing: {{ dinlProgress.processing }}</span>
+                <span>Pending: {{ dinlProgress.pending }}</span>
+              </div>
+            </div>
+          </UCard>
+
+          <!-- Results card shown after completion -->
+          <UCard v-if="dinlResults" class="mt-6">
+            <template #header>
+              <h3 class="font-semibold">Translation Results</h3>
+            </template>
+            <div class="space-y-2">
+              <p><strong>Total Jobs:</strong> {{ dinlResults.total }}</p>
+              <p><strong>Completed:</strong> {{ dinlResults.completed }}</p>
+              <p><strong>Failed:</strong> {{ dinlResults.failed }}</p>
+            </div>
+          </UCard>
+        </div>
+
         <!-- Campaigns Tab -->
         <div v-if="item.value === 'campaigns'" class="py-6">
           <h2 class="text-xl font-semibold mb-2">Campaign Management</h2>
@@ -194,6 +272,37 @@
         </div>
       </template>
     </UTabs>
+
+    <!-- DINL Translation Confirmation Modal -->
+    <UModal v-model:open="showDinlConfirmModal" title="Confirm Day in Life Translation">
+      <template #body>
+        <div class="p-6 space-y-4">
+          <p>
+            This will translate <strong>all Day in the Life libraries</strong> from English to all configured target languages.
+          </p>
+          <p v-if="dinlOverwrite" class="text-amber-600 dark:text-amber-400">
+            Existing translations will be overwritten.
+          </p>
+          <p v-else>
+            Existing translations will be preserved (only missing languages will be translated).
+          </p>
+          <div class="flex gap-2 justify-end pt-4">
+            <UButton
+              variant="outline"
+              @click="showDinlConfirmModal = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              @click="startDinlTranslation"
+              color="primary"
+            >
+              Start Translation
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
 
     <!-- Translation Confirmation Modal -->
     <UModal v-model:open="showTranslateConfirmModal" title="Confirm Batch Translation" :close="!isTranslating">
@@ -265,6 +374,7 @@ definePageMeta({
 const tabs = [
   { label: 'Backups', value: 'backups' },
   { label: 'People Groups', value: 'people-groups' },
+  { label: 'Libraries', value: 'libraries' },
   { label: 'Campaigns', value: 'campaigns' },
 ]
 
@@ -292,6 +402,17 @@ const isTranslating = ref(false)
 const translateMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 const translateStats = ref<{ total: number; translated: number; skipped: number; errors: number } | null>(null)
 const translateProgress = ref<{ message: string; detail?: string; percent?: number }>({ message: 'Starting...' })
+
+// DINL Translation state
+const dinlOverwrite = ref(false)
+const showDinlConfirmModal = ref(false)
+const isDinlTranslating = ref(false)
+const isCancellingDinl = ref(false)
+const dinlBatchId = ref<number | null>(null)
+const dinlMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
+const dinlProgress = ref({ total: 0, pending: 0, processing: 0, completed: 0, failed: 0 })
+const dinlResults = ref<{ total: number; completed: number; failed: number } | null>(null)
+let dinlPollTimer: ReturnType<typeof setInterval> | null = null
 
 // Filter to only translatable fields
 const translatableFieldOptions = computed(() =>
@@ -428,6 +549,141 @@ async function syncCampaignsFromPeopleGroups() {
     isSyncingCampaigns.value = false
   }
 }
+
+async function startDinlTranslation() {
+  showDinlConfirmModal.value = false
+  isDinlTranslating.value = true
+  dinlMessage.value = null
+  dinlResults.value = null
+  dinlProgress.value = { total: 0, pending: 0, processing: 0, completed: 0, failed: 0 }
+
+  try {
+    const response = await $fetch<{
+      success: boolean
+      batchId: number
+      totalLibraries: number
+      totalJobs: number
+      targetLanguages: string[]
+    }>('/api/admin/superadmin/translate-dinl', {
+      method: 'POST',
+      body: { overwrite: dinlOverwrite.value }
+    })
+
+    dinlBatchId.value = response.batchId
+    dinlProgress.value.total = response.totalJobs
+    dinlProgress.value.pending = response.totalJobs
+
+    dinlMessage.value = {
+      text: `Queued ${response.totalJobs} jobs for ${response.totalLibraries} libraries`,
+      type: 'success'
+    }
+
+    // Start polling for progress
+    startDinlPolling()
+  } catch (error: any) {
+    console.error('DINL translation error:', error)
+    dinlMessage.value = {
+      text: error.data?.message || 'Failed to start translation. Please try again.',
+      type: 'error'
+    }
+    isDinlTranslating.value = false
+  }
+}
+
+function startDinlPolling() {
+  stopDinlPolling()
+  dinlPollTimer = setInterval(pollDinlStatus, 2000)
+}
+
+function stopDinlPolling() {
+  if (dinlPollTimer) {
+    clearInterval(dinlPollTimer)
+    dinlPollTimer = null
+  }
+}
+
+async function pollDinlStatus() {
+  if (!dinlBatchId.value) return
+
+  try {
+    const status = await $fetch<{
+      batchId: number
+      total: number
+      pending: number
+      processing: number
+      completed: number
+      failed: number
+      isComplete: boolean
+    }>('/api/admin/superadmin/translate-dinl/status', {
+      params: { batchId: dinlBatchId.value }
+    })
+
+    dinlProgress.value = {
+      total: status.total,
+      pending: status.pending,
+      processing: status.processing,
+      completed: status.completed,
+      failed: status.failed
+    }
+
+    if (status.isComplete) {
+      stopDinlPolling()
+      isDinlTranslating.value = false
+      dinlResults.value = {
+        total: status.total,
+        completed: status.completed,
+        failed: status.failed
+      }
+      dinlMessage.value = {
+        text: `Translation complete: ${status.completed} succeeded, ${status.failed} failed`,
+        type: status.failed > 0 ? 'error' : 'success'
+      }
+    }
+  } catch (error: any) {
+    console.error('DINL poll error:', error)
+  }
+}
+
+async function cancelDinlTranslation() {
+  if (!dinlBatchId.value) return
+
+  isCancellingDinl.value = true
+
+  try {
+    const response = await $fetch<{
+      success: boolean
+      cancelledCount: number
+      stats: { total: number; pending: number; processing: number; completed: number; failed: number }
+    }>('/api/admin/superadmin/translate-dinl/cancel', {
+      method: 'POST',
+      params: { batchId: dinlBatchId.value }
+    })
+
+    stopDinlPolling()
+    isDinlTranslating.value = false
+    dinlResults.value = {
+      total: response.stats.total,
+      completed: response.stats.completed,
+      failed: response.stats.failed
+    }
+    dinlMessage.value = {
+      text: `Cancelled ${response.cancelledCount} pending jobs. ${response.stats.completed} completed before cancellation.`,
+      type: 'success'
+    }
+  } catch (error: any) {
+    console.error('DINL cancel error:', error)
+    dinlMessage.value = {
+      text: error.data?.message || 'Failed to cancel translation.',
+      type: 'error'
+    }
+  } finally {
+    isCancellingDinl.value = false
+  }
+}
+
+onUnmounted(() => {
+  stopDinlPolling()
+})
 
 async function translateField() {
   if (!selectedTranslateField.value) return

@@ -1,25 +1,23 @@
 import { libraryContentService } from '#server/database/library-content'
-import { jobQueueService, type TranslationPayload } from '#server/database/job-queue'
+import { jobQueueService, type TranslationBatchPayload } from '#server/database/job-queue'
 import { isDeepLConfigured, SUPPORTED_LANGUAGES } from '#server/utils/deepl'
 import { getIntParam } from '#server/utils/api-helpers'
 
 /**
- * Queue bulk translation for an entire library
+ * Queue bulk translation for an entire library using batch jobs.
+ * Creates 1 job per target language (instead of per-day).
  *
  * POST /api/admin/libraries/[libraryId]/translate
  *
  * Body:
  * - sourceLanguage: string - Language code to translate FROM
  * - overwrite: boolean - Whether to overwrite existing translations
- *
- * Returns library ID for tracking progress via reference_type='library_translation'
  */
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.create')
 
   const libraryId = getIntParam(event, 'libraryId')
 
-  // Check if DeepL is configured
   if (!isDeepLConfigured()) {
     throw createError({
       statusCode: 503,
@@ -38,7 +36,7 @@ export default defineEventHandler(async (event) => {
 
   const { sourceLanguage, overwrite = false } = body
 
-  // Get all content for the source language in this library
+  // Verify there's source content
   const sourceContent = await libraryContentService.getLibraryContent(libraryId, {
     language: sourceLanguage
   })
@@ -53,44 +51,28 @@ export default defineEventHandler(async (event) => {
   // Determine target languages (all except source)
   const targetLanguages = SUPPORTED_LANGUAGES.filter(lang => lang !== sourceLanguage)
 
-  // Create jobs for each source content × target language combination
+  // Create one batch job per target language
   let jobCount = 0
 
-  for (const content of sourceContent) {
-    // Skip content without actual content
-    if (!content.content_json) continue
-
-    for (const targetLanguage of targetLanguages) {
-      // If not overwriting, check if target already exists
-      if (!overwrite) {
-        const existing = await libraryContentService.getLibraryContentByDay(
-          libraryId,
-          content.day_number,
-          targetLanguage
-        )
-        if (existing) continue
-      }
-
-      const payload: TranslationPayload = {
-        library_id: libraryId,
-        source_content_id: content.id,
-        source_language: sourceLanguage,
-        target_language: targetLanguage,
-        overwrite
-      }
-
-      await jobQueueService.createJob('translation', payload, {
-        referenceType: 'library_translation',
-        referenceId: libraryId
-      })
-      jobCount++
+  for (const targetLanguage of targetLanguages) {
+    const payload: TranslationBatchPayload = {
+      library_id: libraryId,
+      source_language: sourceLanguage,
+      target_language: targetLanguage,
+      overwrite
     }
+
+    await jobQueueService.createJob('translation_batch', payload, {
+      referenceType: 'library_translation',
+      referenceId: libraryId
+    })
+    jobCount++
   }
 
   if (jobCount === 0) {
     return {
       success: true,
-      message: 'No translations needed - all target languages already have content',
+      message: 'No target languages configured',
       libraryId,
       totalJobs: 0
     }
@@ -98,7 +80,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    message: `Queued ${jobCount} translation job(s)`,
+    message: `Queued ${jobCount} translation batch job(s)`,
     libraryId,
     totalJobs: jobCount
   }
