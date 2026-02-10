@@ -60,6 +60,9 @@ export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   // Clean marketing emails (must be before users due to FK)
   await sql`DELETE FROM marketing_emails WHERE created_by IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
 
+  // Clean API keys
+  await sql`DELETE FROM api_keys WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
+
   // Clean users last
   await sql`DELETE FROM users WHERE email LIKE 'test-%@example.com'`
 }

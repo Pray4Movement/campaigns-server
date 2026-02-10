@@ -18,11 +18,17 @@ export interface UserWithRoles {
   isSuperAdmin: boolean
 }
 
-// Require admin role - extends base layer's requireAuth
-// Note: requireAuth, getAuthUser, and verifyToken are auto-imported from base layer
+// Authenticate via API key (set by api-key-auth middleware) or JWT cookie.
+// Uses a unique name to avoid conflicting with the base layer's auto-imported requireAuth.
+export function checkAuth(event: H3Event) {
+  if (event.context.apiKeyAuth) {
+    return event.context.apiKeyAuth as { userId: string; email: string; display_name: string }
+  }
+  return requireAuth(event)
+}
+
 export async function requireAdmin(event: H3Event) {
-  // Get the authenticated user from base layer's requireAuth (auto-imported)
-  const user = requireAuth(event)
+  const user = checkAuth(event)
 
   // Check if user has admin role
   // userId is a UUID string, not a number
@@ -38,10 +44,8 @@ export async function requireAdmin(event: H3Event) {
   return user
 }
 
-// Require specific permission - checks user's role permissions
 export async function requirePermission(event: H3Event, permission: string) {
-  // Get the authenticated user from base layer's requireAuth (auto-imported)
-  const user = requireAuth(event)
+  const user = checkAuth(event)
 
   // Check if user has the required permission
   const hasPermission = await roleService.userHasPermission(user.userId, permission)

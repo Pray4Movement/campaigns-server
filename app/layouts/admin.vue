@@ -61,7 +61,7 @@
       <div v-if="!hasRole" class="nav-menu"></div>
 
       <div class="sidebar-footer">
-        <NuxtLink to="/profile" class="user-name-link" v-if="user">
+        <NuxtLink to="/admin/profile" class="user-name-link" v-if="user">
           {{ user.display_name || user.email }}
         </NuxtLink>
         <ThemeToggle />
