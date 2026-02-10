@@ -1,68 +1,59 @@
-import type { Job, TranslationPayload } from '../../database/job-queue'
+import type { Job, TranslationBatchPayload } from '../../database/job-queue'
 import type { ProcessorResult } from './index'
 import { libraryContentService } from '../../database/library-content'
-import { translateTiptapContent, isDeepLConfigured } from '../../utils/deepl'
+import { batchTranslateTiptapContents, isDeepLConfigured } from '../../utils/deepl'
 
-export async function processTranslation(job: Job): Promise<ProcessorResult> {
-  const payload = job.payload as TranslationPayload
+export async function processBatchTranslation(job: Job): Promise<ProcessorResult> {
+  const payload = job.payload as TranslationBatchPayload
 
-  // Check if DeepL is configured
   if (!isDeepLConfigured()) {
     return { success: false, data: { error: 'DeepL API key not configured' } }
   }
 
-  // Get source content
-  const sourceContent = await libraryContentService.getLibraryContentById(payload.source_content_id)
+  // Get all source content for this library + language
+  const sourceContent = await libraryContentService.getLibraryContent(payload.library_id, {
+    language: payload.source_language
+  })
 
-  if (!sourceContent) {
-    return { success: false, data: { error: 'Source content not found' } }
+  if (sourceContent.length === 0) {
+    return { success: false, data: { error: 'No source content found' } }
   }
 
-  if (!sourceContent.content_json) {
-    return { success: false, data: { error: 'Source content is empty' } }
-  }
+  // Filter to items that have content
+  let contentToTranslate = sourceContent.filter(c => c.content_json)
 
-  // Check if target already exists (race condition protection)
-  const existingTarget = await libraryContentService.getLibraryContentByDay(
-    payload.library_id,
-    sourceContent.day_number,
-    payload.target_language
-  )
-
-  if (existingTarget && !payload.overwrite) {
-    // Already exists and not overwriting - mark as completed (skipped)
-    return { success: true, data: { skipped: true, reason: 'Target already exists' } }
-  }
-
-  // Perform translation
-  const translatedJson = await translateTiptapContent(
-    sourceContent.content_json,
-    payload.target_language,
-    payload.source_language
-  )
-
-  // Save translated content
-  if (existingTarget) {
-    // Update existing
-    await libraryContentService.updateLibraryContent(existingTarget.id, {
-      content_json: translatedJson
+  // If not overwriting, filter out days that already have target translations
+  if (!payload.overwrite) {
+    const existingTarget = await libraryContentService.getLibraryContent(payload.library_id, {
+      language: payload.target_language
     })
-  } else {
-    // Create new
-    await libraryContentService.createLibraryContent({
-      library_id: payload.library_id,
-      day_number: sourceContent.day_number,
-      language_code: payload.target_language,
-      content_json: translatedJson
-    })
+    const existingDays = new Set(existingTarget.map(c => c.day_number))
+    contentToTranslate = contentToTranslate.filter(c => !existingDays.has(c.day_number))
   }
+
+  if (contentToTranslate.length === 0) {
+    return { success: true, data: { skipped: true, reason: 'All days already translated', target_language: payload.target_language } }
+  }
+
+  // Batch translate all docs at once
+  const docs = contentToTranslate.map(c => c.content_json!)
+  const translatedDocs = await batchTranslateTiptapContents(docs, payload.target_language, payload.source_language)
+
+  // Bulk upsert all translated content
+  const items = contentToTranslate.map((c, i) => ({
+    day_number: c.day_number,
+    language_code: payload.target_language,
+    content_json: translatedDocs[i]!
+  }))
+
+  const { upserted } = await libraryContentService.bulkUpsertContent(payload.library_id, items)
 
   return {
     success: true,
     data: {
-      day_number: sourceContent.day_number,
       target_language: payload.target_language,
-      updated: !!existingTarget
+      days_translated: upserted,
+      total_source_days: sourceContent.length
     }
   }
 }

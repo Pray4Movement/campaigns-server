@@ -90,8 +90,8 @@ async function processJobQueue() {
       }
     }
 
-    // Throttle translation jobs to avoid DeepL rate limits
-    if (job.type === 'translation') {
+    // Throttle translation batch jobs to avoid DeepL rate limits
+    if (job.type === 'translation_batch') {
       await new Promise(resolve => setTimeout(resolve, 100))
     }
   }

@@ -1,6 +1,6 @@
 import { getDatabase } from './db'
 
-export type JobType = 'marketing_email' | 'translation' | 'import'
+export type JobType = 'marketing_email' | 'translation_batch' | 'import'
 
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
@@ -45,9 +45,8 @@ export interface MarketingEmailPayload {
   recipient_email: string
 }
 
-export interface TranslationPayload {
+export interface TranslationBatchPayload {
   library_id: number
-  source_content_id: number
   source_language: string
   target_language: string
   overwrite: boolean

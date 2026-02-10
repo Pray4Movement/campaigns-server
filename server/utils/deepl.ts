@@ -152,7 +152,7 @@ interface TiptapNode {
  * Extract all text content from Tiptap JSON, skipping specified node types.
  * Returns array of { path, text } for reconstruction.
  */
-function extractTexts(
+export function extractTexts(
   node: TiptapNode,
   path: number[] = [],
   skipNodeTypes: Set<string> = new Set()
@@ -179,7 +179,7 @@ function extractTexts(
 /**
  * Set text at a specific path in the Tiptap JSON tree
  */
-function setTextAtPath(node: TiptapNode, path: number[], text: string): void {
+export function setTextAtPath(node: TiptapNode, path: number[], text: string): void {
   if (path.length === 0) {
     node.text = text
     return
@@ -221,6 +221,66 @@ export async function translateTiptapContent(
   await translateVerseNodes(cloned, targetLanguage)
 
   return cloned
+}
+
+/**
+ * Batch translate multiple Tiptap JSON documents in a single operation.
+ * More efficient than calling translateTiptapContent() per doc because it
+ * combines all text nodes across all documents into chunked DeepL API calls.
+ *
+ * Returns translated documents in the same order as the input.
+ */
+export async function batchTranslateTiptapContents(
+  docs: TiptapNode[],
+  targetLanguage: string,
+  sourceLanguage?: string
+): Promise<TiptapNode[]> {
+  const skipNodes = new Set(['verse'])
+
+  // Deep clone all docs
+  const clonedDocs: TiptapNode[] = docs.map(doc => JSON.parse(JSON.stringify(doc)))
+
+  // Extract text entries from all docs, tracking which doc each belongs to
+  const allEntries: Array<{ docIndex: number; path: number[]; text: string }> = []
+
+  for (let i = 0; i < clonedDocs.length; i++) {
+    const entries = extractTexts(clonedDocs[i]!, [], skipNodes)
+    for (const entry of entries) {
+      allEntries.push({ docIndex: i, path: entry.path, text: entry.text })
+    }
+  }
+
+  // Translate in chunks of 100
+  if (allEntries.length > 0) {
+    const CHUNK_SIZE = 100
+    const allTranslated: string[] = []
+
+    for (let i = 0; i < allEntries.length; i += CHUNK_SIZE) {
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+      }
+      const chunk = allEntries.slice(i, i + CHUNK_SIZE)
+      const translated = await translateTexts(
+        chunk.map(e => e.text),
+        targetLanguage,
+        sourceLanguage
+      )
+      allTranslated.push(...translated)
+    }
+
+    // Set translated texts back into cloned docs
+    for (let i = 0; i < allEntries.length; i++) {
+      const entry = allEntries[i]!
+      setTextAtPath(clonedDocs[entry.docIndex]!, entry.path, allTranslated[i]!)
+    }
+  }
+
+  // Handle verse nodes in each doc
+  for (const doc of clonedDocs) {
+    await translateVerseNodes(doc, targetLanguage)
+  }
+
+  return clonedDocs
 }
 
 /**
