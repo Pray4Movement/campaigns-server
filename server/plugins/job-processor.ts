@@ -3,6 +3,8 @@ import { marketingEmailService } from '../database/marketing-emails'
 import { getProcessor } from '../jobs/processors'
 
 export default defineNitroPlugin((nitroApp) => {
+  if (process.env.VITEST) return
+
   const enableJobProcessor = process.env.ENABLE_JOB_PROCESSOR !== 'false'
 
   if (!enableJobProcessor) {

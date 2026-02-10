@@ -7,6 +7,8 @@ import { updatePrayerStats } from '../utils/prayer-stats'
  * to see if it's time to update stats (at 3 AM daily)
  */
 export default defineNitroPlugin((nitroApp) => {
+  if (process.env.VITEST) return
+
   console.log('📅 Scheduling prayer stats updates (daily at 3 AM)')
 
   let lastUpdateDate: string | null = null

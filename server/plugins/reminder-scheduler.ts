@@ -11,6 +11,8 @@ import { sendPrayerReminderEmail } from '../utils/prayer-reminder-email'
  * for users whose next_reminder_utc has passed.
  */
 export default defineNitroPlugin((nitroApp) => {
+  if (process.env.VITEST) return
+
   // Check if reminders are enabled (defaults to true)
   const enableReminders = process.env.ENABLE_REMINDER_EMAILS !== 'false'
 

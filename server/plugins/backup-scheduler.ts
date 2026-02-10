@@ -7,6 +7,8 @@ import { createDatabaseBackup } from '../utils/backup'
  * to see if it's time to run a backup (at 2 AM daily)
  */
 export default defineNitroPlugin((nitroApp) => {
+  if (process.env.VITEST) return
+
   // Only run scheduled backups in production or if explicitly enabled
   const enableScheduledBackups = process.env.ENABLE_SCHEDULED_BACKUPS === 'true'
   const isProduction = process.env.NODE_ENV === 'production'

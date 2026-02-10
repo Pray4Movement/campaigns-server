@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process'
 import { createTest, exposeContextToEnv } from '@nuxt/test-utils/e2e'
+import { getTestDatabase, closeTestDatabase, cleanupTestData } from '../helpers/db'
 
 const hooks = createTest({ server: true, browser: false })
 
@@ -11,6 +12,11 @@ export async function setup() {
       DATABASE_URL: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
     },
   })
+
+  const sql = getTestDatabase()
+  await cleanupTestData(sql)
+  await closeTestDatabase()
+
   await hooks.beforeAll()
   exposeContextToEnv()
 }

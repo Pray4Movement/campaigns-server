@@ -43,7 +43,9 @@ export function handleApiError(error: unknown, defaultMessage: string, statusCod
   }
 
   // Log and wrap unknown errors
-  console.error(`${defaultMessage}:`, error)
+  if (!process.env.VITEST) {
+    console.error(`${defaultMessage}:`, error)
+  }
   throw createError({
     statusCode,
     statusMessage: getErrorMessage(error) || defaultMessage

@@ -7,6 +7,8 @@ const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 export default defineNitroPlugin((nitroApp) => {
+  if (process.env.VITEST) return
+
   const enableFollowups = process.env.ENABLE_FOLLOWUP_EMAILS !== 'false'
 
   if (!enableFollowups) {
