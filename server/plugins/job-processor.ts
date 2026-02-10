@@ -15,33 +15,26 @@ export default defineNitroPlugin((nitroApp) => {
 
   console.log('Job processor started (checking every 30 seconds)')
 
-  let isProcessing = false
+  let processingStartedAt = 0
 
-  const interval = setInterval(async () => {
-    if (isProcessing) return
-    isProcessing = true
-
+  const drainQueue = async () => {
+    if (processingStartedAt > 0 && Date.now() - processingStartedAt < 5 * 60 * 1000) return
     try {
-      await processJobQueue()
+      while (true) {
+        processingStartedAt = Date.now()
+        const hadWork = await processJobQueue()
+        if (!hadWork) break
+      }
     } catch (error: any) {
       console.error('Job processor error:', error.message)
     } finally {
-      isProcessing = false
+      processingStartedAt = 0
     }
-  }, 30 * 1000)
+  }
 
-  setTimeout(async () => {
-    if (!isProcessing) {
-      isProcessing = true
-      try {
-        await processJobQueue()
-      } catch (error: any) {
-        console.error('Initial job check error:', error.message)
-      } finally {
-        isProcessing = false
-      }
-    }
-  }, 15000)
+  const interval = setInterval(drainQueue, 30 * 1000)
+
+  setTimeout(drainQueue, 15000)
 
   console.log('Job processor initialized')
 
@@ -51,11 +44,11 @@ export default defineNitroPlugin((nitroApp) => {
   })
 })
 
-async function processJobQueue() {
+async function processJobQueue(): Promise<boolean> {
   const batchSize = 10
   const pending = await jobQueueService.getPendingJobs(undefined, batchSize)
 
-  if (pending.length === 0) return
+  if (pending.length === 0) return false
 
   console.log(`Processing ${pending.length} job(s)...`)
 
@@ -107,4 +100,5 @@ async function processJobQueue() {
   }
 
   console.log('Job processing complete')
+  return true
 }
