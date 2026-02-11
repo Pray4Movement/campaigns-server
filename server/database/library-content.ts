@@ -373,7 +373,7 @@ export class LibraryContentService {
     return { inserted, skipped }
   }
 
-  // Bulk upsert content — inserts or overwrites translations in a single operation
+  // Bulk upsert content — inserts or overwrites translations in a single multi-row operation
   async bulkUpsertContent(
     libraryId: number,
     items: Array<{
@@ -382,25 +382,26 @@ export class LibraryContentService {
       content_json: Record<string, any> | null
     }>
   ): Promise<{ upserted: number }> {
+    const raw = this.db.rawSql
     let upserted = 0
     const batchSize = 100
 
     for (let i = 0; i < items.length; i += batchSize) {
       const batch = items.slice(i, i + batchSize)
+      const rows = batch.map(item => ({
+        library_id: libraryId,
+        day_number: item.day_number,
+        language_code: item.language_code,
+        content_json: stringifyContentJson(item.content_json),
+      }))
 
-      for (const item of batch) {
-        const contentJsonString = stringifyContentJson(item.content_json)
-        const stmt = this.db.prepare(`
-          INSERT INTO library_content (library_id, day_number, language_code, content_json)
-          VALUES (?, ?, ?, ?)
-          ON CONFLICT (library_id, day_number, language_code)
-          DO UPDATE SET content_json = EXCLUDED.content_json, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
-        `)
-        const result = await stmt.run(libraryId, item.day_number, item.language_code, contentJsonString)
-        if (result.changes > 0) {
-          upserted++
-        }
-      }
+      const result = await raw`
+        INSERT INTO library_content ${raw(rows, 'library_id', 'day_number', 'language_code', 'content_json')}
+        ON CONFLICT (library_id, day_number, language_code)
+        DO UPDATE SET content_json = EXCLUDED.content_json,
+                      updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
+      `
+      upserted += result.count
     }
 
     return { upserted }
