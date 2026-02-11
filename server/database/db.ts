@@ -86,6 +86,10 @@ class PreparedStatement {
 class DatabaseWrapper {
   constructor(private sql: Sql) {}
 
+  get rawSql(): Sql {
+    return this.sql
+  }
+
   prepare(query: string): PreparedStatement {
     return new PreparedStatement(this.sql, query)
   }
