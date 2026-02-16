@@ -54,7 +54,7 @@
       "goHome": "Zur Startseite"
     },
     "startsOn": {
-      "message": "Das Gebet beginnt am {date}",
+      "message": "Tägliche Gebetsaktualisierungen beginnen am {date}",
       "signupEarly": "Melden Sie sich jetzt an und seien Sie bereit, wenn das Gebet beginnt!"
     },
     "signup": {

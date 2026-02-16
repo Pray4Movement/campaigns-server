@@ -54,7 +54,7 @@
       "goHome": "Go Home"
     },
     "startsOn": {
-      "message": "Prayer begins on {date}",
+      "message": "Daily prayer updates will begin on {date}",
       "signupEarly": "Sign up now and be ready when prayer starts!"
     },
     "signup": {

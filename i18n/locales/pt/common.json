@@ -54,7 +54,7 @@
       "goHome": "Ir para Inicio"
     },
     "startsOn": {
-      "message": "A oracao comeca em {date}",
+      "message": "As atualizações diárias de oração começarão em {date}",
       "signupEarly": "Inscreva-se agora e esteja pronto quando a oracao comecar!"
     },
     "signup": {

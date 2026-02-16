@@ -54,7 +54,7 @@
       "goHome": "Accueil"
     },
     "startsOn": {
-      "message": "La prière commence le {date}",
+      "message": "Les mises à jour quotidiennes de prière commenceront le {date}",
       "signupEarly": "Inscrivez-vous maintenant et soyez prêt quand la prière commence !"
     },
     "signup": {

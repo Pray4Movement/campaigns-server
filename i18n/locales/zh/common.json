@@ -54,7 +54,7 @@
       "goHome": "返回首页"
     },
     "startsOn": {
-      "message": "祷告将于{date}开始",
+      "message": "每日祷告更新将于{date}开始",
       "signupEarly": "立即注册，准备好开始祷告！"
     },
     "signup": {
