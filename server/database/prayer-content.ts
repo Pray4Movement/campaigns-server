@@ -3,7 +3,6 @@ import { appConfigService } from './app-config'
 import { libraryContentService } from './library-content'
 import { libraryService, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID, DAY_IN_LIFE_LIBRARY_ID } from './libraries'
 import { peopleGroupService } from './people-groups'
-import { campaignService } from './campaigns'
 import { getFieldOptionLabel, getReligionLabel, getCountryLabel } from '../utils/app/field-options'
 import { generatePeopleGroupDescription } from '../utils/app/people-group-description'
 
@@ -21,7 +20,7 @@ export interface PeopleGroupData {
 
 export interface PrayerContent {
   id: number
-  campaign_id: number
+  people_group_id: number
   content_date: string
   language_code: string
   title: string
@@ -33,7 +32,7 @@ export interface PrayerContent {
 }
 
 export interface CreatePrayerContentData {
-  campaign_id: number
+  people_group_id: number
   content_date: string
   language_code: string
   title: string
@@ -236,10 +235,10 @@ export class PrayerContentService {
   /**
    * Transform library content to prayer content format
    */
-  private transformLibraryContent(libraryContent: any, campaignId: number, date: string): PrayerContent {
+  private transformLibraryContent(libraryContent: any, peopleGroupId: number, date: string): PrayerContent {
     return {
       id: libraryContent.id,
-      campaign_id: campaignId,
+      people_group_id: peopleGroupId,
       content_date: date,
       language_code: libraryContent.language_code,
       title: '', // Library content doesn't have titles, but keeping for compatibility
@@ -254,15 +253,8 @@ export class PrayerContentService {
    * Generate people group content for a campaign
    * Includes Day in the Life content if a campaign-specific library exists
    */
-  private async generatePeopleGroupContent(campaignId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
-    // Get the campaign to find its dt_id
-    const campaign = await campaignService.getCampaignById(campaignId)
-    if (!campaign?.dt_id) {
-      return null
-    }
-
-    // Fetch the people group by dt_id
-    const peopleGroup = await peopleGroupService.getPeopleGroupByDtId(campaign.dt_id)
+  private async generatePeopleGroupContent(peopleGroupId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
+    const peopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
     if (!peopleGroup) {
       return null
     }
@@ -308,7 +300,7 @@ export class PrayerContentService {
 
     return {
       id: -1, // Virtual content - no actual database ID
-      campaign_id: campaignId,
+      people_group_id: peopleGroupId,
       content_date: date,
       language_code: languageCode,
       title: peopleGroup.name,
@@ -334,15 +326,8 @@ export class PrayerContentService {
    * Generate daily people group content - rotates through all people groups
    * Each campaign shows a different people group based on their linked group's random_order offset
    */
-  private async generateDailyPeopleGroupContent(campaignId: number, date: string, languageCode: string, dayNumber: number): Promise<PrayerContent | null> {
-    // Get the campaign to find its linked people group
-    const campaign = await campaignService.getCampaignById(campaignId)
-    if (!campaign?.dt_id) {
-      return null
-    }
-
-    // Get the campaign's linked people group to use its random_order as offset
-    const campaignPeopleGroup = await peopleGroupService.getPeopleGroupByDtId(campaign.dt_id)
+  private async generateDailyPeopleGroupContent(peopleGroupId: number, date: string, languageCode: string, dayNumber: number): Promise<PrayerContent | null> {
+    const campaignPeopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
     if (!campaignPeopleGroup?.random_order) {
       return null
     }
@@ -405,7 +390,7 @@ export class PrayerContentService {
 
     return {
       id: -2, // Virtual content ID for daily people group
-      campaign_id: campaignId,
+      people_group_id: peopleGroupId,
       content_date: date,
       language_code: languageCode,
       title: peopleGroup.name,
@@ -428,13 +413,13 @@ export class PrayerContentService {
   }
 
   /**
-   * Generate Day in the Life content for a campaign
-   * Looks up the campaign's day_in_life library and fetches the appropriate day's content
+   * Generate Day in the Life content for a people group
+   * Looks up the people group's day_in_life library and fetches the appropriate day's content
    */
-  private async generateDayInLifeContent(campaignId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
+  private async generateDayInLifeContent(peopleGroupId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
     try {
-      // Get the campaign's day_in_life library
-      const library = await libraryService.getCampaignLibraryByKey(campaignId, 'day_in_life')
+      // Get the people group's day_in_life library
+      const library = await libraryService.getCampaignLibraryByKey(peopleGroupId, 'day_in_life')
       if (!library) {
         return null
       }
@@ -463,7 +448,7 @@ export class PrayerContentService {
 
       return {
         id: -3, // Virtual content ID for Day in the Life
-        campaign_id: campaignId,
+        people_group_id: peopleGroupId,
         content_date: date,
         language_code: languageCode,
         title: '', // Title handled via translation in frontend
@@ -499,7 +484,7 @@ export class PrayerContentService {
    * Get prayer content by campaign, date, and language
    * Uses row-based scheduling - returns first content found across all rows
    */
-  async getPrayerContentByDate(campaignId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent | null> {
+  async getPrayerContentByDate(peopleGroupId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent | null> {
     try {
       // Convert date to campaign day number
       const campaignDay = await this.dateToDayNumber(date)
@@ -523,7 +508,7 @@ export class PrayerContentService {
           )
 
           if (content) {
-            return this.transformLibraryContent(content, campaignId, date)
+            return this.transformLibraryContent(content, peopleGroupId, date)
           }
         }
       }
@@ -539,7 +524,7 @@ export class PrayerContentService {
    * Get ALL prayer content for a specific date from ALL rows
    * Uses row-based scheduling: each row runs in parallel, libraries within a row run sequentially
    */
-  async getAllPrayerContentByDate(campaignId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent[]> {
+  async getAllPrayerContentByDate(peopleGroupId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent[]> {
     try {
       // Convert date to campaign day number
       const campaignDay = await this.dateToDayNumber(date)
@@ -562,20 +547,20 @@ export class PrayerContentService {
           const libraryType = await this.getLibraryType(libraryInfo.libraryId)
 
           if (libraryType === 'people_group') {
-            // Generate campaign's linked people group content
-            const peopleGroupContent = await this.generatePeopleGroupContent(campaignId, date, languageCode)
+            // Generate linked people group content
+            const peopleGroupContent = await this.generatePeopleGroupContent(peopleGroupId, date, languageCode)
             if (peopleGroupContent) {
               allContent.push(peopleGroupContent)
             }
           } else if (libraryType === 'daily_people_group') {
             // Generate daily rotating people group content
-            const dailyContent = await this.generateDailyPeopleGroupContent(campaignId, date, languageCode, campaignDay)
+            const dailyContent = await this.generateDailyPeopleGroupContent(peopleGroupId, date, languageCode, campaignDay)
             if (dailyContent) {
               allContent.push(dailyContent)
             }
           } else if (libraryType === 'day_in_life') {
-            // Generate Day in the Life content from campaign's library
-            const dayInLifeContent = await this.generateDayInLifeContent(campaignId, date, languageCode)
+            // Generate Day in the Life content from people group's library
+            const dayInLifeContent = await this.generateDayInLifeContent(peopleGroupId, date, languageCode)
             if (dayInLifeContent) {
               allContent.push(dayInLifeContent)
             }
@@ -599,7 +584,7 @@ export class PrayerContentService {
             )
 
             if (content) {
-              allContent.push(this.transformLibraryContent(content, campaignId, date))
+              allContent.push(this.transformLibraryContent(content, peopleGroupId, date))
             }
           }
         }
@@ -618,7 +603,7 @@ export class PrayerContentService {
    * Get all languages available for a specific campaign and date
    * Uses row-based scheduling
    */
-  async getAvailableLanguages(campaignId: number, date: string): Promise<string[]> {
+  async getAvailableLanguages(peopleGroupId: number, date: string): Promise<string[]> {
     try {
       // Convert date to campaign day number
       const campaignDay = await this.dateToDayNumber(date)
@@ -652,7 +637,7 @@ export class PrayerContentService {
    * Get all prayer content for a campaign
    * This now fetches from all libraries across all rows
    */
-  async getCampaignPrayerContent(campaignId: number, options?: {
+  async getCampaignPrayerContent(peopleGroupId: number, options?: {
     startDate?: string
     endDate?: string
     language?: string
@@ -692,7 +677,7 @@ export class PrayerContentService {
         // Transform each library content item to prayer content format
         for (const item of libraryContent) {
           const date = await this.dayNumberToDate(item.day_number)
-          allContent.push(this.transformLibraryContent(item, campaignId, date))
+          allContent.push(this.transformLibraryContent(item, peopleGroupId, date))
         }
       }
 
@@ -723,7 +708,7 @@ export class PrayerContentService {
   /**
    * Get prayer content grouped by date with language information
    */
-  async getCampaignContentGroupedByDate(campaignId: number, options?: {
+  async getCampaignContentGroupedByDate(peopleGroupId: number, options?: {
     startDate?: string
     endDate?: string
     limit?: number
@@ -799,7 +784,7 @@ export class PrayerContentService {
   /**
    * Get content count for campaign
    */
-  async getContentCount(campaignId: number): Promise<number> {
+  async getContentCount(peopleGroupId: number): Promise<number> {
     try {
       // Get all library IDs from all rows
       const libraryIds = await this.getAllLibraryIds()

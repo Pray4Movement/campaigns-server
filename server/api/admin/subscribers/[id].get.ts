@@ -1,7 +1,7 @@
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Verify user has access to this campaign
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
         // Subscription info (id for backwards compat)
         id: subscription.id,
         subscription_id: subscription.id,
-        campaign_id: subscription.campaign_id,
+        campaign_id: subscription.people_group_id,
         subscriber_id: subscriber.id,
         // Global subscriber info
         name: subscriber.name,
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
         // All subscriptions for this subscriber
         all_subscriptions: allSubscriptions.map(sub => ({
           id: sub.id,
-          campaign_id: sub.campaign_id,
+          campaign_id: sub.people_group_id,
           campaign_title: sub.campaign_title,
           campaign_slug: sub.campaign_slug,
           status: sub.status

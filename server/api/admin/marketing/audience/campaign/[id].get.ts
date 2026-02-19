@@ -1,5 +1,5 @@
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 
 export default defineEventHandler(async (event) => {
   const user = await requirePermission(event, 'campaigns.view')
@@ -12,19 +12,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const canAccess = await campaignService.userCanAccessCampaign(user.userId, id)
+  const canAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, id)
   if (!canAccess) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
-  const campaign = await campaignService.getCampaignById(id)
-  if (!campaign) {
+  const peopleGroup = await peopleGroupService.getPeopleGroupById(id)
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -34,6 +34,6 @@ export default defineEventHandler(async (event) => {
     count: contacts.length,
     audience_type: 'campaign',
     campaign_id: id,
-    campaign_title: campaign.title
+    campaign_title: peopleGroup.name
   }
 })

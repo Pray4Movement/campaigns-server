@@ -1,7 +1,7 @@
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Verify user has access to this campaign
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -148,7 +148,7 @@ export default defineEventHandler(async (event) => {
       subscriber: {
         id: updatedSubscription?.id,
         subscription_id: updatedSubscription?.id,
-        campaign_id: updatedSubscription?.campaign_id,
+        campaign_id: updatedSubscription?.people_group_id,
         subscriber_id: updatedSubscriber?.id,
         name: updatedSubscriber?.name,
         tracking_id: updatedSubscriber?.tracking_id,

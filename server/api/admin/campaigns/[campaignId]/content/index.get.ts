@@ -1,5 +1,5 @@
 import { prayerContentService } from '#server/database/prayer-content'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
 
   // Check if user has access to this campaign
-  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, campaignId)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,

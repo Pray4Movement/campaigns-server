@@ -1,7 +1,7 @@
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { followupTrackingService } from '#server/database/followup-tracking'
 import { subscriberService } from '#server/database/subscribers'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 
 export default defineEventHandler(async (event) => {
   const subscriptionId = getRouterParam(event, 'id')
@@ -63,12 +63,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get campaign for slug
-  const campaign = await campaignService.getCampaignById(subscription.campaign_id)
-  if (!campaign) {
+  // Get people group for slug
+  const peopleGroup = await peopleGroupService.getPeopleGroupById(subscription.people_group_id)
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -97,7 +97,7 @@ export default defineEventHandler(async (event) => {
     success: true,
     message: getResponseMessage(response),
     profile_id: subscriber.profile_id,
-    campaign_slug: campaign.slug
+    campaign_slug: peopleGroup.slug
   }
 })
 

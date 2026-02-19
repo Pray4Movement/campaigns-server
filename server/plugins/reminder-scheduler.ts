@@ -1,6 +1,6 @@
 import { campaignSubscriptionService } from '../database/campaign-subscriptions'
 import { reminderSentService } from '../database/reminder-sent'
-import { campaignService } from '../database/campaigns'
+import { peopleGroupService } from '../database/people-groups'
 import { prayerContentService } from '../database/prayer-content'
 import { sendPrayerReminderEmail } from '../utils/prayer-reminder-email'
 
@@ -82,30 +82,30 @@ async function processReminders() {
 
   console.log(`📧 Processing ${dueSubscriptions.length} reminder(s)...`)
 
-  // Group subscriptions by campaign_id for efficient content fetching
-  const subscriptionsByCampaign = new Map<number, typeof dueSubscriptions>()
+  // Group subscriptions by people_group_id for efficient content fetching
+  const subscriptionsByPeopleGroup = new Map<number, typeof dueSubscriptions>()
   for (const subscription of dueSubscriptions) {
-    if (!subscriptionsByCampaign.has(subscription.campaign_id)) {
-      subscriptionsByCampaign.set(subscription.campaign_id, [])
+    if (!subscriptionsByPeopleGroup.has(subscription.people_group_id)) {
+      subscriptionsByPeopleGroup.set(subscription.people_group_id, [])
     }
-    subscriptionsByCampaign.get(subscription.campaign_id)!.push(subscription)
+    subscriptionsByPeopleGroup.get(subscription.people_group_id)!.push(subscription)
   }
 
-  // Process each campaign's subscriptions
-  for (const [campaignId, subscriptions] of subscriptionsByCampaign) {
+  // Process each people group's subscriptions
+  for (const [peopleGroupId, subscriptions] of subscriptionsByPeopleGroup) {
     try {
-      // Get campaign info
-      const campaign = await campaignService.getCampaignById(campaignId)
-      if (!campaign) {
-        console.error(`Campaign ${campaignId} not found, skipping ${subscriptions.length} subscriptions`)
+      // Get people group info
+      const peopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
+      if (!peopleGroup) {
+        console.error(`People group ${peopleGroupId} not found, skipping ${subscriptions.length} subscriptions`)
         continue
       }
 
       // Get today's prayer content (all content for this date)
       const prayerContent = await prayerContentService.getAllPrayerContentByDate(
-        campaignId,
+        peopleGroupId,
         todayDate,
-        campaign.default_language || 'en'
+        'en'
       )
 
       // Send reminder to each subscription
@@ -147,7 +147,7 @@ async function processReminders() {
         }
       }
     } catch (error: any) {
-      console.error(`❌ Error processing campaign ${campaignId}:`, error.message)
+      console.error(`❌ Error processing people group ${peopleGroupId}:`, error.message)
     }
   }
 

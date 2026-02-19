@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const filters = {
     status: query.status as 'draft' | 'queued' | 'sending' | 'sent' | 'failed' | undefined,
     audience_type: query.audience_type as 'doxa' | 'campaign' | undefined,
-    campaign_id: query.campaign_id ? Number(query.campaign_id) : undefined
+    people_group_id: query.people_group_id ? Number(query.people_group_id) : undefined
   }
 
   const emails = await marketingEmailService.listForUser(user.userId, filters)

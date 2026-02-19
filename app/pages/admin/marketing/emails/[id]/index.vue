@@ -79,7 +79,7 @@
 
                   <USelectMenu
                     v-show="form.audience_type === 'campaign'"
-                    v-model="form.campaign_id"
+                    v-model="form.people_group_id"
                     :items="campaignOptions"
                     placeholder="Select a campaign"
                     class="campaign-select"
@@ -201,7 +201,7 @@ interface MarketingEmail {
   subject: string
   content_json: string
   audience_type: 'doxa' | 'campaign'
-  campaign_id: number | null
+  people_group_id: number | null
   campaign_title?: string
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
   sent_at: string | null
@@ -225,7 +225,7 @@ const error = ref('')
 const form = ref({
   subject: '',
   audience_type: '' as 'doxa' | 'campaign' | '',
-  campaign_id: undefined as number | undefined,
+  people_group_id: undefined as number | undefined,
   content: { type: 'doc', content: [{ type: 'paragraph' }] } as any
 })
 
@@ -258,7 +258,7 @@ const canPreview = computed(() => {
 
 const canSave = computed(() => {
   return form.value.subject && form.value.audience_type && form.value.content
-    && (form.value.audience_type === 'doxa' || form.value.campaign_id)
+    && (form.value.audience_type === 'doxa' || form.value.people_group_id)
 })
 
 const canSend = computed(() => {
@@ -288,7 +288,7 @@ function getStatusColor(status: string): BadgeColor {
 function selectAudience(type: 'doxa' | 'campaign') {
   form.value.audience_type = type
   if (type === 'doxa') {
-    form.value.campaign_id = undefined
+    form.value.people_group_id = undefined
     campaignCount.value = null
   }
 }
@@ -307,12 +307,12 @@ async function loadEmail() {
       form.value = {
         subject: response.email.subject,
         audience_type: response.email.audience_type,
-        campaign_id: response.email.campaign_id ?? undefined,
+        people_group_id: response.email.people_group_id ?? undefined,
         content: JSON.parse(response.email.content_json)
       }
       originalForm.value = JSON.stringify(form.value)
 
-      if (response.email.audience_type === 'campaign' && response.email.campaign_id) {
+      if (response.email.audience_type === 'campaign' && response.email.people_group_id) {
         void loadCampaignCount()
       }
     } else {
@@ -346,12 +346,12 @@ async function loadDoxaCount() {
 }
 
 async function loadCampaignCount() {
-  if (!form.value.campaign_id) {
+  if (!form.value.people_group_id) {
     campaignCount.value = null
     return
   }
   try {
-    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/campaign/${form.value.campaign_id}`)
+    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/campaign/${form.value.people_group_id}`)
     campaignCount.value = response.count
   } catch (error) {
     console.error('Failed to load campaign count:', error)
@@ -370,7 +370,7 @@ async function saveEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type,
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -407,7 +407,7 @@ async function sendEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type,
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -449,7 +449,7 @@ async function previewEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type || 'doxa',
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 

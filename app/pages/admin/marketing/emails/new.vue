@@ -66,7 +66,7 @@
 
                 <USelectMenu
                   v-show="form.audience_type === 'campaign'"
-                  v-model="form.campaign_id"
+                  v-model="form.people_group_id"
                   :items="campaignOptions"
                   placeholder="Select a campaign"
                   class="campaign-select"
@@ -132,7 +132,7 @@ const toast = useToast()
 const form = ref({
   subject: '',
   audience_type: '' as 'doxa' | 'campaign' | '',
-  campaign_id: undefined as number | undefined,
+  people_group_id: undefined as number | undefined,
   content: { type: 'doc', content: [{ type: 'paragraph' }] }
 })
 
@@ -160,7 +160,7 @@ const canPreview = computed(() => {
 
 const canSave = computed(() => {
   return form.value.subject && form.value.audience_type && form.value.content
-    && (form.value.audience_type === 'doxa' || form.value.campaign_id)
+    && (form.value.audience_type === 'doxa' || form.value.people_group_id)
 })
 
 const canSend = computed(() => {
@@ -177,7 +177,7 @@ const hasActualContent = computed(() => {
 function selectAudience(type: 'doxa' | 'campaign') {
   form.value.audience_type = type
   if (type === 'doxa') {
-    form.value.campaign_id = undefined
+    form.value.people_group_id = undefined
     campaignCount.value = null
   }
 }
@@ -202,12 +202,12 @@ async function loadDoxaCount() {
 }
 
 async function loadCampaignCount() {
-  if (!form.value.campaign_id) {
+  if (!form.value.people_group_id) {
     campaignCount.value = null
     return
   }
   try {
-    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/campaign/${form.value.campaign_id}`)
+    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/campaign/${form.value.people_group_id}`)
     campaignCount.value = response.count
   } catch (error) {
     console.error('Failed to load campaign count:', error)
@@ -226,7 +226,7 @@ async function saveEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type,
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -262,7 +262,7 @@ async function sendEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type,
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -304,7 +304,7 @@ async function previewEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type || 'doxa',
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 

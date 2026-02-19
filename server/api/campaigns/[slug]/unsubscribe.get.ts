@@ -2,7 +2,7 @@
  * GET /api/campaigns/:slug/unsubscribe
  * Get subscriber info and unsubscribe from campaign reminders
  */
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 
@@ -43,10 +43,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify the campaign exists
-  const campaign = await campaignService.getCampaignBySlug(slug)
+  // Verify the people group exists
+  const peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
 
-  if (!campaign) {
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Campaign not found'
@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
   const allSubscriberSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
   // Get subscriptions for this specific campaign
-  const campaignSubscriptions = allSubscriberSubscriptions.filter(s => s.campaign_id === campaign.id)
+  const campaignSubscriptions = allSubscriberSubscriptions.filter(s => s.people_group_id === peopleGroup.id)
 
   if (campaignSubscriptions.length === 0) {
     throw createError({
@@ -92,15 +92,15 @@ export default defineEventHandler(async (event) => {
     for (const sub of subs) {
       if (sub.status !== 'active') continue
 
-      if (!campaignMap.has(sub.campaign_id)) {
-        campaignMap.set(sub.campaign_id, {
-          id: sub.campaign_id,
+      if (!campaignMap.has(sub.people_group_id)) {
+        campaignMap.set(sub.people_group_id, {
+          id: sub.people_group_id,
           title: sub.campaign_title,
           slug: sub.campaign_slug,
           reminders: []
         })
       }
-      campaignMap.get(sub.campaign_id)!.reminders.push(formatReminder(sub))
+      campaignMap.get(sub.people_group_id)!.reminders.push(formatReminder(sub))
     }
 
     return Array.from(campaignMap.values())
@@ -110,12 +110,12 @@ export default defineEventHandler(async (event) => {
   if (unsubscribeAll) {
     const unsubscribedCount = await campaignSubscriptionService.unsubscribeAllForCampaign(
       subscriber.id,
-      campaign.id
+      peopleGroup.id
     )
 
     // Get other campaigns (excluding current one)
     const otherCampaigns = groupByCampaign(
-      allSubscriberSubscriptions.filter(s => s.campaign_id !== campaign.id)
+      allSubscriberSubscriptions.filter(s => s.people_group_id !== peopleGroup.id)
     )
 
     return {
@@ -123,8 +123,8 @@ export default defineEventHandler(async (event) => {
       already_unsubscribed: false,
       unsubscribed_from_campaign: true,
       campaign: {
-        id: campaign.id,
-        title: campaign.title,
+        id: peopleGroup.id,
+        title: peopleGroup.name,
         slug: slug
       },
       unsubscribed_reminder: null,
@@ -140,7 +140,7 @@ export default defineEventHandler(async (event) => {
 
   // Get other campaigns (excluding current one)
   const otherCampaigns = groupByCampaign(
-    allSubscriberSubscriptions.filter(s => s.campaign_id !== campaign.id)
+    allSubscriberSubscriptions.filter(s => s.people_group_id !== peopleGroup.id)
   )
 
   if (!subscriptionToUnsubscribe) {
@@ -153,8 +153,8 @@ export default defineEventHandler(async (event) => {
       already_unsubscribed: true,
       unsubscribed_from_campaign: false,
       campaign: {
-        id: campaign.id,
-        title: campaign.title,
+        id: peopleGroup.id,
+        title: peopleGroup.name,
         slug: slug
       },
       unsubscribed_reminder: null,
@@ -174,8 +174,8 @@ export default defineEventHandler(async (event) => {
       already_unsubscribed: true,
       unsubscribed_from_campaign: false,
       campaign: {
-        id: campaign.id,
-        title: campaign.title,
+        id: peopleGroup.id,
+        title: peopleGroup.name,
         slug: slug
       },
       unsubscribed_reminder: formatReminder(subscriptionToUnsubscribe),
@@ -205,8 +205,8 @@ export default defineEventHandler(async (event) => {
     already_unsubscribed: false,
     unsubscribed_from_campaign: false,
     campaign: {
-      id: campaign.id,
-      title: campaign.title,
+      id: peopleGroup.id,
+      title: peopleGroup.name,
       slug: slug
     },
     unsubscribed_reminder: formatReminder(subscriptionToUnsubscribe),

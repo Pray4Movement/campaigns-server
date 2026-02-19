@@ -257,7 +257,7 @@ interface Library {
   description: string
   library_key: string | null
   repeating: boolean
-  campaign_id: number | null
+  people_group_id: number | null
   created_at: string
   updated_at: string
   stats?: {

@@ -1,7 +1,7 @@
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { sendFollowupEmail } from '#server/utils/followup-email'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
@@ -21,8 +21,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verify user has access to this campaign
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+    // Verify user has access to this people group
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -66,13 +66,13 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get campaign info
-    const campaign = await campaignService.getCampaignById(subscription.campaign_id)
+    // Get people group info
+    const peopleGroup = await peopleGroupService.getPeopleGroupById(subscription.people_group_id)
 
-    if (!campaign) {
+    if (!peopleGroup) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Campaign not found'
+        statusMessage: 'People group not found'
       })
     }
 
@@ -85,8 +85,8 @@ export default defineEventHandler(async (event) => {
     const success = await sendFollowupEmail({
       to: emailContact.value,
       subscriberName: subscriber.name,
-      campaignTitle: campaign.title,
-      campaignSlug: campaign.slug,
+      campaignTitle: peopleGroup.name,
+      campaignSlug: peopleGroup.slug,
       subscriptionId: subscription.id,
       profileId: subscriber.profile_id,
       frequency: subscription.frequency,

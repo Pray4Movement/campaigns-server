@@ -1,7 +1,7 @@
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 
 export default defineEventHandler(async (event) => {
@@ -101,14 +101,14 @@ export default defineEventHandler(async (event) => {
         // Get subscriber's first subscription to use for verification email context
         const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
         if (subscriptions.length > 0) {
-          const campaign = await campaignService.getCampaignById(subscriptions[0]!.campaign_id)
-          if (campaign && newEmailContact) {
+          const peopleGroup = await peopleGroupService.getPeopleGroupById(subscriptions[0]!.people_group_id)
+          if (peopleGroup && newEmailContact) {
             const verificationToken = await contactMethodService.generateVerificationToken(newEmailContact.id)
             await sendSignupVerificationEmail(
               newEmail,
               verificationToken,
-              campaign.slug,
-              campaign.title,
+              peopleGroup.slug,
+              peopleGroup.name,
               body.name?.trim() || subscriber.name
             )
           }
@@ -183,7 +183,7 @@ export default defineEventHandler(async (event) => {
   // Build consent state for response
   const consents = {
     doxa_general: updatedEmail?.consent_doxa_general || false,
-    campaign_ids: updatedEmail?.consented_campaign_ids || []
+    campaign_ids: updatedEmail?.consented_people_group_ids || []
   }
 
   const response: any = {

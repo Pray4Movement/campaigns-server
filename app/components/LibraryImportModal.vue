@@ -354,7 +354,7 @@ async function handleImport() {
     } else {
       body.name = importName.value
       if (props.campaignId) {
-        body.campaign_id = props.campaignId
+        body.people_group_id = props.campaignId
         // Only send library_key if we need one (export file didn't have it)
         if (needsLibraryKey.value && libraryKey.value) {
           body.library_key = libraryKey.value

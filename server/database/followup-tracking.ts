@@ -11,7 +11,7 @@ export interface FollowupResponse {
 
 export interface SubscriptionForFollowup {
   id: number
-  campaign_id: number
+  people_group_id: number
   subscriber_id: number
   frequency: string
   days_of_week: string | null
@@ -39,14 +39,14 @@ class FollowupTrackingService {
    * Get the last prayer activity timestamp for a subscriber on a campaign.
    * Returns null if no activity found.
    */
-  async getLastActivityAt(subscriberId: number, campaignId: number): Promise<string | null> {
+  async getLastActivityAt(subscriberId: number, peopleGroupId: number): Promise<string | null> {
     const stmt = this.db.prepare(`
       SELECT MAX(pa.timestamp) as last_activity_at
       FROM prayer_activity pa
       JOIN subscribers s ON pa.tracking_id = s.tracking_id
-      WHERE s.id = ? AND pa.campaign_id = ?
+      WHERE s.id = ? AND pa.people_group_id = ?
     `)
-    const result = await stmt.get(subscriberId, campaignId) as { last_activity_at: string | null }
+    const result = await stmt.get(subscriberId, peopleGroupId) as { last_activity_at: string | null }
     return result?.last_activity_at || null
   }
 
@@ -65,7 +65,7 @@ class FollowupTrackingService {
     const stmt = this.db.prepare(`
       SELECT
         cs.id,
-        cs.campaign_id,
+        cs.people_group_id,
         cs.subscriber_id,
         cs.frequency,
         cs.days_of_week,
@@ -79,16 +79,16 @@ class FollowupTrackingService {
         s.profile_id as subscriber_profile_id,
         s.preferred_language as subscriber_language,
         cm.value as email_value,
-        c.slug as campaign_slug,
-        c.title as campaign_title,
+        pg.slug as campaign_slug,
+        pg.name as campaign_title,
         (
           SELECT MAX(pa.timestamp)
           FROM prayer_activity pa
-          WHERE pa.tracking_id = s.tracking_id AND pa.campaign_id = cs.campaign_id
+          WHERE pa.tracking_id = s.tracking_id AND pa.people_group_id = cs.people_group_id
         ) as last_activity_at
       FROM campaign_subscriptions cs
       JOIN subscribers s ON s.id = cs.subscriber_id
-      JOIN campaigns c ON c.id = cs.campaign_id
+      JOIN people_groups pg ON pg.id = cs.people_group_id
       LEFT JOIN contact_methods cm ON cm.subscriber_id = s.id AND cm.type = 'email'
       WHERE cs.status = 'active'
         AND cs.delivery_method = 'email'
@@ -150,7 +150,7 @@ class FollowupTrackingService {
         SELECT 1
         FROM prayer_activity pa
         JOIN subscribers s ON pa.tracking_id = s.tracking_id
-        JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id AND cs.campaign_id = pa.campaign_id
+        JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id AND cs.people_group_id = pa.people_group_id
         WHERE cs.id = ?
           AND cs.last_followup_at IS NOT NULL
           AND pa.timestamp > cs.last_followup_at

@@ -1,4 +1,4 @@
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const campaignId = getIntParam(event, 'campaignId')
 
   // Check if user has access to this campaign
-  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, campaignId)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
@@ -19,14 +19,12 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   try {
-    const campaign = await campaignService.updateCampaign(campaignId, {
-      title: body.title,
-      description: body.description,
-      slug: body.slug,
-      status: body.status
+    const peopleGroup = await peopleGroupService.updatePeopleGroup(campaignId, {
+      name: body.title,
+      slug: body.slug
     })
 
-    if (!campaign) {
+    if (!peopleGroup) {
       throw createError({
         statusCode: 404,
         statusMessage: 'Campaign not found'
@@ -35,7 +33,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      campaign
+      campaign: { ...peopleGroup, title: peopleGroup.name }
     }
   } catch (error) {
     handleApiError(error, 'Failed to update campaign', 400)

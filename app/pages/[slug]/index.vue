@@ -509,11 +509,11 @@ interface CampaignResponse {
     id: number
     slug: string
     title: string
-    description: string
-    status: 'active' | 'inactive'
-    default_language: string
     dt_id: string | null
     people_praying: number
+    daily_prayer_duration: number
+    people_committed: number
+    committed_duration: number
     created_at: string
     updated_at: string
   }

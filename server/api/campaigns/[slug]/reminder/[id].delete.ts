@@ -2,7 +2,7 @@
  * DELETE /api/campaigns/:slug/reminder/:id
  * Delete a specific reminder for a campaign subscription
  */
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 
@@ -33,10 +33,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify the campaign exists
-  const campaign = await campaignService.getCampaignBySlug(slug)
+  // Verify the people group exists
+  const peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
 
-  if (!campaign) {
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Campaign not found'
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Verify ownership
-  if (subscription.subscriber_id !== subscriber.id || subscription.campaign_id !== campaign.id) {
+  if (subscription.subscriber_id !== subscriber.id || subscription.people_group_id !== peopleGroup.id) {
     throw createError({
       statusCode: 403,
       statusMessage: 'You do not have permission to delete this reminder'

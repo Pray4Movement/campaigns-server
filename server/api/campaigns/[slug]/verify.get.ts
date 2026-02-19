@@ -2,7 +2,7 @@
  * GET /api/campaigns/:slug/verify
  * Verify email address for campaign subscription
  */
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
@@ -27,10 +27,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify the campaign exists
-  const campaign = await campaignService.getCampaignBySlug(slug)
+  // Verify the people group exists
+  const peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
 
-  if (!campaign) {
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Campaign not found'
@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
         sendWelcomeEmail(
           result.contactMethod.value,
           subscriber.name,
-          campaign.title,
+          peopleGroup.name,
           slug,
           subscriber.profile_id,
           subscriber.preferred_language || 'en'
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     message: 'Email verified successfully',
-    campaign_title: campaign.title,
+    campaign_title: peopleGroup.name,
     campaign_slug: slug
   }
 })

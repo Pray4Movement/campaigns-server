@@ -5,7 +5,7 @@ import { appConfigService } from './app-config'
 
 export interface CampaignSubscription {
   id: number
-  campaign_id: number
+  people_group_id: number
   subscriber_id: number
   delivery_method: 'email' | 'whatsapp' | 'app'
   frequency: string
@@ -39,7 +39,7 @@ export interface SubscriptionDueForReminder extends CampaignSubscription {
 }
 
 export interface CreateSubscriptionInput {
-  campaign_id: number
+  people_group_id: number
   subscriber_id: number
   delivery_method: 'email' | 'whatsapp' | 'app'
   frequency: string
@@ -58,14 +58,14 @@ class CampaignSubscriptionService {
 
     const stmt = this.db.prepare(`
       INSERT INTO campaign_subscriptions (
-        campaign_id, subscriber_id, delivery_method, frequency, days_of_week,
+        people_group_id, subscriber_id, delivery_method, frequency, days_of_week,
         time_preference, timezone, prayer_duration, status
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
     `)
 
     const result = await stmt.run(
-      input.campaign_id,
+      input.people_group_id,
       input.subscriber_id,
       input.delivery_method,
       input.frequency,
@@ -90,75 +90,75 @@ class CampaignSubscriptionService {
 
   async getBySubscriberAndCampaign(
     subscriberId: number,
-    campaignId: number
+    peopleGroupId: number
   ): Promise<CampaignSubscription | null> {
     const stmt = this.db.prepare(`
       SELECT * FROM campaign_subscriptions
-      WHERE subscriber_id = ? AND campaign_id = ?
+      WHERE subscriber_id = ? AND people_group_id = ?
     `)
-    return await stmt.get(subscriberId, campaignId) as CampaignSubscription | null
+    return await stmt.get(subscriberId, peopleGroupId) as CampaignSubscription | null
   }
 
   /**
-   * Get all subscriptions for a subscriber on a specific campaign
+   * Get all subscriptions for a subscriber on a specific people group
    */
   async getAllBySubscriberAndCampaign(
     subscriberId: number,
-    campaignId: number
+    peopleGroupId: number
   ): Promise<CampaignSubscription[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM campaign_subscriptions
-      WHERE subscriber_id = ? AND campaign_id = ?
+      WHERE subscriber_id = ? AND people_group_id = ?
       ORDER BY created_at ASC
     `)
-    return await stmt.all(subscriberId, campaignId) as CampaignSubscription[]
+    return await stmt.all(subscriberId, peopleGroupId) as CampaignSubscription[]
   }
 
   /**
-   * Count subscriptions for a subscriber on a specific campaign
+   * Count subscriptions for a subscriber on a specific people group
    */
   async countBySubscriberAndCampaign(
     subscriberId: number,
-    campaignId: number
+    peopleGroupId: number
   ): Promise<number> {
     const stmt = this.db.prepare(`
       SELECT COUNT(*) as count FROM campaign_subscriptions
-      WHERE subscriber_id = ? AND campaign_id = ?
+      WHERE subscriber_id = ? AND people_group_id = ?
     `)
-    const result = await stmt.get(subscriberId, campaignId) as { count: number }
+    const result = await stmt.get(subscriberId, peopleGroupId) as { count: number }
     return result.count
   }
 
   /**
-   * Unsubscribe from all subscriptions for a subscriber on a campaign
+   * Unsubscribe from all subscriptions for a subscriber on a people group
    */
   async unsubscribeAllForCampaign(
     subscriberId: number,
-    campaignId: number
+    peopleGroupId: number
   ): Promise<number> {
     const stmt = this.db.prepare(`
       UPDATE campaign_subscriptions
       SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
-      WHERE subscriber_id = ? AND campaign_id = ?
+      WHERE subscriber_id = ? AND people_group_id = ?
     `)
-    const result = await stmt.run(subscriberId, campaignId)
+    const result = await stmt.run(subscriberId, peopleGroupId)
     return result.changes
   }
 
   /**
-   * Get all subscriptions for a subscriber (with campaign details)
+   * Get all subscriptions for a subscriber (with people group details)
    */
   async getSubscriberSubscriptions(subscriberId: number): Promise<CampaignSubscriptionWithDetails[]> {
     const stmt = this.db.prepare(`
       SELECT
         cs.*,
-        c.title as campaign_title,
-        c.slug as campaign_slug,
+        pg.name as campaign_title,
+        pg.slug as campaign_slug,
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
         s.profile_id as subscriber_profile_id
       FROM campaign_subscriptions cs
-      JOIN campaigns c ON c.id = cs.campaign_id
+      JOIN people_groups pg ON pg.id = cs.people_group_id
       JOIN subscribers s ON s.id = cs.subscriber_id
       WHERE cs.subscriber_id = ?
       ORDER BY cs.created_at DESC
@@ -167,10 +167,10 @@ class CampaignSubscriptionService {
   }
 
   /**
-   * Get all subscriptions for a campaign (with subscriber details)
+   * Get all subscriptions for a people group (with subscriber details)
    */
   async getCampaignSubscriptions(
-    campaignId: number,
+    peopleGroupId: number,
     options?: {
       status?: 'active' | 'inactive' | 'unsubscribed'
       limit?: number
@@ -180,17 +180,17 @@ class CampaignSubscriptionService {
     let query = `
       SELECT
         cs.*,
-        c.title as campaign_title,
-        c.slug as campaign_slug,
+        pg.name as campaign_title,
+        pg.slug as campaign_slug,
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
         s.profile_id as subscriber_profile_id
       FROM campaign_subscriptions cs
-      JOIN campaigns c ON c.id = cs.campaign_id
+      JOIN people_groups pg ON pg.id = cs.people_group_id
       JOIN subscribers s ON s.id = cs.subscriber_id
-      WHERE cs.campaign_id = ?
+      WHERE cs.people_group_id = ?
     `
-    const params: any[] = [campaignId]
+    const params: any[] = [peopleGroupId]
 
     if (options?.status) {
       query += ' AND cs.status = ?'
@@ -214,15 +214,15 @@ class CampaignSubscriptionService {
   }
 
   /**
-   * Get active subscription count for a campaign
+   * Get active subscription count for a people group
    */
-  async getActiveSubscriptionCount(campaignId: number): Promise<number> {
+  async getActiveSubscriptionCount(peopleGroupId: number): Promise<number> {
     const stmt = this.db.prepare(`
       SELECT COUNT(*) as count
       FROM campaign_subscriptions
-      WHERE campaign_id = ? AND status = 'active'
+      WHERE people_group_id = ? AND status = 'active'
     `)
-    const result = await stmt.get(campaignId) as { count: number }
+    const result = await stmt.get(peopleGroupId) as { count: number }
     return result.count
   }
 
@@ -367,11 +367,11 @@ class CampaignSubscriptionService {
         s.preferred_language as subscriber_language,
         cm.value as email_value,
         cm.verified as email_verified,
-        c.slug as campaign_slug,
-        c.title as campaign_title
+        pg.slug as campaign_slug,
+        pg.name as campaign_title
       FROM campaign_subscriptions cs
       JOIN subscribers s ON s.id = cs.subscriber_id
-      JOIN campaigns c ON c.id = cs.campaign_id
+      JOIN people_groups pg ON pg.id = cs.people_group_id
       LEFT JOIN contact_methods cm ON cm.subscriber_id = s.id AND cm.type = 'email'
       WHERE cs.next_reminder_utc <= CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
         AND cs.status = 'active'
@@ -440,18 +440,18 @@ class CampaignSubscriptionService {
   }
 
   /**
-   * Get commitment stats for a single campaign.
+   * Get commitment stats for a single people group.
    * Returns count of active subscriptions and total committed prayer minutes.
    */
-  async getCommitmentStats(campaignId: number): Promise<{ people_committed: number; committed_duration: number }> {
+  async getCommitmentStats(peopleGroupId: number): Promise<{ people_committed: number; committed_duration: number }> {
     const stmt = this.db.prepare(`
       SELECT
         COUNT(*) as people_committed,
         COALESCE(SUM(prayer_duration), 0) as committed_duration
       FROM campaign_subscriptions
-      WHERE campaign_id = ? AND status = 'active'
+      WHERE people_group_id = ? AND status = 'active'
     `)
-    const result = await stmt.get(campaignId) as { people_committed: number; committed_duration: number }
+    const result = await stmt.get(peopleGroupId) as { people_committed: number; committed_duration: number }
     return {
       people_committed: result.people_committed,
       committed_duration: result.committed_duration
@@ -459,40 +459,40 @@ class CampaignSubscriptionService {
   }
 
   /**
-   * Get commitment stats for multiple campaigns in a single query.
-   * Returns a Map of campaign_id to stats.
+   * Get commitment stats for multiple people groups in a single query.
+   * Returns a Map of people_group_id to stats.
    */
-  async getCommitmentStatsForCampaigns(campaignIds: number[]): Promise<Map<number, { people_committed: number; committed_duration: number }>> {
-    if (campaignIds.length === 0) {
+  async getCommitmentStatsForCampaigns(peopleGroupIds: number[]): Promise<Map<number, { people_committed: number; committed_duration: number }>> {
+    if (peopleGroupIds.length === 0) {
       return new Map()
     }
 
-    const placeholders = campaignIds.map(() => '?').join(', ')
+    const placeholders = peopleGroupIds.map(() => '?').join(', ')
     const stmt = this.db.prepare(`
       SELECT
-        campaign_id,
+        people_group_id,
         COUNT(*) as people_committed,
         COALESCE(SUM(prayer_duration), 0) as committed_duration
       FROM campaign_subscriptions
-      WHERE campaign_id IN (${placeholders}) AND status = 'active'
-      GROUP BY campaign_id
+      WHERE people_group_id IN (${placeholders}) AND status = 'active'
+      GROUP BY people_group_id
     `)
-    const results = await stmt.all(...campaignIds) as Array<{
-      campaign_id: number
+    const results = await stmt.all(...peopleGroupIds) as Array<{
+      people_group_id: number
       people_committed: number
       committed_duration: number
     }>
 
     const statsMap = new Map<number, { people_committed: number; committed_duration: number }>()
 
-    // Initialize all campaign IDs with zeros
-    for (const id of campaignIds) {
+    // Initialize all IDs with zeros
+    for (const id of peopleGroupIds) {
       statsMap.set(id, { people_committed: 0, committed_duration: 0 })
     }
 
     // Fill in actual values
     for (const row of results) {
-      statsMap.set(row.campaign_id, {
+      statsMap.set(row.people_group_id, {
         people_committed: row.people_committed,
         committed_duration: row.committed_duration
       })

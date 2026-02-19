@@ -2,7 +2,7 @@
  * POST /api/campaigns/:slug/prayer-content/:date/session
  * Record a prayer session for analytics and tracking
  */
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { getDatabase } from '#server/database/db'
 import { handleApiError } from '#server/utils/api-helpers'
 
@@ -38,14 +38,14 @@ export default defineEventHandler(async (event) => {
   const { sessionId, trackingId, duration, timestamp, campaignId } = body
 
   // Use campaignId if provided (faster), otherwise lookup by slug
-  let campaign
+  let peopleGroup
   if (campaignId) {
-    campaign = await campaignService.getCampaignById(campaignId)
+    peopleGroup = await peopleGroupService.getPeopleGroupById(campaignId)
   } else {
-    campaign = await campaignService.getCampaignBySlug(slug)
+    peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
   }
 
-  if (!campaign) {
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Campaign not found'
@@ -64,13 +64,13 @@ export default defineEventHandler(async (event) => {
   try {
     // Upsert: Insert or update based on session_id
     const stmt = db.prepare(`
-      INSERT INTO prayer_activity (campaign_id, session_id, tracking_id, duration, timestamp, content_date)
+      INSERT INTO prayer_activity (people_group_id, session_id, tracking_id, duration, timestamp, content_date)
       VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT (session_id) WHERE session_id IS NOT NULL
       DO UPDATE SET duration = EXCLUDED.duration, timestamp = EXCLUDED.timestamp, content_date = EXCLUDED.content_date
     `)
 
-    await stmt.run(campaign.id, sessionId, trackingId || null, duration, timestamp, dateParam)
+    await stmt.run(peopleGroup.id, sessionId, trackingId || null, duration, timestamp, dateParam)
 
     return {
       message: 'Prayer session recorded'

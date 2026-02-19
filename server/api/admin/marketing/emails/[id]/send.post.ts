@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   const canSend = await marketingEmailService.canUserSendToAudience(
     user.userId,
     email.audience_type,
-    email.campaign_id ?? undefined
+    email.people_group_id ?? undefined
   )
 
   if (!canSend) {
@@ -57,8 +57,8 @@ export default defineEventHandler(async (event) => {
   if (email.audience_type === 'doxa') {
     const contacts = await contactMethodService.getContactsWithDoxaConsent()
     recipients = contacts.map(c => ({ id: c.id, value: c.value }))
-  } else if (email.campaign_id) {
-    const contacts = await contactMethodService.getContactsConsentedToCampaign(email.campaign_id)
+  } else if (email.people_group_id) {
+    const contacts = await contactMethodService.getContactsConsentedToCampaign(email.people_group_id)
     recipients = contacts.map(c => ({ id: c.id, value: c.value }))
   } else {
     throw createError({

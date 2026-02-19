@@ -1,5 +1,5 @@
 import { libraryService } from '#server/database/libraries'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   const campaignId = getIntParam(event, 'campaignId')
 
   // Check if user has access to this campaign
-  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, campaignId)
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, campaignId)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
       name: body.name,
       description: body.description,
       repeating: body.repeating,
-      campaign_id: campaignId,
+      people_group_id: campaignId,
       library_key: body.library_key
     })
 

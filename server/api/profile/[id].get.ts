@@ -33,10 +33,10 @@ export default defineEventHandler(async (event) => {
   // Group subscriptions by campaign
   const subscriptionsByCampaign = new Map<number, typeof allSubscriptions>()
   for (const sub of allSubscriptions) {
-    if (!subscriptionsByCampaign.has(sub.campaign_id)) {
-      subscriptionsByCampaign.set(sub.campaign_id, [])
+    if (!subscriptionsByCampaign.has(sub.people_group_id)) {
+      subscriptionsByCampaign.set(sub.people_group_id, [])
     }
-    subscriptionsByCampaign.get(sub.campaign_id)!.push(sub)
+    subscriptionsByCampaign.get(sub.people_group_id)!.push(sub)
   }
 
   // Build campaigns array with reminders
@@ -62,9 +62,9 @@ export default defineEventHandler(async (event) => {
   const consents = {
     doxa_general: primaryEmail?.consent_doxa_general || false,
     doxa_general_at: primaryEmail?.consent_doxa_general_at || null,
-    campaigns: (primaryEmail?.consented_campaign_ids || []).map(campaignId => ({
+    campaigns: (primaryEmail?.consented_people_group_ids || []).map(campaignId => ({
       campaign_id: campaignId,
-      consented_at: primaryEmail?.consented_campaign_ids_at?.[String(campaignId)] || null
+      consented_at: primaryEmail?.consented_people_group_ids_at?.[String(campaignId)] || null
     }))
   }
 

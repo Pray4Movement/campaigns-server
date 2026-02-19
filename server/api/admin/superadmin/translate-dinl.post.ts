@@ -32,13 +32,13 @@ export default defineEventHandler(async (event) => {
 
     // Find all day_in_life libraries that have English content
     const stmt = db.prepare(`
-      SELECT DISTINCT l.id, l.name, l.campaign_id
+      SELECT DISTINCT l.id, l.name, l.people_group_id
       FROM libraries l
       INNER JOIN library_content lc ON lc.library_id = l.id AND lc.language_code = 'en'
       WHERE l.library_key = 'day_in_life'
       ORDER BY l.id
     `)
-    const libraries = await stmt.all() as Array<{ id: number; name: string; campaign_id: number | null }>
+    const libraries = await stmt.all() as Array<{ id: number; name: string; people_group_id: number | null }>
 
     if (libraries.length === 0) {
       throw createError({

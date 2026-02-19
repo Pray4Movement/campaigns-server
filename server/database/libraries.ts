@@ -10,7 +10,7 @@ export const PEOPLE_GROUP_LIBRARY: Library = {
   description: 'Dynamically displays the linked people group information for the campaign',
   type: 'people_group',
   repeating: false,
-  campaign_id: null,
+  people_group_id: null,
   library_key: null,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
@@ -24,7 +24,7 @@ export const DAILY_PEOPLE_GROUP_LIBRARY: Library = {
   description: 'Displays a different people group each day, rotating through all groups',
   type: 'people_group',
   repeating: false,
-  campaign_id: null,
+  people_group_id: null,
   library_key: null,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
@@ -38,7 +38,7 @@ export const DAY_IN_LIFE_LIBRARY: Library = {
   description: 'Displays day in the life content from the campaign\'s day_in_life library',
   type: 'static',
   repeating: true,
-  campaign_id: null,
+  people_group_id: null,
   library_key: null,
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z'
@@ -50,7 +50,7 @@ export interface Library {
   description: string
   type: LibraryType
   repeating: boolean
-  campaign_id: number | null
+  people_group_id: number | null
   library_key: string | null
   created_at: string
   updated_at: string
@@ -60,7 +60,7 @@ export interface CreateLibraryData {
   name: string
   description?: string
   repeating?: boolean
-  campaign_id?: number | null
+  people_group_id?: number | null
   library_key?: string | null
 }
 
@@ -68,7 +68,7 @@ export interface UpdateLibraryData {
   name?: string
   description?: string
   repeating?: boolean
-  campaign_id?: number | null
+  people_group_id?: number | null
   library_key?: string | null
 }
 
@@ -101,15 +101,15 @@ export class LibraryService {
   // Accepts optional db parameter for transaction support
   async createLibrary(data: CreateLibraryData, db?: ReturnType<typeof getDatabase>): Promise<Library> {
     const database = db || this.db
-    const { name, description = '', repeating = false, campaign_id = null, library_key = null } = data
+    const { name, description = '', repeating = false, people_group_id = null, library_key = null } = data
 
     const stmt = database.prepare(`
-      INSERT INTO libraries (name, description, repeating, campaign_id, library_key)
+      INSERT INTO libraries (name, description, repeating, people_group_id, library_key)
       VALUES (?, ?, ?, ?, ?)
     `)
 
     try {
-      const result = await stmt.run(name, description, repeating, campaign_id, library_key)
+      const result = await stmt.run(name, description, repeating, people_group_id, library_key)
       const libraryId = result.lastInsertRowid as number
       return (await this.getLibraryById(libraryId, db))!
     } catch (error: any) {
@@ -143,31 +143,31 @@ export class LibraryService {
     return library
   }
 
-  // Get campaign-specific library by key
-  async getCampaignLibraryByKey(campaignId: number, libraryKey: string): Promise<Library | null> {
+  // Get people-group-specific library by key
+  async getCampaignLibraryByKey(peopleGroupId: number, libraryKey: string): Promise<Library | null> {
     const stmt = this.db.prepare(`
-      SELECT * FROM libraries WHERE campaign_id = ? AND library_key = ?
+      SELECT * FROM libraries WHERE people_group_id = ? AND library_key = ?
     `)
-    const library = await stmt.get(campaignId, libraryKey) as Library | null
+    const library = await stmt.get(peopleGroupId, libraryKey) as Library | null
     return library
   }
 
-  // Get all libraries for a campaign
-  async getCampaignLibraries(campaignId: number): Promise<Library[]> {
+  // Get all libraries for a people group
+  async getCampaignLibraries(peopleGroupId: number): Promise<Library[]> {
     const stmt = this.db.prepare(`
-      SELECT * FROM libraries WHERE campaign_id = ? ORDER BY name
+      SELECT * FROM libraries WHERE people_group_id = ? ORDER BY name
     `)
-    const libraries = await stmt.all(campaignId) as Library[]
+    const libraries = await stmt.all(peopleGroupId) as Library[]
     return libraries
   }
 
-  // Get all global libraries (excludes campaign-specific libraries)
+  // Get all global libraries (excludes people-group-specific libraries)
   async getAllLibraries(options?: {
     search?: string
     limit?: number
     offset?: number
   }): Promise<Library[]> {
-    let query = `SELECT * FROM libraries WHERE campaign_id IS NULL`
+    let query = `SELECT * FROM libraries WHERE people_group_id IS NULL`
     const params: any[] = []
 
     if (options?.search) {
@@ -217,9 +217,9 @@ export class LibraryService {
       values.push(data.repeating)
     }
 
-    if (data.campaign_id !== undefined) {
-      updates.push('campaign_id = ?')
-      values.push(data.campaign_id)
+    if (data.people_group_id !== undefined) {
+      updates.push('people_group_id = ?')
+      values.push(data.people_group_id)
     }
 
     if (data.library_key !== undefined) {

@@ -27,17 +27,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (body.audience_type === 'campaign' && !body.campaign_id) {
+  if (body.audience_type === 'campaign' && !body.people_group_id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'campaign_id is required when audience_type is campaign'
+      statusMessage: 'people_group_id is required when audience_type is campaign'
     })
   }
 
   const canSend = await marketingEmailService.canUserSendToAudience(
     user.userId,
     body.audience_type,
-    body.campaign_id
+    body.people_group_id
   )
 
   if (!canSend) {
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
       subject: body.subject,
       content_json: body.content_json,
       audience_type: body.audience_type,
-      campaign_id: body.audience_type === 'campaign' ? body.campaign_id : null,
+      people_group_id: body.audience_type === 'campaign' ? body.people_group_id : null,
       created_by: user.userId
     })
 

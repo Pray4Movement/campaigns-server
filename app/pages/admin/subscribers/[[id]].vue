@@ -364,7 +364,7 @@ interface Contact {
 
 interface Subscription {
   id: number
-  campaign_id: number
+  people_group_id: number
   campaign_title: string
   campaign_slug: string
   delivery_method: 'email' | 'whatsapp' | 'app'
@@ -500,7 +500,7 @@ const filteredSubscribers = computed(() => {
 
   if (filterCampaignId.value) {
     filtered = filtered.filter(s =>
-      s.subscriptions.some(sub => sub.campaign_id === filterCampaignId.value)
+      s.subscriptions.some(sub => sub.people_group_id === filterCampaignId.value)
     )
   }
 
@@ -813,8 +813,8 @@ function cancelDelete() {
 }
 
 function filterByCampaign(subscription: Subscription) {
-  filterCampaignId.value = subscription.campaign_id
-  router.push({ query: { campaign: subscription.campaign_id } })
+  filterCampaignId.value = subscription.people_group_id
+  router.push({ query: { campaign: subscription.people_group_id } })
 }
 
 // Formatting functions

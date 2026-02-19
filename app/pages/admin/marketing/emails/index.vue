@@ -133,7 +133,7 @@ interface MarketingEmail {
   subject: string
   content_json: string
   audience_type: 'doxa' | 'campaign'
-  campaign_id: number | null
+  people_group_id: number | null
   campaign_title?: string
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
   recipient_count: number

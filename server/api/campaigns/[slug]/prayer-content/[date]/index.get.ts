@@ -2,7 +2,7 @@
  * GET /api/campaigns/:slug/prayer-content/:date
  * Get prayer content for a specific date
  */
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { prayerContentService } from '#server/database/prayer-content'
 import { appConfigService } from '#server/database/app-config'
 
@@ -36,38 +36,30 @@ export default defineEventHandler(async (event) => {
 
   const date = dateParam
 
-  // Get campaign by slug
-  const campaign = await campaignService.getCampaignBySlug(slug)
+  // Get people group by slug
+  const peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
 
-  if (!campaign) {
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Campaign not found'
     })
   }
 
-  // Only return content for active campaigns
-  if (campaign.status !== 'active') {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Campaign not found'
-    })
-  }
-
-  // Get language preference (default to campaign's default language)
-  const defaultLang = campaign.default_language || 'en'
+  // Get language preference (default to 'en')
+  const defaultLang = 'en'
   const languageCode = (query.language as string) || defaultLang
 
   // Get ALL prayer content for the date and language from all libraries
-  let allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, languageCode)
+  let allContent = await prayerContentService.getAllPrayerContentByDate(peopleGroup.id, date, languageCode)
 
-  // If no content found in requested language, fall back to campaign default language
+  // If no content found in requested language, fall back to default language
   if (allContent.length === 0 && languageCode !== defaultLang) {
-    allContent = await prayerContentService.getAllPrayerContentByDate(campaign.id, date, defaultLang)
+    allContent = await prayerContentService.getAllPrayerContentByDate(peopleGroup.id, date, defaultLang)
   }
 
   // Get available languages for this date
-  const availableLanguages = await prayerContentService.getAvailableLanguages(campaign.id, date)
+  const availableLanguages = await prayerContentService.getAvailableLanguages(peopleGroup.id, date)
 
   // Parse content_json for each content item
   const parsedContent = allContent.map(content => {
@@ -99,10 +91,10 @@ export default defineEventHandler(async (event) => {
 
   return {
     campaign: {
-      id: campaign.id,
-      slug: campaign.slug,
-      title: campaign.title,
-      default_language: campaign.default_language
+      id: peopleGroup.id,
+      slug: peopleGroup.slug,
+      title: peopleGroup.name,
+      default_language: defaultLang
     },
     date,
     language: languageCode,

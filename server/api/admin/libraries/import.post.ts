@@ -1,6 +1,6 @@
 import { libraryService, type LibraryExportData } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { getDatabase } from '#server/database/db'
 import { sanitizeImportContent } from '#server/utils/sanitize-tiptap'
 
@@ -9,7 +9,7 @@ const VALID_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', '
 interface ImportRequestBody {
   data: LibraryExportData
   name?: string
-  campaign_id?: number
+  people_group_id?: number
   library_key?: string
   target_library_id?: number  // Import into existing library
 }
@@ -76,17 +76,17 @@ export default defineEventHandler(async (event) => {
   if (body.target_library_id) {
     // Importing into existing library - check what type it is
     const existingLibrary = await libraryService.getLibraryById(body.target_library_id)
-    if (existingLibrary?.campaign_id) {
-      targetCampaignId = existingLibrary.campaign_id
+    if (existingLibrary?.people_group_id) {
+      targetCampaignId = existingLibrary.people_group_id
     }
-  } else if (body.campaign_id) {
-    targetCampaignId = body.campaign_id
+  } else if (body.people_group_id) {
+    targetCampaignId = body.people_group_id
   }
 
   if (targetCampaignId) {
-    // Campaign import - require content.edit permission and campaign access
+    // People group import - require content.edit permission and access
     user = await requirePermission(event, 'content.edit')
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, targetCampaignId)
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, targetCampaignId)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -160,7 +160,7 @@ export default defineEventHandler(async (event) => {
         name: uniqueName,
         description: exportData.library.description,
         repeating: exportData.library.repeating,
-        campaign_id: body.campaign_id || null,
+        people_group_id: body.people_group_id || null,
         library_key: libraryKey
       }, tx)
     }

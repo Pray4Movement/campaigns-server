@@ -32,12 +32,6 @@
         <div class="campaign-title">{{ campaign.title }}</div>
         <div class="campaign-slug">/{{ campaign.slug }}</div>
         <div class="campaign-meta">
-          <UBadge
-            :label="campaign.status"
-            :variant="campaign.status === 'active' ? 'solid' : 'outline'"
-            :color="campaign.status === 'active' ? 'primary' : 'neutral'"
-            size="xs"
-          />
           <span class="committed-count" :title="`${campaign.people_committed} people committed to pray`">
             {{ campaign.people_committed }} committed
           </span>
@@ -115,36 +109,6 @@
                   class="w-full"
                 />
               </UFormField>
-
-              <UFormField label="Description" class="full-width">
-                <UTextarea
-                  v-model="form.description"
-                  :rows="4"
-                  placeholder="Enter campaign description"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <UFormField label="Status">
-                <USelect
-                  v-model="form.status"
-                  :items="statusOptions"
-                  value-key="value"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <UFormField
-                label="Default Language"
-                hint="Primary language for this campaign"
-              >
-                <USelect
-                  v-model="form.default_language"
-                  :items="languageOptions"
-                  value-key="value"
-                  class="w-full"
-                />
-              </UFormField>
             </div>
           </CrmFormSection>
         </form>
@@ -180,9 +144,7 @@ interface Campaign {
   id: number
   slug: string
   title: string
-  description: string
-  status: 'active' | 'inactive'
-  default_language: string
+  name: string
   created_at: string
   updated_at: string
   people_praying: number
@@ -212,29 +174,8 @@ const deleting = ref(false)
 // Form
 const form = ref({
   title: '',
-  slug: '',
-  description: '',
-  status: 'active' as 'active' | 'inactive',
-  default_language: 'en'
+  slug: ''
 })
-
-const statusOptions = [
-  { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' }
-]
-
-const languageOptions = [
-  { label: 'English', value: 'en' },
-  { label: 'Spanish (Español)', value: 'es' },
-  { label: 'French (Français)', value: 'fr' },
-  { label: 'Portuguese (Português)', value: 'pt' },
-  { label: 'German (Deutsch)', value: 'de' },
-  { label: 'Italian (Italiano)', value: 'it' },
-  { label: 'Chinese (中文)', value: 'zh' },
-  { label: 'Arabic (العربية)', value: 'ar' },
-  { label: 'Russian (Русский)', value: 'ru' },
-  { label: 'Hindi (हिन्दी)', value: 'hi' }
-]
 
 const filteredCampaigns = computed(() => {
   if (!searchQuery.value) return campaigns.value
@@ -242,8 +183,7 @@ const filteredCampaigns = computed(() => {
   const query = searchQuery.value.toLowerCase()
   return campaigns.value.filter(c =>
     c.title.toLowerCase().includes(query) ||
-    c.slug.toLowerCase().includes(query) ||
-    c.description?.toLowerCase().includes(query)
+    c.slug.toLowerCase().includes(query)
   )
 })
 
@@ -266,10 +206,7 @@ function selectCampaign(campaign: Campaign, updateUrl = true) {
   selectedCampaign.value = campaign
   form.value = {
     title: campaign.title,
-    slug: campaign.slug,
-    description: campaign.description,
-    status: campaign.status,
-    default_language: campaign.default_language
+    slug: campaign.slug
   }
   if (updateUrl && import.meta.client) {
     window.history.replaceState({}, '', `/admin/campaigns/${campaign.id}`)
@@ -281,10 +218,7 @@ function createNew() {
   isCreating.value = true
   form.value = {
     title: '',
-    slug: '',
-    description: '',
-    status: 'active',
-    default_language: 'en'
+    slug: ''
   }
   if (import.meta.client) {
     window.history.replaceState({}, '', '/admin/campaigns/new')
@@ -423,10 +357,7 @@ function handleUrlSelection() {
     isCreating.value = true
     form.value = {
       title: '',
-      slug: '',
-      description: '',
-      status: 'active',
-      default_language: 'en'
+      slug: ''
     }
   } else {
     const id = parseInt(idParam)

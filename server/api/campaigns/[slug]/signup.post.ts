@@ -1,8 +1,8 @@
 /**
  * POST /api/campaigns/:slug/signup
- * Sign up for prayer reminders for a campaign
+ * Sign up for prayer reminders for a people group
  */
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
@@ -21,21 +21,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get campaign by slug
-  const campaign = await campaignService.getCampaignBySlug(slug)
+  // Get people group by slug
+  const peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
 
-  if (!campaign) {
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Campaign not found'
-    })
-  }
-
-  // Only allow signups for active campaigns
-  if (campaign.status !== 'active') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'This campaign is not accepting signups'
     })
   }
 
@@ -124,7 +116,7 @@ export default defineEventHandler(async (event) => {
 
       if (contactMethod) {
         if (body.consent_campaign_updates) {
-          await contactMethodService.addCampaignConsent(contactMethod.id, campaign.id)
+          await contactMethodService.addCampaignConsent(contactMethod.id, peopleGroup.id)
         }
         if (body.consent_doxa_general) {
           await contactMethodService.updateDoxaConsent(contactMethod.id, true)
@@ -135,7 +127,7 @@ export default defineEventHandler(async (event) => {
     // Get all existing subscriptions for this subscriber/campaign
     const existingSubscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
       subscriber.id,
-      campaign.id
+      peopleGroup.id
     )
 
     const MAX_SUBSCRIPTIONS_PER_CAMPAIGN = 5
@@ -148,7 +140,7 @@ export default defineEventHandler(async (event) => {
         await sendWelcomeEmail(
           body.email,
           body.name,
-          campaign.title,
+          peopleGroup.name,
           slug,
           subscriber.profile_id,
           language
@@ -173,7 +165,7 @@ export default defineEventHandler(async (event) => {
         await sendWelcomeEmail(
           body.email,
           body.name,
-          campaign.title,
+          peopleGroup.name,
           slug,
           subscriber.profile_id,
           language
@@ -207,9 +199,9 @@ export default defineEventHandler(async (event) => {
         const emailContact = await contactMethodService.getByValue('email', body.email)
         if (emailContact && !emailContact.verified) {
           const token = await contactMethodService.generateVerificationToken(emailContact.id)
-          await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name, language)
+          await sendSignupVerificationEmail(body.email, token, slug, peopleGroup.name, body.name, language)
         } else if (emailContact?.verified) {
-          await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id, language)
+          await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language)
         }
       }
 
@@ -221,7 +213,7 @@ export default defineEventHandler(async (event) => {
 
     // Create new subscription
     const subscription = await campaignSubscriptionService.createSubscription({
-      campaign_id: campaign.id,
+      people_group_id: peopleGroup.id,
       subscriber_id: subscriber.id,
       delivery_method: body.delivery_method,
       frequency: body.frequency,
@@ -238,11 +230,11 @@ export default defineEventHandler(async (event) => {
       if (emailContact?.verified) {
         // Email already verified - set next reminder and send welcome
         await campaignSubscriptionService.setInitialNextReminder(subscription.id)
-        await sendWelcomeEmail(body.email, body.name, campaign.title, slug, subscriber.profile_id, language)
+        await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language)
       } else if (emailContact) {
         // Email not verified - send verification email
         const token = await contactMethodService.generateVerificationToken(emailContact.id)
-        await sendSignupVerificationEmail(body.email, token, slug, campaign.title, body.name, language)
+        await sendSignupVerificationEmail(body.email, token, slug, peopleGroup.name, body.name, language)
       }
 
       // Always return same response for email signups
