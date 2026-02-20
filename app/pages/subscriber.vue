@@ -585,7 +585,7 @@ async function confirmDeleteReminder(reminder: any, campaignGroup: any) {
   }
 
   try {
-    await $fetch(`/api/campaigns/${campaignGroup.slug}/reminder/${reminder.id}`, {
+    await $fetch(`/api/people-groups/${campaignGroup.slug}/reminder/${reminder.id}`, {
       method: 'DELETE',
       query: { id: profileId }
     })
@@ -606,7 +606,7 @@ async function confirmDeleteReminder(reminder: any, campaignGroup: any) {
 
 async function resubscribeReminder(reminder: any, campaignGroup: any) {
   try {
-    await $fetch(`/api/campaigns/${campaignGroup.slug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${campaignGroup.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId, subscription_id: reminder.id }
     })

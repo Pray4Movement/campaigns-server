@@ -1,5 +1,5 @@
 /**
- * POST /api/campaigns/:slug/signup
+ * POST /api/people-groups/:slug/signup
  * Sign up for prayer reminders for a people group
  */
 import { peopleGroupService } from '#server/database/people-groups'

@@ -1,5 +1,5 @@
 /**
- * POST /api/campaigns/:slug/resubscribe
+ * POST /api/people-groups/:slug/resubscribe
  * Re-subscribe to campaign reminders after unsubscribing
  */
 import { peopleGroupService } from '#server/database/people-groups'

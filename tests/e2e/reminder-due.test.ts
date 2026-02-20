@@ -24,7 +24,7 @@ describe('getSubscriptionsDueForReminder', async () => {
 
   describe('Basic Filtering', () => {
     it('returns subscriptions with past due next_reminder_utc', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Due Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -49,7 +49,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('excludes subscriptions with future next_reminder_utc', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Future Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -73,7 +73,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('excludes inactive subscriptions', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Inactive Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -96,7 +96,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('excludes unsubscribed subscriptions', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Unsubscribed Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -119,7 +119,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('excludes unverified emails', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Unverified Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -142,7 +142,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('only returns email delivery method', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test WhatsApp Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -167,7 +167,7 @@ describe('getSubscriptionsDueForReminder', async () => {
 
   describe('Edge Cases', () => {
     it('includes subscription due exactly at current time', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Exact Time Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -192,7 +192,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('excludes subscriptions with null next_reminder_utc', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Null Reminder Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -218,7 +218,6 @@ describe('getSubscriptionsDueForReminder', async () => {
   describe('Return Data', () => {
     it('returns complete data with all joined fields', async () => {
       const campaign = await createTestCampaign(sql, {
-        status: 'active',
         title: 'Test Campaign Data'
       })
       const subscriber = await createTestSubscriber(sql, { name: 'Test Data Subscriber' })
@@ -246,7 +245,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       expect(found).toBeDefined()
 
       // Subscription fields
-      expect(found!.campaign_id).toBe(campaign.id)
+      expect(found!.people_group_id).toBe(campaign.id)
       expect(found!.subscriber_id).toBe(subscriber.id)
       expect(found!.delivery_method).toBe('email')
       expect(found!.frequency).toBe('daily')
@@ -269,7 +268,7 @@ describe('getSubscriptionsDueForReminder', async () => {
     })
 
     it('orders by next_reminder_utc ASC', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const campaign = await createTestCampaign(sql)
 
       // Create 3 subscribers with different due times
       const times = [

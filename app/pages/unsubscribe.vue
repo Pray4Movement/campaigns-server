@@ -431,7 +431,7 @@ async function loadData() {
     } else if (slug) {
       // Campaign unsubscribe - use existing flow
       const [unsubData, profData] = await Promise.all([
-        $fetch<UnsubscribeData>(`/api/campaigns/${slug}/unsubscribe`, {
+        $fetch<UnsubscribeData>(`/api/people-groups/${slug}/unsubscribe`, {
           query: { id: profileId, sid: subscriptionId }
         }),
         $fetch<ProfileData>(`/api/profile/${profileId}`)
@@ -530,7 +530,7 @@ function formatReminderSchedule(reminder: Reminder) {
 async function unsubscribeFromReminder(campaignSlug: string, campaignId: number, reminderId: number) {
   try {
     unsubscribingId.value = reminderId
-    await $fetch(`/api/campaigns/${campaignSlug}/unsubscribe`, {
+    await $fetch(`/api/people-groups/${campaignSlug}/unsubscribe`, {
       query: { id: profileId, sid: reminderId }
     })
 
@@ -555,7 +555,7 @@ async function unsubscribeFromReminder(campaignSlug: string, campaignId: number,
 async function unsubscribeFromEntireCampaign(campaign: Campaign) {
   try {
     unsubscribingFromCampaignId.value = campaign.id
-    await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe`, {
+    await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe`, {
       query: { id: profileId, all: 'true' }
     })
 
@@ -579,7 +579,7 @@ async function unsubscribeFromEntireCampaign(campaign: Campaign) {
 async function resubscribeReminder(campaignSlug: string, reminderId: number) {
   try {
     resubscribingId.value = reminderId
-    await $fetch(`/api/campaigns/${campaignSlug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${campaignSlug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId, subscription_id: reminderId }
     })
@@ -605,7 +605,7 @@ async function resubscribeReminder(campaignSlug: string, reminderId: number) {
 async function resubscribe() {
   try {
     resubscribing.value = true
-    await $fetch(`/api/campaigns/${slug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId }
     })
@@ -687,7 +687,7 @@ function doxaActiveRemindersCount(campaign: Campaign): number {
 async function doxaUnsubscribeFromReminder(campaignSlug: string, campaignId: number, reminderId: number) {
   try {
     doxaUnsubscribingId.value = reminderId
-    await $fetch(`/api/campaigns/${campaignSlug}/unsubscribe`, {
+    await $fetch(`/api/people-groups/${campaignSlug}/unsubscribe`, {
       query: { id: profileId, sid: reminderId }
     })
 
@@ -712,7 +712,7 @@ async function doxaUnsubscribeFromReminder(campaignSlug: string, campaignId: num
 async function doxaResubscribeReminder(campaignSlug: string, reminderId: number) {
   try {
     doxaResubscribingId.value = reminderId
-    await $fetch(`/api/campaigns/${campaignSlug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${campaignSlug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId, subscription_id: reminderId }
     })
@@ -738,7 +738,7 @@ async function doxaResubscribeReminder(campaignSlug: string, reminderId: number)
 async function doxaUnsubscribeFromEntireCampaign(campaign: Campaign) {
   try {
     doxaUnsubscribingFromCampaignId.value = campaign.id
-    await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe`, {
+    await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe`, {
       query: { id: profileId, all: 'true' }
     })
 

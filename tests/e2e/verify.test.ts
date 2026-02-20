@@ -14,7 +14,7 @@ import {
   setVerificationToken
 } from '../helpers/db'
 
-describe('GET /api/campaigns/[slug]/verify', async () => {
+describe('GET /api/people-groups/[slug]/verify', async () => {
   const sql = getTestDatabase()
 
   afterEach(async () => {
@@ -26,9 +26,9 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
   })
 
   it('returns 400 for missing token', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/verify`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/verify`, {
       method: 'GET'
     }).catch(e => e)
 
@@ -37,9 +37,9 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
   })
 
   it('returns 400 for invalid token', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/verify?token=invalid-token-123`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/verify?token=invalid-token-123`, {
       method: 'GET'
     }).catch(e => e)
 
@@ -48,7 +48,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
   })
 
   it('returns 400 for expired token (7 days)', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Verify Expired' })
     const email = `test-verify-expired-${Date.now()}@example.com`
     const contact = await createTestContactMethod(sql, subscriber.id, {
@@ -62,7 +62,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
     const expiredDate = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) // 8 days ago
     await setVerificationToken(sql, contact.id, token, expiredDate)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/verify?token=${token}`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/verify?token=${token}`, {
       method: 'GET'
     }).catch(e => e)
 
@@ -71,7 +71,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
   })
 
   it('marks email as verified for valid token', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Verify Valid' })
     const email = `test-verify-valid-${Date.now()}@example.com`
     const contact = await createTestContactMethod(sql, subscriber.id, {
@@ -85,7 +85,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
     const futureDate = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000) // 6 days from now
     await setVerificationToken(sql, contact.id, token, futureDate)
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/verify?token=${token}`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/verify?token=${token}`, {
       method: 'GET'
     })
 
@@ -98,7 +98,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
   })
 
   it('sets initial next_reminder_utc on verification', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Verify Reminder' })
     const email = `test-verify-reminder-${Date.now()}@example.com`
     const contact = await createTestContactMethod(sql, subscriber.id, {
@@ -120,7 +120,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
     const futureDate = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000) // 6 days from now
     await setVerificationToken(sql, contact.id, token, futureDate)
 
-    await $fetch(`/api/campaigns/${campaign.slug}/verify?token=${token}`, {
+    await $fetch(`/api/people-groups/${campaign.slug}/verify?token=${token}`, {
       method: 'GET'
     })
 
@@ -131,7 +131,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
 
   it('returns campaign info on success', async () => {
     const campaign = await createTestCampaign(sql, {
-      status: 'active',
+
       title: 'Test Verify Campaign'
     })
     const subscriber = await createTestSubscriber(sql, { name: 'Test Verify Info' })
@@ -147,7 +147,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
     const futureDate = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000) // 6 days from now
     await setVerificationToken(sql, contact.id, token, futureDate)
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/verify?token=${token}`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/verify?token=${token}`, {
       method: 'GET'
     })
 
@@ -156,7 +156,7 @@ describe('GET /api/campaigns/[slug]/verify', async () => {
   })
 
   it('returns 404 for non-existent campaign', async () => {
-    const error = await $fetch('/api/campaigns/non-existent/verify?token=some-token', {
+    const error = await $fetch('/api/people-groups/non-existent/verify?token=some-token', {
       method: 'GET'
     }).catch(e => e)
 

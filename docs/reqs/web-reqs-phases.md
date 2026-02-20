@@ -131,9 +131,9 @@
   - [x] Time picker for reminders
   - [x] Submit handling
 - [x] API endpoints:
-  - [x] `GET /api/campaigns` (public list)
-  - [x] `GET /api/campaigns/{slug}` (campaign details)
-  - [x] `POST /api/campaigns/{slug}/signup` (reminder signup)
+  - [x] `GET /api/people-groups` (public list)
+  - [x] `GET /api/people-groups/{slug}` (campaign details)
+  - [x] `POST /api/people-groups/{slug}/signup` (reminder signup)
 - [x] Generate unique tracking IDs for signups
 - [x] Store signup data in ReminderSignups table
 - [x] Form validation and error handling
@@ -162,8 +162,8 @@
   - [x] Query content for matching calendar date
   - [x] Handle missing content gracefully
 - [x] API endpoints:
-  - [x] `GET /api/campaigns/{slug}/prayer-fuel?userDate={iso-date}`
-  - [x] `POST /api/campaigns/{slug}/prayed`
+  - [x] `GET /api/people-groups/{slug}/prayer-fuel?userDate={iso-date}`
+  - [x] `POST /api/people-groups/{slug}/prayed`
 - [x] Prayer activity tracking:
   - [x] Capture timestamp
   - [x] Calculate duration (page open time)

@@ -22,12 +22,12 @@ afterAll(async () => {
   await closeTestDatabase()
 })
 
-describe('GET /api/campaigns/[slug]/unsubscribe', () => {
+describe('GET /api/people-groups/[slug]/unsubscribe', () => {
 
   it('returns 400 for missing profile_id', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe`, {
       method: 'GET'
     }).catch(e => e)
 
@@ -36,7 +36,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('returns 404 for non-existent campaign', async () => {
-    const error = await $fetch('/api/campaigns/non-existent/unsubscribe?id=some-profile-id', {
+    const error = await $fetch('/api/people-groups/non-existent/unsubscribe?id=some-profile-id', {
       method: 'GET'
     }).catch(e => e)
 
@@ -45,9 +45,9 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('returns 404 for non-existent subscriber', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe?id=non-existent-profile`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe?id=non-existent-profile`, {
       method: 'GET'
     }).catch(e => e)
 
@@ -56,7 +56,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('unsubscribes single subscription', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Unsubscribe Single' })
     const email = `test-unsub-single-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -67,7 +67,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
       status: 'active'
     })
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}`, {
       method: 'GET'
     })
 
@@ -81,7 +81,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('unsubscribes specific subscription by ID', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Unsubscribe Specific' })
     const email = `test-unsub-specific-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -99,7 +99,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
     })
 
     // Unsubscribe from specific subscription
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}&sid=${sub2.id}`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}&sid=${sub2.id}`, {
       method: 'GET'
     })
 
@@ -116,7 +116,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('unsubscribes all campaign subscriptions with all=true', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Unsubscribe All' })
     const email = `test-unsub-all-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -139,7 +139,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
       status: 'active'
     })
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}&all=true`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}&all=true`, {
       method: 'GET'
     })
 
@@ -152,8 +152,8 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('returns other active campaigns in response', async () => {
-    const campaign1 = await createTestCampaign(sql, { status: 'active', title: 'Test Campaign 1' })
-    const campaign2 = await createTestCampaign(sql, { status: 'active', title: 'Test Campaign 2' })
+    const campaign1 = await createTestCampaign(sql, { title: 'Test Campaign 1' })
+    const campaign2 = await createTestCampaign(sql, { title: 'Test Campaign 2' })
     const subscriber = await createTestSubscriber(sql, { name: 'Test Unsubscribe Other' })
     const email = `test-unsub-other-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -171,7 +171,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
     })
 
     // Unsubscribe from campaign1
-    const response = await $fetch(`/api/campaigns/${campaign1.slug}/unsubscribe?id=${subscriber.profile_id}`, {
+    const response = await $fetch(`/api/people-groups/${campaign1.slug}/unsubscribe?id=${subscriber.profile_id}`, {
       method: 'GET'
     })
 
@@ -181,7 +181,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 
   it('returns already_unsubscribed for already unsubscribed subscription', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Already Unsubscribed' })
     const email = `test-already-unsub-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -193,7 +193,7 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
       status: 'unsubscribed'
     })
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe?id=${subscriber.profile_id}`, {
       method: 'GET'
     })
 
@@ -202,12 +202,12 @@ describe('GET /api/campaigns/[slug]/unsubscribe', () => {
   })
 })
 
-describe('POST /api/campaigns/[slug]/resubscribe', () => {
+describe('POST /api/people-groups/[slug]/resubscribe', () => {
 
   it('returns 400 for missing profile_id', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: {}
     }).catch(e => e)
@@ -217,7 +217,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
   })
 
   it('returns 404 for non-existent campaign', async () => {
-    const error = await $fetch('/api/campaigns/non-existent/resubscribe', {
+    const error = await $fetch('/api/people-groups/non-existent/resubscribe', {
       method: 'POST',
       body: { profile_id: 'some-profile-id' }
     }).catch(e => e)
@@ -227,9 +227,9 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
   })
 
   it('returns 404 for non-existent subscriber', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
 
-    const error = await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    const error = await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: 'non-existent-profile' }
     }).catch(e => e)
@@ -239,7 +239,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
   })
 
   it('reactivates unsubscribed subscription', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Resubscribe' })
     const email = `test-resub-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -251,7 +251,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
       status: 'unsubscribed'
     })
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: subscriber.profile_id }
     })
@@ -265,7 +265,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
   })
 
   it('reactivates specific subscription by ID', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Resubscribe Specific' })
     const email = `test-resub-specific-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -283,7 +283,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
     })
 
     // Resubscribe to specific subscription
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: {
         profile_id: subscriber.profile_id,
@@ -303,7 +303,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
   })
 
   it('recalculates next_reminder_utc on reactivation', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Resubscribe Reminder' })
     const email = `test-resub-reminder-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -315,7 +315,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
       status: 'unsubscribed'
     })
 
-    await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: subscriber.profile_id }
     })
@@ -326,7 +326,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
   })
 
   it('returns already_active for active subscription', async () => {
-    const campaign = await createTestCampaign(sql, { status: 'active' })
+    const campaign = await createTestCampaign(sql)
     const subscriber = await createTestSubscriber(sql, { name: 'Test Already Active' })
     const email = `test-already-active-${Date.now()}@example.com`
     await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
@@ -338,7 +338,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
       status: 'active'
     })
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: subscriber.profile_id }
     })
@@ -349,7 +349,6 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
 
   it('returns campaign info on success', async () => {
     const campaign = await createTestCampaign(sql, {
-      status: 'active',
       title: 'Test Resubscribe Campaign'
     })
     const subscriber = await createTestSubscriber(sql, { name: 'Test Resubscribe Info' })
@@ -362,7 +361,7 @@ describe('POST /api/campaigns/[slug]/resubscribe', () => {
       status: 'unsubscribed'
     })
 
-    const response = await $fetch(`/api/campaigns/${campaign.slug}/resubscribe`, {
+    const response = await $fetch(`/api/people-groups/${campaign.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: subscriber.profile_id }
     })

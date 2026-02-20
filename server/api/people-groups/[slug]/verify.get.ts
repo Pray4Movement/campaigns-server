@@ -1,5 +1,5 @@
 /**
- * GET /api/campaigns/:slug/verify
+ * GET /api/people-groups/:slug/verify
  * Verify email address for campaign subscription
  */
 import { peopleGroupService } from '#server/database/people-groups'

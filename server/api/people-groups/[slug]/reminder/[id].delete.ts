@@ -1,5 +1,5 @@
 /**
- * DELETE /api/campaigns/:slug/reminder/:id
+ * DELETE /api/people-groups/:slug/reminder/:id
  * Delete a specific reminder for a campaign subscription
  */
 import { peopleGroupService } from '#server/database/people-groups'

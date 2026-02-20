@@ -1,5 +1,5 @@
 /**
- * GET /api/campaigns/:slug
+ * GET /api/people-groups/:slug
  * Get campaign (people group) details
  */
 import { peopleGroupService } from '#server/database/people-groups'

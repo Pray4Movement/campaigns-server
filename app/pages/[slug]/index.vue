@@ -541,7 +541,7 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 // Fetch campaign data with locale for translated labels
-const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`, {
+const { data, pending, error } = await useFetch<CampaignResponse>(`/api/people-groups/${slug}`, {
   query: { locale },
   watch: [locale]
 })
@@ -696,7 +696,7 @@ async function handleSignup() {
   signupError.value = ''
 
   try {
-    const response = await $fetch(`/api/campaigns/${slug}/signup`, {
+    const response = await $fetch(`/api/people-groups/${slug}/signup`, {
       method: 'POST',
       body: {
         name: signupForm.value.name,

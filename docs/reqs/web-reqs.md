@@ -151,19 +151,19 @@ Prayer campaign platform built on Nuxt 4, enabling admins to create ongoing pray
 
 #### Get Campaign List
 ```
-GET /api/campaigns
+GET /api/people-groups
 ```
 **Response**: Array of active campaigns with basic info (id, slug, title, description)
 
 #### Get Campaign Details
 ```
-GET /api/campaigns/{slug}
+GET /api/people-groups/{slug}
 ```
 **Response**: Full campaign details for landing page
 
 #### Get Prayer Content for Today
 ```
-GET /api/campaigns/{slug}/prayer-fuel
+GET /api/people-groups/{slug}/prayer-fuel
 Query Parameters:
   - userDate: ISO 8601 date/time string (user's current date/time)
   - timezone: User's timezone (optional)
@@ -172,7 +172,7 @@ Query Parameters:
 
 #### Mark "I Prayed"
 ```
-POST /api/campaigns/{slug}/prayed
+POST /api/people-groups/{slug}/prayed
 Body:
   - userId: Tracking ID from email link (optional)
   - duration: Time spent on page in seconds
@@ -182,7 +182,7 @@ Body:
 
 #### Submit Reminder Signup
 ```
-POST /api/campaigns/{slug}/signup
+POST /api/people-groups/{slug}/signup
 Body:
   - name: string
   - email: string (if email delivery)

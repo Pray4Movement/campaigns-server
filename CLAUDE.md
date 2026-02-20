@@ -115,7 +115,7 @@ i18n/locales/     # Translation files (en.json, es.json, fr.json, etc.)
 
 API routes follow Nitro conventions:
 - `server/api/admin/` - Admin-only endpoints (require authentication)
-- `server/api/campaigns/[slug]/` - Public campaign endpoints
+- `server/api/people-groups/[slug]/` - Public people group endpoints
 - `server/api/libraries/` - Public library endpoints
 
 ### Authentication

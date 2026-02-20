@@ -35,7 +35,7 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
       const duration = Math.floor((Date.now() - pageOpenTime.value) / 1000)
       const timestamp = new Date().toISOString()
 
-      await $fetch(`/api/campaigns/${slug}/prayer-content/${contentDate.value}/session`, {
+      await $fetch(`/api/people-groups/${slug}/prayer-content/${contentDate.value}/session`, {
         method: 'POST',
         body: {
           sessionId: sessionId.value,
@@ -68,7 +68,7 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
       const duration = Math.min(rawDuration, MAX_DURATION)
       const timestamp = new Date().toISOString()
 
-      await $fetch(`/api/campaigns/${slug}/prayer-content/${contentDate.value}/session`, {
+      await $fetch(`/api/people-groups/${slug}/prayer-content/${contentDate.value}/session`, {
         method: 'POST',
         body: {
           sessionId: sessionId.value,

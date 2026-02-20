@@ -87,7 +87,7 @@ const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(
 
 // Fetch prayer content for specific date
 const { data, pending, error: fetchError, refresh } = await useFetch(
-  `/api/campaigns/${slug}/prayer-content/${dateParam}`,
+  `/api/people-groups/${slug}/prayer-content/${dateParam}`,
   {
     query: computed(() => ({
       language: selectedLanguage.value || undefined

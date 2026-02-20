@@ -95,7 +95,7 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = 9
 
-const { data, pending, error } = await useFetch('/api/campaigns')
+const { data, pending, error } = await useFetch('/api/people-groups')
 
 const filteredCampaigns = computed(() => {
   if (!data.value?.campaigns) return []

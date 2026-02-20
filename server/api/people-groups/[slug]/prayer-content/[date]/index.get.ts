@@ -1,5 +1,5 @@
 /**
- * GET /api/campaigns/:slug/prayer-content/:date
+ * GET /api/people-groups/:slug/prayer-content/:date
  * Get prayer content for a specific date
  */
 import { peopleGroupService } from '#server/database/people-groups'

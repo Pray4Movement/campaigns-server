@@ -1,5 +1,5 @@
 /**
- * GET /api/campaigns
+ * GET /api/people-groups
  * List all people groups (campaigns) with images
  */
 import { peopleGroupService } from '#server/database/people-groups'

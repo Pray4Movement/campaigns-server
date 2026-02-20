@@ -44,7 +44,7 @@ const slug = route.params.slug as string
 const token = route.query.token as string
 
 // Verify the token
-const { data, pending, error } = await useFetch(`/api/campaigns/${slug}/verify`, {
+const { data, pending, error } = await useFetch(`/api/people-groups/${slug}/verify`, {
   query: { token }
 })
 

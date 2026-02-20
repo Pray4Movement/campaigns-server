@@ -71,7 +71,7 @@ export default defineNitroPlugin((nitroApp) => {
  * Process all reminders that are due
  */
 async function processReminders() {
-  const todayDate = new Date().toISOString().split('T')[0]
+  const todayDate = new Date().toISOString().split('T')[0]!
 
   // Get all subscriptions that are due for a reminder (with verified email)
   const dueSubscriptions = await campaignSubscriptionService.getSubscriptionsDueForReminder()

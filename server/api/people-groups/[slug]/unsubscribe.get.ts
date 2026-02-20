@@ -1,5 +1,5 @@
 /**
- * GET /api/campaigns/:slug/unsubscribe
+ * GET /api/people-groups/:slug/unsubscribe
  * Get subscriber info and unsubscribe from campaign reminders
  */
 import { peopleGroupService } from '#server/database/people-groups'

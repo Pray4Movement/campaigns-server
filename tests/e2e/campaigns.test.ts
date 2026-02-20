@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
 import { $fetch } from '@nuxt/test-utils/e2e'
 import { getTestDatabase, closeTestDatabase, cleanupTestData, createTestCampaign } from '../helpers/db'
 
-describe('GET /api/campaigns', async () => {
+describe('GET /api/people-groups', async () => {
   const sql = getTestDatabase()
 
   afterEach(async () => {
@@ -14,39 +14,24 @@ describe('GET /api/campaigns', async () => {
   })
 
   it('returns empty array when no campaigns exist', async () => {
-    const response = await $fetch('/api/campaigns')
+    const response = await $fetch('/api/people-groups')
 
     expect(response).toHaveProperty('campaigns')
     expect(Array.isArray(response.campaigns)).toBe(true)
   })
 
-  it('returns active campaigns', async () => {
+  it('returns people groups', async () => {
     const campaign = await createTestCampaign(sql, {
-      title: 'Test Prayer Campaign',
-      status: 'active'
+      title: 'Test Prayer Campaign'
     })
 
-    const response = await $fetch('/api/campaigns')
+    const response = await $fetch('/api/people-groups')
 
     expect(response.campaigns).toContainEqual(
       expect.objectContaining({
         slug: campaign.slug,
-        title: 'Test Prayer Campaign',
-        status: 'active'
+        title: 'Test Prayer Campaign'
       })
     )
-  })
-
-  it('does not return inactive campaigns', async () => {
-    await createTestCampaign(sql, {
-      title: 'Inactive Campaign',
-      slug: 'test-inactive',
-      status: 'inactive'
-    })
-
-    const response = await $fetch('/api/campaigns')
-
-    const slugs = response.campaigns.map((c: any) => c.slug)
-    expect(slugs).not.toContain('test-inactive')
   })
 })

@@ -41,15 +41,15 @@ export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   await sql`DELETE FROM libraries WHERE name LIKE 'Test Library %'`
 
   // Clean campaign-related data
-  await sql`DELETE FROM reminder_emails_sent WHERE subscription_id IN (SELECT cs.id FROM campaign_subscriptions cs JOIN campaigns c ON c.id = cs.campaign_id WHERE c.slug LIKE 'test-%')`
-  await sql`DELETE FROM campaign_subscriptions WHERE campaign_id IN (SELECT id FROM campaigns WHERE slug LIKE 'test-%')`
+  await sql`DELETE FROM reminder_emails_sent WHERE subscription_id IN (SELECT cs.id FROM campaign_subscriptions cs JOIN people_groups pg ON pg.id = cs.people_group_id WHERE pg.slug LIKE 'test-%')`
+  await sql`DELETE FROM campaign_subscriptions WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM contact_methods WHERE subscriber_id IN (SELECT id FROM subscribers WHERE name LIKE 'Test %')`
 
   // Clean campaign_users (user-campaign access)
-  await sql`DELETE FROM campaign_users WHERE campaign_id IN (SELECT id FROM campaigns WHERE slug LIKE 'test-%')`
+  await sql`DELETE FROM campaign_users WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM campaign_users WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
 
-  await sql`DELETE FROM campaigns WHERE slug LIKE 'test-%'`
+  await sql`DELETE FROM people_groups WHERE slug LIKE 'test-%'`
   await sql`DELETE FROM activity_logs WHERE metadata->>'email' LIKE 'test-%@example.com'`
   await sql`DELETE FROM subscribers WHERE name LIKE 'Test %'`
 
@@ -72,22 +72,17 @@ export async function createTestCampaign(
   options: {
     title?: string
     slug?: string
-    status?: 'active' | 'inactive'
-    description?: string
-    default_language?: string
   } = {}
 ) {
   const slugId = uuidv4().slice(0, 8)
   const title = options.title || `Test Campaign ${slugId}`
   const slug = options.slug || `test-${slugId}`
-  const status = options.status ?? 'active'
-  const description = options.description ?? ''
-  const default_language = options.default_language ?? 'en'
+  const dt_id = `test-dt-${slugId}`
 
   const result = await sql`
-    INSERT INTO campaigns (slug, title, description, status, default_language)
-    VALUES (${slug}, ${title}, ${description}, ${status}, ${default_language})
-    RETURNING id, slug, title, status
+    INSERT INTO people_groups (dt_id, name, slug)
+    VALUES (${dt_id}, ${title}, ${slug})
+    RETURNING id, slug, name as title
   `
 
   return result[0]
@@ -164,20 +159,20 @@ export async function createTestCampaignSubscription(
 
   const result = await sql`
     INSERT INTO campaign_subscriptions (
-      campaign_id, subscriber_id, delivery_method, frequency,
+      people_group_id, subscriber_id, delivery_method, frequency,
       time_preference, timezone, status, days_of_week
     )
     VALUES (
       ${campaignId}, ${subscriberId}, ${delivery_method}, ${frequency},
       ${time_preference}, ${timezone}, ${status}, ${days_of_week}
     )
-    RETURNING id, campaign_id, subscriber_id, delivery_method, frequency,
+    RETURNING id, people_group_id, subscriber_id, delivery_method, frequency,
               time_preference, timezone, status, days_of_week, next_reminder_utc
   `
 
   return result[0] as {
     id: number
-    campaign_id: number
+    people_group_id: number
     subscriber_id: number
     delivery_method: string
     frequency: string
@@ -218,13 +213,13 @@ export async function getTestSubscription(
 ) {
   const result = await sql`
     SELECT * FROM campaign_subscriptions
-    WHERE campaign_id = ${campaignId} AND subscriber_id = ${subscriberId}
+    WHERE people_group_id = ${campaignId} AND subscriber_id = ${subscriberId}
     ORDER BY created_at DESC
     LIMIT 1
   `
   return result[0] as {
     id: number
-    campaign_id: number
+    people_group_id: number
     subscriber_id: number
     delivery_method: string
     frequency: string
@@ -243,12 +238,12 @@ export async function getAllTestSubscriptions(
 ) {
   const result = await sql`
     SELECT * FROM campaign_subscriptions
-    WHERE campaign_id = ${campaignId} AND subscriber_id = ${subscriberId}
+    WHERE people_group_id = ${campaignId} AND subscriber_id = ${subscriberId}
     ORDER BY created_at ASC
   `
   return result as Array<{
     id: number
-    campaign_id: number
+    people_group_id: number
     subscriber_id: number
     delivery_method: string
     frequency: string
@@ -382,7 +377,7 @@ export async function assignUserToCampaign(
   campaignId: number
 ): Promise<void> {
   await sql`
-    INSERT INTO campaign_users (user_id, campaign_id)
+    INSERT INTO campaign_users (user_id, people_group_id)
     VALUES (${userId}, ${campaignId})
     ON CONFLICT DO NOTHING
   `
@@ -395,7 +390,7 @@ export async function removeUserFromCampaign(
 ): Promise<void> {
   await sql`
     DELETE FROM campaign_users
-    WHERE user_id = ${userId} AND campaign_id = ${campaignId}
+    WHERE user_id = ${userId} AND people_group_id = ${campaignId}
   `
 }
 
@@ -404,10 +399,10 @@ export async function getUserCampaignAccess(
   userId: string
 ): Promise<number[]> {
   const result = await sql`
-    SELECT campaign_id FROM campaign_users
+    SELECT people_group_id FROM campaign_users
     WHERE user_id = ${userId}
   `
-  return result.map((r: { campaign_id: number }) => r.campaign_id)
+  return result.map((r: { people_group_id: number }) => r.people_group_id)
 }
 
 // Library helpers

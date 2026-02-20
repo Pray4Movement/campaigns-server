@@ -21,7 +21,7 @@ tags:
     description: Unreached people group data for WordPress themes and map widgets
 
 paths:
-  /api/campaigns:
+  /api/people-groups:
     get:
       tags:
         - Campaigns
@@ -41,7 +41,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/Campaign'
 
-  /api/campaigns/{slug}:
+  /api/people-groups/{slug}:
     get:
       tags:
         - Campaigns
@@ -71,7 +71,7 @@ paths:
         '404':
           description: Campaign not found or not active
 
-  /api/campaigns/{slug}/signup:
+  /api/people-groups/{slug}/signup:
     post:
       tags:
         - Signups
@@ -155,7 +155,7 @@ paths:
         '500':
           description: Failed to create signup
 
-  /api/campaigns/{slug}/prayer-content/{date}:
+  /api/people-groups/{slug}/prayer-content/{date}:
     get:
       tags:
         - Prayer
@@ -246,7 +246,7 @@ paths:
         '404':
           description: Campaign not found
 
-  /api/campaigns/{slug}/prayer-content/{date}/session:
+  /api/people-groups/{slug}/prayer-content/{date}/session:
     post:
       tags:
         - Prayer
