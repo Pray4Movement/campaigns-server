@@ -38,36 +38,6 @@
 
         <!-- People Groups Tab -->
         <div v-if="item.value === 'people-groups'" class="py-6">
-          <h2 class="text-xl font-semibold mb-2">People Groups Sync</h2>
-          <p class="text-[var(--ui-text-muted)] mb-6">Synchronize people groups from the Disciple.Tools API. Existing records will be updated, new records will be created.</p>
-
-          <UButton
-            @click="syncPeopleGroups"
-            :loading="isSyncingPeopleGroups"
-            variant="outline"
-          >
-            {{ isSyncingPeopleGroups ? 'Syncing...' : 'Sync People Groups' }}
-          </UButton>
-
-          <UAlert
-            v-if="syncMessage"
-            :color="syncMessage.type === 'success' ? 'success' : 'error'"
-            :title="syncMessage.text"
-            class="mt-4"
-          />
-
-          <UCard v-if="syncStats" class="mt-6">
-            <template #header>
-              <h3 class="font-semibold">Sync Results</h3>
-            </template>
-            <div class="space-y-2">
-              <p><strong>Total from API:</strong> {{ syncStats.total }}</p>
-              <p><strong>Created:</strong> {{ syncStats.created }}</p>
-              <p><strong>Updated:</strong> {{ syncStats.updated }}</p>
-              <p><strong>Errors:</strong> {{ syncStats.errors }}</p>
-            </div>
-          </UCard>
-
           <!-- Import Descriptions -->
           <div class="border-t border-[var(--ui-border)] pt-8 mt-8">
             <h3 class="text-lg font-medium mb-2">Import People Descriptions</h3>
@@ -349,10 +319,6 @@ const isCreatingBackup = ref(false)
 const backupMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 const lastBackup = ref<{ filename: string; size: number; location: string } | null>(null)
 
-const isSyncingPeopleGroups = ref(false)
-const syncMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
-const syncStats = ref<{ total: number; created: number; updated: number; errors: number } | null>(null)
-
 const isUpdatingPrayerCounts = ref(false)
 const prayerCountsMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 
@@ -427,36 +393,6 @@ function formatBytes(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-}
-
-async function syncPeopleGroups() {
-  isSyncingPeopleGroups.value = true
-  syncMessage.value = null
-  syncStats.value = null
-
-  try {
-    const response = await $fetch<{
-      success: boolean
-      message: string
-      stats: { total: number; created: number; updated: number; errors: number }
-    }>('/api/admin/people-groups/sync', {
-      method: 'POST'
-    })
-
-    syncMessage.value = {
-      text: response.message,
-      type: 'success'
-    }
-    syncStats.value = response.stats
-  } catch (error: any) {
-    console.error('Sync error:', error)
-    syncMessage.value = {
-      text: error.data?.message || 'Failed to sync people groups. Please try again.',
-      type: 'error'
-    }
-  } finally {
-    isSyncingPeopleGroups.value = false
-  }
 }
 
 async function updatePrayerCounts() {

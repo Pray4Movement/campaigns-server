@@ -4,9 +4,6 @@
       <div>
         <h1>People Groups</h1>
       </div>
-      <UButton @click="syncPeopleGroups" :loading="syncing" icon="i-lucide-refresh-cw">
-        Sync from API
-      </UButton>
     </template>
 
     <template #list-header>
@@ -204,7 +201,6 @@ const formData = ref<Record<string, any>>({})
 const loading = ref(true)
 const error = ref('')
 const saving = ref(false)
-const syncing = ref(false)
 const searchQuery = ref('')
 
 // i18n and localized options
@@ -363,41 +359,6 @@ async function saveChanges() {
     })
   } finally {
     saving.value = false
-  }
-}
-
-// Sync people groups from API
-async function syncPeopleGroups() {
-  try {
-    syncing.value = true
-
-    const response = await $fetch<{ success: boolean; message: string; stats: any }>(
-      '/api/admin/people-groups/sync',
-      { method: 'POST' }
-    )
-
-    toast.add({
-      title: 'Sync Complete',
-      description: response.message,
-      color: 'success'
-    })
-
-    await loadPeopleGroups()
-
-    if (selectedGroup.value) {
-      const updated = peopleGroups.value.find(g => g.id === selectedGroup.value!.id)
-      if (updated) {
-        selectGroup(updated)
-      }
-    }
-  } catch (err: any) {
-    toast.add({
-      title: 'Sync Failed',
-      description: err.data?.statusMessage || 'Failed to sync people groups',
-      color: 'error'
-    })
-  } finally {
-    syncing.value = false
   }
 }
 
