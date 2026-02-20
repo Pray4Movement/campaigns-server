@@ -40,6 +40,37 @@ bun run migrate      # Run database migrations manually
 bun install          # Install dependencies
 ```
 
+## Testing
+
+Tests are end-to-end tests using vitest. Requires `TEST_DATABASE_URL` in `.env`.
+
+**Do NOT use `bun test`** — it skips vitest's global setup and the Nuxt server won't start.
+
+```bash
+# Run all tests
+npx vitest run
+
+# Run a specific test file
+npx vitest run tests/e2e/admin/users/role.test.ts
+
+# Run tests matching a pattern
+npx vitest run subscribers
+```
+
+**Retrieving output**: vitest writes to TTY, so piping loses output. Use the JSON reporter to capture results:
+
+```bash
+npx vitest run --reporter=json --outputFile=/tmp/vitest-results.json
+```
+
+**Recreating the test database** (when migrations are out of sync):
+
+```bash
+psql -U postgres -c "DROP DATABASE prayertools_test;"
+psql -U postgres -c "CREATE DATABASE prayertools_test;"
+DATABASE_URL=$TEST_DATABASE_URL bun run migrate
+```
+
 ## Architecture
 
 ### Base Layer Pattern
