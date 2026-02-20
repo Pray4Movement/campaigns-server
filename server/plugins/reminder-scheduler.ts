@@ -22,7 +22,7 @@ export default defineNitroPlugin((nitroApp) => {
     return
   }
 
-  console.log('📧 Scheduling prayer reminder emails (checking every 5 minutes)')
+  console.log('📧 Scheduling prayer reminder emails (checking every 1 minutes)')
 
   // Track if we're currently processing to avoid overlapping runs
   let isProcessing = false
@@ -42,7 +42,7 @@ export default defineNitroPlugin((nitroApp) => {
     } finally {
       isProcessing = false
     }
-  }, 5 * 60 * 1000) // 5 minutes
+  }, 60 * 1000) // 1 minute
 
   // Also run immediately on startup (after a short delay to let the server initialize)
   setTimeout(async () => {
