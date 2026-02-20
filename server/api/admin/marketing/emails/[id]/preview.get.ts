@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
 
   const html = renderMarketingEmailHtml(
     email.content_json,
-    email.audience_type === 'campaign' ? email.campaign_title : undefined,
+    email.audience_type === 'campaign' ? email.people_group_name : undefined,
     unsubscribeUrl
   )
 

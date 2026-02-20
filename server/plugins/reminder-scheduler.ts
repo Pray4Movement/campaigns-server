@@ -123,8 +123,8 @@ async function processReminders() {
           const emailSent = await sendPrayerReminderEmail({
             to: subscription.email_value,
             subscriberName: subscription.subscriber_name,
-            campaignTitle: subscription.campaign_title,
-            campaignSlug: subscription.campaign_slug,
+            peopleGroupName: subscription.people_group_name,
+            peopleGroupSlug: subscription.people_group_slug,
             trackingId: subscription.subscriber_tracking_id,
             profileId: subscription.subscriber_profile_id,
             subscriptionId: subscription.id,
@@ -138,7 +138,7 @@ async function processReminders() {
             await reminderSentService.recordSent(subscription.id, todayDate)
             // Update next reminder time
             await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
-            console.log(`  ✅ Sent reminder to ${subscription.email_value} for ${subscription.campaign_title}`)
+            console.log(`  ✅ Sent reminder to ${subscription.email_value} for ${subscription.people_group_name}`)
           } else {
             console.error(`  ❌ Failed to send reminder to ${subscription.email_value}`)
           }

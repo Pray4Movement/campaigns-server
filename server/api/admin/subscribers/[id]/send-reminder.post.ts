@@ -80,8 +80,8 @@ export default defineEventHandler(async (event) => {
     const success = await sendPrayerReminderEmail({
       to: emailContact.value,
       subscriberName: subscriber.name,
-      campaignTitle: peopleGroup.name,
-      campaignSlug: peopleGroup.slug,
+      peopleGroupName: peopleGroup.name,
+      peopleGroupSlug: peopleGroup.slug,
       trackingId: subscriber.tracking_id,
       profileId: subscriber.profile_id,
       subscriptionId: subscription.id,

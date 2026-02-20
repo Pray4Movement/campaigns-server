@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Handle consent preferences (stored on the contact method)
-    if (body.consent_campaign_updates || body.consent_doxa_general) {
+    if (body.consent_people_group_updates || body.consent_doxa_general) {
       // Get the contact method for the delivery channel
       let contactMethod = null
       if (body.email) {
@@ -115,8 +115,8 @@ export default defineEventHandler(async (event) => {
       }
 
       if (contactMethod) {
-        if (body.consent_campaign_updates) {
-          await contactMethodService.addCampaignConsent(contactMethod.id, peopleGroup.id)
+        if (body.consent_people_group_updates) {
+          await contactMethodService.addPeopleGroupConsent(contactMethod.id, peopleGroup.id)
         }
         if (body.consent_doxa_general) {
           await contactMethodService.updateDoxaConsent(contactMethod.id, true)

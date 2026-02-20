@@ -151,8 +151,8 @@ describe('GET /api/people-groups/[slug]/verify', async () => {
       method: 'GET'
     })
 
-    expect(response.campaign_title).toBe('Test Verify Campaign')
-    expect(response.campaign_slug).toBe(campaign.slug)
+    expect(response.people_group_name).toBe('Test Verify Campaign')
+    expect(response.people_group_slug).toBe(campaign.slug)
   })
 
   it('returns 404 for non-existent campaign', async () => {

@@ -3,21 +3,21 @@ import { t, localePath } from './translations'
 export async function sendWelcomeEmail(
   to: string,
   subscriberName: string,
-  campaignTitle: string,
-  campaignSlug: string,
+  peopleGroupName: string,
+  peopleGroupSlug: string,
   profileId: string,
   locale: string = 'en'
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const appName = config.appName || 'Doxa'
-  const campaignUrl = `${baseUrl}${localePath(`/${campaignSlug}/prayer`, locale)}`
+  const campaignUrl = `${baseUrl}${localePath(`/${peopleGroupSlug}/prayer`, locale)}`
   const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${profileId}`
 
-  const subject = t('email.welcome.subject', locale, { appName, campaign: campaignTitle })
+  const subject = t('email.welcome.subject', locale, { appName, campaign: peopleGroupName })
   const header = t('email.welcome.header', locale, { appName })
   const hello = t('email.common.hello', locale, { name: subscriberName })
-  const thankYou = t('email.welcome.thankYou', locale, { campaign: campaignTitle })
+  const thankYou = t('email.welcome.thankYou', locale, { campaign: peopleGroupName })
   const startPraying = t('email.welcome.startPraying', locale)
   const profileInstructions = t('email.welcome.profileInstructions', locale)
   const managePreferences = t('email.common.managePreferences', locale)
@@ -34,7 +34,7 @@ export async function sendWelcomeEmail(
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
         <h1 style="margin: 0; font-size: 28px; font-weight: 500;">${header}</h1>
-        <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${campaignTitle}</p>
+        <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${peopleGroupName}</p>
       </div>
 
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
@@ -87,7 +87,7 @@ export async function sendWelcomeEmail(
   `
 
   const text = `
-${header} - ${campaignTitle}
+${header} - ${peopleGroupName}
 
 ${hello}
 

@@ -3,8 +3,8 @@ import { t, localePath } from './translations'
 export interface PrayerReminderEmailData {
   to: string
   subscriberName: string
-  campaignTitle: string
-  campaignSlug: string
+  peopleGroupName: string
+  peopleGroupSlug: string
   trackingId: string
   profileId: string
   subscriptionId: number
@@ -162,11 +162,11 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
   const appName = config.appName || 'Prayer Tools'
   const locale = data.locale || 'en'
 
-  const unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', locale)}?slug=${data.campaignSlug}&id=${data.profileId}&sid=${data.subscriptionId}`
+  const unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', locale)}?slug=${data.peopleGroupSlug}&id=${data.profileId}&sid=${data.subscriptionId}`
   const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${data.profileId}`
-  const prayerFuelUrl = `${baseUrl}${localePath(`/${data.campaignSlug}/prayer`, locale)}?uid=${data.trackingId}`
+  const prayerFuelUrl = `${baseUrl}${localePath(`/${data.peopleGroupSlug}/prayer`, locale)}?uid=${data.trackingId}`
 
-  const subject = t('email.reminder.subject', locale, { campaign: data.campaignTitle })
+  const subject = t('email.reminder.subject', locale, { campaign: data.peopleGroupName })
   const header = t('email.reminder.header', locale)
   const hello = t('email.common.hello', locale, { name: data.subscriberName })
   const timeForPrayer = t('email.reminder.timeForPrayer', locale, { duration: data.prayerDuration })
@@ -208,7 +208,7 @@ export async function sendPrayerReminderEmail(data: PrayerReminderEmailData): Pr
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
         <h1 style="margin: 0; font-size: 28px; font-weight: 500;">${header}</h1>
-        <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${data.campaignTitle}</p>
+        <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${data.peopleGroupName}</p>
       </div>
 
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">

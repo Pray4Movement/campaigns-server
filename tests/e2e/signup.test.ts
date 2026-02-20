@@ -407,14 +407,14 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
           delivery_method: 'email',
           frequency: 'daily',
           reminder_time: '09:00',
-          consent_campaign_updates: true
+          consent_people_group_updates: true
         }
       })
 
       // Verify consent was recorded
       const subscriber = await getTestSubscriberByEmail(sql, email)
       const contactMethod = await getTestContactMethod(sql, subscriber!.id, 'email')
-      expect(contactMethod!.consented_campaign_ids).toContain(campaign.id)
+      expect(contactMethod!.consented_people_group_ids).toContain(campaign.id)
     })
 
     it('records DOXA general consent when provided', async () => {

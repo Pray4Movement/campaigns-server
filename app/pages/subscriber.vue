@@ -119,7 +119,7 @@
 
           <!-- Campaign-specific consents -->
           <div
-            v-for="campaignGroup in data.campaigns"
+            v-for="campaignGroup in data.peopleGroups"
             :key="'consent-' + campaignGroup.id"
             class="flex items-center justify-between py-2"
           >
@@ -139,7 +139,7 @@
           {{ $t('campaign.profile.subscriptions') }}
         </h2>
 
-        <div v-for="campaignGroup in data.campaigns" :key="campaignGroup.id">
+        <div v-for="campaignGroup in data.peopleGroups" :key="campaignGroup.id">
           <UCard>
             <template #header>
               <div class="flex items-center justify-between">
@@ -316,13 +316,13 @@
       </div>
 
       <!-- Back Button -->
-      <div v-if="data.campaigns.length > 0" class="flex items-center justify-start pt-8">
+      <div v-if="data.peopleGroups.length > 0" class="flex items-center justify-start pt-8">
         <UButton
-          :to="localePath(`/${data.campaigns[0]?.slug}`)"
+          :to="localePath(`/${data.peopleGroups[0]?.slug}`)"
           variant="ghost"
         >
           <UIcon name="i-lucide-arrow-left" class="w-4 h-4 mr-1" />
-          {{ $t('prayerFuel.backTo', { campaign: data.campaigns[0]?.title }) }}
+          {{ $t('prayerFuel.backTo', { campaign: data.peopleGroups[0]?.title }) }}
         </UButton>
       </div>
     </div>
@@ -349,7 +349,7 @@ interface ProfileResponse {
     email_verified: boolean
     phone: string
   }
-  campaigns: Array<{
+  peopleGroups: Array<{
     id: number
     title: string
     slug: string
@@ -367,8 +367,8 @@ interface ProfileResponse {
   consents: {
     doxa_general: boolean
     doxa_general_at: string | null
-    campaigns: Array<{
-      campaign_id: number
+    peopleGroups: Array<{
+      people_group_id: number
       consented_at: string | null
     }>
   }
@@ -387,7 +387,7 @@ const globalForm = ref({
 // Consent form state
 const consentForm = ref({
   doxa_general: false,
-  campaign_ids: [] as number[]
+  people_group_ids: [] as number[]
 })
 
 // Reminder form state (for editing individual reminders)
@@ -420,7 +420,7 @@ watch(data, (newData) => {
   if (newData?.consents) {
     consentForm.value = {
       doxa_general: newData.consents.doxa_general || false,
-      campaign_ids: (newData.consents.campaigns || []).map((c: any) => c.campaign_id)
+      people_group_ids: (newData.consents.peopleGroups || []).map((c: any) => c.people_group_id)
     }
   }
 }, { immediate: true })
@@ -509,7 +509,7 @@ async function saveGlobalSettings() {
       success: boolean
       email_changed: boolean
       subscriber: { id: number; profile_id: string; name: string; email: string; email_verified: boolean }
-      consents: { doxa_general: boolean; campaign_ids: number[] }
+      consents: { doxa_general: boolean; people_group_ids: number[] }
     }>(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
@@ -627,7 +627,7 @@ async function resubscribeReminder(reminder: any, campaignGroup: any) {
 
 // Check if a campaign is consented
 function isCampaignConsented(campaignId: number): boolean {
-  return consentForm.value.campaign_ids.includes(campaignId)
+  return consentForm.value.people_group_ids.includes(campaignId)
 }
 
 // Update Doxa general consent
@@ -660,18 +660,18 @@ async function updateCampaignConsent(campaignId: number, campaignSlug: string, g
     await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        consent_campaign_id: campaignId,
-        consent_campaign_updates: granted
+        consent_people_group_id: campaignId,
+        consent_people_group_updates: granted
       }
     })
 
     // Update local state
     if (granted) {
-      if (!consentForm.value.campaign_ids.includes(campaignId)) {
-        consentForm.value.campaign_ids.push(campaignId)
+      if (!consentForm.value.people_group_ids.includes(campaignId)) {
+        consentForm.value.people_group_ids.push(campaignId)
       }
     } else {
-      consentForm.value.campaign_ids = consentForm.value.campaign_ids.filter(id => id !== campaignId)
+      consentForm.value.people_group_ids = consentForm.value.people_group_ids.filter(id => id !== campaignId)
     }
 
     toast.add({

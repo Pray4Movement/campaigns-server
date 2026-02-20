@@ -26,8 +26,8 @@ export interface SubscriptionForFollowup {
   subscriber_profile_id: string
   subscriber_language: string
   email_value: string
-  campaign_slug: string
-  campaign_title: string
+  people_group_slug: string
+  people_group_name: string
   // Calculated
   last_activity_at: string | null
 }
@@ -79,8 +79,8 @@ class FollowupTrackingService {
         s.profile_id as subscriber_profile_id,
         s.preferred_language as subscriber_language,
         cm.value as email_value,
-        pg.slug as campaign_slug,
-        pg.name as campaign_title,
+        pg.slug as people_group_slug,
+        pg.name as people_group_name,
         (
           SELECT MAX(pa.timestamp)
           FROM prayer_activity pa

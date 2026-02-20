@@ -33,6 +33,6 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600')
 
   return {
-    campaigns: enrichedCampaigns
+    peopleGroups: enrichedCampaigns
   }
 })

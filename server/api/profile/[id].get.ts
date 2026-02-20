@@ -39,13 +39,13 @@ export default defineEventHandler(async (event) => {
     subscriptionsByCampaign.get(sub.people_group_id)!.push(sub)
   }
 
-  // Build campaigns array with reminders
-  const campaigns = Array.from(subscriptionsByCampaign.entries())
+  // Build people groups array with reminders
+  const peopleGroups = Array.from(subscriptionsByCampaign.entries())
     .filter(([, subs]) => subs.length > 0)
     .map(([campaignId, subs]) => ({
       id: campaignId,
-      title: subs[0]!.campaign_title,
-      slug: subs[0]!.campaign_slug,
+      title: subs[0]!.people_group_name,
+      slug: subs[0]!.people_group_slug,
       reminders: subs.map(sub => ({
         id: sub.id,
         delivery_method: sub.delivery_method,
@@ -62,8 +62,8 @@ export default defineEventHandler(async (event) => {
   const consents = {
     doxa_general: primaryEmail?.consent_doxa_general || false,
     doxa_general_at: primaryEmail?.consent_doxa_general_at || null,
-    campaigns: (primaryEmail?.consented_people_group_ids || []).map(campaignId => ({
-      campaign_id: campaignId,
+    peopleGroups: (primaryEmail?.consented_people_group_ids || []).map(campaignId => ({
+      people_group_id: campaignId,
       consented_at: primaryEmail?.consented_people_group_ids_at?.[String(campaignId)] || null
     }))
   }
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
       email_verified: primaryEmail?.verified || false,
       phone: primaryPhone?.value || ''
     },
-    campaigns,
+    peopleGroups,
     consents
   }
 })

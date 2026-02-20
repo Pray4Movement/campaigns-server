@@ -108,7 +108,7 @@ i18n/locales/     # Translation files (en.json, es.json, fr.json, etc.)
 
 - **Libraries**: Centralized content managed in `/admin/libraries`
 - **Library Content**: Organized by day number (1-365+), each day can have multiple language versions
-- **Campaigns**: Subscribe to libraries via global configuration at `/admin/campaign-config`
+- **People Groups**: Subscribe to libraries via global configuration at `/admin/prayer-fuel-order`
 - Prayer content uses Tiptap rich text editor (stored as JSON, rendered as HTML)
 
 ### API Pattern

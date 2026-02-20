@@ -28,12 +28,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const contacts = await contactMethodService.getContactsConsentedToCampaign(id)
+  const contacts = await contactMethodService.getContactsConsentedToPeopleGroup(id)
 
   return {
     count: contacts.length,
     audience_type: 'campaign',
-    campaign_id: id,
-    campaign_title: peopleGroup.name
+    people_group_id: id,
+    people_group_name: peopleGroup.name
   }
 })

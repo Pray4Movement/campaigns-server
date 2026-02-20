@@ -148,7 +148,7 @@ export default defineEventHandler(async (event) => {
       subscriber: {
         id: updatedSubscription?.id,
         subscription_id: updatedSubscription?.id,
-        campaign_id: updatedSubscription?.people_group_id,
+        people_group_id: updatedSubscription?.people_group_id,
         subscriber_id: updatedSubscriber?.id,
         name: updatedSubscriber?.name,
         tracking_id: updatedSubscriber?.tracking_id,

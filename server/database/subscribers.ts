@@ -25,8 +25,8 @@ export interface SubscriberWithContacts extends Subscriber {
 export interface SubscriberConsents {
   doxa_general: boolean
   doxa_general_at: string | null
-  campaign_ids: number[]
-  campaign_names: string[]
+  people_group_ids: number[]
+  people_group_names: string[]
 }
 
 export interface SubscriberWithSubscriptions extends SubscriberWithContacts {
@@ -290,13 +290,13 @@ class SubscriberService {
       const consentedPeopleGroupIds = emailContact?.consented_people_group_ids || []
 
       // Get people group names for consented IDs
-      let campaignNames: string[] = []
+      let peopleGroupNames: string[] = []
       if (consentedPeopleGroupIds.length > 0) {
         const pgStmt = this.db.prepare(`
           SELECT id, name FROM people_groups WHERE id IN (${consentedPeopleGroupIds.map(() => '?').join(',')})
         `)
         const peopleGroups = await pgStmt.all(...consentedPeopleGroupIds) as { id: number; name: string }[]
-        campaignNames = consentedPeopleGroupIds.map(id => {
+        peopleGroupNames = consentedPeopleGroupIds.map(id => {
           const pg = peopleGroups.find(p => p.id === id)
           return pg?.name || `People Group ${id}`
         })
@@ -316,8 +316,8 @@ class SubscriberService {
         consents: {
           doxa_general: emailContact?.consent_doxa_general || false,
           doxa_general_at: emailContact?.consent_doxa_general_at || null,
-          campaign_ids: consentedPeopleGroupIds,
-          campaign_names: campaignNames
+          people_group_ids: consentedPeopleGroupIds,
+          people_group_names: peopleGroupNames
         }
       })
     }

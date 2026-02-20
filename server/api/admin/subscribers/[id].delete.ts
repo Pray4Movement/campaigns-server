@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         phone: phoneContact?.value,
         delivery_method: subscription.delivery_method,
         status: subscription.status,
-        campaign_id: subscription.people_group_id
+        people_group_id: subscription.people_group_id
       }
     })
 

@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
     const contacts = await contactMethodService.getContactsWithDoxaConsent()
     recipients = contacts.map(c => ({ id: c.id, value: c.value }))
   } else if (email.people_group_id) {
-    const contacts = await contactMethodService.getContactsConsentedToCampaign(email.people_group_id)
+    const contacts = await contactMethodService.getContactsConsentedToPeopleGroup(email.people_group_id)
     recipients = contacts.map(c => ({ id: c.id, value: c.value }))
   } else {
     throw createError({

@@ -124,11 +124,11 @@ export default defineEventHandler(async (event) => {
     }
 
     // Campaign consent update - requires campaign_id
-    if (body.consent_campaign_id !== undefined && body.consent_campaign_updates !== undefined) {
-      if (body.consent_campaign_updates) {
-        await contactMethodService.addCampaignConsent(currentEmail.id, body.consent_campaign_id)
+    if (body.consent_people_group_id !== undefined && body.consent_people_group_updates !== undefined) {
+      if (body.consent_people_group_updates) {
+        await contactMethodService.addPeopleGroupConsent(currentEmail.id, body.consent_people_group_id)
       } else {
-        await contactMethodService.removeCampaignConsent(currentEmail.id, body.consent_campaign_id)
+        await contactMethodService.removePeopleGroupConsent(currentEmail.id, body.consent_people_group_id)
       }
     }
   }

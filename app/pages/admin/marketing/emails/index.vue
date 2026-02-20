@@ -48,7 +48,7 @@
             <td class="subject-cell">{{ email.subject }}</td>
             <td class="audience-cell">
               <UBadge
-                :label="email.audience_type === 'doxa' ? 'DOXA' : email.campaign_title || 'Campaign'"
+                :label="email.audience_type === 'doxa' ? 'DOXA' : email.people_group_name || 'Campaign'"
                 variant="subtle"
                 color="neutral"
               />
@@ -134,7 +134,7 @@ interface MarketingEmail {
   content_json: string
   audience_type: 'doxa' | 'campaign'
   people_group_id: number | null
-  campaign_title?: string
+  people_group_name?: string
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
   recipient_count: number
   sent_count: number

@@ -46,21 +46,21 @@ describe('User Campaign Access API', async () => {
     await closeTestDatabase()
   })
 
-  describe('GET /api/admin/users/[id]/campaigns', () => {
+  describe('GET /api/admin/users/[id]/people-groups', () => {
     describe('Authorization', () => {
       it('returns 401 for unauthenticated requests', async () => {
-        const error = await $fetch(`/api/admin/users/${targetUserId}/campaigns`).catch((e) => e)
+        const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`).catch((e) => e)
         expect(error.statusCode).toBe(401)
       })
 
       it('returns 403 for non-admin users', async () => {
-        const error = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, editorAuth).catch((e) => e)
+        const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, editorAuth).catch((e) => e)
         expect(error.statusCode).toBe(403)
       })
 
       it('succeeds for admin users', async () => {
-        const response = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, adminAuth)
-        expect(response.campaigns).toBeDefined()
+        const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, adminAuth)
+        expect(response.peopleGroups).toBeDefined()
       })
     })
 
@@ -69,15 +69,15 @@ describe('User Campaign Access API', async () => {
         // First assign user to campaign1
         await assignUserToCampaign(sql, targetUserId, campaign1.id)
 
-        const response = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, adminAuth)
+        const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, adminAuth)
 
         expect(response.success).toBe(true)
-        expect(response.campaigns).toBeDefined()
-        expect(Array.isArray(response.campaigns)).toBe(true)
+        expect(response.peopleGroups).toBeDefined()
+        expect(Array.isArray(response.peopleGroups)).toBe(true)
 
         // Find our test campaigns
-        const c1 = response.campaigns.find((c: any) => c.id === campaign1.id)
-        const c2 = response.campaigns.find((c: any) => c.id === campaign2.id)
+        const c1 = response.peopleGroups.find((c: any) => c.id === campaign1.id)
+        const c2 = response.peopleGroups.find((c: any) => c.id === campaign2.id)
 
         expect(c1?.hasAccess).toBe(true)
         expect(c2?.hasAccess).toBe(false)
@@ -86,27 +86,27 @@ describe('User Campaign Access API', async () => {
 
     describe('Validation', () => {
       it('returns 400 for invalid user ID', async () => {
-        const error = await $fetch('/api/admin/users/invalid-id/campaigns', adminAuth).catch((e) => e)
+        const error = await $fetch('/api/admin/users/invalid-id/people-groups', adminAuth).catch((e) => e)
         expect(error.statusCode).toBe(400)
       })
     })
   })
 
-  describe('PUT /api/admin/users/[id]/campaigns', () => {
+  describe('PUT /api/admin/users/[id]/people-groups', () => {
     describe('Authorization', () => {
       it('returns 401 for unauthenticated requests', async () => {
-        const error = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [campaign1.id] }
+          body: { people_group_ids: [campaign1.id] }
         }).catch((e) => e)
 
         expect(error.statusCode).toBe(401)
       })
 
       it('returns 403 for non-admin users', async () => {
-        const error = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [campaign1.id] },
+          body: { people_group_ids: [campaign1.id] },
           ...editorAuth
         }).catch((e) => e)
 
@@ -114,9 +114,9 @@ describe('User Campaign Access API', async () => {
       })
 
       it('succeeds for admin users', async () => {
-        const response = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [campaign1.id] },
+          body: { people_group_ids: [campaign1.id] },
           ...adminAuth
         })
 
@@ -126,9 +126,9 @@ describe('User Campaign Access API', async () => {
 
     describe('Campaign assignment', () => {
       it('assigns user to multiple campaigns', async () => {
-        const response = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [campaign1.id, campaign2.id] },
+          body: { people_group_ids: [campaign1.id, campaign2.id] },
           ...adminAuth
         })
 
@@ -141,16 +141,16 @@ describe('User Campaign Access API', async () => {
 
       it('removes existing campaign access and replaces with new list', async () => {
         // First assign to both campaigns
-        await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [campaign1.id, campaign2.id] },
+          body: { people_group_ids: [campaign1.id, campaign2.id] },
           ...adminAuth
         })
 
         // Now assign to only campaign1
-        const response = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [campaign1.id] },
+          body: { people_group_ids: [campaign1.id] },
           ...adminAuth
         })
 
@@ -166,9 +166,9 @@ describe('User Campaign Access API', async () => {
         await assignUserToCampaign(sql, targetUserId, campaign1.id)
 
         // Remove all access
-        const response = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+        const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [] },
+          body: { people_group_ids: [] },
           ...adminAuth
         })
 
@@ -181,17 +181,17 @@ describe('User Campaign Access API', async () => {
 
     describe('Validation', () => {
       it('returns 400 for invalid user ID', async () => {
-        const error = await $fetch('/api/admin/users/invalid-id/campaigns', {
+        const error = await $fetch('/api/admin/users/invalid-id/people-groups', {
           method: 'PUT',
-          body: { campaign_ids: [] },
+          body: { people_group_ids: [] },
           ...adminAuth
         }).catch((e) => e)
 
         expect(error.statusCode).toBe(400)
       })
 
-      it('returns 400 for missing campaign_ids', async () => {
-        const error = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+      it('returns 400 for missing people_group_ids', async () => {
+        const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
           body: {},
           ...adminAuth
@@ -200,10 +200,10 @@ describe('User Campaign Access API', async () => {
         expect(error.statusCode).toBe(400)
       })
 
-      it('returns 400 for non-array campaign_ids', async () => {
-        const error = await $fetch(`/api/admin/users/${targetUserId}/campaigns`, {
+      it('returns 400 for non-array people_group_ids', async () => {
+        const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: 'not-an-array' },
+          body: { people_group_ids: 'not-an-array' },
           ...adminAuth
         }).catch((e) => e)
 
@@ -212,9 +212,9 @@ describe('User Campaign Access API', async () => {
 
       it('returns 404 for non-existent user', async () => {
         const fakeUuid = '00000000-0000-0000-0000-000000000000'
-        const error = await $fetch(`/api/admin/users/${fakeUuid}/campaigns`, {
+        const error = await $fetch(`/api/admin/users/${fakeUuid}/people-groups`, {
           method: 'PUT',
-          body: { campaign_ids: [] },
+          body: { people_group_ids: [] },
           ...adminAuth
         }).catch((e) => e)
 

@@ -85,8 +85,8 @@ export default defineEventHandler(async (event) => {
     const success = await sendFollowupEmail({
       to: emailContact.value,
       subscriberName: subscriber.name,
-      campaignTitle: peopleGroup.name,
-      campaignSlug: peopleGroup.slug,
+      peopleGroupName: peopleGroup.name,
+      peopleGroupSlug: peopleGroup.slug,
       subscriptionId: subscription.id,
       profileId: subscriber.profile_id,
       frequency: subscription.frequency,

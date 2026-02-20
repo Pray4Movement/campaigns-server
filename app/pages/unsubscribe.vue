@@ -57,7 +57,7 @@
 
             <!-- Campaign-specific consents -->
             <div
-              v-for="campaign in profileData.campaigns"
+              v-for="campaign in profileData.peopleGroups"
               :key="'consent-' + campaign.id"
               class="flex items-center justify-between py-2"
             >
@@ -341,7 +341,7 @@ interface UnsubscribeData {
   }
   unsubscribed_reminder: Reminder | null
   other_reminders_in_campaign: Reminder[]
-  other_campaigns: Campaign[]
+  other_people_groups: Campaign[]
 }
 
 interface ProfileData {
@@ -352,11 +352,11 @@ interface ProfileData {
     email: string
     email_verified: boolean
   }
-  campaigns: Campaign[]
+  peopleGroups: Campaign[]
   consents: {
     doxa_general: boolean
     doxa_general_at: string | null
-    campaigns: Array<{ campaign_id: number; consented_at: string | null }>
+    peopleGroups: Array<{ people_group_id: number; consented_at: string | null }>
   }
 }
 
@@ -386,7 +386,7 @@ const profileData = ref<ProfileData | null>(null)
 // Doxa consent form
 const doxaConsentForm = ref({
   doxa_general: false,
-  campaign_ids: [] as number[]
+  people_group_ids: [] as number[]
 })
 
 // Doxa local campaigns for reactive updates
@@ -411,11 +411,11 @@ async function loadData() {
       // Initialize consent form
       doxaConsentForm.value = {
         doxa_general: response.consents?.doxa_general || false,
-        campaign_ids: (response.consents?.campaigns || []).map(c => c.campaign_id)
+        people_group_ids: (response.consents?.peopleGroups || []).map(c => c.people_group_id)
       }
 
       // Initialize local campaigns for reactive updates
-      doxaLocalCampaigns.value = response.campaigns.map(c => ({
+      doxaLocalCampaigns.value = response.peopleGroups.map(c => ({
         ...c,
         reminders: c.reminders.map(r => ({ ...r, status: r.status || 'active' as const }))
       }))
@@ -443,7 +443,7 @@ async function loadData() {
       if (profData?.consents) {
         consentForm.value = {
           doxa_general: profData.consents.doxa_general || false,
-          campaign_ids: (profData.consents.campaigns || []).map((c: any) => c.campaign_id)
+          people_group_ids: (profData.consents.peopleGroups || []).map((c: any) => c.people_group_id)
         }
       }
     } else {
@@ -465,7 +465,7 @@ onMounted(() => {
 // Consent form state for campaign view
 const consentForm = ref({
   doxa_general: false,
-  campaign_ids: [] as number[]
+  people_group_ids: [] as number[]
 })
 
 // State
@@ -494,8 +494,8 @@ watch(data, (newData) => {
     }
 
     // Add other campaigns
-    if (newData.other_campaigns) {
-      campaigns.push(...newData.other_campaigns.map(c => ({
+    if (newData.other_people_groups) {
+      campaigns.push(...newData.other_people_groups.map(c => ({
         ...c,
         reminders: c.reminders.map(r => ({ ...r, status: r.status || 'active' as const }))
       })))
@@ -619,7 +619,7 @@ async function resubscribe() {
 
 // Check if a campaign is consented
 function isCampaignConsented(campaignId: number): boolean {
-  return consentForm.value.campaign_ids.includes(campaignId)
+  return consentForm.value.people_group_ids.includes(campaignId)
 }
 
 // Update Doxa general consent
@@ -652,18 +652,18 @@ async function updateCampaignConsent(campaignId: number, campaignSlug: string, g
     await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        consent_campaign_id: campaignId,
-        consent_campaign_updates: granted
+        consent_people_group_id: campaignId,
+        consent_people_group_updates: granted
       }
     })
 
     // Update local state
     if (granted) {
-      if (!consentForm.value.campaign_ids.includes(campaignId)) {
-        consentForm.value.campaign_ids.push(campaignId)
+      if (!consentForm.value.people_group_ids.includes(campaignId)) {
+        consentForm.value.people_group_ids.push(campaignId)
       }
     } else {
-      consentForm.value.campaign_ids = consentForm.value.campaign_ids.filter(id => id !== campaignId)
+      consentForm.value.people_group_ids = consentForm.value.people_group_ids.filter(id => id !== campaignId)
     }
 
     toast.add({
@@ -759,7 +759,7 @@ async function doxaUnsubscribeFromEntireCampaign(campaign: Campaign) {
 }
 
 function isDoxaCampaignConsented(campaignId: number): boolean {
-  return doxaConsentForm.value.campaign_ids.includes(campaignId)
+  return doxaConsentForm.value.people_group_ids.includes(campaignId)
 }
 
 async function updateDoxaConsentDirect(granted: boolean) {
@@ -788,18 +788,18 @@ async function updateDoxaCampaignConsent(campaignId: number, granted: boolean) {
     await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        consent_campaign_id: campaignId,
-        consent_campaign_updates: granted
+        consent_people_group_id: campaignId,
+        consent_people_group_updates: granted
       }
     })
 
     // Update local state
     if (granted) {
-      if (!doxaConsentForm.value.campaign_ids.includes(campaignId)) {
-        doxaConsentForm.value.campaign_ids.push(campaignId)
+      if (!doxaConsentForm.value.people_group_ids.includes(campaignId)) {
+        doxaConsentForm.value.people_group_ids.push(campaignId)
       }
     } else {
-      doxaConsentForm.value.campaign_ids = doxaConsentForm.value.campaign_ids.filter(id => id !== campaignId)
+      doxaConsentForm.value.people_group_ids = doxaConsentForm.value.people_group_ids.filter(id => id !== campaignId)
     }
 
     toast.add({

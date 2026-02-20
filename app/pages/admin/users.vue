@@ -565,8 +565,8 @@ async function openCampaignModal(user: User) {
   campaignModalLoading.value = true
 
   try {
-    const response = await $fetch<{ campaigns: Campaign[] }>(`/api/admin/users/${user.id}/campaigns`)
-    availableCampaigns.value = response.campaigns
+    const response = await $fetch<{ peopleGroups: Campaign[] }>(`/api/admin/users/${user.id}/people-groups`)
+    availableCampaigns.value = response.peopleGroups
   } catch (err: any) {
     campaignModalError.value = err.data?.statusMessage || 'Failed to load campaigns'
   } finally {
@@ -601,10 +601,10 @@ async function saveCampaignAccess() {
       .filter(c => c.hasAccess)
       .map(c => c.id)
 
-    await $fetch(`/api/admin/users/${selectedUser.value.id}/campaigns`, {
+    await $fetch(`/api/admin/users/${selectedUser.value.id}/people-groups`, {
       method: 'PUT',
       body: {
-        campaign_ids: selectedCampaignIds
+        people_group_ids: selectedCampaignIds
       }
     })
 

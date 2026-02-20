@@ -92,12 +92,12 @@ export default defineEventHandler(async (event) => {
     await campaignSubscriptionService.updateStatus(subscription.id, 'inactive')
   }
 
-  // Return success with profile_id and campaign_slug for the landing page
+  // Return success with profile_id and people_group_slug for the landing page
   return {
     success: true,
     message: getResponseMessage(response),
     profile_id: subscriber.profile_id,
-    campaign_slug: peopleGroup.slug
+    people_group_slug: peopleGroup.slug
   }
 })
 

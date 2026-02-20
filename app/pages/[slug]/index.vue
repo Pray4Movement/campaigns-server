@@ -401,7 +401,7 @@
                     {{ $t('campaign.signup.form.consent.description') }}
                   </p>
                   <UCheckbox
-                    v-model="signupForm.consent_campaign_updates"
+                    v-model="signupForm.consent_people_group_updates"
                     :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
                   />
                   <UCheckbox v-model="signupForm.consent_doxa_general">
@@ -632,7 +632,7 @@ const signupForm = ref({
   days_of_week: [] as number[],
   reminder_time: '09:00',
   prayer_duration: 10,
-  consent_campaign_updates: false,
+  consent_people_group_updates: false,
   consent_doxa_general: false
 })
 
@@ -664,7 +664,7 @@ function resetForm() {
     days_of_week: [],
     reminder_time: '09:00',
     prayer_duration: 10,
-    consent_campaign_updates: false,
+    consent_people_group_updates: false,
     consent_doxa_general: false
   }
 }
@@ -708,7 +708,7 @@ async function handleSignup() {
         prayer_duration: signupForm.value.prayer_duration,
         timezone: userTimezone.value,
         language: locale.value,
-        consent_campaign_updates: signupForm.value.consent_campaign_updates,
+        consent_people_group_updates: signupForm.value.consent_people_group_updates,
         consent_doxa_general: signupForm.value.consent_doxa_general
       }
     })

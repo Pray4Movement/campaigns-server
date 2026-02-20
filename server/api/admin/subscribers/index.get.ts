@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event)
   const search = query.search as string | undefined
-  const campaignId = query.campaign_id ? parseInt(query.campaign_id as string) : undefined
+  const campaignId = query.people_group_id ? parseInt(query.people_group_id as string) : undefined
 
   try {
     // Determine accessible campaigns for non-admin users

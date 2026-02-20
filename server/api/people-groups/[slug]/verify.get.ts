@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     message: 'Email verified successfully',
-    campaign_title: peopleGroup.name,
-    campaign_slug: slug
+    people_group_name: peopleGroup.name,
+    people_group_slug: slug
   }
 })

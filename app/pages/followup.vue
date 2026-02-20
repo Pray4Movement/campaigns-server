@@ -121,7 +121,7 @@ async function recordResponse() {
       success: boolean
       message: string
       profile_id: string
-      campaign_slug: string
+      people_group_slug: string
     }>(`/api/subscriptions/${subscriptionId}/followup-response?id=${idParam}`, {
       method: 'POST',
       body: { response: responseParam }
@@ -129,7 +129,7 @@ async function recordResponse() {
 
     response.value = responseParam
     profileId.value = result.profile_id
-    campaignSlug.value = result.campaign_slug
+    campaignSlug.value = result.people_group_slug
   } catch (err: any) {
     error.value = err.data?.statusMessage || t('followupPage.error.failed')
   } finally {

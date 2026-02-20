@@ -113,15 +113,15 @@ describe('GET /api/admin/subscribers', async () => {
       expect(names.every((n: string) => !n.includes('C2'))).toBe(true)
     })
 
-    it('admin can filter by campaign_id', async () => {
-      const response = await $fetch(`/api/admin/subscribers?campaign_id=${campaign1.id}`, adminAuth)
+    it('admin can filter by people_group_id', async () => {
+      const response = await $fetch(`/api/admin/subscribers?people_group_id=${campaign1.id}`, adminAuth)
 
       const names = response.subscribers.map((s: any) => s.name)
       expect(names.every((n: string) => n.includes('C1'))).toBe(true)
     })
 
-    it('campaign_editor cannot filter by unassigned campaign_id', async () => {
-      const error = await $fetch(`/api/admin/subscribers?campaign_id=${campaign2.id}`, editorAuth).catch((e) => e)
+    it('campaign_editor cannot filter by unassigned people_group_id', async () => {
+      const error = await $fetch(`/api/admin/subscribers?people_group_id=${campaign2.id}`, editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
   })

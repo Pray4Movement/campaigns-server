@@ -48,7 +48,7 @@ const { data, pending, error } = await useFetch(`/api/people-groups/${slug}/veri
   query: { token }
 })
 
-const campaignTitle = computed(() => data.value?.campaign_title || '')
+const campaignTitle = computed(() => data.value?.people_group_name || '')
 const errorMessage = computed(() => {
   return t('campaign.verify.error.generic')
 })

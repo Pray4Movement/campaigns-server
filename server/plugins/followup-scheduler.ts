@@ -108,8 +108,8 @@ async function processSubscription(
     created_at,
     subscriber_name,
     email_value,
-    campaign_title,
-    campaign_slug,
+    people_group_name,
+    people_group_slug,
     frequency,
     days_of_week,
     subscriber_profile_id,
@@ -145,8 +145,8 @@ async function processSubscription(
     const emailSent = await sendFollowupEmail({
       to: email_value,
       subscriberName: subscriber_name,
-      campaignTitle: campaign_title,
-      campaignSlug: campaign_slug,
+      peopleGroupName: people_group_name,
+      peopleGroupSlug: people_group_slug,
       subscriptionId,
       profileId: subscriber_profile_id,
       frequency,
@@ -157,7 +157,7 @@ async function processSubscription(
 
     if (emailSent) {
       await campaignSubscriptionService.markFollowupSent(subscriptionId)
-      console.log(`  ✅ Sent follow-up to ${email_value} for ${campaign_title}`)
+      console.log(`  ✅ Sent follow-up to ${email_value} for ${people_group_name}`)
       return 'email_sent'
     } else {
       console.error(`  ❌ Failed to send follow-up to ${email_value}`)
@@ -176,8 +176,8 @@ async function processSubscription(
     const emailSent = await sendFollowupEmail({
       to: email_value,
       subscriberName: subscriber_name,
-      campaignTitle: campaign_title,
-      campaignSlug: campaign_slug,
+      peopleGroupName: people_group_name,
+      peopleGroupSlug: people_group_slug,
       subscriptionId,
       profileId: subscriber_profile_id,
       frequency,
@@ -188,7 +188,7 @@ async function processSubscription(
 
     if (emailSent) {
       await campaignSubscriptionService.markFollowupSent(subscriptionId)
-      console.log(`  ✅ Sent follow-up reminder to ${email_value} for ${campaign_title}`)
+      console.log(`  ✅ Sent follow-up reminder to ${email_value} for ${people_group_name}`)
       return 'email_sent'
     } else {
       console.error(`  ❌ Failed to send follow-up reminder to ${email_value}`)

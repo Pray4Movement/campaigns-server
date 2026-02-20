@@ -218,7 +218,7 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 
 **Purpose**: Define which libraries are available to all people groups
 
-**Location**: Global config page (`/admin/campaign-config`)
+**Location**: Global config page (`/admin/prayer-fuel-order`)
 
 **Features**:
 - Select multiple libraries

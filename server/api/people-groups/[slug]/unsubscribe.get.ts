@@ -95,8 +95,8 @@ export default defineEventHandler(async (event) => {
       if (!campaignMap.has(sub.people_group_id)) {
         campaignMap.set(sub.people_group_id, {
           id: sub.people_group_id,
-          title: sub.campaign_title,
-          slug: sub.campaign_slug,
+          title: sub.people_group_name,
+          slug: sub.people_group_slug,
           reminders: []
         })
       }
@@ -129,7 +129,7 @@ export default defineEventHandler(async (event) => {
       },
       unsubscribed_reminder: null,
       other_reminders_in_campaign: [],
-      other_campaigns: otherCampaigns
+      other_people_groups: otherCampaigns
     }
   }
 
@@ -138,7 +138,7 @@ export default defineEventHandler(async (event) => {
     ? campaignSubscriptions.find(s => s.id === subscriptionId)
     : campaignSubscriptions.find(s => s.status === 'active')
 
-  // Get other campaigns (excluding current one)
+  // Get other people groups (excluding current one)
   const otherCampaigns = groupByCampaign(
     allSubscriberSubscriptions.filter(s => s.people_group_id !== peopleGroup.id)
   )
@@ -159,7 +159,7 @@ export default defineEventHandler(async (event) => {
       },
       unsubscribed_reminder: null,
       other_reminders_in_campaign: otherRemindersInCampaign,
-      other_campaigns: otherCampaigns
+      other_people_groups: otherCampaigns
     }
   }
 
@@ -180,7 +180,7 @@ export default defineEventHandler(async (event) => {
       },
       unsubscribed_reminder: formatReminder(subscriptionToUnsubscribe),
       other_reminders_in_campaign: otherRemindersInCampaign,
-      other_campaigns: otherCampaigns
+      other_people_groups: otherCampaigns
     }
   }
 
@@ -211,6 +211,6 @@ export default defineEventHandler(async (event) => {
     },
     unsubscribed_reminder: formatReminder(subscriptionToUnsubscribe),
     other_reminders_in_campaign: otherRemindersInCampaign,
-    other_campaigns: otherCampaigns
+    other_people_groups: otherCampaigns
   }
 })

@@ -20,8 +20,8 @@ export interface CampaignSubscription {
 }
 
 export interface CampaignSubscriptionWithDetails extends CampaignSubscription {
-  campaign_title: string
-  campaign_slug: string
+  people_group_name: string
+  people_group_slug: string
   subscriber_name: string
   subscriber_tracking_id: string
   subscriber_profile_id: string
@@ -34,8 +34,8 @@ export interface SubscriptionDueForReminder extends CampaignSubscription {
   subscriber_language: string
   email_value: string
   email_verified: boolean
-  campaign_slug: string
-  campaign_title: string
+  people_group_slug: string
+  people_group_name: string
 }
 
 export interface CreateSubscriptionInput {
@@ -152,8 +152,8 @@ class CampaignSubscriptionService {
     const stmt = this.db.prepare(`
       SELECT
         cs.*,
-        pg.name as campaign_title,
-        pg.slug as campaign_slug,
+        pg.name as people_group_name,
+        pg.slug as people_group_slug,
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
         s.profile_id as subscriber_profile_id
@@ -180,8 +180,8 @@ class CampaignSubscriptionService {
     let query = `
       SELECT
         cs.*,
-        pg.name as campaign_title,
-        pg.slug as campaign_slug,
+        pg.name as people_group_name,
+        pg.slug as people_group_slug,
         s.name as subscriber_name,
         s.tracking_id as subscriber_tracking_id,
         s.profile_id as subscriber_profile_id
@@ -367,8 +367,8 @@ class CampaignSubscriptionService {
         s.preferred_language as subscriber_language,
         cm.value as email_value,
         cm.verified as email_verified,
-        pg.slug as campaign_slug,
-        pg.name as campaign_title
+        pg.slug as people_group_slug,
+        pg.name as people_group_name
       FROM campaign_subscriptions cs
       JOIN subscribers s ON s.id = cs.subscriber_id
       JOIN people_groups pg ON pg.id = cs.people_group_id

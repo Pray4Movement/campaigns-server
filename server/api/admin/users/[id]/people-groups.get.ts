@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      campaigns: peopleGroupsWithAccess
+      peopleGroups: peopleGroupsWithAccess
     }
   } catch (error) {
     handleApiError(error, 'Failed to fetch user campaigns')

@@ -36,7 +36,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  campaigns:
+                  peopleGroups:
                     type: array
                     items:
                       $ref: '#/components/schemas/Campaign'

@@ -34,15 +34,15 @@ export async function processMarketingEmail(job: Job): Promise<ProcessorResult> 
   const subscriberLanguage = subscriber?.preferred_language || 'en'
 
   let unsubscribeUrl: string
-  if (cached.email.audience_type === 'campaign' && cached.email.campaign_slug) {
-    unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', subscriberLanguage)}?id=${profileId}&type=campaign&slug=${cached.email.campaign_slug}`
+  if (cached.email.audience_type === 'campaign' && cached.email.people_group_slug) {
+    unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', subscriberLanguage)}?id=${profileId}&type=campaign&slug=${cached.email.people_group_slug}`
   } else {
     unsubscribeUrl = `${baseUrl}${localePath('/unsubscribe', subscriberLanguage)}?id=${profileId}&type=doxa`
   }
 
   const html = renderMarketingEmailHtml(
     cached.email.content_json,
-    cached.email.audience_type === 'campaign' ? cached.email.campaign_title : undefined,
+    cached.email.audience_type === 'campaign' ? cached.email.people_group_name : undefined,
     unsubscribeUrl,
     subscriberLanguage
   )

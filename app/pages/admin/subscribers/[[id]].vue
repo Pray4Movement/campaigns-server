@@ -105,14 +105,14 @@
                 </span>
               </div>
 
-              <div v-if="selectedSubscriber.consents.campaign_names.length > 0" class="consent-item">
+              <div v-if="selectedSubscriber.consents.people_group_names.length > 0" class="consent-item">
                 <div class="consent-label">
                   <span class="consent-name">Campaign Marketing</span>
                 </div>
                 <div class="campaign-consents">
                   <UBadge
-                    v-for="(name, idx) in selectedSubscriber.consents.campaign_names"
-                    :key="selectedSubscriber.consents.campaign_ids[idx]"
+                    v-for="(name, idx) in selectedSubscriber.consents.people_group_names"
+                    :key="selectedSubscriber.consents.people_group_ids[idx]"
                     :label="name"
                     color="primary"
                     variant="subtle"
@@ -144,7 +144,7 @@
               >
                 <div class="subscription-header" @click="toggleSubscription(subscription.id)">
                   <div class="subscription-title">
-                    <span class="campaign-name">{{ subscription.campaign_title }}</span>
+                    <span class="campaign-name">{{ subscription.people_group_name }}</span>
                     <UBadge
                       :label="subscription.status"
                       variant="outline"
@@ -295,20 +295,20 @@
                 </div>
                 <div v-if="activity.eventType === 'PRAYER'" class="prayer-details">
                   {{ formatPrayerDuration(activity.metadata.duration ?? 0) }}
-                  <template v-if="activity.metadata.campaignTitle">
-                    for {{ activity.metadata.campaignTitle }}
+                  <template v-if="activity.metadata.peopleGroupName">
+                    for {{ activity.metadata.peopleGroupName }}
                   </template>
                 </div>
                 <div v-if="activity.eventType === 'EMAIL'" class="email-details">
                   Day {{ activity.metadata.sentDate }}
-                  <template v-if="activity.metadata.campaignTitle">
-                    · {{ activity.metadata.campaignTitle }}
+                  <template v-if="activity.metadata.peopleGroupName">
+                    · {{ activity.metadata.peopleGroupName }}
                   </template>
                 </div>
                 <div v-if="activity.eventType === 'FOLLOWUP_RESPONSE'" class="followup-details">
                   {{ formatFollowupResponse(activity.metadata.response ?? '') }}
-                  <template v-if="activity.metadata.campaignTitle">
-                    · {{ activity.metadata.campaignTitle }}
+                  <template v-if="activity.metadata.peopleGroupName">
+                    · {{ activity.metadata.peopleGroupName }}
                   </template>
                 </div>
                 <div v-if="activity.metadata?.changes" class="activity-changes">
@@ -365,8 +365,8 @@ interface Contact {
 interface Subscription {
   id: number
   people_group_id: number
-  campaign_title: string
-  campaign_slug: string
+  people_group_name: string
+  people_group_slug: string
   delivery_method: 'email' | 'whatsapp' | 'app'
   frequency: string
   days_of_week: string | null
@@ -382,8 +382,8 @@ interface Subscription {
 interface SubscriberConsents {
   doxa_general: boolean
   doxa_general_at: string | null
-  campaign_ids: number[]
-  campaign_names: string[]
+  people_group_ids: number[]
+  people_group_names: string[]
 }
 
 interface GeneralSubscriber {
@@ -456,7 +456,7 @@ interface ActivityLogEntry {
     deletedRecord?: Record<string, any>
     source?: string
     duration?: number
-    campaignTitle?: string
+    peopleGroupName?: string
     sentDate?: string
     response?: string
   }
@@ -620,7 +620,7 @@ async function sendReminder(subscription: Subscription) {
 
     toast.add({
       title: 'Reminder Sent',
-      description: `Prayer reminder email sent for ${subscription.campaign_title}`,
+      description: `Prayer reminder email sent for ${subscription.people_group_name}`,
       color: 'success'
     })
 
@@ -650,7 +650,7 @@ async function sendFollowup(subscription: Subscription) {
 
     toast.add({
       title: 'Follow-up Sent',
-      description: `Commitment check-in email sent for ${subscription.campaign_title}`,
+      description: `Commitment check-in email sent for ${subscription.people_group_name}`,
       color: 'success'
     })
 

@@ -20,9 +20,9 @@ export interface MarketingEmail {
   failed_count: number
 }
 
-export interface MarketingEmailWithCampaign extends MarketingEmail {
-  campaign_title?: string
-  campaign_slug?: string
+export interface MarketingEmailWithPeopleGroup extends MarketingEmail {
+  people_group_name?: string
+  people_group_slug?: string
   created_by_name?: string
   created_by_email?: string
   updated_by_name?: string
@@ -88,14 +88,14 @@ class MarketingEmailService {
     return await stmt.get(id) as MarketingEmail | null
   }
 
-  async getByIdWithCampaign(id: number): Promise<MarketingEmailWithCampaign | null> {
+  async getByIdWithCampaign(id: number): Promise<MarketingEmailWithPeopleGroup | null> {
     const stmt = this.db.prepare(`
-      SELECT me.*, pg.name as campaign_title, pg.slug as campaign_slug
+      SELECT me.*, pg.name as people_group_name, pg.slug as people_group_slug
       FROM marketing_emails me
       LEFT JOIN people_groups pg ON me.people_group_id = pg.id
       WHERE me.id = ?
     `)
-    return await stmt.get(id) as MarketingEmailWithCampaign | null
+    return await stmt.get(id) as MarketingEmailWithPeopleGroup | null
   }
 
   async update(id: number, data: UpdateMarketingEmailData): Promise<MarketingEmail | null> {
@@ -163,13 +163,13 @@ class MarketingEmailService {
     return result.changes > 0
   }
 
-  async listForUser(userId: string, filters?: MarketingEmailFilters): Promise<MarketingEmailWithCampaign[]> {
+  async listForUser(userId: string, filters?: MarketingEmailFilters): Promise<MarketingEmailWithPeopleGroup[]> {
     const isAdmin = await roleService.isAdmin(userId)
 
     let query = `
       SELECT me.*,
-        pg.name as campaign_title,
-        pg.slug as campaign_slug,
+        pg.name as people_group_name,
+        pg.slug as people_group_slug,
         u_created.display_name as created_by_name,
         u_created.email as created_by_email,
         u_updated.display_name as updated_by_name,
@@ -221,7 +221,7 @@ class MarketingEmailService {
     query += ' ORDER BY me.updated_at DESC'
 
     const stmt = this.db.prepare(query)
-    return await stmt.all(...values) as MarketingEmailWithCampaign[]
+    return await stmt.all(...values) as MarketingEmailWithPeopleGroup[]
   }
 
   async updateStatus(id: number, status: MarketingEmail['status'], sentBy?: string): Promise<void> {

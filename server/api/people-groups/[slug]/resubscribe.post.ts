@@ -76,8 +76,8 @@ export default defineEventHandler(async (event) => {
     return {
       message: 'Subscription is already active',
       already_active: true,
-      campaign_title: peopleGroup.name,
-      campaign_slug: slug
+      people_group_name: peopleGroup.name,
+      people_group_slug: slug
     }
   }
 
@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
   return {
     message: 'Successfully resubscribed to prayer reminders',
     already_active: false,
-    campaign_title: peopleGroup.name,
-    campaign_slug: slug
+    people_group_name: peopleGroup.name,
+    people_group_slug: slug
   }
 })

@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
           pa.timestamp,
           pa.duration,
           pa.people_group_id,
-          pg.name as campaign_title
+          pg.name as people_group_name
         FROM prayer_activity pa
         LEFT JOIN people_groups pg ON pa.people_group_id = pg.id
         WHERE pa.tracking_id = ${trackingId}
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
         res.id,
         res.sent_date,
         res.sent_at,
-        pg.name as campaign_title
+        pg.name as people_group_name
       FROM reminder_emails_sent res
       JOIN campaign_subscriptions cs ON res.subscription_id = cs.id
       JOIN people_groups pg ON cs.people_group_id = pg.id
@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
       userName: null,
       metadata: {
         duration: pa.duration,
-        campaignTitle: pa.campaign_title
+        peopleGroupName: pa.people_group_name
       }
     }))
 
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event) => {
       userName: null,
       metadata: {
         sentDate: e.sent_date,
-        campaignTitle: e.campaign_title
+        peopleGroupName: e.people_group_name
       }
     }))
 
@@ -135,7 +135,7 @@ export default defineEventHandler(async (event) => {
         fr.response,
         fr.followup_sent_at,
         fr.responded_at,
-        pg.name as campaign_title
+        pg.name as people_group_name
       FROM followup_responses fr
       JOIN campaign_subscriptions cs ON fr.subscription_id = cs.id
       JOIN people_groups pg ON cs.people_group_id = pg.id
@@ -154,7 +154,7 @@ export default defineEventHandler(async (event) => {
       userName: null,
       metadata: {
         response: fr.response,
-        campaignTitle: fr.campaign_title
+        peopleGroupName: fr.people_group_name
       }
     }))
 

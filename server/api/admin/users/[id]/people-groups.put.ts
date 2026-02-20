@@ -13,10 +13,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   // Validate campaign_ids is an array
-  if (!Array.isArray(body.campaign_ids)) {
+  if (!Array.isArray(body.people_group_ids)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'campaign_ids must be an array'
+      statusMessage: 'people_group_ids must be an array'
     })
   }
 
@@ -34,14 +34,14 @@ export default defineEventHandler(async (event) => {
     await campaignAccessService.removeUserFromAllCampaigns(userId)
 
     // Add new campaign access
-    if (body.campaign_ids.length > 0) {
-      await campaignAccessService.assignUserToCampaigns(userId, body.campaign_ids)
+    if (body.people_group_ids.length > 0) {
+      await campaignAccessService.assignUserToCampaigns(userId, body.people_group_ids)
     }
 
     return {
       success: true,
-      message: `User assigned to ${body.campaign_ids.length} campaign(s)`,
-      campaign_ids: body.campaign_ids
+      message: `User assigned to ${body.people_group_ids.length} people group(s)`,
+      people_group_ids: body.people_group_ids
     }
   } catch (error) {
     handleApiError(error, 'Failed to update user campaigns')

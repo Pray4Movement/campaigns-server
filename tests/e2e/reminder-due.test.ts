@@ -263,8 +263,8 @@ describe('getSubscriptionsDueForReminder', async () => {
       expect(found!.email_verified).toBe(true)
 
       // Joined campaign fields
-      expect(found!.campaign_slug).toBe(campaign.slug)
-      expect(found!.campaign_title).toBe('Test Campaign Data')
+      expect(found!.people_group_slug).toBe(campaign.slug)
+      expect(found!.people_group_name).toBe('Test Campaign Data')
     })
 
     it('orders by next_reminder_utc ASC', async () => {

@@ -175,9 +175,9 @@ describe('GET /api/people-groups/[slug]/unsubscribe', () => {
       method: 'GET'
     })
 
-    expect(response.other_campaigns).toBeDefined()
-    expect(response.other_campaigns.length).toBe(1)
-    expect(response.other_campaigns[0].title).toBe('Test Campaign 2')
+    expect(response.other_people_groups).toBeDefined()
+    expect(response.other_people_groups.length).toBe(1)
+    expect(response.other_people_groups[0].title).toBe('Test Campaign 2')
   })
 
   it('returns already_unsubscribed for already unsubscribed subscription', async () => {
@@ -366,7 +366,7 @@ describe('POST /api/people-groups/[slug]/resubscribe', () => {
       body: { profile_id: subscriber.profile_id }
     })
 
-    expect(response.campaign_title).toBe('Test Resubscribe Campaign')
-    expect(response.campaign_slug).toBe(campaign.slug)
+    expect(response.people_group_name).toBe('Test Resubscribe Campaign')
+    expect(response.people_group_slug).toBe(campaign.slug)
   })
 })

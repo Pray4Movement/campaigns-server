@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
         // Subscription info (id for backwards compat)
         id: subscription.id,
         subscription_id: subscription.id,
-        campaign_id: subscription.people_group_id,
+        people_group_id: subscription.people_group_id,
         subscriber_id: subscriber.id,
         // Global subscriber info
         name: subscriber.name,
@@ -74,9 +74,9 @@ export default defineEventHandler(async (event) => {
         // All subscriptions for this subscriber
         all_subscriptions: allSubscriptions.map(sub => ({
           id: sub.id,
-          campaign_id: sub.people_group_id,
-          campaign_title: sub.campaign_title,
-          campaign_slug: sub.campaign_slug,
+          people_group_id: sub.people_group_id,
+          people_group_name: sub.people_group_name,
+          people_group_slug: sub.people_group_slug,
           status: sub.status
         }))
       }

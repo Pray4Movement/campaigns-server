@@ -263,7 +263,7 @@ class ContactMethodService {
   /**
    * Add people group consent for a contact method
    */
-  async addCampaignConsent(contactMethodId: number, peopleGroupId: number): Promise<ContactMethod | null> {
+  async addPeopleGroupConsent(contactMethodId: number, peopleGroupId: number): Promise<ContactMethod | null> {
     const contactMethod = await this.getById(contactMethodId)
     if (!contactMethod) return null
 
@@ -293,7 +293,7 @@ class ContactMethodService {
   /**
    * Remove people group consent for a contact method
    */
-  async removeCampaignConsent(contactMethodId: number, peopleGroupId: number): Promise<ContactMethod | null> {
+  async removePeopleGroupConsent(contactMethodId: number, peopleGroupId: number): Promise<ContactMethod | null> {
     const contactMethod = await this.getById(contactMethodId)
     if (!contactMethod) return null
 
@@ -323,7 +323,7 @@ class ContactMethodService {
   /**
    * Check if a contact method has consented to people group updates
    */
-  async hasConsentedToCampaign(contactMethodId: number, peopleGroupId: number): Promise<boolean> {
+  async hasConsentedToPeopleGroup(contactMethodId: number, peopleGroupId: number): Promise<boolean> {
     const contactMethod = await this.getById(contactMethodId)
     if (!contactMethod) return false
 
@@ -334,7 +334,7 @@ class ContactMethodService {
   /**
    * Get all contact methods that have consented to a specific people group's updates
    */
-  async getContactsConsentedToCampaign(peopleGroupId: number): Promise<ContactMethod[]> {
+  async getContactsConsentedToPeopleGroup(peopleGroupId: number): Promise<ContactMethod[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM contact_methods
       WHERE ? = ANY(consented_people_group_ids) AND verified = true

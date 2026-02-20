@@ -98,12 +98,12 @@ const pageSize = 9
 const { data, pending, error } = await useFetch('/api/people-groups')
 
 const filteredCampaigns = computed(() => {
-  if (!data.value?.campaigns) return []
+  if (!data.value?.peopleGroups) return []
 
   const query = searchQuery.value.toLowerCase().trim()
-  if (!query) return data.value.campaigns
+  if (!query) return data.value.peopleGroups
 
-  return data.value.campaigns.filter((campaign: any) =>
+  return data.value.peopleGroups.filter((campaign: any) =>
     campaign.title.toLowerCase().includes(query) ||
     campaign.description?.toLowerCase().includes(query)
   )

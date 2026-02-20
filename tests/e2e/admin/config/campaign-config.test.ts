@@ -36,31 +36,31 @@ describe('Campaign Config API', async () => {
     await closeTestDatabase()
   })
 
-  describe('GET /api/admin/campaign-config/libraries', () => {
+  describe('GET /api/admin/people-group-config/libraries', () => {
     it('returns 401 for unauthenticated requests', async () => {
-      const error = await $fetch('/api/admin/campaign-config/libraries').catch((e) => e)
+      const error = await $fetch('/api/admin/people-group-config/libraries').catch((e) => e)
       expect(error.statusCode).toBe(401)
     })
 
     it('returns 403 for users with no role', async () => {
-      const error = await $fetch('/api/admin/campaign-config/libraries', noRoleAuth).catch((e) => e)
+      const error = await $fetch('/api/admin/people-group-config/libraries', noRoleAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
 
     it('succeeds for admin users', async () => {
-      const response = await $fetch('/api/admin/campaign-config/libraries', adminAuth)
+      const response = await $fetch('/api/admin/people-group-config/libraries', adminAuth)
       expect(response).toBeDefined()
     })
 
     it('returns 403 for campaign_editor users (admin only)', async () => {
-      const error = await $fetch('/api/admin/campaign-config/libraries', editorAuth).catch((e) => e)
+      const error = await $fetch('/api/admin/people-group-config/libraries', editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
   })
 
-  describe('PUT /api/admin/campaign-config/libraries', () => {
+  describe('PUT /api/admin/people-group-config/libraries', () => {
     it('returns 401 for unauthenticated requests', async () => {
-      const error = await $fetch('/api/admin/campaign-config/libraries', {
+      const error = await $fetch('/api/admin/people-group-config/libraries', {
         method: 'PUT',
         body: { config: {} }
       }).catch((e) => e)
@@ -69,7 +69,7 @@ describe('Campaign Config API', async () => {
     })
 
     it('returns 403 for users with no role', async () => {
-      const error = await $fetch('/api/admin/campaign-config/libraries', {
+      const error = await $fetch('/api/admin/people-group-config/libraries', {
         method: 'PUT',
         body: { config: {} },
         ...noRoleAuth
@@ -80,7 +80,7 @@ describe('Campaign Config API', async () => {
 
     it('succeeds for admin users', async () => {
       // Send valid config format
-      const response = await $fetch('/api/admin/campaign-config/libraries', {
+      const response = await $fetch('/api/admin/people-group-config/libraries', {
         method: 'PUT',
         body: {
           rows: [],

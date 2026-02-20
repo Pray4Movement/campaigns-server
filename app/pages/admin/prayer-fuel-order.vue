@@ -315,7 +315,7 @@ async function loadConfiguration() {
     error.value = ''
 
     const response = await $fetch<{ config: GlobalConfig }>(
-      '/api/admin/campaign-config/libraries'
+      '/api/admin/people-group-config/libraries'
     )
 
     rows.value = response.config.rows || []
@@ -567,7 +567,7 @@ async function saveConfiguration() {
   try {
     saving.value = true
 
-    await $fetch('/api/admin/campaign-config/libraries', {
+    await $fetch('/api/admin/people-group-config/libraries', {
       method: 'PUT',
       body: {
         rows: rows.value,

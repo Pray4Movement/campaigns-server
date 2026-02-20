@@ -207,7 +207,7 @@ async function loadCampaignCount() {
     return
   }
   try {
-    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/campaign/${form.value.people_group_id}`)
+    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/people-group/${form.value.people_group_id}`)
     campaignCount.value = response.count
   } catch (error) {
     console.error('Failed to load campaign count:', error)
