@@ -363,7 +363,7 @@ async function saveChanges() {
 }
 
 function navigateToSubscribers(peopleGroupId: number) {
-  navigateTo(`/admin/subscribers?campaign=${peopleGroupId}`)
+  navigateTo(`/admin/subscribers?peopleGroup=${peopleGroupId}`)
 }
 
 function formatNumber(num: number | string): string {

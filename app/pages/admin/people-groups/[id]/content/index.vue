@@ -1,5 +1,5 @@
 <template>
-  <div class="campaign-content-page">
+  <div class="people-group-content-page">
     <div class="page-header">
       <div>
         <NuxtLink :to="`/admin/people-groups/${peopleGroupId}`" class="back-link">← Back to People Group</NuxtLink>
@@ -227,7 +227,7 @@
     <!-- Import Modal -->
     <LibraryImportModal
       v-model:open="showImportModal"
-      :campaign-id="peopleGroupId"
+      :people-group-id="peopleGroupId"
       :existing-libraries="libraries"
       @imported="handleImported"
     />
@@ -611,7 +611,7 @@ watch(selectedLanguage, () => {
 </script>
 
 <style scoped>
-.campaign-content-page {
+.people-group-content-page {
   max-width: 1400px;
 }
 

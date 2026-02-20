@@ -30,20 +30,20 @@ export default defineEventHandler(async (event) => {
   // Get all subscriptions for this subscriber
   const allSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
-  // Group subscriptions by campaign
-  const subscriptionsByCampaign = new Map<number, typeof allSubscriptions>()
+  // Group subscriptions by people group
+  const subscriptionsByPeopleGroup = new Map<number, typeof allSubscriptions>()
   for (const sub of allSubscriptions) {
-    if (!subscriptionsByCampaign.has(sub.people_group_id)) {
-      subscriptionsByCampaign.set(sub.people_group_id, [])
+    if (!subscriptionsByPeopleGroup.has(sub.people_group_id)) {
+      subscriptionsByPeopleGroup.set(sub.people_group_id, [])
     }
-    subscriptionsByCampaign.get(sub.people_group_id)!.push(sub)
+    subscriptionsByPeopleGroup.get(sub.people_group_id)!.push(sub)
   }
 
   // Build people groups array with reminders
-  const peopleGroups = Array.from(subscriptionsByCampaign.entries())
+  const peopleGroups = Array.from(subscriptionsByPeopleGroup.entries())
     .filter(([, subs]) => subs.length > 0)
-    .map(([campaignId, subs]) => ({
-      id: campaignId,
+    .map(([peopleGroupId, subs]) => ({
+      id: peopleGroupId,
       title: subs[0]!.people_group_name,
       slug: subs[0]!.people_group_slug,
       reminders: subs.map(sub => ({
@@ -62,9 +62,9 @@ export default defineEventHandler(async (event) => {
   const consents = {
     doxa_general: primaryEmail?.consent_doxa_general || false,
     doxa_general_at: primaryEmail?.consent_doxa_general_at || null,
-    peopleGroups: (primaryEmail?.consented_people_group_ids || []).map(campaignId => ({
-      people_group_id: campaignId,
-      consented_at: primaryEmail?.consented_people_group_ids_at?.[String(campaignId)] || null
+    peopleGroups: (primaryEmail?.consented_people_group_ids || []).map(peopleGroupId => ({
+      people_group_id: peopleGroupId,
+      consented_at: primaryEmail?.consented_people_group_ids_at?.[String(peopleGroupId)] || null
     }))
   }
 

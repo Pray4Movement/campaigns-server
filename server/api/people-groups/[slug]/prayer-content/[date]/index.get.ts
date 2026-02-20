@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   if (!slug) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Campaign slug is required'
+      statusMessage: 'People group slug is required'
     })
   }
 
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
   if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -90,7 +90,7 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=3600')
 
   return {
-    campaign: {
+    people_group: {
       id: peopleGroup.id,
       slug: peopleGroup.slug,
       title: peopleGroup.name,

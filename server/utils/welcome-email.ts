@@ -11,7 +11,7 @@ export async function sendWelcomeEmail(
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const appName = config.appName || 'Doxa'
-  const campaignUrl = `${baseUrl}${localePath(`/${peopleGroupSlug}/prayer`, locale)}`
+  const peopleGroupUrl = `${baseUrl}${localePath(`/${peopleGroupSlug}/prayer`, locale)}`
   const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${profileId}`
 
   const subject = t('email.welcome.subject', locale, { appName, campaign: peopleGroupName })
@@ -44,7 +44,7 @@ export async function sendWelcomeEmail(
         </p>
 
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${campaignUrl}" style="
+          <a href="${peopleGroupUrl}" style="
             background: #3B463D;
             color: #ffffff;
             padding: 15px 30px;
@@ -93,7 +93,7 @@ ${hello}
 
 ${thankYou}
 
-${startPraying}: ${campaignUrl}
+${startPraying}: ${peopleGroupUrl}
 
 ${managePreferences}: ${profileUrl}
 

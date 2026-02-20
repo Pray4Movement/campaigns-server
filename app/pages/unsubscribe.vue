@@ -55,16 +55,16 @@
               />
             </div>
 
-            <!-- Campaign-specific consents -->
+            <!-- People group-specific consents -->
             <div
-              v-for="campaign in profileData.peopleGroups"
-              :key="'consent-' + campaign.id"
+              v-for="pg in profileData.peopleGroups"
+              :key="'consent-' + pg.id"
               class="flex items-center justify-between py-2"
             >
-              <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: campaign.title }) }}</p>
+              <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: pg.title }) }}</p>
               <USwitch
-                :model-value="isDoxaCampaignConsented(campaign.id)"
-                @update:model-value="(val: boolean) => updateDoxaCampaignConsent(campaign.id, val)"
+                :model-value="isDoxaPeopleGroupConsented(pg.id)"
+                @update:model-value="(val: boolean) => updateDoxaPeopleGroupConsent(pg.id, val)"
               />
             </div>
           </div>
@@ -72,26 +72,26 @@
       </div>
 
       <!-- Subscriptions for Doxa view -->
-      <div v-if="doxaLocalCampaigns.length > 0" class="mt-6">
+      <div v-if="doxaLocalPeopleGroups.length > 0" class="mt-6">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
           <UIcon name="i-lucide-bell" class="w-5 h-5" />
           {{ $t('campaign.unsubscribe.yourSubscriptions') }}
         </h2>
 
         <div class="space-y-4">
-          <UCard v-for="campaign in doxaLocalCampaigns" :key="'sub-' + campaign.id">
+          <UCard v-for="pg in doxaLocalPeopleGroups" :key="'sub-' + pg.id">
             <template #header>
               <div class="flex items-center justify-between">
-                <span class="font-medium">{{ campaign.title }}</span>
+                <span class="font-medium">{{ pg.title }}</span>
                 <UBadge color="neutral" size="xs">
-                  {{ doxaActiveRemindersCount(campaign) }} {{ $t('campaign.unsubscribe.active') }}
+                  {{ doxaActiveRemindersCount(pg) }} {{ $t('campaign.unsubscribe.active') }}
                 </UBadge>
               </div>
             </template>
 
             <div class="space-y-2">
               <div
-                v-for="reminder in campaign.reminders"
+                v-for="reminder in pg.reminders"
                 :key="reminder.id"
                 class="flex items-center justify-between p-3 border border-[var(--ui-border)] rounded-lg"
                 :class="{ 'opacity-60': reminder.status === 'unsubscribed' }"
@@ -108,7 +108,7 @@
                   variant="ghost"
                   color="error"
                   :loading="doxaUnsubscribingId === reminder.id"
-                  @click="doxaUnsubscribeFromReminder(campaign.slug, campaign.id, reminder.id)"
+                  @click="doxaUnsubscribeFromReminder(pg.slug, pg.id, reminder.id)"
                 >
                   {{ $t('campaign.unsubscribe.unsubscribeButton') }}
                 </UButton>
@@ -117,24 +117,24 @@
                   size="xs"
                   variant="ghost"
                   :loading="doxaResubscribingId === reminder.id"
-                  @click="doxaResubscribeReminder(campaign.slug, reminder.id)"
+                  @click="doxaResubscribeReminder(pg.slug, reminder.id)"
                 >
                   {{ $t('campaign.profile.resubscribeButton') }}
                 </UButton>
               </div>
             </div>
 
-            <!-- Unsubscribe from entire campaign -->
-            <div v-if="doxaActiveRemindersCount(campaign) > 1" class="mt-4 pt-4 border-t border-[var(--ui-border)]">
+            <!-- Unsubscribe from entire people group -->
+            <div v-if="doxaActiveRemindersCount(pg) > 1" class="mt-4 pt-4 border-t border-[var(--ui-border)]">
               <UButton
                 variant="outline"
                 color="error"
                 size="sm"
-                :loading="doxaUnsubscribingFromCampaignId === campaign.id"
-                @click="doxaUnsubscribeFromEntireCampaign(campaign)"
+                :loading="doxaUnsubscribingFromPeopleGroupId === pg.id"
+                @click="doxaUnsubscribeFromEntirePeopleGroup(pg)"
                 class="w-full"
               >
-                {{ $t('campaign.unsubscribe.unsubscribeFromAll', { campaign: campaign.title }) }}
+                {{ $t('campaign.unsubscribe.unsubscribeFromAll', { campaign: pg.title }) }}
               </UButton>
             </div>
           </UCard>
@@ -142,7 +142,7 @@
       </div>
     </div>
 
-    <!-- Resubscribed successfully (campaign) -->
+    <!-- Resubscribed successfully -->
     <div v-else-if="resubscribed && data" class="flex items-center justify-center min-h-[50vh]">
       <UCard class="max-w-md w-full text-center">
         <UIcon name="i-lucide-check-circle" class="w-16 h-16 mx-auto mb-4 text-green-500" />
@@ -150,13 +150,13 @@
         <p class="text-[var(--ui-text-muted)] mb-6">
           {{ $t('campaign.unsubscribe.resubscribed.message') }}
         </p>
-        <UButton :to="localePath(`/${data?.campaign?.slug}`)">
+        <UButton :to="localePath(`/${data?.people_group?.slug}`)">
           {{ $t('campaign.unsubscribe.resubscribed.viewCampaign') }}
         </UButton>
       </UCard>
     </div>
 
-    <!-- Main unsubscribe content (campaign) -->
+    <!-- Main unsubscribe content -->
     <div v-else-if="data" class="max-w-2xl mx-auto">
       <!-- Success message -->
       <UCard class="mb-6 text-center">
@@ -165,8 +165,8 @@
           {{ data.already_unsubscribed ? $t('campaign.unsubscribe.alreadyDone.title') : $t('campaign.unsubscribe.success.title') }}
         </h1>
         <p class="text-[var(--ui-text-muted)]">
-          {{ data.unsubscribed_from_campaign
-            ? $t('campaign.unsubscribe.unsubscribedFromCampaign', { campaign: data.campaign.title })
+          {{ data.unsubscribed_from_people_group
+            ? $t('campaign.unsubscribe.unsubscribedFromCampaign', { campaign: data.people_group.title })
             : data.already_unsubscribed
               ? $t('campaign.unsubscribe.alreadyDone.message')
               : $t('campaign.unsubscribe.success.message')
@@ -174,8 +174,8 @@
         </p>
 
         <!-- Show unsubscribed reminder details -->
-        <div v-if="data.unsubscribed_reminder && !data.unsubscribed_from_campaign" class="mt-4 p-3 bg-[var(--ui-bg-elevated)] rounded-lg text-sm">
-          <p class="font-medium">{{ data.campaign.title }} - {{ formatReminderSchedule(data.unsubscribed_reminder) }}</p>
+        <div v-if="data.unsubscribed_reminder && !data.unsubscribed_from_people_group" class="mt-4 p-3 bg-[var(--ui-bg-elevated)] rounded-lg text-sm">
+          <p class="font-medium">{{ data.people_group.title }} - {{ formatReminderSchedule(data.unsubscribed_reminder) }}</p>
         </div>
 
         <!-- Resubscribe button -->
@@ -187,29 +187,29 @@
       </UCard>
 
       <!-- All Subscriptions -->
-      <div v-if="allCampaigns.length > 0">
+      <div v-if="allPeopleGroups.length > 0">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
           <UIcon name="i-lucide-bell" class="w-5 h-5" />
           {{ $t('campaign.unsubscribe.yourSubscriptions') }}
         </h2>
 
         <div class="space-y-4">
-          <UCard v-for="campaign in allCampaigns" :key="campaign.id">
+          <UCard v-for="pg in allPeopleGroups" :key="pg.id">
             <template #header>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <span class="font-medium">{{ campaign.title }}</span>
-                  <UBadge v-if="campaign.id === data.campaign.id" color="primary" size="xs">{{ $t('campaign.unsubscribe.current') }}</UBadge>
+                  <span class="font-medium">{{ pg.title }}</span>
+                  <UBadge v-if="pg.id === data.people_group.id" color="primary" size="xs">{{ $t('campaign.unsubscribe.current') }}</UBadge>
                 </div>
                 <UBadge color="neutral" size="xs">
-                  {{ activeRemindersCount(campaign) }} {{ $t('campaign.unsubscribe.active') }}
+                  {{ activeRemindersCount(pg) }} {{ $t('campaign.unsubscribe.active') }}
                 </UBadge>
               </div>
             </template>
 
             <div class="space-y-2">
               <div
-                v-for="reminder in campaign.reminders"
+                v-for="reminder in pg.reminders"
                 :key="reminder.id"
                 class="flex items-center justify-between p-3 border border-[var(--ui-border)] rounded-lg"
                 :class="{ 'opacity-60': reminder.status === 'unsubscribed' }"
@@ -226,7 +226,7 @@
                   variant="ghost"
                   color="error"
                   :loading="unsubscribingId === reminder.id"
-                  @click="unsubscribeFromReminder(campaign.slug, campaign.id, reminder.id)"
+                  @click="unsubscribeFromReminder(pg.slug, pg.id, reminder.id)"
                 >
                   {{ $t('campaign.unsubscribe.unsubscribeButton') }}
                 </UButton>
@@ -235,24 +235,24 @@
                   size="xs"
                   variant="ghost"
                   :loading="resubscribingId === reminder.id"
-                  @click="resubscribeReminder(campaign.slug, reminder.id)"
+                  @click="resubscribeReminder(pg.slug, reminder.id)"
                 >
                   {{ $t('campaign.profile.resubscribeButton') }}
                 </UButton>
               </div>
             </div>
 
-            <!-- Unsubscribe from entire campaign -->
-            <div v-if="activeRemindersCount(campaign) > 1" class="mt-4 pt-4 border-t border-[var(--ui-border)]">
+            <!-- Unsubscribe from entire people group -->
+            <div v-if="activeRemindersCount(pg) > 1" class="mt-4 pt-4 border-t border-[var(--ui-border)]">
               <UButton
                 variant="outline"
                 color="error"
                 size="sm"
-                :loading="unsubscribingFromCampaignId === campaign.id"
-                @click="unsubscribeFromEntireCampaign(campaign)"
+                :loading="unsubscribingFromPeopleGroupId === pg.id"
+                @click="unsubscribeFromEntirePeopleGroup(pg)"
                 class="w-full"
               >
-                {{ $t('campaign.unsubscribe.unsubscribeFromAll', { campaign: campaign.title }) }}
+                {{ $t('campaign.unsubscribe.unsubscribeFromAll', { campaign: pg.title }) }}
               </UButton>
             </div>
           </UCard>
@@ -289,16 +289,16 @@
               />
             </div>
 
-            <!-- Campaign-specific consents -->
+            <!-- People group-specific consents -->
             <div
-              v-for="campaign in allCampaigns"
-              :key="'consent-' + campaign.id"
+              v-for="pg in allPeopleGroups"
+              :key="'consent-' + pg.id"
               class="flex items-center justify-between py-2"
             >
-              <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: campaign.title }) }}</p>
+              <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: pg.title }) }}</p>
               <USwitch
-                :model-value="isCampaignConsented(campaign.id)"
-                @update:model-value="(val: boolean) => updateCampaignConsent(campaign.id, campaign.slug, val)"
+                :model-value="isPeopleGroupConsented(pg.id)"
+                @update:model-value="(val: boolean) => updatePeopleGroupConsent(pg.id, pg.slug, val)"
               />
             </div>
           </div>
@@ -322,7 +322,7 @@ interface Reminder {
   status: 'active' | 'unsubscribed'
 }
 
-interface Campaign {
+interface PeopleGroupWithReminders {
   id: number
   title: string
   slug: string
@@ -333,15 +333,15 @@ interface UnsubscribeData {
   success: boolean
   message: string
   already_unsubscribed: boolean
-  unsubscribed_from_campaign: boolean
-  campaign: {
+  unsubscribed_from_people_group: boolean
+  people_group: {
     id: number
     title: string
     slug: string
   }
   unsubscribed_reminder: Reminder | null
-  other_reminders_in_campaign: Reminder[]
-  other_people_groups: Campaign[]
+  other_reminders_in_people_group: Reminder[]
+  other_people_groups: PeopleGroupWithReminders[]
 }
 
 interface ProfileData {
@@ -352,7 +352,7 @@ interface ProfileData {
     email: string
     email_verified: boolean
   }
-  peopleGroups: Campaign[]
+  peopleGroups: PeopleGroupWithReminders[]
   consents: {
     doxa_general: boolean
     doxa_general_at: string | null
@@ -376,11 +376,11 @@ const isDoxaType = computed(() => unsubscribeType === 'doxa' || (!slug && !unsub
 const loading = ref(true)
 const loadError = ref<string | null>(null)
 
-// Campaign unsubscribe data
+// People group unsubscribe data
 const data = ref<UnsubscribeData | null>(null)
 const error = ref<any>(null)
 
-// Profile data (for both Doxa and campaign views)
+// Profile data (for both Doxa and people group views)
 const profileData = ref<ProfileData | null>(null)
 
 // Doxa consent form
@@ -389,13 +389,13 @@ const doxaConsentForm = ref({
   people_group_ids: [] as number[]
 })
 
-// Doxa local campaigns for reactive updates
-const doxaLocalCampaigns = ref<Campaign[]>([])
+// Doxa local people groups for reactive updates
+const doxaLocalPeopleGroups = ref<PeopleGroupWithReminders[]>([])
 
 // Doxa-specific loading states
 const doxaUnsubscribingId = ref<number | null>(null)
 const doxaResubscribingId = ref<number | null>(null)
-const doxaUnsubscribingFromCampaignId = ref<number | null>(null)
+const doxaUnsubscribingFromPeopleGroupId = ref<number | null>(null)
 
 // Load data based on type
 async function loadData() {
@@ -414,8 +414,8 @@ async function loadData() {
         people_group_ids: (response.consents?.peopleGroups || []).map(c => c.people_group_id)
       }
 
-      // Initialize local campaigns for reactive updates
-      doxaLocalCampaigns.value = response.peopleGroups.map(c => ({
+      // Initialize local people groups for reactive updates
+      doxaLocalPeopleGroups.value = response.peopleGroups.map(c => ({
         ...c,
         reminders: c.reminders.map(r => ({ ...r, status: r.status || 'active' as const }))
       }))
@@ -429,7 +429,7 @@ async function loadData() {
         doxaConsentForm.value.doxa_general = false
       }
     } else if (slug) {
-      // Campaign unsubscribe - use existing flow
+      // People group unsubscribe - use existing flow
       const [unsubData, profData] = await Promise.all([
         $fetch<UnsubscribeData>(`/api/people-groups/${slug}/unsubscribe`, {
           query: { id: profileId, sid: subscriptionId }
@@ -462,7 +462,7 @@ onMounted(() => {
   loadData()
 })
 
-// Consent form state for campaign view
+// Consent form state for people group view
 const consentForm = ref({
   doxa_general: false,
   people_group_ids: [] as number[]
@@ -472,45 +472,45 @@ const consentForm = ref({
 const resubscribing = ref(false)
 const resubscribed = ref(false)
 const unsubscribingId = ref<number | null>(null)
-const unsubscribingFromCampaignId = ref<number | null>(null)
+const unsubscribingFromPeopleGroupId = ref<number | null>(null)
 const resubscribingId = ref<number | null>(null)
 
-// Local reactive copy of campaigns for UI updates
-const localCampaigns = ref<Campaign[]>([])
+// Local reactive copy of people groups for UI updates
+const localPeopleGroups = ref<PeopleGroupWithReminders[]>([])
 
-// Initialize local campaigns when data loads
+// Initialize local people groups when data loads
 watch(data, (newData) => {
   if (newData) {
-    const campaigns: Campaign[] = []
+    const groups: PeopleGroupWithReminders[] = []
 
-    // Add current campaign if it has reminders
-    if (newData.other_reminders_in_campaign && newData.other_reminders_in_campaign.length > 0) {
-      campaigns.push({
-        id: newData.campaign.id,
-        title: newData.campaign.title,
-        slug: newData.campaign.slug,
-        reminders: newData.other_reminders_in_campaign.map(r => ({ ...r, status: r.status || 'active' as const }))
+    // Add current people group if it has reminders
+    if (newData.other_reminders_in_people_group && newData.other_reminders_in_people_group.length > 0) {
+      groups.push({
+        id: newData.people_group.id,
+        title: newData.people_group.title,
+        slug: newData.people_group.slug,
+        reminders: newData.other_reminders_in_people_group.map(r => ({ ...r, status: r.status || 'active' as const }))
       })
     }
 
-    // Add other campaigns
+    // Add other people groups
     if (newData.other_people_groups) {
-      campaigns.push(...newData.other_people_groups.map(c => ({
+      groups.push(...newData.other_people_groups.map(c => ({
         ...c,
         reminders: c.reminders.map(r => ({ ...r, status: r.status || 'active' as const }))
       })))
     }
 
-    localCampaigns.value = campaigns
+    localPeopleGroups.value = groups
   }
 }, { immediate: true })
 
-// Use local campaigns for display
-const allCampaigns = computed(() => localCampaigns.value)
+// Use local people groups for display
+const allPeopleGroups = computed(() => localPeopleGroups.value)
 
-// Count active reminders in a campaign
-function activeRemindersCount(campaign: Campaign): number {
-  return campaign.reminders.filter(r => r.status === 'active').length
+// Count active reminders in a people group
+function activeRemindersCount(pg: PeopleGroupWithReminders): number {
+  return pg.reminders.filter(r => r.status === 'active').length
 }
 
 // Format reminder schedule for display
@@ -527,17 +527,17 @@ function formatReminderSchedule(reminder: Reminder) {
 }
 
 // Unsubscribe from a specific reminder
-async function unsubscribeFromReminder(campaignSlug: string, campaignId: number, reminderId: number) {
+async function unsubscribeFromReminder(peopleGroupSlug: string, peopleGroupId: number, reminderId: number) {
   try {
     unsubscribingId.value = reminderId
-    await $fetch(`/api/people-groups/${campaignSlug}/unsubscribe`, {
+    await $fetch(`/api/people-groups/${peopleGroupSlug}/unsubscribe`, {
       query: { id: profileId, sid: reminderId }
     })
 
     // Mark reminder as unsubscribed
-    const campaign = localCampaigns.value.find(c => c.id === campaignId)
-    if (campaign) {
-      const reminder = campaign.reminders.find(r => r.id === reminderId)
+    const pg = localPeopleGroups.value.find(c => c.id === peopleGroupId)
+    if (pg) {
+      const reminder = pg.reminders.find(r => r.id === reminderId)
       if (reminder) {
         reminder.status = 'unsubscribed'
       }
@@ -551,42 +551,42 @@ async function unsubscribeFromReminder(campaignSlug: string, campaignId: number,
   }
 }
 
-// Unsubscribe from entire campaign
-async function unsubscribeFromEntireCampaign(campaign: Campaign) {
+// Unsubscribe from entire people group
+async function unsubscribeFromEntirePeopleGroup(pg: PeopleGroupWithReminders) {
   try {
-    unsubscribingFromCampaignId.value = campaign.id
-    await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe`, {
+    unsubscribingFromPeopleGroupId.value = pg.id
+    await $fetch(`/api/people-groups/${pg.slug}/unsubscribe`, {
       query: { id: profileId, all: 'true' }
     })
 
-    // Mark all reminders in campaign as unsubscribed
-    const localCampaign = localCampaigns.value.find(c => c.id === campaign.id)
-    if (localCampaign) {
-      localCampaign.reminders.forEach(r => {
+    // Mark all reminders as unsubscribed
+    const localPg = localPeopleGroups.value.find(c => c.id === pg.id)
+    if (localPg) {
+      localPg.reminders.forEach(r => {
         r.status = 'unsubscribed'
       })
     }
 
-    toast.add({ title: 'Unsubscribed', description: `Unsubscribed from all ${campaign.title} reminders`, color: 'success' })
+    toast.add({ title: 'Unsubscribed', description: `Unsubscribed from all ${pg.title} reminders`, color: 'success' })
   } catch (err: any) {
     toast.add({ title: 'Error', description: 'Failed to unsubscribe', color: 'error' })
   } finally {
-    unsubscribingFromCampaignId.value = null
+    unsubscribingFromPeopleGroupId.value = null
   }
 }
 
 // Resubscribe to a specific reminder
-async function resubscribeReminder(campaignSlug: string, reminderId: number) {
+async function resubscribeReminder(peopleGroupSlug: string, reminderId: number) {
   try {
     resubscribingId.value = reminderId
-    await $fetch(`/api/people-groups/${campaignSlug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${peopleGroupSlug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId, subscription_id: reminderId }
     })
 
     // Mark reminder as active
-    for (const campaign of localCampaigns.value) {
-      const reminder = campaign.reminders.find(r => r.id === reminderId)
+    for (const pg of localPeopleGroups.value) {
+      const reminder = pg.reminders.find(r => r.id === reminderId)
       if (reminder) {
         reminder.status = 'active'
         break
@@ -617,9 +617,9 @@ async function resubscribe() {
   }
 }
 
-// Check if a campaign is consented
-function isCampaignConsented(campaignId: number): boolean {
-  return consentForm.value.people_group_ids.includes(campaignId)
+// Check if a people group is consented
+function isPeopleGroupConsented(peopleGroupId: number): boolean {
+  return consentForm.value.people_group_ids.includes(peopleGroupId)
 }
 
 // Update Doxa general consent
@@ -646,24 +646,24 @@ async function updateDoxaConsent(granted: boolean) {
   }
 }
 
-// Update campaign-specific consent
-async function updateCampaignConsent(campaignId: number, campaignSlug: string, granted: boolean) {
+// Update people group-specific consent
+async function updatePeopleGroupConsent(peopleGroupId: number, peopleGroupSlug: string, granted: boolean) {
   try {
     await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        consent_people_group_id: campaignId,
+        consent_people_group_id: peopleGroupId,
         consent_people_group_updates: granted
       }
     })
 
     // Update local state
     if (granted) {
-      if (!consentForm.value.people_group_ids.includes(campaignId)) {
-        consentForm.value.people_group_ids.push(campaignId)
+      if (!consentForm.value.people_group_ids.includes(peopleGroupId)) {
+        consentForm.value.people_group_ids.push(peopleGroupId)
       }
     } else {
-      consentForm.value.people_group_ids = consentForm.value.people_group_ids.filter(id => id !== campaignId)
+      consentForm.value.people_group_ids = consentForm.value.people_group_ids.filter(id => id !== peopleGroupId)
     }
 
     toast.add({
@@ -679,22 +679,22 @@ async function updateCampaignConsent(campaignId: number, campaignSlug: string, g
 }
 
 // Doxa-specific helper functions
-function doxaActiveRemindersCount(campaign: Campaign): number {
-  return campaign.reminders.filter(r => r.status === 'active').length
+function doxaActiveRemindersCount(pg: PeopleGroupWithReminders): number {
+  return pg.reminders.filter(r => r.status === 'active').length
 }
 
 // Doxa unsubscribe from a specific reminder
-async function doxaUnsubscribeFromReminder(campaignSlug: string, campaignId: number, reminderId: number) {
+async function doxaUnsubscribeFromReminder(peopleGroupSlug: string, peopleGroupId: number, reminderId: number) {
   try {
     doxaUnsubscribingId.value = reminderId
-    await $fetch(`/api/people-groups/${campaignSlug}/unsubscribe`, {
+    await $fetch(`/api/people-groups/${peopleGroupSlug}/unsubscribe`, {
       query: { id: profileId, sid: reminderId }
     })
 
     // Mark reminder as unsubscribed
-    const campaign = doxaLocalCampaigns.value.find(c => c.id === campaignId)
-    if (campaign) {
-      const reminder = campaign.reminders.find(r => r.id === reminderId)
+    const pg = doxaLocalPeopleGroups.value.find(c => c.id === peopleGroupId)
+    if (pg) {
+      const reminder = pg.reminders.find(r => r.id === reminderId)
       if (reminder) {
         reminder.status = 'unsubscribed'
       }
@@ -709,17 +709,17 @@ async function doxaUnsubscribeFromReminder(campaignSlug: string, campaignId: num
 }
 
 // Doxa resubscribe to a specific reminder
-async function doxaResubscribeReminder(campaignSlug: string, reminderId: number) {
+async function doxaResubscribeReminder(peopleGroupSlug: string, reminderId: number) {
   try {
     doxaResubscribingId.value = reminderId
-    await $fetch(`/api/people-groups/${campaignSlug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${peopleGroupSlug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId, subscription_id: reminderId }
     })
 
     // Mark reminder as active
-    for (const campaign of doxaLocalCampaigns.value) {
-      const reminder = campaign.reminders.find(r => r.id === reminderId)
+    for (const pg of doxaLocalPeopleGroups.value) {
+      const reminder = pg.reminders.find(r => r.id === reminderId)
       if (reminder) {
         reminder.status = 'active'
         break
@@ -734,32 +734,32 @@ async function doxaResubscribeReminder(campaignSlug: string, reminderId: number)
   }
 }
 
-// Doxa unsubscribe from entire campaign
-async function doxaUnsubscribeFromEntireCampaign(campaign: Campaign) {
+// Doxa unsubscribe from entire people group
+async function doxaUnsubscribeFromEntirePeopleGroup(pg: PeopleGroupWithReminders) {
   try {
-    doxaUnsubscribingFromCampaignId.value = campaign.id
-    await $fetch(`/api/people-groups/${campaign.slug}/unsubscribe`, {
+    doxaUnsubscribingFromPeopleGroupId.value = pg.id
+    await $fetch(`/api/people-groups/${pg.slug}/unsubscribe`, {
       query: { id: profileId, all: 'true' }
     })
 
-    // Mark all reminders in campaign as unsubscribed
-    const localCampaign = doxaLocalCampaigns.value.find(c => c.id === campaign.id)
-    if (localCampaign) {
-      localCampaign.reminders.forEach(r => {
+    // Mark all reminders as unsubscribed
+    const localPg = doxaLocalPeopleGroups.value.find(c => c.id === pg.id)
+    if (localPg) {
+      localPg.reminders.forEach(r => {
         r.status = 'unsubscribed'
       })
     }
 
-    toast.add({ title: 'Unsubscribed', description: `Unsubscribed from all ${campaign.title} reminders`, color: 'success' })
+    toast.add({ title: 'Unsubscribed', description: `Unsubscribed from all ${pg.title} reminders`, color: 'success' })
   } catch (err: any) {
     toast.add({ title: 'Error', description: 'Failed to unsubscribe', color: 'error' })
   } finally {
-    doxaUnsubscribingFromCampaignId.value = null
+    doxaUnsubscribingFromPeopleGroupId.value = null
   }
 }
 
-function isDoxaCampaignConsented(campaignId: number): boolean {
-  return doxaConsentForm.value.people_group_ids.includes(campaignId)
+function isDoxaPeopleGroupConsented(peopleGroupId: number): boolean {
+  return doxaConsentForm.value.people_group_ids.includes(peopleGroupId)
 }
 
 async function updateDoxaConsentDirect(granted: boolean) {
@@ -783,23 +783,23 @@ async function updateDoxaConsentDirect(granted: boolean) {
   }
 }
 
-async function updateDoxaCampaignConsent(campaignId: number, granted: boolean) {
+async function updateDoxaPeopleGroupConsent(peopleGroupId: number, granted: boolean) {
   try {
     await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        consent_people_group_id: campaignId,
+        consent_people_group_id: peopleGroupId,
         consent_people_group_updates: granted
       }
     })
 
     // Update local state
     if (granted) {
-      if (!doxaConsentForm.value.people_group_ids.includes(campaignId)) {
-        doxaConsentForm.value.people_group_ids.push(campaignId)
+      if (!doxaConsentForm.value.people_group_ids.includes(peopleGroupId)) {
+        doxaConsentForm.value.people_group_ids.push(peopleGroupId)
       }
     } else {
-      doxaConsentForm.value.people_group_ids = doxaConsentForm.value.people_group_ids.filter(id => id !== campaignId)
+      doxaConsentForm.value.people_group_ids = doxaConsentForm.value.people_group_ids.filter(id => id !== peopleGroupId)
     }
 
     toast.add({

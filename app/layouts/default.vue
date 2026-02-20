@@ -7,9 +7,9 @@
           <!-- Logo / Back Navigation -->
           <NuxtLink v-if="isPrayerPage && slug" :to="localePath(`/${slug}`)" class="flex items-center gap-2">
             <UIcon name="i-lucide-arrow-left" class="w-5 h-5" />
-            <span class="text-xl font-bold tracking-wider">{{ campaignTitle }}</span>
+            <span class="text-xl font-bold tracking-wider">{{ peopleGroupTitle }}</span>
           </NuxtLink>
-          <NuxtLink v-else-if="!isCampaignPage" :to="logoLink" class="flex items-center gap-2">
+          <NuxtLink v-else-if="!isPeopleGroupPage" :to="logoLink" class="flex items-center gap-2">
             <span class="text-xl font-bold tracking-wider">{{ config.public.appName }}</span>
           </NuxtLink>
           <div v-else></div>
@@ -17,7 +17,7 @@
           <!-- Navigation -->
           <div class="flex items-center gap-4 navbar-actions">
             <a
-              v-if="isCampaignPage && !isPrayerPage"
+              v-if="isPeopleGroupPage && !isPrayerPage"
               href="https://doxa.life"
               target="_blank"
               class="inline-flex items-center gap-1"
@@ -49,10 +49,10 @@
     </header>
 
     <!-- Campaign Title -->
-    <div v-if="shouldShowCampaignHeader" class="bg-beige-50 dark:bg-elevated py-8">
+    <div v-if="shouldShowPeopleGroupHeader" class="bg-beige-50 dark:bg-elevated py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
         <h1 class="text-3xl md:text-4xl font-bold uppercase tracking-wide">
-          <span class="text-default">{{ $t('campaign.header.prayFor', { campaign: campaignTitle }) }}</span>
+          <span class="text-default">{{ $t('campaign.header.prayFor', { campaign: peopleGroupTitle }) }}</span>
         </h1>
       </div>
     </div>
@@ -85,7 +85,7 @@ const config = useRuntimeConfig()
 const route = useRoute()
 const localePath = useLocalePath()
 const currentYear = new Date().getFullYear()
-const { campaignTitle, showCampaignHeader } = useCampaign()
+const { peopleGroupTitle, showPeopleGroupHeader } = usePeopleGroup()
 const { isLoggedIn, checkAuth } = useAuth()
 
 const slug = computed(() => route.params.slug as string | undefined)
@@ -96,10 +96,10 @@ const logoLink = computed(() => {
 
 const isHomePage = computed(() => route.path === '/')
 
-// Show campaign header when on a campaign route and title is set
-const isCampaignPage = computed(() => !!slug.value)
+// Show people group header when on a people group route and title is set
+const isPeopleGroupPage = computed(() => !!slug.value)
 const isPrayerPage = computed(() => route.path.includes('/prayer'))
-const shouldShowCampaignHeader = computed(() => isCampaignPage.value && showCampaignHeader.value)
+const shouldShowPeopleGroupHeader = computed(() => isPeopleGroupPage.value && showPeopleGroupHeader.value)
 
 onMounted(() => {
   checkAuth()

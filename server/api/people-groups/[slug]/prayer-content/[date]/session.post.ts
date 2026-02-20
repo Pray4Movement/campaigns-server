@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   if (!slug) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Campaign slug is required'
+      statusMessage: 'People group slug is required'
     })
   }
 
@@ -35,12 +35,12 @@ export default defineEventHandler(async (event) => {
   }
 
   // Validate request body
-  const { sessionId, trackingId, duration, timestamp, campaignId } = body
+  const { sessionId, trackingId, duration, timestamp, peopleGroupId } = body
 
-  // Use campaignId if provided (faster), otherwise lookup by slug
+  // Use peopleGroupId if provided (faster), otherwise lookup by slug
   let peopleGroup
-  if (campaignId) {
-    peopleGroup = await peopleGroupService.getPeopleGroupById(campaignId)
+  if (peopleGroupId) {
+    peopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
   } else {
     peopleGroup = await peopleGroupService.getPeopleGroupBySlug(slug)
   }
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
   if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 

@@ -183,10 +183,10 @@ export class PrayerContentService {
   }
 
   /**
-   * For a given campaign day and row, find which library contains that day
+   * For a given people group day and row, find which library contains that day
    * and return the day number within that library
    */
-  private async findLibraryForDay(row: { rowIndex: number; libraries: Array<{ libraryId: number; order: number }> }, campaignDay: number): Promise<{ libraryId: number; dayInLibrary: number } | null> {
+  private async findLibraryForDay(row: { rowIndex: number; libraries: Array<{ libraryId: number; order: number }> }, peopleGroupDay: number): Promise<{ libraryId: number; dayInLibrary: number } | null> {
     let accumulatedDays = 0
 
     // Sort libraries by order
@@ -199,17 +199,17 @@ export class PrayerContentService {
       const libraryStartDay = accumulatedDays + 1
       const libraryEndDay = accumulatedDays + libraryTotalDays
 
-      if (campaignDay >= libraryStartDay && campaignDay <= libraryEndDay) {
+      if (peopleGroupDay >= libraryStartDay && peopleGroupDay <= libraryEndDay) {
         return {
           libraryId: libConfig.libraryId,
-          dayInLibrary: campaignDay - accumulatedDays
+          dayInLibrary: peopleGroupDay - accumulatedDays
         }
       }
 
       accumulatedDays += libraryTotalDays
     }
 
-    // Campaign day exceeds all libraries in this row
+    // People group day exceeds all libraries in this row
     return null
   }
 
@@ -250,8 +250,8 @@ export class PrayerContentService {
   }
 
   /**
-   * Generate people group content for a campaign
-   * Includes Day in the Life content if a campaign-specific library exists
+   * Generate people group content for a people group
+   * Includes Day in the Life content if a people-group-specific library exists
    */
   private async generatePeopleGroupContent(peopleGroupId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
     const peopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
@@ -324,11 +324,11 @@ export class PrayerContentService {
 
   /**
    * Generate daily people group content - rotates through all people groups
-   * Each campaign shows a different people group based on their linked group's random_order offset
+   * Each people group shows a different people group based on their linked group's random_order offset
    */
   private async generateDailyPeopleGroupContent(peopleGroupId: number, date: string, languageCode: string, dayNumber: number): Promise<PrayerContent | null> {
-    const campaignPeopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
-    if (!campaignPeopleGroup?.random_order) {
+    const linkedPeopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
+    if (!linkedPeopleGroup?.random_order) {
       return null
     }
 
@@ -338,9 +338,9 @@ export class PrayerContentService {
       return null
     }
 
-    // Calculate the daily random_order: offset by campaign's people group's random_order
+    // Calculate the daily random_order: offset by the people group's random_order
     // Formula: ((dayNumber + offset - 1) % total) + 1
-    const offset = campaignPeopleGroup.random_order
+    const offset = linkedPeopleGroup.random_order
     const dailyOrder = ((dayNumber + offset - 1) % totalPeopleGroups) + 1
 
     // Fetch the people group by random_order
@@ -424,15 +424,15 @@ export class PrayerContentService {
         return null
       }
 
-      // Calculate campaign day number from date
-      const campaignDay = await this.dateToDayNumber(date)
+      // Calculate people group day number from date
+      const peopleGroupDay = await this.dateToDayNumber(date)
 
       // Get total days in the library for cycling
       const dayRange = await libraryContentService.getDayRange(library.id)
       const totalDays = dayRange?.maxDay || 365
 
-      // Cycle the day number if campaign runs longer than content
-      const dayToFetch = ((campaignDay - 1) % totalDays) + 1
+      // Cycle the day number if content runs longer than library
+      const dayToFetch = ((peopleGroupDay - 1) % totalDays) + 1
 
       const content = await libraryContentService.getLibraryContentByDay(
         library.id,
@@ -471,7 +471,7 @@ export class PrayerContentService {
 
   /**
    * Get prayer content by ID
-   * Note: This is deprecated as content is now library-based, not campaign-specific
+   * Note: This is deprecated as content is now library-based, not people-group-specific
    */
   async getPrayerContentById(id: number): Promise<PrayerContent | null> {
     // This would need to search across all libraries, which is inefficient
@@ -481,13 +481,13 @@ export class PrayerContentService {
   }
 
   /**
-   * Get prayer content by campaign, date, and language
+   * Get prayer content by people group, date, and language
    * Uses row-based scheduling - returns first content found across all rows
    */
   async getPrayerContentByDate(peopleGroupId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent | null> {
     try {
-      // Convert date to campaign day number
-      const campaignDay = await this.dateToDayNumber(date)
+      // Convert date to people group day number
+      const dayNumber = await this.dateToDayNumber(date)
 
       // Get global rows
       const rows = await this.getGlobalRows()
@@ -498,7 +498,7 @@ export class PrayerContentService {
 
       // Search rows for content on this day
       for (const row of rows) {
-        const libraryInfo = await this.findLibraryForDay(row, campaignDay)
+        const libraryInfo = await this.findLibraryForDay(row, dayNumber)
 
         if (libraryInfo) {
           const content = await libraryContentService.getLibraryContentByDay(
@@ -526,8 +526,8 @@ export class PrayerContentService {
    */
   async getAllPrayerContentByDate(peopleGroupId: number, date: string, languageCode: string = 'en'): Promise<PrayerContent[]> {
     try {
-      // Convert date to campaign day number
-      const campaignDay = await this.dateToDayNumber(date)
+      // Convert date to people group day number
+      const dayNumber = await this.dateToDayNumber(date)
 
       // Get global rows
       const rows = await this.getGlobalRows()
@@ -538,9 +538,9 @@ export class PrayerContentService {
 
       const allContent: PrayerContent[] = []
 
-      // For each row, find which library contains this campaign day
+      // For each row, find which library contains this people group day
       for (const row of rows) {
-        const libraryInfo = await this.findLibraryForDay(row, campaignDay)
+        const libraryInfo = await this.findLibraryForDay(row, dayNumber)
 
         if (libraryInfo) {
           // Check the library type
@@ -554,7 +554,7 @@ export class PrayerContentService {
             }
           } else if (libraryType === 'daily_people_group') {
             // Generate daily rotating people group content
-            const dailyContent = await this.generateDailyPeopleGroupContent(peopleGroupId, date, languageCode, campaignDay)
+            const dailyContent = await this.generateDailyPeopleGroupContent(peopleGroupId, date, languageCode, dayNumber)
             if (dailyContent) {
               allContent.push(dailyContent)
             }
@@ -600,22 +600,22 @@ export class PrayerContentService {
   }
 
   /**
-   * Get all languages available for a specific campaign and date
+   * Get all languages available for a specific people group and date
    * Uses row-based scheduling
    */
   async getAvailableLanguages(peopleGroupId: number, date: string): Promise<string[]> {
     try {
-      // Convert date to campaign day number
-      const campaignDay = await this.dateToDayNumber(date)
+      // Convert date to people group day number
+      const dayNumber = await this.dateToDayNumber(date)
 
       // Get global rows
       const rows = await this.getGlobalRows()
 
       const languageSet = new Set<string>()
 
-      // Collect languages from all rows for this campaign day
+      // Collect languages from all rows for this people group day
       for (const row of rows) {
-        const libraryInfo = await this.findLibraryForDay(row, campaignDay)
+        const libraryInfo = await this.findLibraryForDay(row, dayNumber)
 
         if (libraryInfo) {
           const languages = await libraryContentService.getAvailableLanguages(
@@ -634,7 +634,7 @@ export class PrayerContentService {
   }
 
   /**
-   * Get all prayer content for a campaign
+   * Get all prayer content for a people group
    * This now fetches from all libraries across all rows
    */
   async getCampaignPrayerContent(peopleGroupId: number, options?: {
@@ -782,7 +782,7 @@ export class PrayerContentService {
   }
 
   /**
-   * Get content count for campaign
+   * Get content count for people group
    */
   async getContentCount(peopleGroupId: number): Promise<number> {
     try {
@@ -808,34 +808,34 @@ export class PrayerContentService {
   // ==========================================
 
   /**
-   * @deprecated Campaign-specific content creation is no longer supported.
+   * @deprecated People-group-specific content creation is no longer supported.
    * Content should be created in libraries via the library management system.
    */
   async createPrayerContent(data: CreatePrayerContentData): Promise<PrayerContent> {
     throw new Error(
-      'Campaign-specific content creation is deprecated. ' +
+      'People-group-specific content creation is deprecated. ' +
       'Please create content in libraries via /admin/libraries instead.'
     )
   }
 
   /**
-   * @deprecated Campaign-specific content updates are no longer supported.
+   * @deprecated People-group-specific content updates are no longer supported.
    * Content should be edited in libraries via the library management system.
    */
   async updatePrayerContent(id: number, data: UpdatePrayerContentData): Promise<PrayerContent | null> {
     throw new Error(
-      'Campaign-specific content updates are deprecated. ' +
+      'People-group-specific content updates are deprecated. ' +
       'Please edit content in libraries via /admin/libraries instead.'
     )
   }
 
   /**
-   * @deprecated Campaign-specific content deletion is no longer supported.
+   * @deprecated People-group-specific content deletion is no longer supported.
    * Content should be managed in libraries via the library management system.
    */
   async deletePrayerContent(id: number): Promise<boolean> {
     throw new Error(
-      'Campaign-specific content deletion is deprecated. ' +
+      'People-group-specific content deletion is deprecated. ' +
       'Please manage content in libraries via /admin/libraries instead.'
     )
   }

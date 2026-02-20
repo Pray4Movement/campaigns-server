@@ -1,6 +1,6 @@
 /**
  * GET /api/people-groups/:slug
- * Get campaign (people group) details
+ * Get people group details
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   if (!slug) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Campaign slug is required'
+      statusMessage: 'People group slug is required'
     })
   }
 
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   if (!pg) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -98,7 +98,7 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600')
 
   return {
-    campaign: {
+    people_group: {
       id: pg.id,
       slug: pg.slug,
       title: pg.name,

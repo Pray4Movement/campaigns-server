@@ -4,9 +4,9 @@ import {
   getTestDatabase,
   closeTestDatabase,
   cleanupTestData,
-  createTestCampaign,
-  assignUserToCampaign,
-  getUserCampaignAccess
+  createTestPeopleGroup,
+  assignUserToPeopleGroup,
+  getUserPeopleGroupAccess
 } from '../../../helpers/db'
 import {
   createAdminUser,
@@ -14,14 +14,14 @@ import {
   createNoRoleUser
 } from '../../../helpers/auth'
 
-describe('User Campaign Access API', async () => {
+describe('User People Group Access API', async () => {
   const sql = getTestDatabase()
 
   let adminAuth: { headers: { cookie: string } }
   let editorAuth: { headers: { cookie: string } }
   let targetUserId: string
-  let campaign1: { id: number; slug: string }
-  let campaign2: { id: number; slug: string }
+  let peopleGroup1: { id: number; slug: string }
+  let peopleGroup2: { id: number; slug: string }
 
   beforeAll(async () => {
     await cleanupTestData(sql)
@@ -32,13 +32,13 @@ describe('User Campaign Access API', async () => {
     const editor = await createEditorUser(sql)
     editorAuth = editor.auth
 
-    // Create a target user whose campaigns we'll manage
+    // Create a target user whose people group access we'll manage
     const target = await createNoRoleUser(sql)
     targetUserId = target.user.id
 
-    // Create test campaigns
-    campaign1 = await createTestCampaign(sql, { title: 'Test Campaign 1' })
-    campaign2 = await createTestCampaign(sql, { title: 'Test Campaign 2' })
+    // Create test people groups
+    peopleGroup1 = await createTestPeopleGroup(sql, { title: 'Test People Group 1' })
+    peopleGroup2 = await createTestPeopleGroup(sql, { title: 'Test People Group 2' })
   })
 
   afterAll(async () => {
@@ -65,9 +65,9 @@ describe('User Campaign Access API', async () => {
     })
 
     describe('Response structure', () => {
-      it('returns all campaigns with hasAccess flag', async () => {
-        // First assign user to campaign1
-        await assignUserToCampaign(sql, targetUserId, campaign1.id)
+      it('returns all people groups with hasAccess flag', async () => {
+        // First assign user to peopleGroup1
+        await assignUserToPeopleGroup(sql, targetUserId, peopleGroup1.id)
 
         const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, adminAuth)
 
@@ -75,9 +75,9 @@ describe('User Campaign Access API', async () => {
         expect(response.peopleGroups).toBeDefined()
         expect(Array.isArray(response.peopleGroups)).toBe(true)
 
-        // Find our test campaigns
-        const c1 = response.peopleGroups.find((c: any) => c.id === campaign1.id)
-        const c2 = response.peopleGroups.find((c: any) => c.id === campaign2.id)
+        // Find our test people groups
+        const c1 = response.peopleGroups.find((c: any) => c.id === peopleGroup1.id)
+        const c2 = response.peopleGroups.find((c: any) => c.id === peopleGroup2.id)
 
         expect(c1?.hasAccess).toBe(true)
         expect(c2?.hasAccess).toBe(false)
@@ -97,7 +97,7 @@ describe('User Campaign Access API', async () => {
       it('returns 401 for unauthenticated requests', async () => {
         const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { people_group_ids: [campaign1.id] }
+          body: { people_group_ids: [peopleGroup1.id] }
         }).catch((e) => e)
 
         expect(error.statusCode).toBe(401)
@@ -106,7 +106,7 @@ describe('User Campaign Access API', async () => {
       it('returns 403 for non-admin users', async () => {
         const error = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { people_group_ids: [campaign1.id] },
+          body: { people_group_ids: [peopleGroup1.id] },
           ...editorAuth
         }).catch((e) => e)
 
@@ -116,7 +116,7 @@ describe('User Campaign Access API', async () => {
       it('succeeds for admin users', async () => {
         const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { people_group_ids: [campaign1.id] },
+          body: { people_group_ids: [peopleGroup1.id] },
           ...adminAuth
         })
 
@@ -124,46 +124,46 @@ describe('User Campaign Access API', async () => {
       })
     })
 
-    describe('Campaign assignment', () => {
-      it('assigns user to multiple campaigns', async () => {
+    describe('People group assignment', () => {
+      it('assigns user to multiple people groups', async () => {
         const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { people_group_ids: [campaign1.id, campaign2.id] },
+          body: { people_group_ids: [peopleGroup1.id, peopleGroup2.id] },
           ...adminAuth
         })
 
         expect(response.success).toBe(true)
 
-        const access = await getUserCampaignAccess(sql, targetUserId)
-        expect(access).toContain(campaign1.id)
-        expect(access).toContain(campaign2.id)
+        const access = await getUserPeopleGroupAccess(sql, targetUserId)
+        expect(access).toContain(peopleGroup1.id)
+        expect(access).toContain(peopleGroup2.id)
       })
 
-      it('removes existing campaign access and replaces with new list', async () => {
-        // First assign to both campaigns
+      it('removes existing people group access and replaces with new list', async () => {
+        // First assign to both people groups
         await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { people_group_ids: [campaign1.id, campaign2.id] },
+          body: { people_group_ids: [peopleGroup1.id, peopleGroup2.id] },
           ...adminAuth
         })
 
-        // Now assign to only campaign1
+        // Now assign to only peopleGroup1
         const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
           method: 'PUT',
-          body: { people_group_ids: [campaign1.id] },
+          body: { people_group_ids: [peopleGroup1.id] },
           ...adminAuth
         })
 
         expect(response.success).toBe(true)
 
-        const access = await getUserCampaignAccess(sql, targetUserId)
-        expect(access).toContain(campaign1.id)
-        expect(access).not.toContain(campaign2.id)
+        const access = await getUserPeopleGroupAccess(sql, targetUserId)
+        expect(access).toContain(peopleGroup1.id)
+        expect(access).not.toContain(peopleGroup2.id)
       })
 
-      it('can remove all campaign access', async () => {
-        // First assign to a campaign
-        await assignUserToCampaign(sql, targetUserId, campaign1.id)
+      it('can remove all people group access', async () => {
+        // First assign to a people group
+        await assignUserToPeopleGroup(sql, targetUserId, peopleGroup1.id)
 
         // Remove all access
         const response = await $fetch(`/api/admin/users/${targetUserId}/people-groups`, {
@@ -174,7 +174,7 @@ describe('User Campaign Access API', async () => {
 
         expect(response.success).toBe(true)
 
-        const access = await getUserCampaignAccess(sql, targetUserId)
+        const access = await getUserPeopleGroupAccess(sql, targetUserId)
         expect(access).toHaveLength(0)
       })
     })

@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify user has access to this campaign
+  // Verify user has access to this people group
   const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
   if (!hasAccess) {
     throw createError({

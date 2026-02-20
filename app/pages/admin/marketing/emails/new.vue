@@ -67,16 +67,16 @@
                 <USelectMenu
                   v-show="form.audience_type === 'campaign'"
                   v-model="form.people_group_id"
-                  :items="campaignOptions"
-                  placeholder="Select a campaign"
-                  class="campaign-select"
+                  :items="peopleGroupOptions"
+                  placeholder="Select a people group"
+                  class="people-group-select"
                   searchable
                   virtualize
                   value-key="value"
-                  @update:model-value="loadCampaignCount"
+                  @update:model-value="loadPeopleGroupCount"
                 />
-                <p class="option-count" v-if="form.audience_type === 'campaign' && campaignCount !== null">
-                  {{ campaignCount }} recipients
+                <p class="option-count" v-if="form.audience_type === 'campaign' && peopleGroupCount !== null">
+                  {{ peopleGroupCount }} recipients
                 </p>
               </div>
             </div>
@@ -136,9 +136,9 @@ const form = ref({
   content: { type: 'doc', content: [{ type: 'paragraph' }] }
 })
 
-const campaigns = ref<{ id: number; title: string }[]>([])
+const peopleGroups = ref<{ id: number; title: string }[]>([])
 const doxaCount = ref<number | null>(null)
-const campaignCount = ref<number | null>(null)
+const peopleGroupCount = ref<number | null>(null)
 const saving = ref(false)
 const sending = ref(false)
 const showPreview = ref(false)
@@ -147,8 +147,8 @@ const isSaved = ref(false)
 const showUnsavedChangesModal = ref(false)
 const pendingNavigation = ref<any>(null)
 
-const campaignOptions = computed(() => {
-  return campaigns.value.map(c => ({
+const peopleGroupOptions = computed(() => {
+  return peopleGroups.value.map(c => ({
     label: c.title,
     value: c.id
   }))
@@ -166,7 +166,7 @@ const canSave = computed(() => {
 const canSend = computed(() => {
   return canSave.value && (
     (form.value.audience_type === 'doxa' && doxaCount.value && doxaCount.value > 0) ||
-    (form.value.audience_type === 'campaign' && campaignCount.value && campaignCount.value > 0)
+    (form.value.audience_type === 'campaign' && peopleGroupCount.value && peopleGroupCount.value > 0)
   )
 })
 
@@ -178,16 +178,16 @@ function selectAudience(type: 'doxa' | 'campaign') {
   form.value.audience_type = type
   if (type === 'doxa') {
     form.value.people_group_id = undefined
-    campaignCount.value = null
+    peopleGroupCount.value = null
   }
 }
 
-async function loadCampaigns() {
+async function loadPeopleGroups() {
   try {
     const response = await $fetch<{ peopleGroups: { id: number; name: string }[] }>('/api/admin/people-groups')
-    campaigns.value = response.peopleGroups.map(pg => ({ id: pg.id, title: pg.name }))
+    peopleGroups.value = response.peopleGroups.map(pg => ({ id: pg.id, title: pg.name }))
   } catch (error) {
-    console.error('Failed to load campaigns:', error)
+    console.error('Failed to load people groups:', error)
   }
 }
 
@@ -201,16 +201,16 @@ async function loadDoxaCount() {
   }
 }
 
-async function loadCampaignCount() {
+async function loadPeopleGroupCount() {
   if (!form.value.people_group_id) {
-    campaignCount.value = null
+    peopleGroupCount.value = null
     return
   }
   try {
     const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/people-group/${form.value.people_group_id}`)
-    campaignCount.value = response.count
+    peopleGroupCount.value = response.count
   } catch (error) {
-    console.error('Failed to load campaign count:', error)
+    console.error('Failed to load people group count:', error)
   }
 }
 
@@ -347,7 +347,7 @@ onBeforeRouteLeave((_to, _from, next) => {
 })
 
 onMounted(() => {
-  loadCampaigns()
+  loadPeopleGroups()
   if (isAdmin.value) {
     loadDoxaCount()
   } else {
@@ -460,7 +460,7 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.campaign-select {
+.people-group-select {
   margin-top: 0.75rem;
 }
 

@@ -9,11 +9,11 @@
             <span class="text-muted">Life</span>
           </h1>
           <p class="text-lg text-muted mb-8">
-            Find a campaign to join in prayer
+            Find a people group to pray for
           </p>
           <UInput
             v-model="searchQuery"
-            placeholder="Search campaigns..."
+            placeholder="Search people groups..."
             icon="i-lucide-search"
             size="lg"
             class="max-w-md mx-auto"
@@ -22,7 +22,7 @@
       </div>
     </section>
 
-    <!-- Campaign Grid -->
+    <!-- People Group Grid -->
     <section class="py-8 flex-1">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <!-- Loading State -->
@@ -32,34 +32,34 @@
 
         <!-- Error State -->
         <div v-else-if="error" class="text-center py-12">
-          <p class="text-muted">Failed to load campaigns. Please try again.</p>
+          <p class="text-muted">Failed to load people groups. Please try again.</p>
         </div>
 
         <!-- No Results -->
-        <div v-else-if="filteredCampaigns.length === 0" class="text-center py-12">
-          <p class="text-muted">No campaigns found.</p>
+        <div v-else-if="filteredPeopleGroups.length === 0" class="text-center py-12">
+          <p class="text-muted">No people groups found.</p>
         </div>
 
         <!-- Results count -->
-        <p v-if="filteredCampaigns.length > 0" class="text-sm text-muted mb-4">
-          Showing {{ paginatedCampaigns.length }} of {{ filteredCampaigns.length }} campaigns
+        <p v-if="filteredPeopleGroups.length > 0" class="text-sm text-muted mb-4">
+          Showing {{ paginatedPeopleGroups.length }} of {{ filteredPeopleGroups.length }} people groups
         </p>
 
-        <!-- Campaign Cards -->
-        <div v-if="filteredCampaigns.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- People Group Cards -->
+        <div v-if="filteredPeopleGroups.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <NuxtLink
-            v-for="campaign in paginatedCampaigns"
-            :key="campaign.id"
-            :to="`/${campaign.slug}`"
+            v-for="pg in paginatedPeopleGroups"
+            :key="pg.id"
+            :to="`/${pg.slug}`"
             class="block group"
           >
             <UCard class="h-full transition-shadow hover:shadow-lg">
               <template #header>
                 <div class="aspect-square bg-beige-100 dark:bg-gray-800 rounded-t-lg overflow-hidden -mx-4 -mt-4">
                   <img
-                    v-if="campaign.image_url"
-                    :src="campaign.image_url"
-                    :alt="campaign.title"
+                    v-if="pg.image_url"
+                    :src="pg.image_url"
+                    :alt="pg.title"
                     class="w-full h-full object-contain"
                   />
                   <div v-else class="w-full h-full flex items-center justify-center">
@@ -68,10 +68,10 @@
                 </div>
               </template>
               <h3 class="text-lg font-semibold text-default mb-2">
-                {{ campaign.title }}
+                {{ pg.title }}
               </h3>
               <p class="text-sm text-muted line-clamp-3">
-                {{ campaign.description }}
+                {{ pg.description }}
               </p>
             </UCard>
           </NuxtLink>
@@ -81,7 +81,7 @@
         <div v-if="totalPages > 1" class="flex justify-center mt-8">
           <UPagination
             v-model:page="currentPage"
-            :total="filteredCampaigns.length"
+            :total="filteredPeopleGroups.length"
             :items-per-page="pageSize"
           />
         </div>
@@ -97,23 +97,23 @@ const pageSize = 9
 
 const { data, pending, error } = await useFetch('/api/people-groups')
 
-const filteredCampaigns = computed(() => {
+const filteredPeopleGroups = computed(() => {
   if (!data.value?.peopleGroups) return []
 
   const query = searchQuery.value.toLowerCase().trim()
   if (!query) return data.value.peopleGroups
 
-  return data.value.peopleGroups.filter((campaign: any) =>
-    campaign.title.toLowerCase().includes(query) ||
-    campaign.description?.toLowerCase().includes(query)
+  return data.value.peopleGroups.filter((pg: any) =>
+    pg.title.toLowerCase().includes(query) ||
+    pg.description?.toLowerCase().includes(query)
   )
 })
 
-const totalPages = computed(() => Math.ceil(filteredCampaigns.value.length / pageSize))
+const totalPages = computed(() => Math.ceil(filteredPeopleGroups.value.length / pageSize))
 
-const paginatedCampaigns = computed(() => {
+const paginatedPeopleGroups = computed(() => {
   const start = (currentPage.value - 1) * pageSize
-  return filteredCampaigns.value.slice(start, start + pageSize)
+  return filteredPeopleGroups.value.slice(start, start + pageSize)
 })
 
 // Reset to page 1 when search changes

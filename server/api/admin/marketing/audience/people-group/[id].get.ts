@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (!id || isNaN(id)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Invalid campaign ID'
+      statusMessage: 'Invalid people group ID'
     })
   }
 

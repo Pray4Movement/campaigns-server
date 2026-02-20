@@ -5,8 +5,8 @@ import {
   closeTestDatabase,
   cleanupTestData,
   createTestLibrary,
-  createTestCampaign,
-  assignUserToCampaign,
+  createTestPeopleGroup,
+  assignUserToPeopleGroup,
   getTestLibrary
 } from '../../../helpers/db'
 import {
@@ -61,7 +61,7 @@ describe('Library CRUD API', async () => {
       })
     })
 
-    describe('Campaign-linked library access', () => {
+    describe('People group-linked library access', () => {
       it('any authenticated user can read global libraries', async () => {
         const globalLib = await createTestLibrary(sql, { name: `Test Global Library ${Date.now()}` })
 
@@ -70,16 +70,16 @@ describe('Library CRUD API', async () => {
         expect(response.library.id).toBe(globalLib.id)
       })
 
-      // Note: This test documents the potential bug - campaign-linked libraries
-      // don't check campaign access. If this test fails, the bug has been fixed.
-      it('campaign-linked library should check campaign access (potential bug)', async () => {
-        // Create a campaign the editor does NOT have access to
-        const campaign = await createTestCampaign(sql, { title: 'Unassigned Campaign' })
+      // Note: This test documents the potential bug - people group-linked libraries
+      // don't check people group access. If this test fails, the bug has been fixed.
+      it('people group-linked library should check people group access (potential bug)', async () => {
+        // Create a people group the editor does NOT have access to
+        const peopleGroup = await createTestPeopleGroup(sql, { title: 'Unassigned People Group' })
 
-        // Create a library linked to that campaign
+        // Create a library linked to that people group
         const linkedLib = await createTestLibrary(sql, {
           name: `Test Linked Library ${Date.now()}`,
-          campaign_id: campaign.id,
+          campaign_id: peopleGroup.id,
           library_key: 'day_in_life'
         })
 
@@ -96,7 +96,7 @@ describe('Library CRUD API', async () => {
         } else {
           // Bug exists - library is returned without access check
           expect(response.library).toBeDefined()
-          console.warn('KNOWN BUG: Campaign-linked libraries do not check campaign access')
+          console.warn('KNOWN BUG: People group-linked libraries do not check people group access')
         }
       })
     })

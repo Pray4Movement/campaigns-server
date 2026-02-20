@@ -1,6 +1,6 @@
 /**
  * POST /api/people-groups/:slug/resubscribe
- * Re-subscribe to campaign reminders after unsubscribing
+ * Re-subscribe to people group reminders after unsubscribing
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   if (!slug) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Campaign slug is required'
+      statusMessage: 'People group slug is required'
     })
   }
 
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
       })
     }
   } else {
-    // Legacy behavior: find first subscription for this campaign
+    // Legacy behavior: find first subscription for this people group
     subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
       subscriber.id,
       peopleGroup.id
@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
     if (!subscription) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'You are not subscribed to this campaign'
+        statusMessage: 'You are not subscribed to this people group'
       })
     }
   }

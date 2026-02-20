@@ -115,7 +115,7 @@ export async function createAdminUser(
 }
 
 /**
- * Create a campaign editor user and return auth headers
+ * Create an editor user and return auth headers
  */
 export async function createEditorUser(
   sql: ReturnType<typeof postgres>,

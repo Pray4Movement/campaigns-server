@@ -8,34 +8,34 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event)
   const search = query.search as string | undefined
-  const campaignId = query.people_group_id ? parseInt(query.people_group_id as string) : undefined
+  const peopleGroupId = query.people_group_id ? parseInt(query.people_group_id as string) : undefined
 
   try {
-    // Determine accessible campaigns for non-admin users
+    // Determine accessible people groups for non-admin users
     const isAdmin = await roleService.isAdmin(user.userId)
-    let accessibleCampaignIds: number[] | undefined
+    let accessiblePeopleGroupIds: number[] | undefined
 
     if (!isAdmin) {
-      accessibleCampaignIds = await campaignAccessService.getUserCampaigns(user.userId)
+      accessiblePeopleGroupIds = await campaignAccessService.getUserCampaigns(user.userId)
 
-      // If user has no campaign access, return empty list
-      if (accessibleCampaignIds.length === 0) {
+      // If user has no people group access, return empty list
+      if (accessiblePeopleGroupIds.length === 0) {
         return { subscribers: [] }
       }
 
-      // If filtering by campaign, verify user has access
-      if (campaignId && !accessibleCampaignIds.includes(campaignId)) {
+      // If filtering by people group, verify user has access
+      if (peopleGroupId && !accessiblePeopleGroupIds.includes(peopleGroupId)) {
         throw createError({
           statusCode: 403,
-          statusMessage: 'You do not have access to this campaign'
+          statusMessage: 'You do not have access to this people group'
         })
       }
     }
 
     const subscribers = await subscriberService.getAllSubscribersWithSubscriptions({
       search,
-      campaignId,
-      accessibleCampaignIds
+      peopleGroupId: peopleGroupId,
+      accessiblePeopleGroupIds: accessiblePeopleGroupIds
     })
 
     return {

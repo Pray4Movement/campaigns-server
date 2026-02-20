@@ -22,7 +22,7 @@
           <UIcon name="i-lucide-check-circle" class="status-icon" />
           <h1>{{ $t('campaign.verify.success.title') }}</h1>
         </div>
-        <p class="message">{{ $t('campaign.verify.success.message', { campaign: campaignTitle }) }}</p>
+        <p class="message">{{ $t('campaign.verify.success.message', { campaign: peopleGroupTitle }) }}</p>
         <NuxtLink :to="localePath(`/${slug}/prayer`)" class="btn-grey">
           {{ $t('campaign.verify.startPraying') }}
         </NuxtLink>
@@ -48,7 +48,7 @@ const { data, pending, error } = await useFetch(`/api/people-groups/${slug}/veri
   query: { token }
 })
 
-const campaignTitle = computed(() => data.value?.people_group_name || '')
+const peopleGroupTitle = computed(() => data.value?.people_group_name || '')
 const errorMessage = computed(() => {
   return t('campaign.verify.error.generic')
 })

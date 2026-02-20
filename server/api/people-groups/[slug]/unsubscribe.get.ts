@@ -1,6 +1,6 @@
 /**
  * GET /api/people-groups/:slug/unsubscribe
- * Get subscriber info and unsubscribe from campaign reminders
+ * Get subscriber info and unsubscribe from people group reminders
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
@@ -14,7 +14,7 @@ interface ReminderInfo {
   timezone: string
 }
 
-interface CampaignInfo {
+interface PeopleGroupInfo {
   id: number
   title: string
   slug: string
@@ -26,13 +26,13 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const profileId = query.id as string
   const subscriptionId = query.sid ? Number(query.sid) : null
-  // unsubscribe_all flag to unsubscribe from entire campaign
+  // unsubscribe_all flag to unsubscribe from entire people group
   const unsubscribeAll = query.all === 'true'
 
   if (!slug) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Campaign slug is required'
+      statusMessage: 'People group slug is required'
     })
   }
 
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
   if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -63,21 +63,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get ALL subscriptions for this subscriber (across all campaigns)
+  // Get ALL subscriptions for this subscriber (across all people groups)
   const allSubscriberSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
-  // Get subscriptions for this specific campaign
-  const campaignSubscriptions = allSubscriberSubscriptions.filter(s => s.people_group_id === peopleGroup.id)
+  // Get subscriptions for this specific people group
+  const peopleGroupSubscriptions = allSubscriberSubscriptions.filter(s => s.people_group_id === peopleGroup.id)
 
-  if (campaignSubscriptions.length === 0) {
+  if (peopleGroupSubscriptions.length === 0) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'You are not subscribed to this campaign'
+      statusMessage: 'You are not subscribed to this people group'
     })
   }
 
   // Helper to format reminder
-  const formatReminder = (s: typeof campaignSubscriptions[0]): ReminderInfo => ({
+  const formatReminder = (s: typeof peopleGroupSubscriptions[0]): ReminderInfo => ({
     id: s.id,
     frequency: s.frequency,
     days_of_week: s.days_of_week ? JSON.parse(s.days_of_week) : [],
@@ -85,102 +85,102 @@ export default defineEventHandler(async (event) => {
     timezone: s.timezone
   })
 
-  // Helper to group subscriptions by campaign
-  const groupByCampaign = (subs: typeof allSubscriberSubscriptions): CampaignInfo[] => {
-    const campaignMap = new Map<number, CampaignInfo>()
+  // Helper to group subscriptions by people group
+  const groupByPeopleGroup = (subs: typeof allSubscriberSubscriptions): PeopleGroupInfo[] => {
+    const peopleGroupMap = new Map<number, PeopleGroupInfo>()
 
     for (const sub of subs) {
       if (sub.status !== 'active') continue
 
-      if (!campaignMap.has(sub.people_group_id)) {
-        campaignMap.set(sub.people_group_id, {
+      if (!peopleGroupMap.has(sub.people_group_id)) {
+        peopleGroupMap.set(sub.people_group_id, {
           id: sub.people_group_id,
           title: sub.people_group_name,
           slug: sub.people_group_slug,
           reminders: []
         })
       }
-      campaignMap.get(sub.people_group_id)!.reminders.push(formatReminder(sub))
+      peopleGroupMap.get(sub.people_group_id)!.reminders.push(formatReminder(sub))
     }
 
-    return Array.from(campaignMap.values())
+    return Array.from(peopleGroupMap.values())
   }
 
-  // If unsubscribe_all flag is set, unsubscribe from entire campaign
+  // If unsubscribe_all flag is set, unsubscribe from entire people group
   if (unsubscribeAll) {
     const unsubscribedCount = await campaignSubscriptionService.unsubscribeAllForCampaign(
       subscriber.id,
       peopleGroup.id
     )
 
-    // Get other campaigns (excluding current one)
-    const otherCampaigns = groupByCampaign(
+    // Get other people groups (excluding current one)
+    const otherPeopleGroups = groupByPeopleGroup(
       allSubscriberSubscriptions.filter(s => s.people_group_id !== peopleGroup.id)
     )
 
     return {
-      message: `Unsubscribed from all ${unsubscribedCount} reminder(s) for this campaign`,
+      message: `Unsubscribed from all ${unsubscribedCount} reminder(s) for this people group`,
       already_unsubscribed: false,
-      unsubscribed_from_campaign: true,
-      campaign: {
+      unsubscribed_from_people_group: true,
+      people_group: {
         id: peopleGroup.id,
         title: peopleGroup.name,
         slug: slug
       },
       unsubscribed_reminder: null,
-      other_reminders_in_campaign: [],
-      other_people_groups: otherCampaigns
+      other_reminders_in_people_group: [],
+      other_people_groups: otherPeopleGroups
     }
   }
 
   // Find the specific subscription to unsubscribe
   let subscriptionToUnsubscribe = subscriptionId
-    ? campaignSubscriptions.find(s => s.id === subscriptionId)
-    : campaignSubscriptions.find(s => s.status === 'active')
+    ? peopleGroupSubscriptions.find(s => s.id === subscriptionId)
+    : peopleGroupSubscriptions.find(s => s.status === 'active')
 
   // Get other people groups (excluding current one)
-  const otherCampaigns = groupByCampaign(
+  const otherPeopleGroups = groupByPeopleGroup(
     allSubscriberSubscriptions.filter(s => s.people_group_id !== peopleGroup.id)
   )
 
   if (!subscriptionToUnsubscribe) {
-    const otherRemindersInCampaign = campaignSubscriptions
+    const otherRemindersInPeopleGroup = peopleGroupSubscriptions
       .filter(s => s.status === 'active')
       .map(formatReminder)
 
     return {
       message: 'You have already been unsubscribed',
       already_unsubscribed: true,
-      unsubscribed_from_campaign: false,
-      campaign: {
+      unsubscribed_from_people_group: false,
+      people_group: {
         id: peopleGroup.id,
         title: peopleGroup.name,
         slug: slug
       },
       unsubscribed_reminder: null,
-      other_reminders_in_campaign: otherRemindersInCampaign,
-      other_people_groups: otherCampaigns
+      other_reminders_in_people_group: otherRemindersInPeopleGroup,
+      other_people_groups: otherPeopleGroups
     }
   }
 
   // Check if this specific subscription is already unsubscribed
   if (subscriptionToUnsubscribe.status === 'unsubscribed') {
-    const otherRemindersInCampaign = campaignSubscriptions
+    const otherRemindersInPeopleGroup = peopleGroupSubscriptions
       .filter(s => s.id !== subscriptionToUnsubscribe!.id && s.status === 'active')
       .map(formatReminder)
 
     return {
       message: 'You have already been unsubscribed from this reminder',
       already_unsubscribed: true,
-      unsubscribed_from_campaign: false,
-      campaign: {
+      unsubscribed_from_people_group: false,
+      people_group: {
         id: peopleGroup.id,
         title: peopleGroup.name,
         slug: slug
       },
       unsubscribed_reminder: formatReminder(subscriptionToUnsubscribe),
-      other_reminders_in_campaign: otherRemindersInCampaign,
-      other_people_groups: otherCampaigns
+      other_reminders_in_people_group: otherRemindersInPeopleGroup,
+      other_people_groups: otherPeopleGroups
     }
   }
 
@@ -194,8 +194,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get remaining active reminders in this campaign
-  const otherRemindersInCampaign = campaignSubscriptions
+  // Get remaining active reminders in this people group
+  const otherRemindersInPeopleGroup = peopleGroupSubscriptions
     .filter(s => s.id !== subscriptionToUnsubscribe!.id && s.status === 'active')
     .map(formatReminder)
 
@@ -203,14 +203,14 @@ export default defineEventHandler(async (event) => {
     success: true,
     message: 'Successfully unsubscribed from this reminder',
     already_unsubscribed: false,
-    unsubscribed_from_campaign: false,
-    campaign: {
+    unsubscribed_from_people_group: false,
+    people_group: {
       id: peopleGroup.id,
       title: peopleGroup.name,
       slug: slug
     },
     unsubscribed_reminder: formatReminder(subscriptionToUnsubscribe),
-    other_reminders_in_campaign: otherRemindersInCampaign,
-    other_people_groups: otherCampaigns
+    other_reminders_in_people_group: otherRemindersInPeopleGroup,
+    other_people_groups: otherPeopleGroups
   }
 })

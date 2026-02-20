@@ -52,10 +52,10 @@ const { locale } = useI18n()
 const currentDay = ref(1)
 const globalStartDate = ref<string | null>(null)
 
-const { data: campaignData } = await useFetch('/api/people-groups/zuara')
+const { data: peopleGroupData } = await useFetch('/api/people-groups/zuara')
 
-if (campaignData.value) {
-  globalStartDate.value = campaignData.value.globalStartDate
+if (peopleGroupData.value) {
+  globalStartDate.value = peopleGroupData.value.globalStartDate
 }
 
 const contentDate = computed(() => {
@@ -76,7 +76,7 @@ interface ContentItem {
 }
 
 interface PrayerContentResponse {
-  campaign: { id: number; slug: string; title: string; default_language: string }
+  people_group: { id: number; slug: string; title: string; default_language: string }
   date: string
   language: string
   availableLanguages: string[]

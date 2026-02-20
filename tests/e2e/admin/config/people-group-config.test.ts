@@ -11,7 +11,7 @@ import {
   createNoRoleUser
 } from '../../../helpers/auth'
 
-describe('Campaign Config API', async () => {
+describe('People Group Config API', async () => {
   const sql = getTestDatabase()
 
   let adminAuth: { headers: { cookie: string } }

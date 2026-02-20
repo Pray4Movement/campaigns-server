@@ -12,7 +12,7 @@
     </div>
 
     <div v-else-if="data" class="flex flex-col flex-1">
-      <!-- Campaign Header with Navigation -->
+      <!-- People Group Header with Navigation -->
       <header class="border-b border-default py-8 px-4">
         <div class="max-w-4xl mx-auto">
           <div class="flex items-center justify-center gap-3">
@@ -71,7 +71,7 @@ const localePath = useLocalePath()
 const route = useRoute()
 const slug = route.params.slug as string
 const dateParam = route.params.date as string
-const { setCampaignTitle } = useCampaign()
+const { setPeopleGroupTitle } = usePeopleGroup()
 
 // Content date from route param
 const contentDate = computed(() => dateParam)
@@ -79,11 +79,11 @@ const contentDate = computed(() => dateParam)
 // Get language preference from global language selector or query param
 const selectedLanguage = ref((route.query.language as string) || locale.value || '')
 
-// Campaign ID for optimized session tracking
-const campaignId = computed(() => data.value?.campaign?.id)
+// People group ID for optimized session tracking
+const peopleGroupId = computed(() => data.value?.people_group?.id)
 
 // Use prayer session composable
-const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, contentDate, campaignId)
+const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, contentDate, peopleGroupId)
 
 // Fetch prayer content for specific date
 const { data, pending, error: fetchError, refresh } = await useFetch(
@@ -97,14 +97,14 @@ const { data, pending, error: fetchError, refresh } = await useFetch(
 
 const error = computed(() => fetchError.value?.message || null)
 
-// Set selected language and campaign title after data loads
+// Set selected language and people group title after data loads
 watch(data, (newData) => {
   if (newData) {
     if (!selectedLanguage.value) {
       selectedLanguage.value = newData.language
     }
-    if (newData.campaign?.title) {
-      setCampaignTitle(newData.campaign.title)
+    if (newData.people_group?.title) {
+      setPeopleGroupTitle(newData.people_group.title)
     }
   }
 }, { immediate: true })
@@ -151,10 +151,10 @@ const isNextDateFuture = computed(() => {
   return next >= today
 })
 
-// Set campaign title on mount (handles cached data from navigation)
+// Set people group title on mount (handles cached data from navigation)
 onMounted(() => {
-  if (data.value?.campaign?.title) {
-    setCampaignTitle(data.value.campaign.title)
+  if (data.value?.people_group?.title) {
+    setPeopleGroupTitle(data.value.people_group.title)
   }
 })
 
@@ -162,7 +162,7 @@ onMounted(() => {
 const { t } = useI18n()
 useHead(() => ({
   title: data.value?.hasContent
-    ? `${t('prayerFuel.pageTitle')} - ${data.value.campaign.title}`
-    : `${t('prayerFuel.pageTitle')} - ${data.value?.campaign.title || t('common.loading')}`
+    ? `${t('prayerFuel.pageTitle')} - ${data.value.people_group.title}`
+    : `${t('prayerFuel.pageTitle')} - ${data.value?.people_group.title || t('common.loading')}`
 }))
 </script>

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
 import { $fetch } from '@nuxt/test-utils/e2e'
-import { getTestDatabase, closeTestDatabase, cleanupTestData, createTestCampaign } from '../helpers/db'
+import { getTestDatabase, closeTestDatabase, cleanupTestData, createTestPeopleGroup } from '../helpers/db'
 
 describe('GET /api/people-groups', async () => {
   const sql = getTestDatabase()
@@ -13,7 +13,7 @@ describe('GET /api/people-groups', async () => {
     await closeTestDatabase()
   })
 
-  it('returns empty array when no campaigns exist', async () => {
+  it('returns empty array when no people groups exist', async () => {
     const response = await $fetch('/api/people-groups')
 
     expect(response).toHaveProperty('peopleGroups')
@@ -21,16 +21,16 @@ describe('GET /api/people-groups', async () => {
   })
 
   it('returns people groups', async () => {
-    const campaign = await createTestCampaign(sql, {
-      title: 'Test Prayer Campaign'
+    const peopleGroup = await createTestPeopleGroup(sql, {
+      title: 'Test Prayer People Group'
     })
 
     const response = await $fetch('/api/people-groups')
 
     expect(response.peopleGroups).toContainEqual(
       expect.objectContaining({
-        slug: campaign.slug,
-        title: 'Test Prayer Campaign'
+        slug: peopleGroup.slug,
+        title: 'Test Prayer People Group'
       })
     )
   })

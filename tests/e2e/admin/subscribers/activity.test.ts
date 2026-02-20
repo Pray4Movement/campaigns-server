@@ -4,11 +4,11 @@ import {
   getTestDatabase,
   closeTestDatabase,
   cleanupTestData,
-  createTestCampaign,
+  createTestPeopleGroup,
   createTestSubscriber,
   createTestContactMethod,
-  createTestCampaignSubscription,
-  assignUserToCampaign
+  createTestPeopleGroupSubscription,
+  assignUserToPeopleGroup
 } from '../../../helpers/db'
 import {
   createAdminUser,
@@ -23,8 +23,8 @@ describe('GET /api/admin/subscribers/[id]/activity', async () => {
   let editorAuth: { headers: { cookie: string } }
   let editorUserId: string
   let noRoleAuth: { headers: { cookie: string } }
-  let assignedCampaign: { id: number; slug: string }
-  let unassignedCampaign: { id: number; slug: string }
+  let assignedPeopleGroup: { id: number; slug: string }
+  let unassignedPeopleGroup: { id: number; slug: string }
   let assignedSubscription: { id: number }
   let unassignedSubscription: { id: number }
 
@@ -44,26 +44,26 @@ describe('GET /api/admin/subscribers/[id]/activity', async () => {
 
   beforeEach(async () => {
     // Create fresh data for each test
-    assignedCampaign = await createTestCampaign(sql, { title: 'Assigned Campaign' })
-    unassignedCampaign = await createTestCampaign(sql, { title: 'Unassigned Campaign' })
+    assignedPeopleGroup = await createTestPeopleGroup(sql, { title: 'Assigned People Group' })
+    unassignedPeopleGroup = await createTestPeopleGroup(sql, { title: 'Unassigned People Group' })
 
-    await assignUserToCampaign(sql, editorUserId, assignedCampaign.id)
+    await assignUserToPeopleGroup(sql, editorUserId, assignedPeopleGroup.id)
 
-    // Create subscriber in assigned campaign
+    // Create subscriber in assigned people group
     const subscriber1 = await createTestSubscriber(sql, { name: 'Test Assigned Subscriber' })
     await createTestContactMethod(sql, subscriber1.id, {
       value: `test-activity-assigned-${Date.now()}@example.com`,
       verified: true
     })
-    assignedSubscription = await createTestCampaignSubscription(sql, assignedCampaign.id, subscriber1.id)
+    assignedSubscription = await createTestPeopleGroupSubscription(sql, assignedPeopleGroup.id, subscriber1.id)
 
-    // Create subscriber in unassigned campaign
+    // Create subscriber in unassigned people group
     const subscriber2 = await createTestSubscriber(sql, { name: 'Test Unassigned Subscriber' })
     await createTestContactMethod(sql, subscriber2.id, {
       value: `test-activity-unassigned-${Date.now()}@example.com`,
       verified: true
     })
-    unassignedSubscription = await createTestCampaignSubscription(sql, unassignedCampaign.id, subscriber2.id)
+    unassignedSubscription = await createTestPeopleGroupSubscription(sql, unassignedPeopleGroup.id, subscriber2.id)
   })
 
   afterAll(async () => {
@@ -89,12 +89,12 @@ describe('GET /api/admin/subscribers/[id]/activity', async () => {
       expect(response.activities).toBeDefined()
     })
 
-    it('campaign_editor can view activity for subscriber from assigned campaign', async () => {
+    it('campaign_editor can view activity for subscriber from assigned people group', async () => {
       const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}/activity`, editorAuth)
       expect(response.activities).toBeDefined()
     })
 
-    it('campaign_editor cannot view activity for subscriber from unassigned campaign', async () => {
+    it('campaign_editor cannot view activity for subscriber from unassigned people group', async () => {
       const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}/activity`, editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })

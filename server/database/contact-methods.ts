@@ -12,8 +12,6 @@ export interface ContactMethod {
   verified_at: string | null
   consent_doxa_general: boolean
   consent_doxa_general_at: string | null
-  consented_campaign_ids: number[]
-  consented_campaign_ids_at: Record<string, string>
   consented_people_group_ids: number[]
   consented_people_group_ids_at: Record<string, string>
   created_at: string

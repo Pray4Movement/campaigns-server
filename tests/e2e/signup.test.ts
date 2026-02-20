@@ -4,10 +4,10 @@ import {
   getTestDatabase,
   closeTestDatabase,
   cleanupTestData,
-  createTestCampaign,
+  createTestPeopleGroup,
   createTestSubscriber,
   createTestContactMethod,
-  createTestCampaignSubscription,
+  createTestPeopleGroupSubscription,
   getTestContactMethod,
   getTestSubscription,
   getAllTestSubscriptions,
@@ -26,8 +26,8 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
   })
 
   describe('Validation', () => {
-    it('returns 404 for non-existent campaign', async () => {
-      const error = await $fetch('/api/people-groups/non-existent-campaign/signup', {
+    it('returns 404 for non-existent people group', async () => {
+      const error = await $fetch('/api/people-groups/non-existent-people-group/signup', {
         method: 'POST',
         body: {
           name: 'Test User',
@@ -39,13 +39,13 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       }).catch(e => e)
 
       expect(error.statusCode).toBe(404)
-      expect(error.statusMessage).toBe('Campaign not found')
+      expect(error.statusMessage).toBe('People group not found')
     })
 
     it('returns 400 for missing required fields', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
 
-      const error = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const error = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test User'
@@ -57,9 +57,9 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
     })
 
     it('returns 400 when email missing for email delivery', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
 
-      const error = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const error = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test User',
@@ -74,9 +74,9 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
     })
 
     it('returns 400 when phone missing for WhatsApp delivery', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
 
-      const error = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const error = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test User',
@@ -91,9 +91,9 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
     })
 
     it('returns 400 when days_of_week missing for weekly frequency', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
 
-      const error = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const error = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test User',
@@ -111,10 +111,10 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
 
   describe('New Subscriber', () => {
     it('creates subscriber + contact method + subscription for new email', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const email = `test-new-${Date.now()}@example.com`
 
-      const response = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const response = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test New User',
@@ -140,7 +140,7 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       expect(contactMethod!.verified).toBe(false)
 
       // Verify subscription was created
-      const subscription = await getTestSubscription(sql, campaign.id, subscriber!.id)
+      const subscription = await getTestSubscription(sql, peopleGroup.id, subscriber!.id)
       expect(subscription).toBeDefined()
       expect(subscription!.delivery_method).toBe('email')
       expect(subscription!.frequency).toBe('daily')
@@ -150,10 +150,10 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
     })
 
     it('stores email lowercase (case-insensitive)', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const email = `Test-UPPER-${Date.now()}@Example.COM`
 
-      await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Case User',
@@ -172,14 +172,14 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
 
   describe('Existing Subscriber', () => {
     it('reuses existing subscriber when email matches', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
 
       // Create existing subscriber
       const existingSubscriber = await createTestSubscriber(sql, { name: 'Test Existing User' })
       const email = `test-existing-${Date.now()}@example.com`
       await createTestContactMethod(sql, existingSubscriber.id, { type: 'email', value: email, verified: true })
 
-      const response = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const response = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Existing User',
@@ -193,19 +193,19 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       expect(response.message).toBe('Please check your email to complete your signup')
 
       // Verify subscription was created for existing subscriber
-      const subscription = await getTestSubscription(sql, campaign.id, existingSubscriber.id)
+      const subscription = await getTestSubscription(sql, peopleGroup.id, existingSubscriber.id)
       expect(subscription).toBeDefined()
     })
 
     it('updates subscriber name if changed', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
 
       // Create existing subscriber
       const existingSubscriber = await createTestSubscriber(sql, { name: 'Test Old Name' })
       const email = `test-name-${Date.now()}@example.com`
       await createTestContactMethod(sql, existingSubscriber.id, { type: 'email', value: email, verified: true })
 
-      await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test New Name',
@@ -224,22 +224,22 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
   })
 
   describe('Subscription Limits', () => {
-    it('allows up to 5 subscriptions per campaign', async () => {
-      const campaign = await createTestCampaign(sql)
+    it('allows up to 5 subscriptions per people group', async () => {
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Limit User' })
       const email = `test-limit-${Date.now()}@example.com`
       await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
 
       // Create 4 existing subscriptions with different times
       for (let i = 0; i < 4; i++) {
-        await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+        await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
           time_preference: `0${i}:00`,
           status: 'active'
         })
       }
 
       // 5th signup should succeed
-      const response = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const response = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Limit User',
@@ -253,26 +253,26 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       expect(response.message).toBe('Please check your email to complete your signup')
 
       // Verify 5th subscription was created
-      const subscriptions = await getAllTestSubscriptions(sql, campaign.id, subscriber.id)
+      const subscriptions = await getAllTestSubscriptions(sql, peopleGroup.id, subscriber.id)
       expect(subscriptions.length).toBe(5)
     })
 
     it('returns privacy-safe response when at limit', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Limit Max User' })
       const email = `test-limit-max-${Date.now()}@example.com`
       await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
 
       // Create 5 existing subscriptions (max limit)
       for (let i = 0; i < 5; i++) {
-        await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+        await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
           time_preference: `0${i}:00`,
           status: 'active'
         })
       }
 
       // 6th signup should return same response for privacy
-      const response = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const response = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Limit Max User',
@@ -287,27 +287,27 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       expect(response.message).toBe('Please check your email to complete your signup')
 
       // Verify no 6th subscription was created
-      const subscriptions = await getAllTestSubscriptions(sql, campaign.id, subscriber.id)
+      const subscriptions = await getAllTestSubscriptions(sql, peopleGroup.id, subscriber.id)
       expect(subscriptions.length).toBe(5)
     })
   })
 
   describe('Duplicate Detection', () => {
     it('detects duplicate frequency + time combo', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Duplicate User' })
       const email = `test-dup-${Date.now()}@example.com`
       await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
 
       // Create existing subscription
-      await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         frequency: 'daily',
         time_preference: '09:00',
         status: 'active'
       })
 
       // Attempt duplicate signup
-      const response = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const response = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Duplicate User',
@@ -322,27 +322,27 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       expect(response.message).toBe('Please check your email to complete your signup')
 
       // Verify no duplicate subscription was created
-      const subscriptions = await getAllTestSubscriptions(sql, campaign.id, subscriber.id)
+      const subscriptions = await getAllTestSubscriptions(sql, peopleGroup.id, subscriber.id)
       expect(subscriptions.length).toBe(1)
     })
   })
 
   describe('Reactivation', () => {
     it('reactivates unsubscribed subscription with matching schedule', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Reactivate User' })
       const email = `test-reactivate-${Date.now()}@example.com`
       await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
 
       // Create unsubscribed subscription
-      const existing = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const existing = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         frequency: 'daily',
         time_preference: '09:00',
         status: 'unsubscribed'
       })
 
       // Signup with same schedule
-      const response = await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      const response = await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Reactivate User',
@@ -356,20 +356,20 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       expect(response.message).toBe('Please check your email to complete your signup')
 
       // Verify subscription was reactivated (not a new one created)
-      const subscriptions = await getAllTestSubscriptions(sql, campaign.id, subscriber.id)
+      const subscriptions = await getAllTestSubscriptions(sql, peopleGroup.id, subscriber.id)
       expect(subscriptions.length).toBe(1)
       expect(subscriptions[0].id).toBe(existing.id)
       expect(subscriptions[0].status).toBe('active')
     })
 
     it('updates delivery method on reactivation', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Reactivate Delivery User' })
       const email = `test-reactivate-delivery-${Date.now()}@example.com`
       await createTestContactMethod(sql, subscriber.id, { type: 'email', value: email, verified: true })
 
       // Create unsubscribed subscription with whatsapp
-      await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'whatsapp',
         frequency: 'daily',
         time_preference: '09:00',
@@ -377,7 +377,7 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       })
 
       // Signup with same schedule but email delivery
-      await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Reactivate Delivery User',
@@ -389,17 +389,17 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       })
 
       // Verify delivery method was updated
-      const subscription = await getTestSubscription(sql, campaign.id, subscriber.id)
+      const subscription = await getTestSubscription(sql, peopleGroup.id, subscriber.id)
       expect(subscription!.delivery_method).toBe('email')
     })
   })
 
   describe('Consent', () => {
-    it('records campaign-specific consent', async () => {
-      const campaign = await createTestCampaign(sql)
+    it('records people group-specific consent', async () => {
+      const peopleGroup = await createTestPeopleGroup(sql)
       const email = `test-consent-${Date.now()}@example.com`
 
-      await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test Consent User',
@@ -414,14 +414,14 @@ describe('POST /api/people-groups/[slug]/signup', async () => {
       // Verify consent was recorded
       const subscriber = await getTestSubscriberByEmail(sql, email)
       const contactMethod = await getTestContactMethod(sql, subscriber!.id, 'email')
-      expect(contactMethod!.consented_people_group_ids).toContain(campaign.id)
+      expect(contactMethod!.consented_people_group_ids).toContain(peopleGroup.id)
     })
 
     it('records DOXA general consent when provided', async () => {
-      const campaign = await createTestCampaign(sql)
+      const peopleGroup = await createTestPeopleGroup(sql)
       const email = `test-doxa-consent-${Date.now()}@example.com`
 
-      await $fetch(`/api/people-groups/${campaign.slug}/signup`, {
+      await $fetch(`/api/people-groups/${peopleGroup.slug}/signup`, {
         method: 'POST',
         body: {
           name: 'Test DOXA Consent User',

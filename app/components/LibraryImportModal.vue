@@ -94,13 +94,13 @@
               />
             </UFormField>
 
-            <UFormField v-if="campaignId && needsLibraryKey" label="Library Key" required class="key-field">
+            <UFormField v-if="peopleGroupId && needsLibraryKey" label="Library Key" required class="key-field">
               <UInput
                 v-model="libraryKey"
                 placeholder="e.g., day_in_life"
               />
               <template #hint>
-                Used for internal identification within the campaign
+                Used for internal identification within the people group
               </template>
             </UFormField>
           </template>
@@ -210,7 +210,7 @@ interface ExistingLibrary {
 
 interface Props {
   open?: boolean
-  campaignId?: number
+  peopleGroupId?: number
   existingLibraries?: ExistingLibrary[]
 }
 
@@ -241,7 +241,7 @@ const libraryKey = ref('')
 const importMode = ref<'new' | 'existing'>('new')
 const targetLibraryId = ref<number | undefined>(undefined)
 
-// Only show library_key field if campaign import AND export file doesn't have one
+// Only show library_key field if people group import AND export file doesn't have one
 const needsLibraryKey = computed(() => {
   return !preview.value?.library.library_key
 })
@@ -269,7 +269,7 @@ const canImport = computed(() => {
   }
   // Creating new library
   if (!importName.value.trim()) return false
-  if (props.campaignId && needsLibraryKey.value && !libraryKey.value.trim()) return false
+  if (props.peopleGroupId && needsLibraryKey.value && !libraryKey.value.trim()) return false
   return true
 })
 
@@ -353,8 +353,8 @@ async function handleImport() {
       body.target_library_id = targetLibraryId.value
     } else {
       body.name = importName.value
-      if (props.campaignId) {
-        body.people_group_id = props.campaignId
+      if (props.peopleGroupId) {
+        body.people_group_id = props.peopleGroupId
         // Only send library_key if we need one (export file didn't have it)
         if (needsLibraryKey.value && libraryKey.value) {
           body.library_key = libraryKey.value
@@ -380,8 +380,8 @@ function handleViewLibrary() {
 
   const libraryId = result.value.library.id
 
-  if (props.campaignId) {
-    navigateTo(`/admin/people-groups/${props.campaignId}/libraries/${libraryId}/days/1`)
+  if (props.peopleGroupId) {
+    navigateTo(`/admin/people-groups/${props.peopleGroupId}/libraries/${libraryId}/days/1`)
   } else {
     navigateTo(`/admin/libraries/${libraryId}/content`)
   }

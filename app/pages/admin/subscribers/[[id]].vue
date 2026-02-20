@@ -14,10 +14,10 @@
       >
         <template #filters>
           <USelectMenu
-            v-model="filterCampaignId"
-            :items="campaignOptions"
+            v-model="filterPeopleGroupId"
+            :items="peopleGroupOptions"
             value-key="value"
-            placeholder="All Campaigns"
+            placeholder="All People Groups"
             searchable
             virtualize
             class="filter-select"
@@ -109,7 +109,7 @@
                 <div class="consent-label">
                   <span class="consent-name">Campaign Marketing</span>
                 </div>
-                <div class="campaign-consents">
+                <div class="people-group-consents">
                   <UBadge
                     v-for="(name, idx) in selectedSubscriber.consents.people_group_names"
                     :key="selectedSubscriber.consents.people_group_ids[idx]"
@@ -144,7 +144,7 @@
               >
                 <div class="subscription-header" @click="toggleSubscription(subscription.id)">
                   <div class="subscription-title">
-                    <span class="campaign-name">{{ subscription.people_group_name }}</span>
+                    <span class="people-group-name">{{ subscription.people_group_name }}</span>
                     <UBadge
                       :label="subscription.status"
                       variant="outline"
@@ -401,7 +401,7 @@ interface GeneralSubscriber {
   consents: SubscriberConsents
 }
 
-interface Campaign {
+interface PeopleGroup {
   id: number
   name: string
   slug: string
@@ -419,7 +419,7 @@ const toast = useToast()
 
 // Data
 const subscribers = ref<GeneralSubscriber[]>([])
-const campaigns = ref<Campaign[]>([])
+const peopleGroups = ref<PeopleGroup[]>([])
 const selectedSubscriber = ref<GeneralSubscriber | null>(null)
 
 // Loading states
@@ -429,7 +429,7 @@ const saving = ref(false)
 
 // Filters
 const searchQuery = ref('')
-const filterCampaignId = ref<number | null>(null)
+const filterPeopleGroupId = ref<number | null>(null)
 
 // Form state
 const subscriberForm = ref({ name: '' })
@@ -479,10 +479,10 @@ const frequencyOptions = [
   { label: 'Weekly', value: 'weekly' }
 ]
 
-const campaignOptions = computed(() => {
+const peopleGroupOptions = computed(() => {
   return [
-    { label: 'All Campaigns', value: null },
-    ...campaigns.value.map(c => ({ label: c.name, value: c.id }))
+    { label: 'All People Groups', value: null },
+    ...peopleGroups.value.map(c => ({ label: c.name, value: c.id }))
   ]
 })
 
@@ -498,9 +498,9 @@ const filteredSubscribers = computed(() => {
     )
   }
 
-  if (filterCampaignId.value) {
+  if (filterPeopleGroupId.value) {
     filtered = filtered.filter(s =>
-      s.subscriptions.some(sub => sub.people_group_id === filterCampaignId.value)
+      s.subscriptions.some(sub => sub.people_group_id === filterPeopleGroupId.value)
     )
   }
 
@@ -512,8 +512,8 @@ async function loadData() {
     loading.value = true
     error.value = ''
 
-    const peopleGroupsResponse = await $fetch<{ peopleGroups: Campaign[] }>('/api/admin/people-groups')
-    campaigns.value = peopleGroupsResponse.peopleGroups
+    const peopleGroupsResponse = await $fetch<{ peopleGroups: PeopleGroup[] }>('/api/admin/people-groups')
+    peopleGroups.value = peopleGroupsResponse.peopleGroups
 
     const subscribersResponse = await $fetch<{ subscribers: GeneralSubscriber[] }>('/api/admin/subscribers')
     subscribers.value = subscribersResponse.subscribers
@@ -530,9 +530,9 @@ async function selectSubscriber(subscriber: GeneralSubscriber, updateUrl = true)
   subscriberForm.value = { name: subscriber.name }
   if (updateUrl && import.meta.client) {
     const params = new URLSearchParams()
-    if (filterCampaignId.value) params.set('campaign', String(filterCampaignId.value))
+    if (filterPeopleGroupId.value) params.set('peopleGroup', String(filterPeopleGroupId.value))
     if (route.query.from) params.set('from', route.query.from as string)
-    if (route.query.campaignId) params.set('campaignId', route.query.campaignId as string)
+    if (route.query.peopleGroupId) params.set('peopleGroupId', route.query.peopleGroupId as string)
     const queryString = params.toString()
     window.history.replaceState({}, '', `/admin/subscribers/${subscriber.id}${queryString ? '?' + queryString : ''}`)
   }
@@ -790,9 +790,9 @@ async function confirmDelete() {
 
     if (import.meta.client) {
       const params = new URLSearchParams()
-      if (filterCampaignId.value) params.set('campaign', String(filterCampaignId.value))
+      if (filterPeopleGroupId.value) params.set('peopleGroup', String(filterPeopleGroupId.value))
       if (route.query.from) params.set('from', route.query.from as string)
-      if (route.query.campaignId) params.set('campaignId', route.query.campaignId as string)
+      if (route.query.peopleGroupId) params.set('peopleGroupId', route.query.peopleGroupId as string)
       const queryString = params.toString()
       window.history.replaceState({}, '', `/admin/subscribers${queryString ? '?' + queryString : ''}`)
     }
@@ -813,8 +813,8 @@ function cancelDelete() {
 }
 
 function filterByCampaign(subscription: Subscription) {
-  filterCampaignId.value = subscription.people_group_id
-  router.push({ query: { campaign: subscription.people_group_id } })
+  filterPeopleGroupId.value = subscription.people_group_id
+  router.push({ query: { peopleGroup: subscription.people_group_id } })
 }
 
 // Formatting functions
@@ -974,9 +974,9 @@ function handleUrlSelection() {
 }
 
 onMounted(async () => {
-  const campaignParam = route.query.campaign
-  if (campaignParam) {
-    filterCampaignId.value = parseInt(campaignParam as string)
+  const peopleGroupParam = route.query.peopleGroup
+  if (peopleGroupParam) {
+    filterPeopleGroupId.value = parseInt(peopleGroupParam as string)
   }
   await loadData()
   handleUrlSelection()
@@ -1066,7 +1066,7 @@ onMounted(async () => {
   gap: 0.5rem;
 }
 
-.campaign-name {
+.people-group-name {
   font-weight: 500;
 }
 
@@ -1248,7 +1248,7 @@ onMounted(async () => {
   margin-top: 0.25rem;
 }
 
-.campaign-consents {
+.people-group-consents {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;

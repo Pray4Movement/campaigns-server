@@ -214,37 +214,37 @@ class SubscriberService {
    * Get all subscribers with their contact methods and subscriptions.
    * For the general subscribers admin page.
    *
-   * @param options.accessibleCampaignIds - If provided, only return subscribers with subscriptions
-   *   to these campaigns, and filter subscriptions to only include accessible campaigns.
-   *   Used for campaign editors who can only see their assigned campaigns.
+   * @param options.accessiblePeopleGroupIds - If provided, only return subscribers with subscriptions
+   *   to these people groups, and filter subscriptions to only include accessible people groups.
+   *   Used for people group editors who can only see their assigned people groups.
    */
   async getAllSubscribersWithSubscriptions(options?: {
     search?: string
-    campaignId?: number
-    accessibleCampaignIds?: number[]
+    peopleGroupId?: number
+    accessiblePeopleGroupIds?: number[]
   }): Promise<SubscriberWithSubscriptions[]> {
     // Build base query to get subscribers
     let query = 'SELECT DISTINCT s.* FROM subscribers s'
     const params: any[] = []
     let hasWhere = false
 
-    // If accessibleCampaignIds is provided, filter to only subscribers with subscriptions to those people groups
-    if (options?.accessibleCampaignIds && options.accessibleCampaignIds.length > 0) {
-      const placeholders = options.accessibleCampaignIds.map(() => '?').join(',')
+    // If accessiblePeopleGroupIds is provided, filter to only subscribers with subscriptions to those people groups
+    if (options?.accessiblePeopleGroupIds && options.accessiblePeopleGroupIds.length > 0) {
+      const placeholders = options.accessiblePeopleGroupIds.map(() => '?').join(',')
       query += ` JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.people_group_id IN (${placeholders})`
-      params.push(...options.accessibleCampaignIds)
+      params.push(...options.accessiblePeopleGroupIds)
       hasWhere = true
     }
 
-    // If campaignId filter is set, only get subscribers with subscriptions to that people group
-    if (options?.campaignId) {
+    // If peopleGroupId filter is set, only get subscribers with subscriptions to that people group
+    if (options?.peopleGroupId) {
       if (hasWhere) {
         query += ' AND cs.people_group_id = ?'
       } else {
         query += ' JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.people_group_id = ?'
         hasWhere = true
       }
-      params.push(options.campaignId)
+      params.push(options.peopleGroupId)
     }
 
     if (options?.search) {
@@ -276,9 +276,9 @@ class SubscriberService {
       let subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
       // Filter subscriptions to only include accessible people groups
-      if (options?.accessibleCampaignIds) {
+      if (options?.accessiblePeopleGroupIds) {
         subscriptions = subscriptions.filter(sub =>
-          options.accessibleCampaignIds!.includes(sub.people_group_id)
+          options.accessiblePeopleGroupIds!.includes(sub.people_group_id)
         )
       }
 

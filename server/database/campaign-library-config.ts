@@ -45,7 +45,7 @@ export class CampaignLibraryConfigService {
       return (await this.getConfigById(configId))!
     } catch (error: any) {
       if (error.code === '23505') { // PostgreSQL unique violation
-        throw new Error('This library is already configured for this campaign')
+        throw new Error('This library is already configured for this people group')
       }
       throw error
     }

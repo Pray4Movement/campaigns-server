@@ -24,7 +24,7 @@
     <div v-else-if="error" class="error">{{ error }}</div>
 
     <div v-else-if="filteredEmails.length === 0" class="empty-state">
-      <p>No emails yet. Create your first email campaign to get started.</p>
+      <p>No emails yet. Create your first marketing email to get started.</p>
       <UButton @click="navigateTo('/admin/marketing/emails/new')" size="lg">
         Create Email
       </UButton>

@@ -96,7 +96,7 @@ export default defineEventHandler(async (event) => {
 
       emailChanged = true
 
-      // Send verification email - need a campaign for context
+      // Send verification email - need a people group for context
       if (newEmailContact) {
         // Get subscriber's first subscription to use for verification email context
         const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
@@ -123,7 +123,7 @@ export default defineEventHandler(async (event) => {
       await contactMethodService.updateDoxaConsent(currentEmail.id, body.consent_doxa_general)
     }
 
-    // Campaign consent update - requires campaign_id
+    // People group consent update
     if (body.consent_people_group_id !== undefined && body.consent_people_group_updates !== undefined) {
       if (body.consent_people_group_updates) {
         await contactMethodService.addPeopleGroupConsent(currentEmail.id, body.consent_people_group_id)

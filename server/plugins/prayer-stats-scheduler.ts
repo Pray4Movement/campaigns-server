@@ -1,7 +1,7 @@
 import { updatePrayerStats } from '../utils/prayer-stats'
 
 /**
- * Nitro plugin to update campaign prayer stats daily
+ * Nitro plugin to update people group prayer stats daily
  *
  * This plugin runs when the server starts and checks every hour
  * to see if it's time to update stats (at 3 AM daily)

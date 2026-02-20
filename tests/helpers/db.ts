@@ -40,12 +40,12 @@ export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   await sql`DELETE FROM library_content WHERE library_id IN (SELECT id FROM libraries WHERE name LIKE 'Test Library %')`
   await sql`DELETE FROM libraries WHERE name LIKE 'Test Library %'`
 
-  // Clean campaign-related data
+  // Clean people group-related data
   await sql`DELETE FROM reminder_emails_sent WHERE subscription_id IN (SELECT cs.id FROM campaign_subscriptions cs JOIN people_groups pg ON pg.id = cs.people_group_id WHERE pg.slug LIKE 'test-%')`
   await sql`DELETE FROM campaign_subscriptions WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM contact_methods WHERE subscriber_id IN (SELECT id FROM subscribers WHERE name LIKE 'Test %')`
 
-  // Clean campaign_users (user-campaign access)
+  // Clean user-people group access
   await sql`DELETE FROM campaign_users WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM campaign_users WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'test-%@example.com')`
 
@@ -67,7 +67,7 @@ export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   await sql`DELETE FROM users WHERE email LIKE 'test-%@example.com'`
 }
 
-export async function createTestCampaign(
+export async function createTestPeopleGroup(
   sql: ReturnType<typeof postgres>,
   options: {
     title?: string
@@ -75,7 +75,7 @@ export async function createTestCampaign(
   } = {}
 ) {
   const slugId = uuidv4().slice(0, 8)
-  const title = options.title || `Test Campaign ${slugId}`
+  const title = options.title || `Test People Group ${slugId}`
   const slug = options.slug || `test-${slugId}`
   const dt_id = `test-dt-${slugId}`
 
@@ -137,9 +137,9 @@ export async function createTestContactMethod(
   }
 }
 
-export async function createTestCampaignSubscription(
+export async function createTestPeopleGroupSubscription(
   sql: ReturnType<typeof postgres>,
-  campaignId: number,
+  peopleGroupId: number,
   subscriberId: number,
   options: {
     delivery_method?: 'email' | 'whatsapp' | 'app'
@@ -163,7 +163,7 @@ export async function createTestCampaignSubscription(
       time_preference, timezone, status, days_of_week
     )
     VALUES (
-      ${campaignId}, ${subscriberId}, ${delivery_method}, ${frequency},
+      ${peopleGroupId}, ${subscriberId}, ${delivery_method}, ${frequency},
       ${time_preference}, ${timezone}, ${status}, ${days_of_week}
     )
     RETURNING id, people_group_id, subscriber_id, delivery_method, frequency,
@@ -202,18 +202,18 @@ export async function getTestContactMethod(
     verification_token: string | null
     verification_token_expires_at: string | null
     consent_doxa_general: boolean
-    consented_campaign_ids: number[]
+    consented_people_group_ids: number[]
   } | undefined
 }
 
 export async function getTestSubscription(
   sql: ReturnType<typeof postgres>,
-  campaignId: number,
+  peopleGroupId: number,
   subscriberId: number
 ) {
   const result = await sql`
     SELECT * FROM campaign_subscriptions
-    WHERE people_group_id = ${campaignId} AND subscriber_id = ${subscriberId}
+    WHERE people_group_id = ${peopleGroupId} AND subscriber_id = ${subscriberId}
     ORDER BY created_at DESC
     LIMIT 1
   `
@@ -233,12 +233,12 @@ export async function getTestSubscription(
 
 export async function getAllTestSubscriptions(
   sql: ReturnType<typeof postgres>,
-  campaignId: number,
+  peopleGroupId: number,
   subscriberId: number
 ) {
   const result = await sql`
     SELECT * FROM campaign_subscriptions
-    WHERE people_group_id = ${campaignId} AND subscriber_id = ${subscriberId}
+    WHERE people_group_id = ${peopleGroupId} AND subscriber_id = ${subscriberId}
     ORDER BY created_at ASC
   `
   return result as Array<{
@@ -369,32 +369,32 @@ export async function getTestUserInvitationByEmail(
   return result[0] as TestUserInvitation | null
 }
 
-// Campaign access helpers
+// People group access helpers
 
-export async function assignUserToCampaign(
+export async function assignUserToPeopleGroup(
   sql: ReturnType<typeof postgres>,
   userId: string,
-  campaignId: number
+  peopleGroupId: number
 ): Promise<void> {
   await sql`
     INSERT INTO campaign_users (user_id, people_group_id)
-    VALUES (${userId}, ${campaignId})
+    VALUES (${userId}, ${peopleGroupId})
     ON CONFLICT DO NOTHING
   `
 }
 
-export async function removeUserFromCampaign(
+export async function removeUserFromPeopleGroup(
   sql: ReturnType<typeof postgres>,
   userId: string,
-  campaignId: number
+  peopleGroupId: number
 ): Promise<void> {
   await sql`
     DELETE FROM campaign_users
-    WHERE user_id = ${userId} AND people_group_id = ${campaignId}
+    WHERE user_id = ${userId} AND people_group_id = ${peopleGroupId}
   `
 }
 
-export async function getUserCampaignAccess(
+export async function getUserPeopleGroupAccess(
   sql: ReturnType<typeof postgres>,
   userId: string
 ): Promise<number[]> {

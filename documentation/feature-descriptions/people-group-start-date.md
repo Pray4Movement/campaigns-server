@@ -1,4 +1,4 @@
-# Campaign Start Date
+# People Group Start Date
 
 ## Overview
 
@@ -8,7 +8,7 @@ Before the start date, users can sign up for prayer reminders, but no reminders 
 
 ## How Users Experience It
 
-### Campaign Landing Page
+### People Group Landing Page
 
 When visiting a people group before the start date, users see an informational alert in the signup section:
 
