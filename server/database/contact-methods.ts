@@ -271,7 +271,10 @@ class ContactMethodService {
     }
 
     const newIds = [...currentIds, peopleGroupId]
-    const timestamps = contactMethod.consented_people_group_ids_at || {}
+    let timestamps = contactMethod.consented_people_group_ids_at || {}
+    if (typeof timestamps === 'string') {
+      try { timestamps = JSON.parse(timestamps) } catch { timestamps = {} }
+    }
     timestamps[String(peopleGroupId)] = new Date().toISOString()
 
     const pgArrayLiteral = `{${newIds.join(',')}}`
@@ -283,7 +286,7 @@ class ContactMethodService {
           updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
-    await stmt.run(pgArrayLiteral, JSON.stringify(timestamps), contactMethodId)
+    await stmt.run(pgArrayLiteral, timestamps, contactMethodId)
 
     return this.getById(contactMethodId)
   }
@@ -301,7 +304,10 @@ class ContactMethodService {
     }
 
     const newIds = currentIds.filter(id => id !== peopleGroupId)
-    const timestamps = contactMethod.consented_people_group_ids_at || {}
+    let timestamps = contactMethod.consented_people_group_ids_at || {}
+    if (typeof timestamps === 'string') {
+      try { timestamps = JSON.parse(timestamps) } catch { timestamps = {} }
+    }
     delete timestamps[String(peopleGroupId)]
 
     const pgArrayLiteral = `{${newIds.join(',')}}`
@@ -313,7 +319,7 @@ class ContactMethodService {
           updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
-    await stmt.run(pgArrayLiteral, JSON.stringify(timestamps), contactMethodId)
+    await stmt.run(pgArrayLiteral, timestamps, contactMethodId)
 
     return this.getById(contactMethodId)
   }
