@@ -403,7 +403,7 @@ interface GeneralSubscriber {
 
 interface Campaign {
   id: number
-  title: string
+  name: string
   slug: string
 }
 
@@ -482,7 +482,7 @@ const frequencyOptions = [
 const campaignOptions = computed(() => {
   return [
     { label: 'All Campaigns', value: null },
-    ...campaigns.value.map(c => ({ label: c.title, value: c.id }))
+    ...campaigns.value.map(c => ({ label: c.name, value: c.id }))
   ]
 })
 
@@ -512,8 +512,8 @@ async function loadData() {
     loading.value = true
     error.value = ''
 
-    const campaignsResponse = await $fetch<{ campaigns: Campaign[] }>('/api/admin/campaigns')
-    campaigns.value = campaignsResponse.campaigns
+    const peopleGroupsResponse = await $fetch<{ peopleGroups: Campaign[] }>('/api/admin/people-groups')
+    campaigns.value = peopleGroupsResponse.peopleGroups
 
     const subscribersResponse = await $fetch<{ subscribers: GeneralSubscriber[] }>('/api/admin/subscribers')
     subscribers.value = subscribersResponse.subscribers

@@ -144,7 +144,7 @@ const isModalOpen = computed({
 ### `title`
 Sets the modal header title (string):
 ```vue
-<UModal title="Create Campaign">
+<UModal title="Create Library">
 ```
 
 ### `description`

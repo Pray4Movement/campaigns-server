@@ -381,7 +381,7 @@ function handleViewLibrary() {
   const libraryId = result.value.library.id
 
   if (props.campaignId) {
-    navigateTo(`/admin/campaigns/${props.campaignId}/libraries/${libraryId}/days/1`)
+    navigateTo(`/admin/people-groups/${props.campaignId}/libraries/${libraryId}/days/1`)
   } else {
     navigateTo(`/admin/libraries/${libraryId}/content`)
   }

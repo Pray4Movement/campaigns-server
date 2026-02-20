@@ -67,6 +67,18 @@
           </div>
         </template>
 
+        <template #secondary-actions>
+          <UButton @click="navigateToSubscribers(selectedGroup!.id)" variant="outline">
+            View Subscribers
+          </UButton>
+          <UButton :to="`/admin/people-groups/${selectedGroup!.id}/content`" variant="outline">
+            Manage Content
+          </UButton>
+          <UButton v-if="selectedGroup!.slug" :to="`/${selectedGroup!.slug}`" target="_blank" variant="outline">
+            Open Campaign
+          </UButton>
+        </template>
+
         <template #actions>
           <UButton @click="resetForm" variant="outline">Reset</UButton>
           <UButton @click="saveChanges" :loading="saving">Save Changes</UButton>
@@ -169,6 +181,7 @@ interface PeopleGroup {
   id: number
   dt_id: string
   name: string
+  slug: string | null
   image_url: string | null
   descriptions: Record<string, string> | null
   metadata: Record<string, any>
@@ -386,6 +399,10 @@ async function syncPeopleGroups() {
   } finally {
     syncing.value = false
   }
+}
+
+function navigateToSubscribers(peopleGroupId: number) {
+  navigateTo(`/admin/subscribers?campaign=${peopleGroupId}`)
 }
 
 function formatNumber(num: number | string): string {

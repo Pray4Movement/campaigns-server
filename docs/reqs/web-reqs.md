@@ -195,22 +195,17 @@ Body:
 
 ### Admin Endpoints (Authentication Required)
 
-#### Campaign CRUD
+#### People Group CRUD
 ```
-GET /api/admin/campaigns
-GET /api/admin/campaigns/{id}
-POST /api/admin/campaigns
-PUT /api/admin/campaigns/{id}
-DELETE /api/admin/campaigns/{id}
+GET /api/admin/people-groups
+GET /api/admin/people-groups/{id}
+PUT /api/admin/people-groups/{id}
 ```
 
 #### Prayer Content CRUD
 ```
-GET /api/admin/campaigns/{campaignId}/content
-GET /api/admin/campaigns/{campaignId}/content/{contentId}
-POST /api/admin/campaigns/{campaignId}/content
-PUT /api/admin/campaigns/{campaignId}/content/{contentId}
-DELETE /api/admin/campaigns/{campaignId}/content/{contentId}
+GET /api/admin/people-groups/{id}/content
+GET /api/admin/people-groups/{id}/libraries
 
 Query Parameters (for list):
   - startDate: Filter content from date
@@ -245,9 +240,9 @@ Response: Editor.js Link Tool format { success: 1, meta: { title, description, i
 - Requires authentication
 - Supports JPEG, PNG, GIF, WebP
 
-#### Campaign Statistics
+#### People Group Statistics
 ```
-GET /api/admin/campaigns/{campaignId}/stats
+GET /api/admin/people-groups/{id}/stats
 Query Parameters:
   - period: enum [today, month, all]
 ```
@@ -268,7 +263,7 @@ DELETE /api/admin/roles/{id}
 
 #### Reminder Subscriptions Management
 ```
-GET /api/admin/campaigns/{campaignId}/subscriptions
+GET /api/admin/people-groups/{id}/subscriptions
 GET /api/admin/subscriptions/{id}
 PUT /api/admin/subscriptions/{id}
 DELETE /api/admin/subscriptions/{id}

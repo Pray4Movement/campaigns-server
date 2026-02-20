@@ -328,8 +328,8 @@ async function loadEmail() {
 
 async function loadCampaigns() {
   try {
-    const response = await $fetch<{ campaigns: { id: number; title: string }[] }>('/api/admin/campaigns')
-    campaigns.value = response.campaigns
+    const response = await $fetch<{ peopleGroups: { id: number; name: string }[] }>('/api/admin/people-groups')
+    campaigns.value = response.peopleGroups.map(pg => ({ id: pg.id, title: pg.name }))
   } catch (error) {
     console.error('Failed to load campaigns:', error)
   }

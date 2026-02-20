@@ -6,19 +6,19 @@ export default defineEventHandler(async (event) => {
   // Require content.view permission
   const user = await requirePermission(event, 'content.view')
 
-  const campaignId = getIntParam(event, 'campaignId')
+  const id = getIntParam(event, 'id')
 
-  // Check if user has access to this campaign
-  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, campaignId)
+  // Check if user has access to this people group
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, id)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'You do not have access to this campaign'
+      statusMessage: 'You do not have access to this people group'
     })
   }
 
-  // Get all libraries for this campaign
-  const libraries = await libraryService.getCampaignLibraries(campaignId)
+  // Get all libraries for this people group
+  const libraries = await libraryService.getCampaignLibraries(id)
 
   // Get stats for each library
   const librariesWithStats = await Promise.all(

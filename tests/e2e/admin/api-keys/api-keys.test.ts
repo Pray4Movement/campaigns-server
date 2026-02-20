@@ -179,21 +179,21 @@ describe('API Keys', async () => {
     })
 
     it('authenticates with Authorization: Bearer header', async () => {
-      const response = await $fetch('/api/admin/campaigns', {
+      const response = await $fetch('/api/admin/people-groups', {
         headers: { authorization: `Bearer ${plaintextKey}` }
       })
-      expect(response.campaigns).toBeDefined()
+      expect(response.peopleGroups).toBeDefined()
     })
 
     it('authenticates with X-API-Key header', async () => {
-      const response = await $fetch('/api/admin/campaigns', {
+      const response = await $fetch('/api/admin/people-groups', {
         headers: { 'x-api-key': plaintextKey }
       })
-      expect(response.campaigns).toBeDefined()
+      expect(response.peopleGroups).toBeDefined()
     })
 
     it('rejects an invalid key', async () => {
-      const error = await $fetch('/api/admin/campaigns', {
+      const error = await $fetch('/api/admin/people-groups', {
         headers: { authorization: 'Bearer dxk_0000000000000000000000000000000000000000' }
       }).catch((e) => e)
       expect(error.statusCode).toBe(401)
@@ -211,7 +211,7 @@ describe('API Keys', async () => {
         ...adminAuth
       })
 
-      const error = await $fetch('/api/admin/campaigns', {
+      const error = await $fetch('/api/admin/people-groups', {
         headers: { authorization: `Bearer ${created.plaintext_key}` }
       }).catch((e) => e)
       expect(error.statusCode).toBe(401)

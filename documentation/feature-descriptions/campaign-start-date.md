@@ -2,15 +2,15 @@
 
 ## Overview
 
-All prayer campaigns share a global start date that determines when prayer content begins. This date is configured by administrators and affects what users see on campaign pages and when they receive their first reminder.
+All prayer people groups share a global start date that determines when prayer content begins. This date is configured by administrators and affects what users see on people group pages and when they receive their first reminder.
 
-Before the start date, users can sign up for prayer reminders, but no reminders are sent and no prayer content is available. This allows campaigns to build momentum before launch while giving subscribers a clear expectation of when prayer will begin.
+Before the start date, users can sign up for prayer reminders, but no reminders are sent and no prayer content is available. This allows people groups to build momentum before launch while giving subscribers a clear expectation of when prayer will begin.
 
 ## How Users Experience It
 
 ### Campaign Landing Page
 
-When visiting a campaign before the start date, users see an informational alert in the signup section:
+When visiting a people group before the start date, users see an informational alert in the signup section:
 
 > **Prayer begins on [date]**
 
@@ -24,7 +24,7 @@ When visiting the prayer content page before the start date, users see a centere
 >
 > Daily prayer content will begin on [date]. Sign up now to receive reminders when it starts!
 
-A button links back to the campaign signup page. The normal "past prayer content" section is hidden since there is no past content yet.
+A button links back to the people group signup page. The normal "past prayer content" section is hidden since there is no past content yet.
 
 ### Reminder Emails
 
@@ -36,13 +36,13 @@ No reminder emails are sent before the start date, regardless of when a user sig
 
 ## Changing the Start Date
 
-Administrators can change the global start date at any time through the Prayer Fuel Order page. This affects all campaigns immediately:
+Administrators can change the global start date at any time through the Prayer Fuel Order page. This affects all people groups immediately:
 
 **If the start date is moved later**: Users who already signed up will not receive reminders until the new date. The system checks the current start date each time it processes reminders, so this change takes effect immediately without needing to update individual subscriptions.
 
 **If the start date is moved earlier**: Users may receive their first reminder sooner than expected, but no earlier than their scheduled time on the new start date.
 
-**If the campaign has already started**: Moving the start date to a future date will pause all reminders until that date arrives. Moving it to an earlier date has no effect since content is already flowing.
+**If the people group has already started**: Moving the start date to a future date will pause all reminders until that date arrives. Moving it to an earlier date has no effect since content is already flowing.
 
 ## Timezone Handling
 
@@ -56,9 +56,9 @@ This approach ensures that "March 1" means March 1 for everyone, regardless of w
 
 ## Design Decisions
 
-**Global start date rather than per-campaign**: All campaigns share one start date because they share the same prayer content library. Having different start dates per campaign would create complexity around which content to show and would confuse users who subscribe to multiple campaigns.
+**Global start date rather than per-people group**: All people groups share one start date because they share the same prayer content library. Having different start dates per people group would create complexity around which content to show and would confuse users who subscribe to multiple people groups.
 
-**Users can sign up before launch**: This allows campaigns to promote signups before content is ready, building a subscriber base for launch day. The alternative of hiding the signup form would limit marketing opportunities.
+**Users can sign up before launch**: This allows people groups to promote signups before content is ready, building a subscriber base for launch day. The alternative of hiding the signup form would limit marketing opportunities.
 
 **Scheduled at user's preferred time, not midnight**: When a user signs up for 9am reminders, their first reminder on the start date arrives at 9am, not midnight. This respects their stated preference and avoids surprising them with an early-morning notification.
 
@@ -66,6 +66,6 @@ This approach ensures that "March 1" means March 1 for everyone, regardless of w
 
 ## Current Limitations
 
-- The start date is global across all campaigns; there is no way to have different start dates for different campaigns
-- There is no end date feature; campaigns run indefinitely once started
+- The start date is global across all people groups; there is no way to have different start dates for different people groups
+- There is no end date feature; people groups run indefinitely once started
 - Users are not notified if the start date changes after they sign up

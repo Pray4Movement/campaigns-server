@@ -2,9 +2,9 @@
   <div class="campaign-content-page">
     <div class="page-header">
       <div>
-        <NuxtLink :to="`/admin/campaigns/${campaignId}`" class="back-link">← Back to Campaign</NuxtLink>
-        <h1 v-if="campaign">{{ campaign.title }} - Content Libraries</h1>
-        <p class="subtitle">Manage content libraries specific to this campaign</p>
+        <NuxtLink :to="`/admin/people-groups/${peopleGroupId}`" class="back-link">← Back to People Group</NuxtLink>
+        <h1 v-if="peopleGroup">{{ peopleGroup.title }} - Content Libraries</h1>
+        <p class="subtitle">Manage content libraries specific to this people group</p>
       </div>
       <div class="header-actions">
         <UButton @click="showImportModal = true" variant="outline" icon="i-lucide-upload">
@@ -227,7 +227,7 @@
     <!-- Import Modal -->
     <LibraryImportModal
       v-model:open="showImportModal"
-      :campaign-id="campaignId"
+      :campaign-id="peopleGroupId"
       :existing-libraries="libraries"
       @imported="handleImported"
     />
@@ -243,9 +243,9 @@ definePageMeta({
 })
 
 const route = useRoute()
-const campaignId = computed(() => parseInt(route.params.id as string))
+const peopleGroupId = computed(() => parseInt(route.params.id as string))
 
-interface Campaign {
+interface PeopleGroup {
   id: number
   title: string
   slug: string
@@ -274,7 +274,7 @@ interface LibraryContent {
   content_json: any
 }
 
-const campaign = ref<Campaign | null>(null)
+const peopleGroup = ref<PeopleGroup | null>(null)
 const libraries = ref<Library[]>([])
 const selectedLibrary = ref<Library | null>(null)
 const loading = ref(true)
@@ -334,12 +334,12 @@ const displayDays = computed(() => {
   return days
 })
 
-async function loadCampaign() {
+async function loadPeopleGroup() {
   try {
-    const response = await $fetch<{ campaign: Campaign }>(`/api/admin/campaigns/${campaignId.value}`)
-    campaign.value = response.campaign
+    const response = await $fetch<{ peopleGroup: PeopleGroup }>(`/api/admin/people-groups/${peopleGroupId.value}`)
+    peopleGroup.value = response.peopleGroup
   } catch (err) {
-    console.error('Failed to load campaign:', err)
+    console.error('Failed to load people group:', err)
   }
 }
 
@@ -347,7 +347,7 @@ async function loadLibraries() {
   try {
     loading.value = true
     error.value = ''
-    const response = await $fetch<{ libraries: Library[] }>(`/api/admin/campaigns/${campaignId.value}/libraries`)
+    const response = await $fetch<{ libraries: Library[] }>(`/api/admin/people-groups/${peopleGroupId.value}/libraries`)
     libraries.value = response.libraries
 
     // Auto-select first library if none selected
@@ -445,7 +445,7 @@ function getDayTooltip(day: number): string {
 
 async function selectDay(day: number) {
   if (!selectedLibrary.value) return
-  await navigateTo(`/admin/campaigns/${campaignId.value}/libraries/${selectedLibrary.value.id}/days/${day}`)
+  await navigateTo(`/admin/people-groups/${peopleGroupId.value}/libraries/${selectedLibrary.value.id}/days/${day}`)
 }
 
 function previousPage() {
@@ -509,7 +509,7 @@ async function saveLibrary() {
       })
     } else {
       // Create new library
-      await $fetch(`/api/admin/campaigns/${campaignId.value}/libraries`, {
+      await $fetch(`/api/admin/people-groups/${peopleGroupId.value}/libraries`, {
         method: 'POST',
         body: form.value
       })
@@ -601,7 +601,7 @@ function handleImported() {
 }
 
 onMounted(async () => {
-  await loadCampaign()
+  await loadPeopleGroup()
   await loadLibraries()
 })
 

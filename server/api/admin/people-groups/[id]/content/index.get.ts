@@ -6,15 +6,15 @@ export default defineEventHandler(async (event) => {
   // Require content.view permission
   const user = await requirePermission(event, 'content.view')
 
-  const campaignId = getIntParam(event, 'campaignId')
+  const id = getIntParam(event, 'id')
   const query = getQuery(event)
 
-  // Check if user has access to this campaign
-  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, campaignId)
+  // Check if user has access to this people group
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, id)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'You do not have access to this campaign'
+      statusMessage: 'You do not have access to this people group'
     })
   }
 
@@ -28,11 +28,11 @@ export default defineEventHandler(async (event) => {
 
   // If grouped by date is requested, return grouped data
   if (query.grouped === 'true') {
-    const grouped = await prayerContentService.getCampaignContentGroupedByDate(campaignId, options)
+    const grouped = await prayerContentService.getCampaignContentGroupedByDate(id, options)
 
     // For each date, get the content for all languages
     const groupedWithContent = await Promise.all(grouped.map(async (group) => {
-      const dateContent = await prayerContentService.getCampaignPrayerContent(campaignId, {
+      const dateContent = await prayerContentService.getCampaignPrayerContent(id, {
         startDate: group.date,
         endDate: group.date
       })
@@ -65,8 +65,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const content = await prayerContentService.getCampaignPrayerContent(campaignId, options)
-  const count = await prayerContentService.getContentCount(campaignId)
+  const content = await prayerContentService.getCampaignPrayerContent(id, options)
+  const count = await prayerContentService.getContentCount(id)
 
   // Parse content_json and format date for each item
   const parsedContent = content.map(item => {

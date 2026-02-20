@@ -6,14 +6,14 @@ export default defineEventHandler(async (event) => {
   // Require content.edit permission
   const user = await requirePermission(event, 'content.edit')
 
-  const campaignId = getIntParam(event, 'campaignId')
+  const id = getIntParam(event, 'id')
 
-  // Check if user has access to this campaign
-  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, campaignId)
+  // Check if user has access to this people group
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, id)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'You do not have access to this campaign'
+      statusMessage: 'You do not have access to this people group'
     })
   }
 
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
       name: body.name,
       description: body.description,
       repeating: body.repeating,
-      people_group_id: campaignId,
+      people_group_id: id,
       library_key: body.library_key
     })
 

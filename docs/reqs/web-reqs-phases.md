@@ -66,11 +66,9 @@
   - [x] Title, slug, description
   - [x] Status (active/inactive)
   - [x] Timestamps
-- [x] API endpoints:
-  - [x] `GET /api/admin/campaigns`
-  - [x] `POST /api/admin/campaigns`
-  - [x] `PUT /api/admin/campaigns/{id}`
-  - [x] `DELETE /api/admin/campaigns/{id}`
+- [x] API endpoints (now under people-groups):
+  - [x] `GET /api/admin/people-groups`
+  - [x] `PUT /api/admin/people-groups/{id}`
 - [x] Slug generation and validation
 - [ ] Basic role/permission structure for campaign access (deferred to Phase 8)
 
