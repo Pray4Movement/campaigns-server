@@ -1,0 +1,436 @@
+{
+  "welcome": "Bun venit",
+  "hello": "Buna",
+  "language": "Limba",
+  "app": {
+    "title": "Aplicatie"
+  },
+  "theme": {
+    "toggle": "Schimba tema",
+    "light": "Mod luminos",
+    "dark": "Mod intunecat"
+  },
+  "login": {
+    "title": "Autentificare administrator",
+    "email": "Email",
+    "emailPlaceholder": "Introduceti adresa de email",
+    "password": "Parola",
+    "passwordPlaceholder": "Introduceti parola",
+    "signIn": "Autentificare",
+    "signingIn": "Se autentifica...",
+    "error": {
+      "failed": "Autentificarea a esuat. Verificati datele de autentificare."
+    }
+  },
+  "footer": {
+    "allRightsReserved": "Toate drepturile rezervate"
+  },
+  "campaign": {
+    "peopleGroup": {
+      "findOutMore": "Afla mai multe",
+      "overview": {
+        "title": "Prezentare generala",
+        "country": "Tara:",
+        "population": "Populatie:",
+        "language": "Limba:",
+        "religion": "Religie:",
+        "status": "Statut:",
+        "churches": "Biserici:"
+      },
+      "prayerStatus": {
+        "title": "Statutul rugaciunii",
+        "description": "persoane care se roaga 10 minute pe zi pentru acest grup de oameni."
+      }
+    },
+    "header": {
+      "prayFor": "Roaga-te pentru {campaign}"
+    },
+    "pageTitle": "Campanie",
+    "signupButton": "Inscrie-te pentru rugaciune",
+    "loading": "Se incarca campania...",
+    "notFound": {
+      "title": "Campanie negasita",
+      "message": "Campania pe care o cautati nu exista sau nu este disponibila.",
+      "goHome": "Pagina principala"
+    },
+    "startsOn": {
+      "message": "Actualizarile zilnice de rugaciune vor incepe pe {date}",
+      "signupEarly": "Inscrie-te acum si fii pregatit cand incepe rugaciunea!"
+    },
+    "signup": {
+      "title": "Inscrie-te pentru rugaciune",
+      "description": "Angajeaza-te sa te rogi zilnic sau saptamanal si primeste memento-uri cu continut de rugaciune.",
+      "success": "✓ Bun venit! Te-ai alaturat miscarii de rugaciune. Vei primi primul tau indemn de rugaciune in curand.",
+      "successEmail": "✓ Aproape gata! Te rugam sa verifici emailul si sa dai click pe linkul de verificare pentru a finaliza inscrierea.",
+      "checkSpam": "Nu vezi emailul? Verifica folderul de spam.",
+      "modal": {
+        "title": "Verifica-ti emailul",
+        "message": "Am trimis un link de verificare la:",
+        "hint": "Da click pe linkul din email pentru a finaliza inscrierea. Nu uita sa verifici folderul de spam. Daca emailul tau este deja verificat, vei primi un email de confirmare.",
+        "button": "Am inteles"
+      },
+      "form": {
+        "name": {
+          "label": "Nume",
+          "placeholder": "Numele tau"
+        },
+        "deliveryMethod": {
+          "label": "Cum doresti sa primesti indemnurile zilnice de rugaciune?",
+          "placeholder": "Selecteaza o metoda...",
+          "email": "Email",
+          "whatsapp": "WhatsApp",
+          "app": "Aplicatie mobila"
+        },
+        "email": {
+          "label": "Adresa de email",
+          "placeholder": "adresa{'@'}email.com"
+        },
+        "phone": {
+          "label": "Numar de telefon",
+          "hint": "Selecteaza tara si introdu numarul de telefon"
+        },
+        "frequency": {
+          "label": "Ma voi ruga...",
+          "daily": "In fiecare zi",
+          "weekly": "Alege zilele"
+        },
+        "daysOfWeek": {
+          "label": "Selecteaza zilele",
+          "error": "Te rugam sa selectezi cel putin o zi",
+          "days": {
+            "sun": "Dum",
+            "mon": "Lun",
+            "tue": "Mar",
+            "wed": "Mie",
+            "thu": "Joi",
+            "fri": "Vin",
+            "sat": "Sam"
+          }
+        },
+        "time": {
+          "label": "Ora memoriu-ului",
+          "hint": "Cand doresti sa primesti memento-ul de rugaciune?"
+        },
+        "timezone": {
+          "label": "Fusul tau orar",
+          "hint": "Detectat automat din browser",
+          "searchPlaceholder": "Cauta fusuri orare..."
+        },
+        "duration": {
+          "label": "Pentru...",
+          "5min": "5 minute",
+          "10min": "10 minute",
+          "15min": "15 minute",
+          "30min": "30 minute",
+          "60min": "1 ora"
+        },
+        "reminderTime": {
+          "label": "Ora memento-ului"
+        },
+        "submit": "Angajeaza-te la rugaciune",
+        "submitting": "Se inscrie...",
+        "consent": {
+          "description": "Pe langa memento-urile de rugaciune, tine-ma la curent cu:",
+          "campaignUpdates": "Actualizari despre acest grup de oameni: {campaign}",
+          "doxaGeneral": "Progres si actualizari de la {link}"
+        }
+      },
+      "errors": {
+        "invalidPhone": "Te rugam sa introduci un numar de telefon valid",
+        "failed": "Inscrierea a esuat. Te rugam sa incerci din nou."
+      }
+    },
+    "prayerFuel": {
+      "title": "Rugaciunea de astazi",
+      "description": "Acceseaza continutul si indemnurile de rugaciune de astazi",
+      "button": "Vezi continutul de rugaciune"
+    },
+    "whyPray": {
+      "title": "De ce sa ne rugam?",
+      "noOne": {
+        "title": "Nu au pe nimeni",
+        "description": "Multe grupuri de oameni neajunse nu au biserici, nici misionari si adesea nici credinciosi."
+      },
+      "opensDoors": {
+        "title": "Rugaciunea deschide usi",
+        "description": "Rugaciunea inmoaie inimile, deschide usi si invita lucrarea Duhului Sfant cu mult inainte ca Evanghelia sa fie proclamata."
+      },
+      "changed": {
+        "title": "Experimenteaza prezenta lui Dumnezeu",
+        "description": "Dumnezeu i-a intalnit pe multi in moduri profunde si minunate in timpul rugaciunii lor. Rugaciunea zilnica iti va creste credinta si te va apropia de Dumnezeu."
+      }
+    },
+    "sampleContent": {
+      "title": "Primeste continut zilnic de rugaciune",
+      "description": "Iata o previzualizare a continutului zilnic de rugaciune.",
+      "peopleGroupName": "Grup de oameni",
+      "scripture": "Scriptura",
+      "prayerPoints": "Puncte de rugaciune",
+      "peopleGroupOfDay": "Grupul de oameni al zilei"
+    },
+    "mobileApp": {
+      "title": "Descarca aplicatia mobila",
+      "description": "Descarca aplicatia noastra mobila pentru o experienta mai buna de rugaciune",
+      "appStore": {
+        "label": "Descarca de pe",
+        "store": "App Store",
+        "ariaLabel": "Descarca de pe App Store"
+      },
+      "googlePlay": {
+        "label": "Disponibil pe",
+        "store": "Google Play",
+        "ariaLabel": "Disponibil pe Google Play"
+      }
+    },
+    "verify": {
+      "pageTitle": "Verifica emailul",
+      "verifying": "Se verifica emailul...",
+      "success": {
+        "title": "Email verificat!",
+        "message": "Emailul tau a fost verificat cu succes. Vei primi acum memento-uri de rugaciune pentru {campaign}."
+      },
+      "error": {
+        "title": "Verificarea a esuat",
+        "generic": "Nu s-a putut verifica emailul. Acest link a fost deja folosit sau a expirat."
+      },
+      "backToCampaign": "Inapoi la campanie",
+      "startPraying": "Incepe rugaciunea"
+    },
+    "unsubscribe": {
+      "pageTitle": "Dezabonare",
+      "processing": "Se proceseaza cererea ta...",
+      "success": {
+        "title": "Dezabonat",
+        "message": "Ai fost dezabonat de la acest memento.",
+        "campaign": "Campanie: {title}",
+        "resubscribe": "Reabonare",
+        "resubscribing": "Se reaboneaza..."
+      },
+      "alreadyDone": {
+        "title": "Deja dezabonat",
+        "message": "Ai fost deja dezabonat de la acest memento."
+      },
+      "unsubscribedFromCampaign": "Ai fost dezabonat de la toate memento-urile {campaign}.",
+      "resubscribed": {
+        "title": "Bine ai revenit!",
+        "message": "Ai fost reabonat la memento-urile de rugaciune. Vei primi urmatorul memento la ora programata.",
+        "viewCampaign": "Vezi campania"
+      },
+      "error": {
+        "title": "Eroare",
+        "message": "Ceva nu a functionat. Te rugam sa incerci din nou.",
+        "goHome": "Pagina principala"
+      },
+      "otherReminders": "Ai alte memento-uri pentru aceasta campanie:",
+      "unsubscribeThis": "Dezabonare",
+      "unsubscribeAll": "Dezabonare de la toate",
+      "yourSubscriptions": "Abonarile tale",
+      "active": "activ",
+      "unsubscribeButton": "Dezabonare",
+      "unsubscribeFromAll": "Dezabonare de la toate memento-urile {campaign}",
+      "preferencesUpdated": "Preferintele tale de email au fost actualizate.",
+      "noActiveSubscriptions": "Nu ai abonari active.",
+      "current": "Curent",
+      "reminderFormat": {
+        "daily": "Zilnic la {time}",
+        "weekly": "{days} la {time}"
+      }
+    },
+    "profile": {
+      "pageTitle": "Gestioneaza preferintele",
+      "title": "Setari memento",
+      "greeting": "Buna {name}, gestioneaza preferintele tale de memento de rugaciune mai jos.",
+      "save": "Salveaza modificarile",
+      "saving": "Se salveaza...",
+      "success": "Preferintele tale au fost actualizate.",
+      "emailChanged": "Am trimis un email de verificare la noua ta adresa. Te rugam sa verifici pentru a continua sa primesti memento-uri.",
+      "emailNotVerified": "Emailul tau nu este verificat. Te rugam sa verifici casuta de email pentru linkul de verificare pentru a primi memento-uri.",
+      "emailHint": "Schimbarea emailului va necesita re-verificare.",
+      "sections": {
+        "account": "Cont",
+        "schedule": "Program memento",
+        "prayer": "Preferinte de rugaciune",
+        "emailPreferences": "Preferinte de comunicare"
+      },
+      "emailPreferences": {
+        "description": "Alege ce comunicari doresti sa primesti:",
+        "campaignUpdates": "Actualizari despre {campaign}",
+        "doxaGeneral": "Actualizari generale de la Doxa",
+        "doxaGeneralHint": "Actualizari de progres si stiri de la Doxa"
+      },
+      "consentUpdated": "Preferintele de comunicare au fost actualizate.",
+      "subscriptions": "Abonarile tale",
+      "saveAccount": "Salveaza contul",
+      "unsubscribed": "Dezabonat",
+      "current": "Curent",
+      "viewCampaign": "Vezi campania",
+      "unsubscribeButton": "Dezabonare",
+      "resubscribeButton": "Reabonare",
+      "unsubscribeConfirm": "Esti sigur ca vrei sa te dezabonezi de la {campaign}?",
+      "unsubscribeSuccess": "Ai fost dezabonat.",
+      "resubscribeSuccess": "Ai fost reabonat.",
+      "reminders": "memento-uri",
+      "reminder": "Memento",
+      "deleteReminderConfirm": "Esti sigur ca vrei sa stergi acest memento?",
+      "deleteReminderSuccess": "Memento sters.",
+      "error": {
+        "title": "Eroare",
+        "notFound": "Abonarea nu a fost gasita.",
+        "failed": "Salvarea modificarilor a esuat. Te rugam sa incerci din nou."
+      }
+    }
+  },
+  "prayerFuel": {
+    "pageTitle": "Continut de rugaciune",
+    "title": "Rugaciunea de astazi",
+    "loading": "Se incarca rugaciunea de astazi...",
+    "backTo": "Inapoi la {campaign}",
+    "backToToday": "Inapoi la rugaciunea de astazi",
+    "error": {
+      "title": "Nu s-a putut incarca rugaciunea",
+      "backToCampaign": "Inapoi la campanie",
+      "recordFailed": "Inregistrarea rugaciunii a esuat. Te rugam sa incerci din nou."
+    },
+    "noContent": {
+      "title": "Niciun continut de rugaciune astazi",
+      "message": "Revino maine pentru continut nou de rugaciune."
+    },
+    "startsOn": {
+      "title": "Continutul de rugaciune vine in curand",
+      "message": "Continutul zilnic de rugaciune va incepe pe {date}. Inscrie-te acum pentru a primi memento-uri cand incepe!"
+    },
+    "dateView": {
+      "noContent": {
+        "title": "Niciun continut de rugaciune",
+        "message": "Niciun continut de rugaciune disponibil pentru aceasta data."
+      }
+    },
+    "button": {
+      "amen": "Amin",
+      "hint": "Apasa pentru a incheia timpul de rugaciune"
+    },
+    "thankYou": "Multumim ca te-ai rugat!",
+    "meetThePeople": "Cunoaste oamenii",
+    "peopleGroupOfTheDay": "Grupul de oameni al zilei",
+    "dayInTheLife": "O zi din viata",
+    "pauseAndPray": "Opreste-te si roaga-te",
+    "mapTitle": "Harta care arata locatia grupului {name}",
+    "pastPrayers": {
+      "title": "Continut de rugaciune anterior"
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Urmator",
+      "today": "Astazi"
+    }
+  },
+  "common": {
+    "save": "Salveaza",
+    "cancel": "Anuleaza",
+    "delete": "Sterge",
+    "edit": "Editeaza",
+    "create": "Creeaza",
+    "back": "Inapoi",
+    "next": "Urmator",
+    "previous": "Anterior",
+    "loading": "Se incarca...",
+    "minutes": "min",
+    "yes": "Da",
+    "no": "Nu"
+  },
+  "followupPage": {
+    "recording": "Se inregistreaza raspunsul tau...",
+    "error": {
+      "title": "Ceva nu a functionat",
+      "invalidLink": "Link invalid. Lipsesc parametrii necesari.",
+      "invalidResponse": "Tip de raspuns invalid.",
+      "failed": "Inregistrarea raspunsului a esuat. Te rugam sa incerci din nou."
+    },
+    "goHome": "Pagina principala",
+    "committed": {
+      "title": "Multumim pentru angajamentul tau!",
+      "message": "Suntem foarte bucurosi sa auzim ca ramai credincios in rugaciune. Dedicarea ta face diferenta!",
+      "checkInNotice": "Vom reveni cu un mesaj peste cateva luni.",
+      "continueButton": "Continua la campanie"
+    },
+    "sometimes": {
+      "title": "Multumim pentru sinceritate!",
+      "message": "Viata poate fi agitata si e in regula daca nu ai reusit sa te rogi atat de des cat ai fi dorit.",
+      "suggestion": "Doresti sa ajustezi programul de rugaciune la ceva mai usor de gestionat?",
+      "adjustButton": "Ajusteaza programul meu",
+      "continueButton": "Continua la campanie"
+    },
+    "notPraying": {
+      "title": "Intelegem",
+      "message": "Abonarea ta a fost pusa pe pauza. Nu vei primi memento-uri de rugaciune deocamdata.",
+      "reactivateNotice": "Daca doresti sa reiei rugaciunea in viitor, poti reactiva abonarea oricand din profilul tau.",
+      "profileButton": "Vezi profilul meu",
+      "visitButton": "Viziteaza campania"
+    },
+    "pageTitle": "Verificare rugaciune"
+  },
+  "email": {
+    "common": {
+      "hello": "Buna {name}!",
+      "automatedMessage": "Acesta este un mesaj automat de la {appName}. Te rugam sa nu raspunzi la acest email.",
+      "managePreferences": "Gestioneaza preferintele",
+      "unsubscribe": "Dezabonare"
+    },
+    "verification": {
+      "subject": "Verifica emailul pentru {campaign}",
+      "header": "Verifica-ti emailul",
+      "thankYou": "Multumim ca te-ai inscris pentru memento-uri de rugaciune pentru {campaign}.",
+      "pleaseVerify": "Te rugam sa verifici adresa de email facand click pe butonul de mai jos:",
+      "verifyButton": "Verifica emailul",
+      "linkInstructions": "Daca butonul nu functioneaza, poti copia si lipi acest link in browser:",
+      "note": "Nota:",
+      "expiration": "Acest link de verificare va expira in 7 zile.",
+      "ignoreMessage": "Daca nu te-ai inscris pentru memento-uri de rugaciune, poti ignora acest email in siguranta."
+    },
+    "welcome": {
+      "subject": "Bun venit la {appName} - {campaign}",
+      "header": "Bun venit la {appName}",
+      "thankYou": "Multumim ca te-ai inscris pentru rugaciune. Emailul tau a fost verificat si esti pregatit sa primesti memento-uri de rugaciune pentru {campaign}.",
+      "startPraying": "Incepe rugaciunea",
+      "profileInstructions": "Poti actualiza detaliile profilului si notificarile aici:"
+    },
+    "reminder": {
+      "subject": "Memento de rugaciune - {campaign}",
+      "header": "Memento de rugaciune",
+      "timeForPrayer": "Este timpul pentru sesiunea ta de rugaciune de {duration} minute.",
+      "viewPrayer": "Vezi rugaciunea de astazi",
+      "automatedReminder": "Acesta este un memento automat de rugaciune de la {appName}."
+    },
+    "followup": {
+      "subject": "{campaign}: Cum merge angajamentul tau de rugaciune?",
+      "subjectReminder": "Reamintire: {campaign}: Cum merge angajamentul tau de rugaciune?",
+      "header": "Verificare rugaciune",
+      "reminderIntro": "Ti-am trimis un mesaj saptamana trecuta si am dorit sa revenim.",
+      "standardIntro": "Ne-ar placea sa auzim cum merge calatoria ta de rugaciune!",
+      "questionDaily": "Te mai rogi zilnic?",
+      "questionWeekly": "Te mai rogi in zilele de {days}?",
+      "yesDaily": "Da, ma rog zilnic",
+      "yesWeekly": "Da, in zilele programate",
+      "sometimes": "Uneori, dar nu in fiecare zi",
+      "sometimesWeekly": "Uneori, dar nu intotdeauna",
+      "noLonger": "Nu, nu ma mai rog",
+      "feedbackHelps": "Feedback-ul tau ne ajuta sa intelegem cum te putem sprijini mai bine in calatoria ta de rugaciune.",
+      "pauseNotice": "Daca nu primim raspuns, vom pune pe pauza memento-urile de rugaciune pentru a nu-ti umple casuta de email. Le poti reactiva oricand din profilul tau.",
+      "commitmentCheckIn": "Aceasta este o verificare a angajamentului de la {appName}."
+    },
+    "marketing": {
+      "headerCampaign": "Actualizari {campaign}",
+      "headerDefault": "Actualizari {appName}",
+      "footer": "Ai primit acest email deoarece ai optat sa primesti actualizari de la {appName}."
+    },
+    "days": {
+      "sunday": "Duminica",
+      "monday": "Luni",
+      "tuesday": "Marti",
+      "wednesday": "Miercuri",
+      "thursday": "Joi",
+      "friday": "Vineri",
+      "saturday": "Sambata"
+    }
+  }
+}
