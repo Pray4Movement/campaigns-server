@@ -6,12 +6,14 @@ export async function sendWelcomeEmail(
   peopleGroupName: string,
   peopleGroupSlug: string,
   profileId: string,
-  locale: string = 'en'
+  locale: string = 'en',
+  trackingId?: string
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
   const appName = config.appName || 'Doxa'
-  const peopleGroupUrl = `${baseUrl}${localePath(`/${peopleGroupSlug}/prayer`, locale)}`
+  const prayerPath = localePath(`/${peopleGroupSlug}/prayer`, locale)
+  const peopleGroupUrl = trackingId ? `${baseUrl}${prayerPath}?uid=${trackingId}` : `${baseUrl}${prayerPath}`
   const profileUrl = `${baseUrl}${localePath('/subscriber', locale)}?id=${profileId}`
 
   const subject = t('email.welcome.subject', locale, { appName, campaign: peopleGroupName })

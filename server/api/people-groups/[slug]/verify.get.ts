@@ -48,28 +48,29 @@ export default defineEventHandler(async (event) => {
   }
 
   // Set initial next reminder for all email subscriptions of this subscriber
+  let subscriber = null
   if (result.contactMethod) {
     await peopleGroupSubscriptionService.setNextRemindersForSubscriber(result.contactMethod.subscriber_id)
+    subscriber = await subscriberService.getSubscriberById(result.contactMethod.subscriber_id)
 
     // Send welcome email (only if this was a new verification, not already verified)
-    if (result.error !== 'Already verified') {
-      const subscriber = await subscriberService.getSubscriberById(result.contactMethod.subscriber_id)
-      if (subscriber) {
-        sendWelcomeEmail(
-          result.contactMethod.value,
-          subscriber.name,
-          peopleGroup.name,
-          slug,
-          subscriber.profile_id,
-          subscriber.preferred_language || 'en'
-        ).catch(err => console.error('Failed to send welcome email:', err))
-      }
+    if (result.error !== 'Already verified' && subscriber) {
+      sendWelcomeEmail(
+        result.contactMethod.value,
+        subscriber.name,
+        peopleGroup.name,
+        slug,
+        subscriber.profile_id,
+        subscriber.preferred_language || 'en',
+        subscriber.tracking_id
+      ).catch(err => console.error('Failed to send welcome email:', err))
     }
   }
 
   return {
     message: 'Email verified successfully',
     people_group_name: peopleGroup.name,
-    people_group_slug: slug
+    people_group_slug: slug,
+    tracking_id: subscriber?.tracking_id
   }
 })

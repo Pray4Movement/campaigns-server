@@ -23,7 +23,7 @@
           <h1>{{ $t('campaign.verify.success.title') }}</h1>
         </div>
         <p class="message">{{ $t('campaign.verify.success.message', { campaign: peopleGroupTitle }) }}</p>
-        <NuxtLink :to="localePath(`/${slug}/prayer`)" class="btn-grey">
+        <NuxtLink :to="prayerLink" class="btn-grey">
           {{ $t('campaign.verify.startPraying') }}
         </NuxtLink>
       </div>
@@ -49,6 +49,11 @@ const { data, pending, error } = await useFetch(`/api/people-groups/${slug}/veri
 })
 
 const peopleGroupTitle = computed(() => data.value?.people_group_name || '')
+const prayerLink = computed(() => {
+  const basePath = localePath(`/${slug}/prayer`)
+  const trackingId = data.value?.tracking_id
+  return trackingId ? `${basePath}?uid=${trackingId}` : basePath
+})
 const errorMessage = computed(() => {
   return t('campaign.verify.error.generic')
 })
