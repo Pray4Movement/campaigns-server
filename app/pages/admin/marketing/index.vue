@@ -9,7 +9,7 @@
 
     <div class="cards-grid">
       <NuxtLink to="/admin/marketing/emails" class="card">
-        <h2>Email Campaigns</h2>
+        <h2>Marketing Emails</h2>
         <p>Create and send marketing emails to subscribers who have opted in to receive updates.</p>
         <div class="card-stats" v-if="stats">
           <span>{{ stats.drafts }} drafts</span>

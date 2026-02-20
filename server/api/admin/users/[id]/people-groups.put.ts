@@ -1,4 +1,4 @@
-import { campaignAccessService } from '#server/database/campaign-access'
+import { peopleGroupAccessService } from '#server/database/people-group-access'
 import { userService } from '#server/database/users'
 import { handleApiError, getUuidParam } from '#server/utils/api-helpers'
 
@@ -30,12 +30,10 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Remove all existing campaign access for this user
-    await campaignAccessService.removeUserFromAllCampaigns(userId)
+    await peopleGroupAccessService.removeUserFromAllPeopleGroups(userId)
 
-    // Add new campaign access
     if (body.people_group_ids.length > 0) {
-      await campaignAccessService.assignUserToCampaigns(userId, body.people_group_ids)
+      await peopleGroupAccessService.assignUserToPeopleGroups(userId, body.people_group_ids)
     }
 
     return {
@@ -44,6 +42,6 @@ export default defineEventHandler(async (event) => {
       people_group_ids: body.people_group_ids
     }
   } catch (error) {
-    handleApiError(error, 'Failed to update user campaigns')
+    handleApiError(error, 'Failed to update user people groups')
   }
 })

@@ -68,29 +68,26 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Determine if this is a campaign import or global import
-  // and apply appropriate authentication
+  // Determine if this is a people group import or global import
   let user
-  let targetCampaignId: number | null = null
+  let targetPeopleGroupId: number | null = null
 
   if (body.target_library_id) {
-    // Importing into existing library - check what type it is
     const existingLibrary = await libraryService.getLibraryById(body.target_library_id)
     if (existingLibrary?.people_group_id) {
-      targetCampaignId = existingLibrary.people_group_id
+      targetPeopleGroupId = existingLibrary.people_group_id
     }
   } else if (body.people_group_id) {
-    targetCampaignId = body.people_group_id
+    targetPeopleGroupId = body.people_group_id
   }
 
-  if (targetCampaignId) {
-    // People group import - require content.edit permission and access
+  if (targetPeopleGroupId) {
     user = await requirePermission(event, 'content.edit')
-    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, targetCampaignId)
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, targetPeopleGroupId)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
-        statusMessage: 'You do not have access to this campaign'
+        statusMessage: 'You do not have access to this people group'
       })
     }
   } else {

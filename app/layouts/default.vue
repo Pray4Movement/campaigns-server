@@ -48,7 +48,7 @@
       </div>
     </header>
 
-    <!-- Campaign Title -->
+    <!-- People Group Title -->
     <div v-if="shouldShowPeopleGroupHeader" class="bg-beige-50 dark:bg-elevated py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
         <h1 class="text-3xl md:text-4xl font-bold uppercase tracking-wide">

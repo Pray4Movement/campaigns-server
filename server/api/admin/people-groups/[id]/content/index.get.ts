@@ -28,11 +28,11 @@ export default defineEventHandler(async (event) => {
 
   // If grouped by date is requested, return grouped data
   if (query.grouped === 'true') {
-    const grouped = await prayerContentService.getCampaignContentGroupedByDate(id, options)
+    const grouped = await prayerContentService.getPeopleGroupContentGroupedByDate(id, options)
 
     // For each date, get the content for all languages
     const groupedWithContent = await Promise.all(grouped.map(async (group) => {
-      const dateContent = await prayerContentService.getCampaignPrayerContent(id, {
+      const dateContent = await prayerContentService.getPeopleGroupPrayerContent(id, {
         startDate: group.date,
         endDate: group.date
       })
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const content = await prayerContentService.getCampaignPrayerContent(id, options)
+  const content = await prayerContentService.getPeopleGroupPrayerContent(id, options)
   const count = await prayerContentService.getContentCount(id)
 
   // Parse content_json and format date for each item

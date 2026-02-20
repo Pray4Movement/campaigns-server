@@ -7,7 +7,7 @@ export const PEOPLE_GROUP_LIBRARY_ID = -1
 export const PEOPLE_GROUP_LIBRARY: Library = {
   id: PEOPLE_GROUP_LIBRARY_ID,
   name: 'People Group',
-  description: 'Dynamically displays the linked people group information for the campaign',
+  description: 'Dynamically displays the linked people group information',
   type: 'people_group',
   repeating: false,
   people_group_id: null,
@@ -30,12 +30,12 @@ export const DAILY_PEOPLE_GROUP_LIBRARY: Library = {
   updated_at: '2025-01-01T00:00:00.000Z'
 }
 
-// Virtual Day in the Life library - displays campaign's day_in_life library content
+// Virtual Day in the Life library - displays people group's day_in_life library content
 export const DAY_IN_LIFE_LIBRARY_ID = -3
 export const DAY_IN_LIFE_LIBRARY: Library = {
   id: DAY_IN_LIFE_LIBRARY_ID,
   name: 'Day in the Life',
-  description: 'Displays day in the life content from the campaign\'s day_in_life library',
+  description: 'Displays day in the life content from the people group\'s day_in_life library',
   type: 'static',
   repeating: true,
   people_group_id: null,
@@ -144,7 +144,7 @@ export class LibraryService {
   }
 
   // Get people-group-specific library by key
-  async getCampaignLibraryByKey(peopleGroupId: number, libraryKey: string): Promise<Library | null> {
+  async getPeopleGroupLibraryByKey(peopleGroupId: number, libraryKey: string): Promise<Library | null> {
     const stmt = this.db.prepare(`
       SELECT * FROM libraries WHERE people_group_id = ? AND library_key = ?
     `)
@@ -153,7 +153,7 @@ export class LibraryService {
   }
 
   // Get all libraries for a people group
-  async getCampaignLibraries(peopleGroupId: number): Promise<Library[]> {
+  async getPeopleGroupLibraries(peopleGroupId: number): Promise<Library[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM libraries WHERE people_group_id = ? ORDER BY name
     `)
@@ -257,7 +257,7 @@ export class LibraryService {
     return result.changes > 0
   }
 
-  // Get distinct library keys (for campaign-specific libraries)
+  // Get distinct library keys (for people-group-specific libraries)
   async getDistinctLibraryKeys(): Promise<string[]> {
     const stmt = this.db.prepare(`
       SELECT DISTINCT library_key FROM libraries

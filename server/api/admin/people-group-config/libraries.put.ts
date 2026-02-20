@@ -13,8 +13,8 @@ interface RowConfig {
 }
 
 /**
- * Update global campaign library configuration
- * This sets which libraries are available to all campaigns and the global start date
+ * Update global people group library configuration
+ * This sets which libraries are available to all people groups and the global start date
  *
  * Expected body:
  * {
@@ -70,6 +70,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error) {
-    handleApiError(error, 'Failed to update global campaign library configuration')
+    handleApiError(error, 'Failed to update global people group library configuration')
   }
 })

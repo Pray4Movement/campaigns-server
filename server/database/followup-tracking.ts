@@ -36,7 +36,7 @@ class FollowupTrackingService {
   private db = getDatabase()
 
   /**
-   * Get the last prayer activity timestamp for a subscriber on a campaign.
+   * Get the last prayer activity timestamp for a subscriber on a people group.
    * Returns null if no activity found.
    */
   async getLastActivityAt(subscriberId: number, peopleGroupId: number): Promise<string | null> {

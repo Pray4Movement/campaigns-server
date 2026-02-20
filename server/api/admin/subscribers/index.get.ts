@@ -1,6 +1,6 @@
 import { subscriberService } from '#server/database/subscribers'
 import { roleService } from '#server/database/roles'
-import { campaignAccessService } from '#server/database/campaign-access'
+import { peopleGroupAccessService } from '#server/database/people-group-access'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     let accessiblePeopleGroupIds: number[] | undefined
 
     if (!isAdmin) {
-      accessiblePeopleGroupIds = await campaignAccessService.getUserCampaigns(user.userId)
+      accessiblePeopleGroupIds = await peopleGroupAccessService.getUserPeopleGroups(user.userId)
 
       // If user has no people group access, return empty list
       if (accessiblePeopleGroupIds.length === 0) {

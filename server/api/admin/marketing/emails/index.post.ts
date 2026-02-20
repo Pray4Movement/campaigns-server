@@ -20,17 +20,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!body.audience_type || !['doxa', 'campaign'].includes(body.audience_type)) {
+  if (!body.audience_type || !['doxa', 'people_group'].includes(body.audience_type)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Valid audience_type is required (doxa or campaign)'
+      statusMessage: 'Valid audience_type is required (doxa or people_group)'
     })
   }
 
-  if (body.audience_type === 'campaign' && !body.people_group_id) {
+  if (body.audience_type === 'people_group' && !body.people_group_id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'people_group_id is required when audience_type is campaign'
+      statusMessage: 'people_group_id is required when audience_type is people_group'
     })
   }
 
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
       subject: body.subject,
       content_json: body.content_json,
       audience_type: body.audience_type,
-      people_group_id: body.audience_type === 'campaign' ? body.people_group_id : null,
+      people_group_id: body.audience_type === 'people_group' ? body.people_group_id : null,
       created_by: user.userId
     })
 

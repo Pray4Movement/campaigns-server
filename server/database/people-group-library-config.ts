@@ -1,6 +1,6 @@
 import { getDatabase } from './db'
 
-export interface CampaignLibraryConfig {
+export interface PeopleGroupLibraryConfig {
   id: number
   people_group_id: number
   library_id: number
@@ -10,23 +10,22 @@ export interface CampaignLibraryConfig {
   updated_at: string
 }
 
-export interface CreateCampaignLibraryConfigData {
+export interface CreatePeopleGroupLibraryConfigData {
   people_group_id: number
   library_id: number
   order_index: number
   enabled?: boolean
 }
 
-export interface UpdateCampaignLibraryConfigData {
+export interface UpdatePeopleGroupLibraryConfigData {
   order_index?: number
   enabled?: boolean
 }
 
-export class CampaignLibraryConfigService {
+export class PeopleGroupLibraryConfigService {
   private db = getDatabase()
 
-  // Add library to people group
-  async addLibraryToCampaign(data: CreateCampaignLibraryConfigData): Promise<CampaignLibraryConfig> {
+  async addLibraryToPeopleGroup(data: CreatePeopleGroupLibraryConfigData): Promise<PeopleGroupLibraryConfig> {
     const {
       people_group_id,
       library_id,
@@ -44,24 +43,22 @@ export class CampaignLibraryConfigService {
       const configId = result.lastInsertRowid as number
       return (await this.getConfigById(configId))!
     } catch (error: any) {
-      if (error.code === '23505') { // PostgreSQL unique violation
+      if (error.code === '23505') {
         throw new Error('This library is already configured for this people group')
       }
       throw error
     }
   }
 
-  // Get config by ID
-  async getConfigById(id: number): Promise<CampaignLibraryConfig | null> {
+  async getConfigById(id: number): Promise<PeopleGroupLibraryConfig | null> {
     const stmt = this.db.prepare(`
       SELECT * FROM campaign_library_config WHERE id = ?
     `)
-    const config = await stmt.get(id) as CampaignLibraryConfig | null
+    const config = await stmt.get(id) as PeopleGroupLibraryConfig | null
     return config
   }
 
-  // Get all libraries for a people group (ordered)
-  async getCampaignLibraries(peopleGroupId: number, includeDisabled: boolean = false): Promise<CampaignLibraryConfig[]> {
+  async getPeopleGroupLibraries(peopleGroupId: number, includeDisabled: boolean = false): Promise<PeopleGroupLibraryConfig[]> {
     let query = `
       SELECT * FROM campaign_library_config
       WHERE people_group_id = ?
@@ -75,23 +72,21 @@ export class CampaignLibraryConfigService {
     query += ' ORDER BY order_index ASC'
 
     const stmt = this.db.prepare(query)
-    const configs = await stmt.all(...params) as CampaignLibraryConfig[]
+    const configs = await stmt.all(...params) as PeopleGroupLibraryConfig[]
     return configs
   }
 
-  // Get all people groups using a library
-  async getLibraryCampaigns(libraryId: number): Promise<CampaignLibraryConfig[]> {
+  async getLibraryPeopleGroups(libraryId: number): Promise<PeopleGroupLibraryConfig[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM campaign_library_config
       WHERE library_id = ?
       ORDER BY people_group_id, order_index ASC
     `)
-    const configs = await stmt.all(libraryId) as CampaignLibraryConfig[]
+    const configs = await stmt.all(libraryId) as PeopleGroupLibraryConfig[]
     return configs
   }
 
-  // Update config
-  async updateConfig(id: number, data: UpdateCampaignLibraryConfigData): Promise<CampaignLibraryConfig | null> {
+  async updateConfig(id: number, data: UpdatePeopleGroupLibraryConfigData): Promise<PeopleGroupLibraryConfig | null> {
     const config = await this.getConfigById(id)
     if (!config) {
       return null
@@ -126,22 +121,19 @@ export class CampaignLibraryConfigService {
     return this.getConfigById(id)
   }
 
-  // Remove library from people group
-  async removeLibraryFromCampaign(id: number): Promise<boolean> {
+  async removeLibraryFromPeopleGroup(id: number): Promise<boolean> {
     const stmt = this.db.prepare('DELETE FROM campaign_library_config WHERE id = ?')
     const result = await stmt.run(id)
     return result.changes > 0
   }
 
-  // Remove library from people group by people_group_id and library_id
-  async removeLibraryByCampaignAndLibrary(peopleGroupId: number, libraryId: number): Promise<boolean> {
+  async removeLibraryByPeopleGroupAndLibrary(peopleGroupId: number, libraryId: number): Promise<boolean> {
     const stmt = this.db.prepare('DELETE FROM campaign_library_config WHERE people_group_id = ? AND library_id = ?')
     const result = await stmt.run(peopleGroupId, libraryId)
     return result.changes > 0
   }
 
-  // Update order of all libraries for a people group (bulk update)
-  async updateCampaignLibrariesOrder(peopleGroupId: number, libraryOrders: Array<{ library_id: number; order_index: number }>): Promise<void> {
+  async updatePeopleGroupLibrariesOrder(peopleGroupId: number, libraryOrders: Array<{ library_id: number; order_index: number }>): Promise<void> {
     for (const { library_id, order_index } of libraryOrders) {
       const stmt = this.db.prepare(`
         UPDATE campaign_library_config
@@ -152,13 +144,10 @@ export class CampaignLibraryConfigService {
     }
   }
 
-  // Set libraries for people group (replaces existing configuration)
-  async setCampaignLibraries(peopleGroupId: number, libraryIds: number[]): Promise<void> {
-    // Delete existing configurations
+  async setPeopleGroupLibraries(peopleGroupId: number, libraryIds: number[]): Promise<void> {
     const deleteStmt = this.db.prepare('DELETE FROM campaign_library_config WHERE people_group_id = ?')
     await deleteStmt.run(peopleGroupId)
 
-    // Add new configurations
     for (let i = 0; i < libraryIds.length; i++) {
       const insertStmt = this.db.prepare(`
         INSERT INTO campaign_library_config (people_group_id, library_id, order_index, enabled)
@@ -169,5 +158,4 @@ export class CampaignLibraryConfigService {
   }
 }
 
-// Export singleton instance
-export const campaignLibraryConfigService = new CampaignLibraryConfigService()
+export const peopleGroupLibraryConfigService = new PeopleGroupLibraryConfigService()

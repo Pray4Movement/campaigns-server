@@ -91,7 +91,7 @@ export default defineEventHandler(async (event) => {
   // Get commitment stats
   const commitmentStats = await peopleGroupSubscriptionService.getCommitmentStats(pg.id)
 
-  // Get global campaign start date
+  // Get global start date
   const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
 
   // Cache for 1 hour at edge (Cloudflare)

@@ -95,7 +95,7 @@ class ReminderSignupService {
   }
 
   // Get all signups for a people group
-  async getCampaignSignups(peopleGroupId: number, options?: {
+  async getPeopleGroupSignups(peopleGroupId: number, options?: {
     status?: 'active' | 'inactive' | 'unsubscribed'
     limit?: number
     offset?: number

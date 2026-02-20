@@ -72,7 +72,7 @@
             Manage Content
           </UButton>
           <UButton v-if="selectedGroup!.slug" :to="`/${selectedGroup!.slug}`" target="_blank" variant="outline">
-            Open Campaign
+            Open People Group
           </UButton>
         </template>
 

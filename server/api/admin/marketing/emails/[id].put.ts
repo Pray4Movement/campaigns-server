@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         statusCode: 403,
         statusMessage: body.audience_type === 'doxa'
           ? 'Only admins can send Doxa-wide emails'
-          : 'You do not have access to this campaign'
+          : 'You do not have access to this people group'
       })
     }
   }
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
       subject: body.subject,
       content_json: body.content_json,
       audience_type: body.audience_type,
-      people_group_id: body.audience_type === 'campaign' ? body.people_group_id : null,
+      people_group_id: body.audience_type === 'people_group' ? body.people_group_id : null,
       updated_by: user.userId
     })
 

@@ -1,6 +1,6 @@
 /**
  * GET /api/people-groups/:slug/verify
- * Verify email address for campaign subscription
+ * Verify email address for people group subscription
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { contactMethodService } from '#server/database/contact-methods'

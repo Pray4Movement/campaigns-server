@@ -55,17 +55,17 @@
 
               <div
                 class="audience-option"
-                :class="{ selected: form.audience_type === 'campaign' }"
-                @click="selectAudience('campaign')"
+                :class="{ selected: form.audience_type === 'people_group' }"
+                @click="selectAudience('people_group')"
               >
                 <div class="option-header">
-                  <input type="radio" v-model="form.audience_type" value="campaign" />
-                  <span class="option-title">Campaign</span>
+                  <input type="radio" v-model="form.audience_type" value="people_group" />
+                  <span class="option-title">People Group</span>
                 </div>
-                <p class="option-description">Send to subscribers who opted in to a specific campaign</p>
+                <p class="option-description">Send to subscribers who opted in to a specific people group</p>
 
                 <USelectMenu
-                  v-show="form.audience_type === 'campaign'"
+                  v-show="form.audience_type === 'people_group'"
                   v-model="form.people_group_id"
                   :items="peopleGroupOptions"
                   placeholder="Select a people group"
@@ -75,7 +75,7 @@
                   value-key="value"
                   @update:model-value="loadPeopleGroupCount"
                 />
-                <p class="option-count" v-if="form.audience_type === 'campaign' && peopleGroupCount !== null">
+                <p class="option-count" v-if="form.audience_type === 'people_group' && peopleGroupCount !== null">
                   {{ peopleGroupCount }} recipients
                 </p>
               </div>
@@ -131,7 +131,7 @@ const toast = useToast()
 
 const form = ref({
   subject: '',
-  audience_type: '' as 'doxa' | 'campaign' | '',
+  audience_type: '' as 'doxa' | 'people_group' | '',
   people_group_id: undefined as number | undefined,
   content: { type: 'doc', content: [{ type: 'paragraph' }] }
 })
@@ -166,7 +166,7 @@ const canSave = computed(() => {
 const canSend = computed(() => {
   return canSave.value && (
     (form.value.audience_type === 'doxa' && doxaCount.value && doxaCount.value > 0) ||
-    (form.value.audience_type === 'campaign' && peopleGroupCount.value && peopleGroupCount.value > 0)
+    (form.value.audience_type === 'people_group' && peopleGroupCount.value && peopleGroupCount.value > 0)
   )
 })
 
@@ -174,7 +174,7 @@ const hasActualContent = computed(() => {
   return form.value.subject.trim().length > 0
 })
 
-function selectAudience(type: 'doxa' | 'campaign') {
+function selectAudience(type: 'doxa' | 'people_group') {
   form.value.audience_type = type
   if (type === 'doxa') {
     form.value.people_group_id = undefined
@@ -351,7 +351,7 @@ onMounted(() => {
   if (isAdmin.value) {
     loadDoxaCount()
   } else {
-    form.value.audience_type = 'campaign'
+    form.value.audience_type = 'people_group'
   }
 })
 </script>

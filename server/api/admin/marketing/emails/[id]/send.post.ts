@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
       statusCode: 403,
       statusMessage: email.audience_type === 'doxa'
         ? 'Only admins can send Doxa-wide emails'
-        : 'You do not have access to this campaign'
+        : 'You do not have access to this people group'
     })
   }
 

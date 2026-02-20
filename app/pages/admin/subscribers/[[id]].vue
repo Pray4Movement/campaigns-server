@@ -107,7 +107,7 @@
 
               <div v-if="selectedSubscriber.consents.people_group_names.length > 0" class="consent-item">
                 <div class="consent-label">
-                  <span class="consent-name">Campaign Marketing</span>
+                  <span class="consent-name">People Group Marketing</span>
                 </div>
                 <div class="people-group-consents">
                   <UBadge
@@ -123,7 +123,7 @@
 
               <div v-else class="consent-item">
                 <div class="consent-label">
-                  <span class="consent-name">Campaign Marketing</span>
+                  <span class="consent-name">People Group Marketing</span>
                   <UBadge label="None" color="neutral" variant="outline" size="xs" />
                 </div>
               </div>
@@ -231,8 +231,8 @@
                     >
                       Send Follow-up
                     </UButton>
-                    <UButton size="xs" variant="ghost" @click="filterByCampaign(subscription)">
-                      Filter by Campaign
+                    <UButton size="xs" variant="ghost" @click="filterByPeopleGroup(subscription)">
+                      Filter by People Group
                     </UButton>
                   </div>
                 </div>
@@ -812,7 +812,7 @@ function cancelDelete() {
   subscriberToDelete.value = null
 }
 
-function filterByCampaign(subscription: Subscription) {
+function filterByPeopleGroup(subscription: Subscription) {
   filterPeopleGroupId.value = subscription.people_group_id
   router.push({ query: { peopleGroup: subscription.people_group_id } })
 }

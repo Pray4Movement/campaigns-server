@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     await peopleGroupSubscriptionService.deleteSubscription(subscription.id)
 
     // Log the deletion with details
-    logDelete('campaign_subscriptions', subscriptionId, event, {
+    logDelete('campaign_subscriptions', String(subscriptionId), event, {
       deletedRecord: {
         name: subscriber?.name,
         email: emailContact?.value,

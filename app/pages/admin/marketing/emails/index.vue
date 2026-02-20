@@ -2,7 +2,7 @@
   <div class="emails-page">
     <div class="page-header">
       <div>
-        <h1>Email Campaigns</h1>
+        <h1>Marketing Emails</h1>
         <p class="subtitle">Create and manage marketing emails</p>
       </div>
       <UButton @click="navigateTo('/admin/marketing/emails/new')" size="lg">
@@ -48,7 +48,7 @@
             <td class="subject-cell">{{ email.subject }}</td>
             <td class="audience-cell">
               <UBadge
-                :label="email.audience_type === 'doxa' ? 'DOXA' : email.people_group_name || 'Campaign'"
+                :label="email.audience_type === 'doxa' ? 'DOXA' : email.people_group_name || 'People Group'"
                 variant="subtle"
                 color="neutral"
               />
@@ -132,7 +132,7 @@ interface MarketingEmail {
   id: number
   subject: string
   content_json: string
-  audience_type: 'doxa' | 'campaign'
+  audience_type: 'doxa' | 'people_group'
   people_group_id: number | null
   people_group_name?: string
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'

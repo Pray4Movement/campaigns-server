@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const email = await marketingEmailService.getByIdWithCampaign(id)
+  const email = await marketingEmailService.getByIdWithPeopleGroup(id)
   if (!email) {
     throw createError({
       statusCode: 404,

@@ -134,7 +134,7 @@ export default defineEventHandler(async (event) => {
 
     // Log the update if any changes were made
     if (Object.keys(changes).length > 0) {
-      logUpdate('campaign_subscriptions', subscriptionId, event, { changes })
+      logUpdate('campaign_subscriptions', String(subscriptionId), event, { changes })
     }
 
     // Get updated data

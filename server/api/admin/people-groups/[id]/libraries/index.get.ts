@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get all libraries for this people group
-  const libraries = await libraryService.getCampaignLibraries(id)
+  const libraries = await libraryService.getPeopleGroupLibraries(id)
 
   // Get stats for each library
   const librariesWithStats = await Promise.all(

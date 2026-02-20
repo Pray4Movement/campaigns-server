@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  // Get global campaign start date
+  // Get global start date
   const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
 
   // Cache for 24 hours at edge (Cloudflare), allow stale content while revalidating

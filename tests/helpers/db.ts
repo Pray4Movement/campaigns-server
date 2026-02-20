@@ -36,14 +36,20 @@ export async function cleanupTestData(sql: ReturnType<typeof postgres>) {
   // Clean up test data created during tests
   // Delete in order respecting foreign key constraints
 
-  // Clean library content and libraries
-  await sql`DELETE FROM library_content WHERE library_id IN (SELECT id FROM libraries WHERE name LIKE 'Test Library %')`
-  await sql`DELETE FROM libraries WHERE name LIKE 'Test Library %'`
+  // Clean library content and libraries (both test-named and people-group-linked)
+  await sql`DELETE FROM library_content WHERE library_id IN (SELECT id FROM libraries WHERE name LIKE 'Test Library %' OR people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%'))`
+  await sql`DELETE FROM campaign_library_config WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
+  await sql`DELETE FROM libraries WHERE name LIKE 'Test Library %' OR people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
 
   // Clean people group-related data
   await sql`DELETE FROM reminder_emails_sent WHERE subscription_id IN (SELECT cs.id FROM campaign_subscriptions cs JOIN people_groups pg ON pg.id = cs.people_group_id WHERE pg.slug LIKE 'test-%')`
   await sql`DELETE FROM campaign_subscriptions WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
   await sql`DELETE FROM contact_methods WHERE subscriber_id IN (SELECT id FROM subscribers WHERE name LIKE 'Test %')`
+
+  // Clean other tables with people_group_id FK
+  await sql`DELETE FROM prayer_content WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
+  await sql`DELETE FROM prayer_activity WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
+  await sql`DELETE FROM marketing_emails WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`
 
   // Clean user-people group access
   await sql`DELETE FROM campaign_users WHERE people_group_id IN (SELECT id FROM people_groups WHERE slug LIKE 'test-%')`

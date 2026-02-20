@@ -1,6 +1,6 @@
 import { getDatabase } from './db'
 import { roleService } from './roles'
-import { campaignAccessService } from './campaign-access'
+import { peopleGroupAccessService } from './people-group-access'
 
 export interface PeopleGroup {
   id: number
@@ -315,7 +315,7 @@ export class PeopleGroupService {
     if (isAdmin) {
       return true
     }
-    return await campaignAccessService.userHasAccess(userId, peopleGroupId)
+    return await peopleGroupAccessService.userHasAccess(userId, peopleGroupId)
   }
 
   async getPeopleGroupsForUser(userId: string): Promise<PeopleGroup[]> {
@@ -324,7 +324,7 @@ export class PeopleGroupService {
       return this.getAllPeopleGroups()
     }
 
-    const peopleGroupIds = await campaignAccessService.getUserCampaigns(userId)
+    const peopleGroupIds = await peopleGroupAccessService.getUserPeopleGroups(userId)
     if (peopleGroupIds.length === 0) {
       return []
     }

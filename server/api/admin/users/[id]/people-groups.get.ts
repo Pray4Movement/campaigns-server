@@ -1,4 +1,4 @@
-import { campaignAccessService } from '#server/database/campaign-access'
+import { peopleGroupAccessService } from '#server/database/people-group-access'
 import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getUuidParam } from '#server/utils/api-helpers'
 
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Get people group IDs the user has access to
-    const peopleGroupIds = await campaignAccessService.getUserCampaigns(userId)
+    const peopleGroupIds = await peopleGroupAccessService.getUserPeopleGroups(userId)
 
     // Get all people groups
     const allPeopleGroups = await peopleGroupService.getAllPeopleGroups()
@@ -28,6 +28,6 @@ export default defineEventHandler(async (event) => {
       peopleGroups: peopleGroupsWithAccess
     }
   } catch (error) {
-    handleApiError(error, 'Failed to fetch user campaigns')
+    handleApiError(error, 'Failed to fetch user people groups')
   }
 })

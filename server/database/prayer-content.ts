@@ -56,7 +56,7 @@ export class PrayerContentService {
     const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
 
     if (!globalStartDate) {
-      throw new Error('Global campaign start date is not configured')
+      throw new Error('Global start date is not configured')
     }
 
     const startDate = new Date(globalStartDate)
@@ -76,7 +76,7 @@ export class PrayerContentService {
     const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
 
     if (!globalStartDate) {
-      throw new Error('Global campaign start date is not configured')
+      throw new Error('Global start date is not configured')
     }
 
     const startDate = new Date(globalStartDate)
@@ -419,7 +419,7 @@ export class PrayerContentService {
   private async generateDayInLifeContent(peopleGroupId: number, date: string, languageCode: string): Promise<PrayerContent | null> {
     try {
       // Get the people group's day_in_life library
-      const library = await libraryService.getCampaignLibraryByKey(peopleGroupId, 'day_in_life')
+      const library = await libraryService.getPeopleGroupLibraryByKey(peopleGroupId, 'day_in_life')
       if (!library) {
         return null
       }
@@ -637,7 +637,7 @@ export class PrayerContentService {
    * Get all prayer content for a people group
    * This now fetches from all libraries across all rows
    */
-  async getCampaignPrayerContent(peopleGroupId: number, options?: {
+  async getPeopleGroupPrayerContent(peopleGroupId: number, options?: {
     startDate?: string
     endDate?: string
     language?: string
@@ -700,7 +700,7 @@ export class PrayerContentService {
 
       return result
     } catch (error) {
-      console.error('Error getting campaign prayer content:', error)
+      console.error('Error getting people group prayer content:', error)
       return []
     }
   }
@@ -708,7 +708,7 @@ export class PrayerContentService {
   /**
    * Get prayer content grouped by date with language information
    */
-  async getCampaignContentGroupedByDate(peopleGroupId: number, options?: {
+  async getPeopleGroupContentGroupedByDate(peopleGroupId: number, options?: {
     startDate?: string
     endDate?: string
     limit?: number
@@ -776,7 +776,7 @@ export class PrayerContentService {
 
       return finalResult
     } catch (error) {
-      console.error('Error getting campaign content grouped by date:', error)
+      console.error('Error getting people group content grouped by date:', error)
       return []
     }
   }

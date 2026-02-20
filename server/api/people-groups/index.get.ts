@@ -1,6 +1,6 @@
 /**
  * GET /api/people-groups
- * List all people groups (campaigns) with images
+ * List all people groups with images
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const ids = peopleGroups.map(pg => pg.id)
   const commitmentStats = await peopleGroupSubscriptionService.getCommitmentStatsForPeopleGroups(ids)
 
-  const enrichedCampaigns = peopleGroups.map((pg) => {
+  const enrichedPeopleGroups = peopleGroups.map((pg) => {
     const stats = commitmentStats.get(pg.id) || { people_committed: 0, committed_duration: 0 }
     return {
       id: pg.id,
@@ -33,6 +33,6 @@ export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600')
 
   return {
-    peopleGroups: enrichedCampaigns
+    peopleGroups: enrichedPeopleGroups
   }
 })

@@ -124,17 +124,15 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Get all existing subscriptions for this subscriber/campaign
     const existingSubscriptions = await peopleGroupSubscriptionService.getAllBySubscriberAndPeopleGroup(
       subscriber.id,
       peopleGroup.id
     )
 
-    const MAX_SUBSCRIPTIONS_PER_CAMPAIGN = 5
+    const MAX_SUBSCRIPTIONS_PER_PEOPLE_GROUP = 5
 
-    // Check subscription limit
     const activeCount = existingSubscriptions.filter(s => s.status === 'active').length
-    if (activeCount >= MAX_SUBSCRIPTIONS_PER_CAMPAIGN) {
+    if (activeCount >= MAX_SUBSCRIPTIONS_PER_PEOPLE_GROUP) {
       // At limit - send welcome email to prevent email enumeration
       if (body.delivery_method === 'email' && body.email) {
         await sendWelcomeEmail(

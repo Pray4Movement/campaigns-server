@@ -77,6 +77,7 @@ export default class MakeCampaignIdNullable extends BaseMigration {
       'campaign_library_config',
       'prayer_content',
       'prayer_activity',
+      'reminder_signups',
       'marketing_emails',
       'libraries'
     ]
@@ -96,10 +97,13 @@ export default class MakeCampaignIdNullable extends BaseMigration {
 
     // Drop the unique constraint on (campaign_id, subscriber_id) in campaign_subscriptions
     const result = await sql`
-      SELECT constraint_name FROM information_schema.table_constraints
-      WHERE table_name = 'campaign_subscriptions'
-      AND constraint_type = 'UNIQUE'
-      AND constraint_name LIKE '%campaign_id%'
+      SELECT tc.constraint_name
+      FROM information_schema.table_constraints tc
+      JOIN information_schema.constraint_column_usage ccu
+        ON tc.constraint_name = ccu.constraint_name
+      WHERE tc.table_name = 'campaign_subscriptions'
+      AND tc.constraint_type = 'UNIQUE'
+      AND ccu.column_name = 'campaign_id'
     `
     for (const row of result) {
       await this.exec(sql, `ALTER TABLE campaign_subscriptions DROP CONSTRAINT ${row.constraint_name}`)

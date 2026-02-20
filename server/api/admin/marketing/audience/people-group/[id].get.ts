@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     count: contacts.length,
-    audience_type: 'campaign',
+    audience_type: 'people_group',
     people_group_id: id,
     people_group_name: peopleGroup.name
   }

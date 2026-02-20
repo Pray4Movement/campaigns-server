@@ -10,7 +10,7 @@ export interface NextReminderOptions {
 
 /**
  * Calculate the next reminder time in UTC based on user's timezone and preferences.
- * Ensures the reminder is never scheduled before the global campaign start date.
+ * Ensures the reminder is never scheduled before the global start date.
  *
  * @param options - The user's reminder preferences
  * @returns Date object representing the next reminder time in UTC
@@ -25,7 +25,7 @@ export async function calculateNextReminderUtc(options: NextReminderOptions): Pr
   const nowUtc = new Date()
   const nowInUserTz = toZonedTime(nowUtc, timezone)
 
-  // Get global campaign start date and convert to user's timezone
+  // Get global start date and convert to user's timezone
   const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
   let minDateInUserTz: Date | null = null
   if (globalStartDate) {

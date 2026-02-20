@@ -107,7 +107,7 @@ export default defineEventHandler(async (event) => {
             await sendSignupVerificationEmail(
               newEmail,
               verificationToken,
-              peopleGroup.slug,
+              peopleGroup.slug!,
               peopleGroup.name,
               body.name?.trim() || subscriber.name
             )

@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const email = await marketingEmailService.getByIdWithCampaign(id)
+  const email = await marketingEmailService.getByIdWithPeopleGroup(id)
   if (!email) {
     throw createError({
       statusCode: 404,
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
 
   const html = renderMarketingEmailHtml(
     email.content_json,
-    email.audience_type === 'campaign' ? email.people_group_name : undefined,
+    email.audience_type === 'people_group' ? email.people_group_name : undefined,
     unsubscribeUrl
   )
 

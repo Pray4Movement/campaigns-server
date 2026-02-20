@@ -3,8 +3,8 @@ import { appConfigService } from '#server/database/app-config'
 import { handleApiError } from '#server/utils/api-helpers'
 
 /**
- * Get global campaign library configuration
- * This returns which libraries are available to all campaigns and the global start date
+ * Get global people group library configuration
+ * This returns which libraries are available to all people groups and the global start date
  *
  * Structure:
  * {
@@ -29,6 +29,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error) {
-    handleApiError(error, 'Failed to fetch global campaign library configuration')
+    handleApiError(error, 'Failed to fetch global people group library configuration')
   }
 })
