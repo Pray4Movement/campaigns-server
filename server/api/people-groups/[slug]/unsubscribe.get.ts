@@ -4,7 +4,7 @@
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 interface ReminderInfo {
   id: number
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get ALL subscriptions for this subscriber (across all people groups)
-  const allSubscriberSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+  const allSubscriberSubscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
   // Get subscriptions for this specific people group
   const peopleGroupSubscriptions = allSubscriberSubscriptions.filter(s => s.people_group_id === peopleGroup.id)
@@ -108,7 +108,7 @@ export default defineEventHandler(async (event) => {
 
   // If unsubscribe_all flag is set, unsubscribe from entire people group
   if (unsubscribeAll) {
-    const unsubscribedCount = await campaignSubscriptionService.unsubscribeAllForCampaign(
+    const unsubscribedCount = await peopleGroupSubscriptionService.unsubscribeAllForPeopleGroup(
       subscriber.id,
       peopleGroup.id
     )
@@ -185,7 +185,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Unsubscribe from this specific reminder
-  const result = await campaignSubscriptionService.unsubscribe(subscriptionToUnsubscribe.id)
+  const result = await peopleGroupSubscriptionService.unsubscribe(subscriptionToUnsubscribe.id)
 
   if (!result) {
     throw createError({

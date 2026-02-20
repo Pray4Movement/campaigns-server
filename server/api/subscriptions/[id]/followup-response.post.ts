@@ -1,4 +1,4 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { followupTrackingService } from '#server/database/followup-tracking'
 import { subscriberService } from '#server/database/subscribers'
 import { peopleGroupService } from '#server/database/people-groups'
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get the subscription
-  const subscription = await campaignSubscriptionService.getSubscriptionWithFollowupDetails(
+  const subscription = await peopleGroupSubscriptionService.getSubscriptionWithFollowupDetails(
     parseInt(subscriptionId)
   )
 
@@ -86,10 +86,10 @@ export default defineEventHandler(async (event) => {
   // Handle response based on type
   if (response === 'committed' || response === 'sometimes') {
     // Complete the follow-up cycle - increment followup_count, reset followup_reminder_count
-    await campaignSubscriptionService.completeFollowupCycle(subscription.id)
+    await peopleGroupSubscriptionService.completeFollowupCycle(subscription.id)
   } else if (response === 'not_praying') {
     // Mark subscription as inactive
-    await campaignSubscriptionService.updateStatus(subscription.id, 'inactive')
+    await peopleGroupSubscriptionService.updateStatus(subscription.id, 'inactive')
   }
 
   // Return success with profile_id and people_group_slug for the landing page

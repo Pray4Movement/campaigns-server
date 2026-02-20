@@ -1,14 +1,14 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const subscriptionId = getIntParam(event, 'id')
 
   // Verify subscription exists
-  const subscription = await campaignSubscriptionService.getById(subscriptionId)
+  const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
   if (!subscription) {
     throw createError({
       statusCode: 404,

@@ -1,6 +1,6 @@
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const profileId = getRouterParam(event, 'id')
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   const primaryPhone = contacts.find(c => c.type === 'phone')
 
   // Get all subscriptions for this subscriber
-  const allSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+  const allSubscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
   // Group subscriptions by people group
   const subscriptionsByPeopleGroup = new Map<number, typeof allSubscriptions>()

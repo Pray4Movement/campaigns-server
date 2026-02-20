@@ -109,7 +109,7 @@ describe('POST /api/admin/subscribers/[id]/send-reminder', async () => {
       expect(response).toBeDefined()
     })
 
-    it('campaign_editor can send reminder for subscriber from assigned people group', async () => {
+    it('people_group_editor can send reminder for subscriber from assigned people group', async () => {
       const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}/send-reminder`, {
         method: 'POST',
         ...editorAuth
@@ -123,7 +123,7 @@ describe('POST /api/admin/subscribers/[id]/send-reminder', async () => {
       expect(response).toBeDefined()
     })
 
-    it('campaign_editor cannot send reminder for subscriber from unassigned people group', async () => {
+    it('people_group_editor cannot send reminder for subscriber from unassigned people group', async () => {
       const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}/send-reminder`, {
         method: 'POST',
         ...editorAuth

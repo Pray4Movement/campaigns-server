@@ -1,17 +1,17 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.delete')
+  const user = await requirePermission(event, 'people_groups.delete')
 
   const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get subscription data before deletion for logging
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     const phoneContact = contacts.find(c => c.type === 'phone')
 
     // Delete the subscription
-    await campaignSubscriptionService.deleteSubscription(subscription.id)
+    await peopleGroupSubscriptionService.deleteSubscription(subscription.id)
 
     // Log the deletion with details
     logDelete('campaign_subscriptions', subscriptionId, event, {

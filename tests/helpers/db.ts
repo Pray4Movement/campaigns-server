@@ -310,7 +310,7 @@ export interface TestUserInvitation {
   email: string
   token: string
   invited_by: string
-  role: 'admin' | 'campaign_editor' | null
+  role: 'admin' | 'people_group_editor' | null
   status: 'pending' | 'accepted' | 'expired' | 'revoked'
   expires_at: string
 }
@@ -320,7 +320,7 @@ export async function createTestUserInvitation(
   options: {
     email?: string
     invited_by: string
-    role?: 'admin' | 'campaign_editor' | null
+    role?: 'admin' | 'people_group_editor' | null
     status?: 'pending' | 'accepted' | 'expired' | 'revoked'
     expires_in_days?: number
   }
@@ -413,7 +413,7 @@ export interface TestLibrary {
   description: string
   type: 'static' | 'people_group'
   repeating: boolean
-  campaign_id: number | null
+  people_group_id: number | null
   library_key: string | null
 }
 
@@ -424,7 +424,7 @@ export async function createTestLibrary(
     description?: string
     type?: 'static' | 'people_group'
     repeating?: boolean
-    campaign_id?: number | null
+    people_group_id?: number | null
     library_key?: string | null
   } = {}
 ): Promise<TestLibrary> {
@@ -432,13 +432,13 @@ export async function createTestLibrary(
   const description = options.description ?? ''
   const type = options.type ?? 'static'
   const repeating = options.repeating ?? false
-  const campaign_id = options.campaign_id ?? null
+  const people_group_id = options.people_group_id ?? null
   const library_key = options.library_key ?? null
 
   const result = await sql`
-    INSERT INTO libraries (name, description, type, repeating, campaign_id, library_key)
-    VALUES (${name}, ${description}, ${type}, ${repeating}, ${campaign_id}, ${library_key})
-    RETURNING id, name, description, type, repeating, campaign_id, library_key
+    INSERT INTO libraries (name, description, type, repeating, people_group_id, library_key)
+    VALUES (${name}, ${description}, ${type}, ${repeating}, ${people_group_id}, ${library_key})
+    RETURNING id, name, description, type, repeating, people_group_id, library_key
   `
 
   return result[0] as TestLibrary
@@ -449,7 +449,7 @@ export async function getTestLibrary(
   id: number
 ): Promise<TestLibrary | null> {
   const result = await sql`
-    SELECT id, name, description, type, repeating, campaign_id, library_key
+    SELECT id, name, description, type, repeating, people_group_id, library_key
     FROM libraries
     WHERE id = ${id}
   `

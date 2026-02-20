@@ -3,7 +3,7 @@
  * Get people group details
  */
 import { peopleGroupService } from '#server/database/people-groups'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { appConfigService } from '#server/database/app-config'
 import { getFieldOptionLabel } from '../../utils/app/field-options'
 import { generatePeopleGroupDescription } from '../../utils/app/people-group-description'
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get commitment stats
-  const commitmentStats = await campaignSubscriptionService.getCommitmentStats(pg.id)
+  const commitmentStats = await peopleGroupSubscriptionService.getCommitmentStats(pg.id)
 
   // Get global campaign start date
   const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')

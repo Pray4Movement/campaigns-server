@@ -1,17 +1,17 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get the subscription
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     const phoneContact = contacts.find(c => c.type === 'phone')
 
     // Get all subscriptions for this subscriber
-    const allSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+    const allSubscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
     return {
       subscriber: {

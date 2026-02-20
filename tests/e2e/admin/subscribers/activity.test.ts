@@ -89,12 +89,12 @@ describe('GET /api/admin/subscribers/[id]/activity', async () => {
       expect(response.activities).toBeDefined()
     })
 
-    it('campaign_editor can view activity for subscriber from assigned people group', async () => {
+    it('people_group_editor can view activity for subscriber from assigned people group', async () => {
       const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}/activity`, editorAuth)
       expect(response.activities).toBeDefined()
     })
 
-    it('campaign_editor cannot view activity for subscriber from unassigned people group', async () => {
+    it('people_group_editor cannot view activity for subscriber from unassigned people group', async () => {
       const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}/activity`, editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })

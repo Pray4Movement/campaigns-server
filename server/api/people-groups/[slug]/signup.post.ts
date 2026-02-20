@@ -5,7 +5,7 @@
 import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 import { sendWelcomeEmail } from '#server/utils/welcome-email'
 import { isValidTimezone } from '#server/utils/next-reminder-calculator'
@@ -125,7 +125,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Get all existing subscriptions for this subscriber/campaign
-    const existingSubscriptions = await campaignSubscriptionService.getAllBySubscriberAndCampaign(
+    const existingSubscriptions = await peopleGroupSubscriptionService.getAllBySubscriberAndPeopleGroup(
       subscriber.id,
       peopleGroup.id
     )
@@ -186,13 +186,13 @@ export default defineEventHandler(async (event) => {
 
     if (unsubscribedMatch) {
       // Reactivate the matching unsubscribed subscription
-      await campaignSubscriptionService.updateSubscription(unsubscribedMatch.id, {
+      await peopleGroupSubscriptionService.updateSubscription(unsubscribedMatch.id, {
         delivery_method: body.delivery_method,
         days_of_week: body.days_of_week,
         timezone,
         prayer_duration: body.prayer_duration
       })
-      await campaignSubscriptionService.resubscribe(unsubscribedMatch.id)
+      await peopleGroupSubscriptionService.resubscribe(unsubscribedMatch.id)
 
       // For email delivery, send appropriate email
       if (body.delivery_method === 'email') {
@@ -212,7 +212,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Create new subscription
-    const subscription = await campaignSubscriptionService.createSubscription({
+    const subscription = await peopleGroupSubscriptionService.createSubscription({
       people_group_id: peopleGroup.id,
       subscriber_id: subscriber.id,
       delivery_method: body.delivery_method,
@@ -229,7 +229,7 @@ export default defineEventHandler(async (event) => {
 
       if (emailContact?.verified) {
         // Email already verified - set next reminder and send welcome
-        await campaignSubscriptionService.setInitialNextReminder(subscription.id)
+        await peopleGroupSubscriptionService.setInitialNextReminder(subscription.id)
         await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language)
       } else if (emailContact) {
         // Email not verified - send verification email

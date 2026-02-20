@@ -1,7 +1,7 @@
 import { getDatabase } from './db'
 import { randomUUID } from 'crypto'
 import { contactMethodService } from './contact-methods'
-import { campaignSubscriptionService, type CampaignSubscriptionWithDetails } from './campaign-subscriptions'
+import { peopleGroupSubscriptionService, type PeopleGroupSubscriptionWithDetails } from './people-group-subscriptions'
 
 export interface Subscriber {
   id: number
@@ -32,7 +32,7 @@ export interface SubscriberConsents {
 export interface SubscriberWithSubscriptions extends SubscriberWithContacts {
   primary_email: string | null
   primary_phone: string | null
-  subscriptions: CampaignSubscriptionWithDetails[]
+  subscriptions: PeopleGroupSubscriptionWithDetails[]
   consents: SubscriberConsents
 }
 
@@ -273,7 +273,7 @@ class SubscriberService {
 
     for (const subscriber of subscribers) {
       const contacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
-      let subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+      let subscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
       // Filter subscriptions to only include accessible people groups
       if (options?.accessiblePeopleGroupIds) {

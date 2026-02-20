@@ -90,12 +90,12 @@ describe('Subscriber CRUD API', async () => {
         expect(response.subscriber).toBeDefined()
       })
 
-      it('campaign_editor can view subscriber from assigned people group', async () => {
+      it('people_group_editor can view subscriber from assigned people group', async () => {
         const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, editorAuth)
         expect(response.subscriber).toBeDefined()
       })
 
-      it('campaign_editor cannot view subscriber from unassigned people group', async () => {
+      it('people_group_editor cannot view subscriber from unassigned people group', async () => {
         const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, editorAuth).catch((e) => e)
         expect(error.statusCode).toBe(403)
       })
@@ -156,7 +156,7 @@ describe('Subscriber CRUD API', async () => {
         expect(response.subscriber).toBeDefined()
       })
 
-      it('campaign_editor can update subscriber from assigned people group', async () => {
+      it('people_group_editor can update subscriber from assigned people group', async () => {
         const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
           method: 'PUT',
           body: { name: 'Test Assigned Subscriber', status: 'inactive' },
@@ -166,7 +166,7 @@ describe('Subscriber CRUD API', async () => {
         expect(response.subscriber).toBeDefined()
       })
 
-      it('campaign_editor cannot update subscriber from unassigned people group', async () => {
+      it('people_group_editor cannot update subscriber from unassigned people group', async () => {
         const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, {
           method: 'PUT',
           body: { name: 'Test Unassigned Subscriber', status: 'inactive' },
@@ -224,7 +224,7 @@ describe('Subscriber CRUD API', async () => {
         expect(response.success).toBe(true)
       })
 
-      it('campaign_editor can delete subscriber from assigned people group', async () => {
+      it('people_group_editor can delete subscriber from assigned people group', async () => {
         const response = await $fetch(`/api/admin/subscribers/${assignedSubscription.id}`, {
           method: 'DELETE',
           ...editorAuth
@@ -233,7 +233,7 @@ describe('Subscriber CRUD API', async () => {
         expect(response.success).toBe(true)
       })
 
-      it('campaign_editor cannot delete subscriber from unassigned people group', async () => {
+      it('people_group_editor cannot delete subscriber from unassigned people group', async () => {
         const error = await $fetch(`/api/admin/subscribers/${unassignedSubscription.id}`, {
           method: 'DELETE',
           ...editorAuth

@@ -1,4 +1,4 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { peopleGroupService } from '#server/database/people-groups'
@@ -6,13 +6,13 @@ import { sendPrayerReminderEmail } from '#server/utils/prayer-reminder-email'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.edit')
+  const user = await requirePermission(event, 'people_groups.edit')
 
   const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get the subscription
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({

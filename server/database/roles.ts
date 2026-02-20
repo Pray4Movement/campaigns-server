@@ -1,7 +1,7 @@
 import { getDatabase } from './db'
 
 // Valid role names
-export type RoleName = 'admin' | 'campaign_editor'
+export type RoleName = 'admin' | 'people_group_editor'
 
 // Role definitions with permissions
 export const ROLES = {
@@ -9,10 +9,10 @@ export const ROLES = {
     name: 'admin' as RoleName,
     description: 'Full system administrator - can see and do everything',
     permissions: [
-      'campaigns.view',
-      'campaigns.create',
-      'campaigns.edit',
-      'campaigns.delete',
+      'people_groups.view',
+      'people_groups.create',
+      'people_groups.edit',
+      'people_groups.delete',
       'content.view',
       'content.create',
       'content.edit',
@@ -21,14 +21,14 @@ export const ROLES = {
       'roles.manage'
     ]
   },
-  campaign_editor: {
-    name: 'campaign_editor' as RoleName,
-    description: 'Can manage campaigns they have been given access to',
+  people_group_editor: {
+    name: 'people_group_editor' as RoleName,
+    description: 'Can manage people groups they have been given access to',
     permissions: [
-      'campaigns.view',
-      'campaigns.create',
-      'campaigns.edit',
-      'campaigns.delete',
+      'people_groups.view',
+      'people_groups.create',
+      'people_groups.edit',
+      'people_groups.delete',
       'content.view',
       'content.create',
       'content.edit',
@@ -68,10 +68,10 @@ export class RoleService {
     return role === 'admin'
   }
 
-  // Check if user has campaign_editor role
-  async isCampaignEditor(userId: string): Promise<boolean> {
+  // Check if user has people_group_editor role
+  async isPeopleGroupEditor(userId: string): Promise<boolean> {
     const role = await this.getUserRole(userId)
-    return role === 'campaign_editor'
+    return role === 'people_group_editor'
   }
 
   // Get all available roles

@@ -1,11 +1,11 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.edit')
+  const user = await requirePermission(event, 'people_groups.edit')
 
   const subscriptionId = getIntParam(event, 'id')
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Get current subscription
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -123,13 +123,13 @@ export default defineEventHandler(async (event) => {
     }
 
     if (Object.keys(subscriptionUpdates).length > 0) {
-      await campaignSubscriptionService.updateSubscription(subscription.id, subscriptionUpdates)
+      await peopleGroupSubscriptionService.updateSubscription(subscription.id, subscriptionUpdates)
     }
 
     // Update status if changed
     if (status !== undefined && status !== subscription.status) {
       changes.status = { from: subscription.status, to: status }
-      await campaignSubscriptionService.updateStatus(subscription.id, status)
+      await peopleGroupSubscriptionService.updateStatus(subscription.id, status)
     }
 
     // Log the update if any changes were made
@@ -138,7 +138,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Get updated data
-    const updatedSubscription = await campaignSubscriptionService.getById(subscription.id)
+    const updatedSubscription = await peopleGroupSubscriptionService.getById(subscription.id)
     const updatedSubscriber = await subscriberService.getSubscriberById(subscriber.id)
     const updatedContacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
     const updatedEmail = updatedContacts.find(c => c.type === 'email')

@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   // Get request body
   const body = await readBody(event)
 
-  // Validate campaign_ids is an array
+  // Validate people_group_ids is an array
   if (!Array.isArray(body.people_group_ids)) {
     throw createError({
       statusCode: 400,

@@ -1,6 +1,6 @@
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { peopleGroupService } from '#server/database/people-groups'
 import { sendSignupVerificationEmail } from '#server/utils/signup-verification-email'
 
@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
       // Send verification email - need a people group for context
       if (newEmailContact) {
         // Get subscriber's first subscription to use for verification email context
-        const subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+        const subscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
         if (subscriptions.length > 0) {
           const peopleGroup = await peopleGroupService.getPeopleGroupById(subscriptions[0]!.people_group_id)
           if (peopleGroup && newEmailContact) {
@@ -137,7 +137,7 @@ export default defineEventHandler(async (event) => {
   let updatedSubscription = null
   if (body.subscription_id) {
     // Security: Verify subscription belongs to this subscriber
-    const subscription = await campaignSubscriptionService.getById(body.subscription_id)
+    const subscription = await peopleGroupSubscriptionService.getById(body.subscription_id)
     if (!subscription) {
       throw createError({
         statusCode: 404,
@@ -168,7 +168,7 @@ export default defineEventHandler(async (event) => {
     if (body.prayer_duration !== undefined) subscriptionUpdates.prayer_duration = body.prayer_duration
 
     if (Object.keys(subscriptionUpdates).length > 0) {
-      updatedSubscription = await campaignSubscriptionService.updateSubscription(
+      updatedSubscription = await peopleGroupSubscriptionService.updateSubscription(
         body.subscription_id,
         subscriptionUpdates
       )
@@ -183,7 +183,7 @@ export default defineEventHandler(async (event) => {
   // Build consent state for response
   const consents = {
     doxa_general: updatedEmail?.consent_doxa_general || false,
-    campaign_ids: updatedEmail?.consented_people_group_ids || []
+    people_group_ids: updatedEmail?.consented_people_group_ids || []
   }
 
   const response: any = {

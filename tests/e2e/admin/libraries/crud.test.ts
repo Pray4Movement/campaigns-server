@@ -79,7 +79,7 @@ describe('Library CRUD API', async () => {
         // Create a library linked to that people group
         const linkedLib = await createTestLibrary(sql, {
           name: `Test Linked Library ${Date.now()}`,
-          campaign_id: peopleGroup.id,
+          people_group_id: peopleGroup.id,
           library_key: 'day_in_life'
         })
 
@@ -156,7 +156,7 @@ describe('Library CRUD API', async () => {
         expect(response.library).toBeDefined()
       })
 
-      it('returns 403 for campaign_editor users (admin only)', async () => {
+      it('returns 403 for people_group_editor users (admin only)', async () => {
         const error = await $fetch('/api/admin/libraries', {
           method: 'POST',
           body: { name: `Test Library Editor ${Date.now()}` },

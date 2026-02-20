@@ -3,7 +3,7 @@ import { calculateNextReminderUtc, calculateNextReminderAfterSend } from '../uti
 import { contactMethodService } from './contact-methods'
 import { appConfigService } from './app-config'
 
-export interface CampaignSubscription {
+export interface PeopleGroupSubscription {
   id: number
   people_group_id: number
   subscriber_id: number
@@ -19,7 +19,7 @@ export interface CampaignSubscription {
   updated_at: string
 }
 
-export interface CampaignSubscriptionWithDetails extends CampaignSubscription {
+export interface PeopleGroupSubscriptionWithDetails extends PeopleGroupSubscription {
   people_group_name: string
   people_group_slug: string
   subscriber_name: string
@@ -27,7 +27,7 @@ export interface CampaignSubscriptionWithDetails extends CampaignSubscription {
   subscriber_profile_id: string
 }
 
-export interface SubscriptionDueForReminder extends CampaignSubscription {
+export interface SubscriptionDueForReminder extends PeopleGroupSubscription {
   subscriber_name: string
   subscriber_tracking_id: string
   subscriber_profile_id: string
@@ -49,10 +49,10 @@ export interface CreateSubscriptionInput {
   prayer_duration?: number
 }
 
-class CampaignSubscriptionService {
+class PeopleGroupSubscriptionService {
   private db = getDatabase()
 
-  async createSubscription(input: CreateSubscriptionInput): Promise<CampaignSubscription> {
+  async createSubscription(input: CreateSubscriptionInput): Promise<PeopleGroupSubscription> {
     const days_of_week_json = input.days_of_week ? JSON.stringify(input.days_of_week) : null
     const timezone = input.timezone || 'UTC'
 
@@ -83,41 +83,41 @@ class CampaignSubscriptionService {
     return (await this.getById(subscription.id))!
   }
 
-  async getById(id: number): Promise<CampaignSubscription | null> {
+  async getById(id: number): Promise<PeopleGroupSubscription | null> {
     const stmt = this.db.prepare('SELECT * FROM campaign_subscriptions WHERE id = ?')
-    return await stmt.get(id) as CampaignSubscription | null
+    return await stmt.get(id) as PeopleGroupSubscription | null
   }
 
-  async getBySubscriberAndCampaign(
+  async getBySubscriberAndPeopleGroup(
     subscriberId: number,
     peopleGroupId: number
-  ): Promise<CampaignSubscription | null> {
+  ): Promise<PeopleGroupSubscription | null> {
     const stmt = this.db.prepare(`
       SELECT * FROM campaign_subscriptions
       WHERE subscriber_id = ? AND people_group_id = ?
     `)
-    return await stmt.get(subscriberId, peopleGroupId) as CampaignSubscription | null
+    return await stmt.get(subscriberId, peopleGroupId) as PeopleGroupSubscription | null
   }
 
   /**
    * Get all subscriptions for a subscriber on a specific people group
    */
-  async getAllBySubscriberAndCampaign(
+  async getAllBySubscriberAndPeopleGroup(
     subscriberId: number,
     peopleGroupId: number
-  ): Promise<CampaignSubscription[]> {
+  ): Promise<PeopleGroupSubscription[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM campaign_subscriptions
       WHERE subscriber_id = ? AND people_group_id = ?
       ORDER BY created_at ASC
     `)
-    return await stmt.all(subscriberId, peopleGroupId) as CampaignSubscription[]
+    return await stmt.all(subscriberId, peopleGroupId) as PeopleGroupSubscription[]
   }
 
   /**
    * Count subscriptions for a subscriber on a specific people group
    */
-  async countBySubscriberAndCampaign(
+  async countBySubscriberAndPeopleGroup(
     subscriberId: number,
     peopleGroupId: number
   ): Promise<number> {
@@ -132,7 +132,7 @@ class CampaignSubscriptionService {
   /**
    * Unsubscribe from all subscriptions for a subscriber on a people group
    */
-  async unsubscribeAllForCampaign(
+  async unsubscribeAllForPeopleGroup(
     subscriberId: number,
     peopleGroupId: number
   ): Promise<number> {
@@ -148,7 +148,7 @@ class CampaignSubscriptionService {
   /**
    * Get all subscriptions for a subscriber (with people group details)
    */
-  async getSubscriberSubscriptions(subscriberId: number): Promise<CampaignSubscriptionWithDetails[]> {
+  async getSubscriberSubscriptions(subscriberId: number): Promise<PeopleGroupSubscriptionWithDetails[]> {
     const stmt = this.db.prepare(`
       SELECT
         cs.*,
@@ -163,20 +163,20 @@ class CampaignSubscriptionService {
       WHERE cs.subscriber_id = ?
       ORDER BY cs.created_at DESC
     `)
-    return await stmt.all(subscriberId) as CampaignSubscriptionWithDetails[]
+    return await stmt.all(subscriberId) as PeopleGroupSubscriptionWithDetails[]
   }
 
   /**
    * Get all subscriptions for a people group (with subscriber details)
    */
-  async getCampaignSubscriptions(
+  async getPeopleGroupSubscriptions(
     peopleGroupId: number,
     options?: {
       status?: 'active' | 'inactive' | 'unsubscribed'
       limit?: number
       offset?: number
     }
-  ): Promise<CampaignSubscriptionWithDetails[]> {
+  ): Promise<PeopleGroupSubscriptionWithDetails[]> {
     let query = `
       SELECT
         cs.*,
@@ -210,7 +210,7 @@ class CampaignSubscriptionService {
     }
 
     const stmt = this.db.prepare(query)
-    return await stmt.all(...params) as CampaignSubscriptionWithDetails[]
+    return await stmt.all(...params) as PeopleGroupSubscriptionWithDetails[]
   }
 
   /**
@@ -236,7 +236,7 @@ class CampaignSubscriptionService {
       timezone?: string
       prayer_duration?: number
     }
-  ): Promise<CampaignSubscription | null> {
+  ): Promise<PeopleGroupSubscription | null> {
     const fields: string[] = []
     const values: any[] = []
     let scheduleChanged = false
@@ -295,7 +295,7 @@ class CampaignSubscriptionService {
   async updateStatus(
     id: number,
     status: 'active' | 'inactive' | 'unsubscribed'
-  ): Promise<CampaignSubscription | null> {
+  ): Promise<PeopleGroupSubscription | null> {
     const stmt = this.db.prepare(`
       UPDATE campaign_subscriptions
       SET status = ?, updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
@@ -345,15 +345,13 @@ class CampaignSubscriptionService {
    * - status = 'active'
    * - delivery_method = 'email' (for now)
    * - The subscriber has a verified email
-   * - The global campaign start date has been reached (if configured)
+   * - The global start date has been reached (if configured)
    */
   async getSubscriptionsDueForReminder(): Promise<SubscriptionDueForReminder[]> {
-    // Check if we've reached the global campaign start date
     const globalStartDate = await appConfigService.getConfig<string>('global_campaign_start_date')
     if (globalStartDate) {
       const today = new Date().toISOString().split('T')[0]
       if (today! < globalStartDate) {
-        // Campaign hasn't started yet - no reminders to send
         return []
       }
     }
@@ -462,7 +460,7 @@ class CampaignSubscriptionService {
    * Get commitment stats for multiple people groups in a single query.
    * Returns a Map of people_group_id to stats.
    */
-  async getCommitmentStatsForCampaigns(peopleGroupIds: number[]): Promise<Map<number, { people_committed: number; committed_duration: number }>> {
+  async getCommitmentStatsForPeopleGroups(peopleGroupIds: number[]): Promise<Map<number, { people_committed: number; committed_duration: number }>> {
     if (peopleGroupIds.length === 0) {
       return new Map()
     }
@@ -566,7 +564,7 @@ class CampaignSubscriptionService {
   /**
    * Get subscription with follow-up details for the API response.
    */
-  async getSubscriptionWithFollowupDetails(subscriptionId: number): Promise<CampaignSubscription & {
+  async getSubscriptionWithFollowupDetails(subscriptionId: number): Promise<PeopleGroupSubscription & {
     last_followup_at: string | null
     followup_count: number
     followup_reminder_count: number
@@ -578,4 +576,4 @@ class CampaignSubscriptionService {
   }
 }
 
-export const campaignSubscriptionService = new CampaignSubscriptionService()
+export const peopleGroupSubscriptionService = new PeopleGroupSubscriptionService()

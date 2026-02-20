@@ -48,7 +48,7 @@ describe('People Groups API', async () => {
       expect(Array.isArray(response.peopleGroups)).toBe(true)
     })
 
-    it('returns 403 for campaign_editor users (admin only)', async () => {
+    it('returns 403 for people_group_editor users (admin only)', async () => {
       const error = await $fetch('/api/admin/people-groups', editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })

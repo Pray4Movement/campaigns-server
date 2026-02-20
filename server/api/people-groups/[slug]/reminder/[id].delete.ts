@@ -4,7 +4,7 @@
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get the subscription to delete
-  const subscription = await campaignSubscriptionService.getById(Number(reminderId))
+  const subscription = await peopleGroupSubscriptionService.getById(Number(reminderId))
 
   if (!subscription) {
     throw createError({
@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Delete the subscription
-  const deleted = await campaignSubscriptionService.deleteSubscription(subscription.id)
+  const deleted = await peopleGroupSubscriptionService.deleteSubscription(subscription.id)
 
   if (!deleted) {
     throw createError({

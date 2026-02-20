@@ -4,7 +4,7 @@ import { contactMethodService } from '#server/database/contact-methods'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const id = Number(getRouterParam(event, 'id'))
   if (!id || isNaN(id)) {

@@ -9,7 +9,7 @@ import {
   createTestPeopleGroupSubscription,
   setNextReminderUtc
 } from '../helpers/db'
-import { campaignSubscriptionService } from '../../server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '../../server/database/people-group-subscriptions'
 
 describe('getSubscriptionsDueForReminder', async () => {
   const sql = getTestDatabase()
@@ -41,7 +41,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const pastTime = new Date(Date.now() - 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, pastTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeDefined()
@@ -66,7 +66,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const futureTime = new Date(Date.now() + 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, futureTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeUndefined()
@@ -89,7 +89,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const pastTime = new Date(Date.now() - 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, pastTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeUndefined()
@@ -112,7 +112,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const pastTime = new Date(Date.now() - 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, pastTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeUndefined()
@@ -135,7 +135,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const pastTime = new Date(Date.now() - 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, pastTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeUndefined()
@@ -158,7 +158,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const pastTime = new Date(Date.now() - 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, pastTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeUndefined()
@@ -185,7 +185,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const slightlyPast = new Date(Date.now() - 1000)
       await setNextReminderUtc(sql, subscription.id, slightlyPast)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeDefined()
@@ -208,7 +208,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       // Explicitly set to null (subscription is created without next_reminder_utc by default)
       await setNextReminderUtc(sql, subscription.id, null)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeUndefined()
@@ -239,7 +239,7 @@ describe('getSubscriptionsDueForReminder', async () => {
       const pastTime = new Date(Date.now() - 60 * 60 * 1000)
       await setNextReminderUtc(sql, subscription.id, pastTime)
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const found = due.find(d => d.id === subscription.id)
 
       expect(found).toBeDefined()
@@ -296,7 +296,7 @@ describe('getSubscriptionsDueForReminder', async () => {
         subscriptionIds.push(subscription.id)
       }
 
-      const due = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+      const due = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
       const testDue = due.filter(d => subscriptionIds.includes(d.id))
 
       expect(testDue.length).toBe(3)

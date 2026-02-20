@@ -1,4 +1,4 @@
-import { campaignSubscriptionService } from '../database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '../database/people-group-subscriptions'
 import { reminderSentService } from '../database/reminder-sent'
 import { peopleGroupService } from '../database/people-groups'
 import { prayerContentService } from '../database/prayer-content'
@@ -74,7 +74,7 @@ async function processReminders() {
   const todayDate = new Date().toISOString().split('T')[0]!
 
   // Get all subscriptions that are due for a reminder (with verified email)
-  const dueSubscriptions = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+  const dueSubscriptions = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
 
   if (dueSubscriptions.length === 0) {
     return
@@ -115,7 +115,7 @@ async function processReminders() {
           const alreadySent = await reminderSentService.wasSent(subscription.id, todayDate)
           if (alreadySent) {
             // Update next reminder time anyway
-            await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
+            await peopleGroupSubscriptionService.setNextReminderAfterSend(subscription.id)
             continue
           }
 
@@ -137,7 +137,7 @@ async function processReminders() {
             // Record that we sent this reminder
             await reminderSentService.recordSent(subscription.id, todayDate)
             // Update next reminder time
-            await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
+            await peopleGroupSubscriptionService.setNextReminderAfterSend(subscription.id)
             console.log(`  ✅ Sent reminder to ${subscription.email_value} for ${subscription.people_group_name}`)
           } else {
             console.error(`  ❌ Failed to send reminder to ${subscription.email_value}`)

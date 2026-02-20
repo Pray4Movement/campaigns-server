@@ -1,4 +1,4 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
 import { peopleGroupService } from '#server/database/people-groups'
@@ -6,13 +6,13 @@ import { sendFollowupEmail } from '#server/utils/followup-email'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.edit')
+  const user = await requirePermission(event, 'people_groups.edit')
 
   const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get the subscription
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -103,7 +103,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Mark that a follow-up was sent
-    await campaignSubscriptionService.markFollowupSent(subscription.id)
+    await peopleGroupSubscriptionService.markFollowupSent(subscription.id)
 
     return {
       message: `Follow-up email sent to ${emailContact.value}`

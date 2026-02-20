@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     if (!roleConfig) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Invalid role. Valid roles: admin, campaign_editor'
+        statusMessage: 'Invalid role. Valid roles: admin, people_group_editor'
       })
     }
 

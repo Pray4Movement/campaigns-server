@@ -4,7 +4,7 @@
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { subscriberService } from '#server/database/subscribers'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
   let subscription
 
   if (subscriptionId) {
-    subscription = await campaignSubscriptionService.getById(subscriptionId)
+    subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
     if (!subscription || subscription.subscriber_id !== subscriber.id || subscription.people_group_id !== peopleGroup.id) {
       throw createError({
         statusCode: 404,
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
     }
   } else {
     // Legacy behavior: find first subscription for this people group
-    subscription = await campaignSubscriptionService.getBySubscriberAndCampaign(
+    subscription = await peopleGroupSubscriptionService.getBySubscriberAndPeopleGroup(
       subscriber.id,
       peopleGroup.id
     )
@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Reactivate the subscription
-  const result = await campaignSubscriptionService.resubscribe(subscription.id)
+  const result = await peopleGroupSubscriptionService.resubscribe(subscription.id)
 
   if (!result) {
     throw createError({

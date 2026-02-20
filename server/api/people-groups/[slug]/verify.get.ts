@@ -4,7 +4,7 @@
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { sendWelcomeEmail } from '#server/utils/welcome-email'
 
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
 
   // Set initial next reminder for all email subscriptions of this subscriber
   if (result.contactMethod) {
-    await campaignSubscriptionService.setNextRemindersForSubscriber(result.contactMethod.subscriber_id)
+    await peopleGroupSubscriptionService.setNextRemindersForSubscriber(result.contactMethod.subscriber_id)
 
     // Send welcome email (only if this was a new verification, not already verified)
     if (result.error !== 'Already verified') {

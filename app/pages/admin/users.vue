@@ -51,7 +51,7 @@
           </template>
           <template #peopleGroups-cell="{ row }">
             <UButton
-              v-if="(row.original as User).role?.name === 'campaign_editor'"
+              v-if="(row.original as User).role?.name === 'people_group_editor'"
               @click="openPeopleGroupModal(row.original as User)"
               variant="outline"
               size="xs"
@@ -378,7 +378,7 @@ const pendingInvitations = computed(() => {
 function formatRoleName(roleName: string): string {
   const roleDisplayNames: Record<string, string> = {
     'admin': 'Admin',
-    'campaign_editor': 'People Group Editor'
+    'people_group_editor': 'People Group Editor'
   }
   return roleDisplayNames[roleName] || roleName
 }

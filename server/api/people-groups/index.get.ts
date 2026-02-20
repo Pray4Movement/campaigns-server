@@ -3,14 +3,14 @@
  * List all people groups (campaigns) with images
  */
 import { peopleGroupService } from '#server/database/people-groups'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const peopleGroups = await peopleGroupService.getAllPeopleGroups()
 
   // Get commitment stats for all people groups
   const ids = peopleGroups.map(pg => pg.id)
-  const commitmentStats = await campaignSubscriptionService.getCommitmentStatsForCampaigns(ids)
+  const commitmentStats = await peopleGroupSubscriptionService.getCommitmentStatsForPeopleGroups(ids)
 
   const enrichedCampaigns = peopleGroups.map((pg) => {
     const stats = commitmentStats.get(pg.id) || { people_committed: 0, committed_duration: 0 }

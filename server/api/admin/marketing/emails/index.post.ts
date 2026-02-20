@@ -2,7 +2,7 @@ import { marketingEmailService } from '#server/database/marketing-emails'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const body = await readBody(event)
 

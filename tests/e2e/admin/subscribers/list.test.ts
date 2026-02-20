@@ -88,7 +88,7 @@ describe('GET /api/admin/subscribers', async () => {
       expect(response.subscribers).toBeDefined()
     })
 
-    it('succeeds for campaign_editor users', async () => {
+    it('succeeds for people_group_editor users', async () => {
       const response = await $fetch('/api/admin/subscribers', editorAuth)
       expect(response.subscribers).toBeDefined()
     })
@@ -104,7 +104,7 @@ describe('GET /api/admin/subscribers', async () => {
       expect(names.some((n: string) => n.includes('C2'))).toBe(true)
     })
 
-    it('campaign_editor sees only subscribers from assigned people groups', async () => {
+    it('people_group_editor sees only subscribers from assigned people groups', async () => {
       const response = await $fetch('/api/admin/subscribers', editorAuth)
 
       // Should only see subscribers from peopleGroup1
@@ -120,7 +120,7 @@ describe('GET /api/admin/subscribers', async () => {
       expect(names.every((n: string) => n.includes('C1'))).toBe(true)
     })
 
-    it('campaign_editor cannot filter by unassigned people_group_id', async () => {
+    it('people_group_editor cannot filter by unassigned people_group_id', async () => {
       const error = await $fetch(`/api/admin/subscribers?people_group_id=${peopleGroup2.id}`, editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
