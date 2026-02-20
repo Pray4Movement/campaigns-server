@@ -42,6 +42,12 @@
             Pop: {{ formatNumber(group.metadata.imb_population) }}
           </span>
         </div>
+        <div class="group-stats">
+          <span>{{ group.people_committed }} committed</span>
+          <span>{{ formatDuration(group.committed_duration) }} pledged</span>
+          <span>{{ group.people_praying }} praying</span>
+          <span>{{ formatDuration(Math.round(group.daily_prayer_duration / 60)) }} daily</span>
+        </div>
       </CrmListItem>
     </template>
 
@@ -182,6 +188,10 @@ interface PeopleGroup {
   image_url: string | null
   descriptions: Record<string, string> | null
   metadata: Record<string, any>
+  people_committed: number
+  committed_duration: number
+  people_praying: number
+  daily_prayer_duration: number
   created_at: string
   updated_at: string
 }
@@ -372,6 +382,14 @@ function formatNumber(num: number | string): string {
   return n.toLocaleString()
 }
 
+function formatDuration(minutes: number): string {
+  if (!minutes) return '0m'
+  if (minutes < 60) return `${minutes}m`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m > 0 ? `${h}h ${m}m` : `${h}h`
+}
+
 // Handle URL-based selection
 function handleUrlSelection() {
   const idParam = route.params.id as string | undefined
@@ -427,6 +445,18 @@ onMounted(async () => {
 
 .population {
   color: var(--ui-text-muted);
+}
+
+.group-stats {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--ui-text-muted);
+  margin-top: 0.25rem;
+}
+
+.group-stats span {
+  white-space: nowrap;
 }
 
 .header-info {

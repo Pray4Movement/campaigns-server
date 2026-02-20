@@ -1,4 +1,5 @@
 import { peopleGroupService } from '../../../database/people-groups'
+import { peopleGroupSubscriptionService } from '../../../database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
@@ -13,11 +14,16 @@ export default defineEventHandler(async (event) => {
     peopleGroupService.countPeopleGroups(search)
   ])
 
-  // Parse metadata and descriptions for each group
+  const peopleGroupIds = peopleGroups.map(g => g.id)
+  const commitmentStats = await peopleGroupSubscriptionService.getCommitmentStatsForPeopleGroups(peopleGroupIds)
+
+  // Parse metadata and descriptions for each group, attach stats
   const groupsWithParsedMetadata = peopleGroups.map(group => ({
     ...group,
     metadata: group.metadata ? JSON.parse(group.metadata) : {},
-    descriptions: group.descriptions ? (typeof group.descriptions === 'string' ? JSON.parse(group.descriptions) : group.descriptions) : {}
+    descriptions: group.descriptions ? (typeof group.descriptions === 'string' ? JSON.parse(group.descriptions) : group.descriptions) : {},
+    people_committed: commitmentStats.get(group.id)?.people_committed ?? 0,
+    committed_duration: commitmentStats.get(group.id)?.committed_duration ?? 0
   }))
 
   return {
