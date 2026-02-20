@@ -83,7 +83,7 @@
         },
         "email": {
           "label": "ईमेल पता",
-          "placeholder": "your{'@'}email.com"
+          "placeholder": "आपका{'@'}email.com"
         },
         "phone": {
           "label": "फोन नंबर",

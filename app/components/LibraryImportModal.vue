@@ -94,7 +94,7 @@
               />
             </UFormField>
 
-            <UFormField v-if="peopleGroupId && needsLibraryKey" label="Library Key" required class="key-field">
+            <UFormField v-if="peopleGroupId && needsLibraryKey" label="Library Key" class="key-field">
               <UInput
                 v-model="libraryKey"
                 placeholder="e.g., day_in_life"
@@ -269,7 +269,6 @@ const canImport = computed(() => {
   }
   // Creating new library
   if (!importName.value.trim()) return false
-  if (props.peopleGroupId && needsLibraryKey.value && !libraryKey.value.trim()) return false
   return true
 })
 

@@ -115,9 +115,6 @@ export default defineNuxtConfig({
     deeplApiKey: process.env.DEEPL_API_KEY || '',
     deeplApiUrl: process.env.DEEPL_API_URL || 'https://api-free.deepl.com',
 
-    // Bible Brain (DBP v4) API
-    bibleBrainApiKey: process.env.BIBLE_BRAIN_API_KEY || '',
-
     // Public keys (exposed to the frontend)
     public: {
       appName: appTitle,

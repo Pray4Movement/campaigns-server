@@ -7,7 +7,7 @@
 
 import { LANGUAGE_CODES, getDeeplTargetCode, getDeeplSourceCode, getBibleId } from '~/utils/languages'
 import { parseReference } from '../../config/bible-books'
-import { fetchVerseText, isBibleBrainConfigured } from './app/bible-brain'
+import { fetchVerseText, isBollsBibleConfigured } from './app/bolls-bible'
 
 // Re-export for convenience
 export const SUPPORTED_LANGUAGES = LANGUAGE_CODES
@@ -194,7 +194,7 @@ export function setTextAtPath(node: TiptapNode, path: number[], text: string): v
 /**
  * Translate Tiptap JSON content
  * Preserves structure, marks, and attributes while translating text nodes.
- * Verse nodes are never sent to DeepL — they are fetched from Bible Brain instead.
+ * Verse nodes are never sent to DeepL — they are fetched from the Bible API instead.
  */
 export async function translateTiptapContent(
   contentJson: TiptapNode,
@@ -284,7 +284,7 @@ export async function batchTranslateTiptapContents(
 }
 
 /**
- * Walk the Tiptap tree and replace verse node content with Bible Brain text
+ * Walk the Tiptap tree and replace verse node content with Bible text
  * in the target language. If fetching fails or no bibleId is configured,
  * the verse content is left untouched.
  */
@@ -297,25 +297,20 @@ async function translateVerseNodes(node: TiptapNode, targetLanguage: string): Pr
       if (!reference) continue
 
       const bibleId = getBibleId(targetLanguage)
-      if (!bibleId) {
-        console.warn(`[Bible Brain] No bibleId configured for language "${targetLanguage}", skipping verse translation`)
-        continue
-      }
-
-      if (!isBibleBrainConfigured()) {
-        console.warn('[Bible Brain] API key not configured, skipping verse translation')
+      if (!isBollsBibleConfigured(bibleId)) {
+        console.warn(`[Bolls Bible] No bibleId configured for language "${targetLanguage}", skipping verse translation`)
         continue
       }
 
       const parsed = parseReference(reference)
       if (!parsed) {
-        console.warn(`[Bible Brain] Could not parse reference "${reference}", skipping`)
+        console.warn(`[Bolls Bible] Could not parse reference "${reference}", skipping`)
         continue
       }
 
       try {
         const text = await fetchVerseText({
-          bibleId,
+          bibleId: bibleId!,
           bookId: parsed.bookId,
           chapter: parsed.chapter,
           verseStart: parsed.verseStart,
@@ -327,7 +322,7 @@ async function translateVerseNodes(node: TiptapNode, targetLanguage: string): Pr
           content: [{ type: 'text', text }]
         }]
       } catch (e) {
-        console.warn(`[Bible Brain] Failed to fetch verse "${reference}" for language "${targetLanguage}":`, e)
+        console.warn(`[Bolls Bible] Failed to fetch verse "${reference}" for language "${targetLanguage}":`, e)
       }
     } else {
       await translateVerseNodes(child, targetLanguage)

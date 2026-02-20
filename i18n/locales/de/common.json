@@ -419,8 +419,8 @@
       "commitmentCheckIn": "Dies ist ein Engagement-Check-In von {appName}."
     },
     "marketing": {
-      "headerCampaign": "{campaign} Updates",
-      "headerDefault": "{appName} Updates",
+      "headerCampaign": "{campaign} Neuigkeiten",
+      "headerDefault": "{appName} Neuigkeiten",
       "footer": "Sie haben diese E-Mail erhalten, weil Sie sich für Updates von {appName} angemeldet haben."
     },
     "days": {

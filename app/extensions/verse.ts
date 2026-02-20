@@ -1,6 +1,6 @@
 /**
  * Verse Extension for TipTap
- * A styled block for scripture or quoted verses with optional Bible Brain integration
+ * A styled block for scripture or quoted verses with optional Bible verse lookup
  */
 
 import { Node, mergeAttributes } from '@tiptap/core'

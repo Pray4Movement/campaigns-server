@@ -12,8 +12,7 @@ const error = ref('')
 
 const savedReference = computed(() => props.node.attrs.reference || '')
 const translationLabel = computed(() => {
-  const id = getBibleId(language.value)
-  return id ? id.slice(3) : ''
+  return getBibleId(language.value) || ''
 })
 
 function saveReference() {

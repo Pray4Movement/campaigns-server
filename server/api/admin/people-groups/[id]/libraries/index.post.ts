@@ -27,20 +27,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!body.library_key) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Library key is required'
-    })
-  }
-
   try {
     const library = await libraryService.createLibrary({
       name: body.name,
       description: body.description,
       repeating: body.repeating,
       people_group_id: id,
-      library_key: body.library_key
+      library_key: body.library_key || null
     })
 
     return {

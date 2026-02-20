@@ -175,7 +175,7 @@
             />
           </UFormField>
 
-          <UFormField label="Library Key" required :hint="editingLibrary ? 'Cannot be changed' : 'Used for internal identification (e.g., day_in_life, prayer_points)'">
+          <UFormField label="Library Key" :hint="editingLibrary ? 'Cannot be changed' : 'Used for internal identification (e.g., day_in_life, prayer_points)'">
             <UInput
               v-model="form.library_key"
               placeholder="e.g., day_in_life"
@@ -474,15 +474,6 @@ async function saveLibrary() {
     toast.add({
       title: 'Validation Error',
       description: 'Library name is required',
-      color: 'error'
-    })
-    return
-  }
-
-  if (!editingLibrary.value && !form.value.library_key.trim()) {
-    toast.add({
-      title: 'Validation Error',
-      description: 'Library key is required',
       color: 'error'
     })
     return
