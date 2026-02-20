@@ -7,7 +7,8 @@ export async function sendWelcomeEmail(
   peopleGroupSlug: string,
   profileId: string,
   locale: string = 'en',
-  trackingId?: string
+  trackingId?: string,
+  reminderTime?: string
 ): Promise<boolean> {
   const config = useRuntimeConfig()
   const baseUrl = config.public.siteUrl || 'http://localhost:3000'
@@ -19,11 +20,17 @@ export async function sendWelcomeEmail(
   const subject = t('email.welcome.subject', locale, { appName, campaign: peopleGroupName })
   const header = t('email.welcome.header', locale, { appName })
   const hello = t('email.common.hello', locale, { name: subscriberName })
-  const thankYou = t('email.welcome.thankYou', locale, { campaign: peopleGroupName })
+  const doxaMeaning = t('email.welcome.doxaMeaning', locale)
+  const reminderExplanation = t('email.welcome.reminderExplanation', locale)
+  const sharedGoal = t('email.welcome.sharedGoal', locale)
+  const closing = t('email.welcome.closing', locale)
   const startPraying = t('email.welcome.startPraying', locale)
   const profileInstructions = t('email.welcome.profileInstructions', locale)
   const managePreferences = t('email.common.managePreferences', locale)
   const automatedMessage = t('email.common.automatedMessage', locale, { appName })
+  const reminderTimeText = reminderTime
+    ? t('email.welcome.reminderTimeNote', locale, { time: reminderTime })
+    : ''
 
   const html = `
     <!DOCTYPE html>
@@ -42,9 +49,24 @@ export async function sendWelcomeEmail(
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
         <h2 style="color: #3B463D; margin-top: 0; font-weight: 500;">${hello}</h2>
         <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
-          ${thankYou}
+          ${doxaMeaning}
         </p>
-
+        <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
+          ${reminderExplanation}
+        </p>
+        <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
+          ${sharedGoal}
+        </p>
+        <p style="font-size: 16px; margin: 20px 0; color: #3B463D;">
+          ${closing}
+        </p>
+${reminderTimeText ? `
+        <div style="background: #f4f6f4; border-left: 4px solid #3B463D; padding: 15px 20px; margin: 25px 0; border-radius: 0 5px 5px 0;">
+          <p style="font-size: 15px; margin: 0; color: #3B463D; font-weight: 500;">
+            ${reminderTimeText}
+          </p>
+        </div>
+` : ''}
         <div style="text-align: center; margin: 30px 0;">
           <a href="${peopleGroupUrl}" style="
             background: #3B463D;
@@ -93,8 +115,14 @@ ${header} - ${peopleGroupName}
 
 ${hello}
 
-${thankYou}
+${doxaMeaning}
 
+${reminderExplanation}
+
+${sharedGoal}
+
+${closing}
+${reminderTimeText ? `\n${reminderTimeText}\n` : ''}
 ${startPraying}: ${peopleGroupUrl}
 
 ${managePreferences}: ${profileUrl}

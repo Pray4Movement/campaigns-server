@@ -55,6 +55,12 @@ export default defineEventHandler(async (event) => {
 
     // Send welcome email (only if this was a new verification, not already verified)
     if (result.error !== 'Already verified' && subscriber) {
+      const subscriptions = await peopleGroupSubscriptionService.getAllBySubscriberAndPeopleGroup(
+        result.contactMethod.subscriber_id,
+        peopleGroup.id
+      )
+      const latestActive = subscriptions.filter(s => s.status === 'active').pop()
+
       sendWelcomeEmail(
         result.contactMethod.value,
         subscriber.name,
@@ -62,7 +68,8 @@ export default defineEventHandler(async (event) => {
         slug,
         subscriber.profile_id,
         subscriber.preferred_language || 'en',
-        subscriber.tracking_id
+        subscriber.tracking_id,
+        latestActive?.time_preference
       ).catch(err => console.error('Failed to send welcome email:', err))
     }
   }

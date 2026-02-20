@@ -388,9 +388,13 @@
       "ignoreMessage": "Se non ti sei iscritto ai promemoria di preghiera, puoi ignorare questa email."
     },
     "welcome": {
-      "subject": "Benvenuto su {appName} - {campaign}",
-      "header": "Benvenuto su {appName}",
-      "thankYou": "Grazie per esserti iscritto per pregare. La tua email e stata verificata e sei pronto per ricevere i promemoria di preghiera per {campaign}.",
+      "subject": "Benvenuto su Doxa! - {campaign}",
+      "header": "Benvenuto su Doxa!",
+      "doxaMeaning": "In greco, doxa significa \"gloria\", ed è esattamente ciò che stiamo offrendo unendoci in preghiera per i milioni di persone che vivono con poca o nessuna testimonianza del Vangelo. Insieme, stiamo portando gloria a Dio attraverso una preghiera fedele e piena di aspettativa.",
+      "reminderExplanation": "Come parte di questa campagna di preghiera, inizierai presto a ricevere e-mail di promemoria con collegamenti a contenuti di preghiera quotidiani. Ogni collegamento includerà guide di preghiera e altri materiali per aiutarti a pregare in modo strategico e fedele per il gruppo etnico non raggiunto che hai scelto.",
+      "sharedGoal": "Attraverso questo movimento, il nostro obiettivo condiviso è vedere una copertura di preghiera quotidiana di 24 ore per ciascuno degli oltre 2.000 gruppi etnici non raggiunti, uomini e donne inviati a portare il Vangelo a questi gruppi entro il 2033, e donazioni sostenute per sostenere questo impegno.",
+      "closing": "Siamo profondamente grati di unirci a tutta la Chiesa mentre cerchiamo di portare tutto il Vangelo a tutto il mondo.",
+      "reminderTimeNote": "Il tuo promemoria giornaliero è impostato per le {time}.",
       "startPraying": "Inizia a Pregare",
       "profileInstructions": "Puoi aggiornare i dettagli del tuo profilo e le tue notifiche qui:"
     },

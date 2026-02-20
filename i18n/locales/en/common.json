@@ -388,9 +388,13 @@
       "ignoreMessage": "If you didn't sign up for prayer reminders, you can safely ignore this email."
     },
     "welcome": {
-      "subject": "Welcome to {appName} - {campaign}",
-      "header": "Welcome to {appName}",
-      "thankYou": "Thank you for signing up to pray. Your email has been verified and you're all set to receive prayer reminders for {campaign}.",
+      "subject": "Welcome to Doxa! - {campaign}",
+      "header": "Welcome to Doxa!",
+      "doxaMeaning": "In Greek, doxa means \"glory,\" and that is exactly what we are offering as we join in prayer on behalf of the millions of people who live with little to no gospel witness. Together, we are bringing glory to God through faithful, expectant prayer.",
+      "reminderExplanation": "As part of this prayer campaign, you will soon begin receiving reminder emails with links to daily prayer content. Each link will include guided prayer prompts and other materials to help you pray strategically and faithfully for your chosen unengaged people group.",
+      "sharedGoal": "Through this movement, our shared goal is to see daily 24-hour prayer coverage for each of the over 2,000 unengaged people groups, men and women sent to engage these people groups with the gospel by the year 2033, and sustained giving to support this effort.",
+      "closing": "We are deeply grateful to join with the whole Church as we seek to take the whole gospel to the whole world.",
+      "reminderTimeNote": "Your daily reminder is set for {time}.",
       "startPraying": "Start Praying",
       "profileInstructions": "You can update your profile details and your notifications here:"
     },

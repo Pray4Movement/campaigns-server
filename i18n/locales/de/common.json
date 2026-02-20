@@ -388,9 +388,13 @@
       "ignoreMessage": "Wenn Sie sich nicht für Gebetserinnerungen angemeldet haben, können Sie diese E-Mail ignorieren."
     },
     "welcome": {
-      "subject": "Willkommen bei {appName} - {campaign}",
-      "header": "Willkommen bei {appName}",
-      "thankYou": "Vielen Dank für Ihre Anmeldung zum Beten. Ihre E-Mail wurde bestätigt und Sie sind bereit, Gebetserinnerungen für {campaign} zu erhalten.",
+      "subject": "Willkommen bei Doxa! - {campaign}",
+      "header": "Willkommen bei Doxa!",
+      "doxaMeaning": "Im Griechischen bedeutet Doxa „Herrlichkeit", und genau das bieten wir an, wenn wir uns im Gebet für die Millionen von Menschen vereinen, die mit wenig oder gar keinem Zeugnis des Evangeliums leben. Gemeinsam bringen wir Gott durch treues, erwartungsvolles Gebet die Ehre.",
+      "reminderExplanation": "Im Rahmen dieser Gebetskampagne werden Sie bald Erinnerungs-E-Mails mit Links zu täglichen Gebetsinhalten erhalten. Jeder Link enthält angeleitete Gebetsimpulse und weitere Materialien, die Ihnen helfen, strategisch und treu für die von Ihnen gewählte unerreichte Volksgruppe zu beten.",
+      "sharedGoal": "Durch diese Bewegung ist unser gemeinsames Ziel, eine tägliche 24-Stunden-Gebetsabdeckung für jede der über 2.000 unerreichten Volksgruppen zu erreichen, Männer und Frauen auszusenden, die diese Volksgruppen bis zum Jahr 2033 mit dem Evangelium erreichen, und nachhaltige Spenden zur Unterstützung dieses Vorhabens.",
+      "closing": "Wir sind zutiefst dankbar, uns mit der gesamten Kirche zusammenzuschließen, um das ganze Evangelium in die ganze Welt zu tragen.",
+      "reminderTimeNote": "Ihre tägliche Erinnerung ist auf {time} eingestellt.",
       "startPraying": "Mit dem Beten beginnen",
       "profileInstructions": "Sie können Ihre Profildaten und Benachrichtigungen hier aktualisieren:"
     },

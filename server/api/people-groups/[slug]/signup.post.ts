@@ -142,7 +142,8 @@ export default defineEventHandler(async (event) => {
           slug,
           subscriber.profile_id,
           language,
-          subscriber.tracking_id
+          subscriber.tracking_id,
+          body.reminder_time
         )
       }
       // Return same response as new signup for privacy
@@ -168,7 +169,8 @@ export default defineEventHandler(async (event) => {
           slug,
           subscriber.profile_id,
           language,
-          subscriber.tracking_id
+          subscriber.tracking_id,
+          body.reminder_time
         )
       }
       // Return same response as new signup for privacy
@@ -201,7 +203,7 @@ export default defineEventHandler(async (event) => {
           const token = await contactMethodService.generateVerificationToken(emailContact.id)
           await sendSignupVerificationEmail(body.email, token, slug, peopleGroup.name, body.name, language)
         } else if (emailContact?.verified) {
-          await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language, subscriber.tracking_id)
+          await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language, subscriber.tracking_id, body.reminder_time)
         }
       }
 
@@ -230,7 +232,7 @@ export default defineEventHandler(async (event) => {
       if (emailContact?.verified) {
         // Email already verified - set next reminder and send welcome
         await peopleGroupSubscriptionService.setInitialNextReminder(subscription.id)
-        await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language, subscriber.tracking_id)
+        await sendWelcomeEmail(body.email, body.name, peopleGroup.name, slug, subscriber.profile_id, language, subscriber.tracking_id, body.reminder_time)
       } else if (emailContact) {
         // Email not verified - send verification email
         const token = await contactMethodService.generateVerificationToken(emailContact.id)
