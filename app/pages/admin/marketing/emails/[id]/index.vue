@@ -68,28 +68,28 @@
 
                 <div
                   class="audience-option"
-                  :class="{ selected: form.audience_type === 'campaign' }"
-                  @click="selectAudience('campaign')"
+                  :class="{ selected: form.audience_type === 'people_group' }"
+                  @click="selectAudience('people_group')"
                 >
                   <div class="option-header">
-                    <input type="radio" v-model="form.audience_type" value="campaign" />
-                    <span class="option-title">Campaign</span>
+                    <input type="radio" v-model="form.audience_type" value="people_group" />
+                    <span class="option-title">People Group</span>
                   </div>
-                  <p class="option-description">Send to subscribers who opted in to a specific campaign</p>
+                  <p class="option-description">Send to subscribers who opted in to a specific people group</p>
 
                   <USelectMenu
-                    v-show="form.audience_type === 'campaign'"
-                    v-model="form.campaign_id"
-                    :items="campaignOptions"
-                    placeholder="Select a campaign"
-                    class="campaign-select"
+                    v-show="form.audience_type === 'people_group'"
+                    v-model="form.people_group_id"
+                    :items="peopleGroupOptions"
+                    placeholder="Select a people group"
+                    class="people-group-select"
                     searchable
                     virtualize
                     value-key="value"
-                    @update:model-value="loadCampaignCount"
+                    @update:model-value="loadPeopleGroupCount"
                   />
-                  <p class="option-count" v-if="form.audience_type === 'campaign' && campaignCount !== null">
-                    {{ campaignCount }} recipients
+                  <p class="option-count" v-if="form.audience_type === 'people_group' && peopleGroupCount !== null">
+                    {{ peopleGroupCount }} recipients
                   </p>
                 </div>
               </div>
@@ -121,7 +121,7 @@
             <label>Audience</label>
             <p class="view-value">
               <UBadge
-                :label="email.audience_type === 'doxa' ? 'Doxa General' : email.campaign_title || 'Campaign'"
+                :label="email.audience_type === 'doxa' ? 'Doxa General' : email.people_group_name || 'People Group'"
                 variant="subtle"
                 color="neutral"
               />
@@ -200,9 +200,9 @@ interface MarketingEmail {
   id: number
   subject: string
   content_json: string
-  audience_type: 'doxa' | 'campaign'
-  campaign_id: number | null
-  campaign_title?: string
+  audience_type: 'doxa' | 'people_group'
+  people_group_id: number | null
+  people_group_name?: string
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
   sent_at: string | null
   created_at: string
@@ -224,16 +224,16 @@ const error = ref('')
 
 const form = ref({
   subject: '',
-  audience_type: '' as 'doxa' | 'campaign' | '',
-  campaign_id: undefined as number | undefined,
+  audience_type: '' as 'doxa' | 'people_group' | '',
+  people_group_id: undefined as number | undefined,
   content: { type: 'doc', content: [{ type: 'paragraph' }] } as any
 })
 
 const originalForm = ref<string>('')
 
-const campaigns = ref<{ id: number; title: string }[]>([])
+const peopleGroups = ref<{ id: number; title: string }[]>([])
 const doxaCount = ref<number | null>(null)
-const campaignCount = ref<number | null>(null)
+const peopleGroupCount = ref<number | null>(null)
 const saving = ref(false)
 const sending = ref(false)
 const showPreview = ref(false)
@@ -245,8 +245,8 @@ const pendingNavigation = ref<any>(null)
 
 const isDraft = computed(() => email.value?.status === 'draft')
 
-const campaignOptions = computed(() => {
-  return campaigns.value.map(c => ({
+const peopleGroupOptions = computed(() => {
+  return peopleGroups.value.map(c => ({
     label: c.title,
     value: c.id
   }))
@@ -258,13 +258,13 @@ const canPreview = computed(() => {
 
 const canSave = computed(() => {
   return form.value.subject && form.value.audience_type && form.value.content
-    && (form.value.audience_type === 'doxa' || form.value.campaign_id)
+    && (form.value.audience_type === 'doxa' || form.value.people_group_id)
 })
 
 const canSend = computed(() => {
   return canSave.value && (
     (form.value.audience_type === 'doxa' && doxaCount.value && doxaCount.value > 0) ||
-    (form.value.audience_type === 'campaign' && campaignCount.value && campaignCount.value > 0)
+    (form.value.audience_type === 'people_group' && peopleGroupCount.value && peopleGroupCount.value > 0)
   )
 })
 
@@ -285,11 +285,11 @@ function getStatusColor(status: string): BadgeColor {
   return colors[status] || 'neutral'
 }
 
-function selectAudience(type: 'doxa' | 'campaign') {
+function selectAudience(type: 'doxa' | 'people_group') {
   form.value.audience_type = type
   if (type === 'doxa') {
-    form.value.campaign_id = undefined
-    campaignCount.value = null
+    form.value.people_group_id = undefined
+    peopleGroupCount.value = null
   }
 }
 
@@ -307,13 +307,13 @@ async function loadEmail() {
       form.value = {
         subject: response.email.subject,
         audience_type: response.email.audience_type,
-        campaign_id: response.email.campaign_id ?? undefined,
+        people_group_id: response.email.people_group_id ?? undefined,
         content: JSON.parse(response.email.content_json)
       }
       originalForm.value = JSON.stringify(form.value)
 
-      if (response.email.audience_type === 'campaign' && response.email.campaign_id) {
-        void loadCampaignCount()
+      if (response.email.audience_type === 'people_group' && response.email.people_group_id) {
+        void loadPeopleGroupCount()
       }
     } else {
       const previewResponse = await $fetch<{ html: string }>(`/api/admin/marketing/emails/${id}/preview`)
@@ -326,12 +326,12 @@ async function loadEmail() {
   }
 }
 
-async function loadCampaigns() {
+async function loadPeopleGroups() {
   try {
-    const response = await $fetch<{ campaigns: { id: number; title: string }[] }>('/api/admin/campaigns')
-    campaigns.value = response.campaigns
+    const response = await $fetch<{ peopleGroups: { id: number; name: string }[] }>('/api/admin/people-groups')
+    peopleGroups.value = response.peopleGroups.map(pg => ({ id: pg.id, title: pg.name }))
   } catch (error) {
-    console.error('Failed to load campaigns:', error)
+    console.error('Failed to load people groups:', error)
   }
 }
 
@@ -345,16 +345,16 @@ async function loadDoxaCount() {
   }
 }
 
-async function loadCampaignCount() {
-  if (!form.value.campaign_id) {
-    campaignCount.value = null
+async function loadPeopleGroupCount() {
+  if (!form.value.people_group_id) {
+    peopleGroupCount.value = null
     return
   }
   try {
-    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/campaign/${form.value.campaign_id}`)
-    campaignCount.value = response.count
+    const response = await $fetch<{ count: number }>(`/api/admin/marketing/audience/people-group/${form.value.people_group_id}`)
+    peopleGroupCount.value = response.count
   } catch (error) {
-    console.error('Failed to load campaign count:', error)
+    console.error('Failed to load people group count:', error)
   }
 }
 
@@ -370,7 +370,7 @@ async function saveEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type,
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -407,7 +407,7 @@ async function sendEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type,
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -449,7 +449,7 @@ async function previewEmail() {
         subject: form.value.subject,
         content_json: JSON.stringify(form.value.content),
         audience_type: form.value.audience_type || 'doxa',
-        campaign_id: form.value.campaign_id
+        people_group_id: form.value.people_group_id
       }
     })
 
@@ -493,7 +493,7 @@ onBeforeRouteLeave((_to, _from, next) => {
 
 onMounted(() => {
   loadEmail()
-  loadCampaigns()
+  loadPeopleGroups()
   if (isAdmin.value) {
     loadDoxaCount()
   }
@@ -613,7 +613,7 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.campaign-select {
+.people-group-select {
   margin-top: 0.75rem;
 }
 

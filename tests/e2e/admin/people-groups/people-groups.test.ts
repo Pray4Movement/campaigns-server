@@ -48,7 +48,7 @@ describe('People Groups API', async () => {
       expect(Array.isArray(response.peopleGroups)).toBe(true)
     })
 
-    it('returns 403 for campaign_editor users (admin only)', async () => {
+    it('returns 403 for people_group_editor users (admin only)', async () => {
       const error = await $fetch('/api/admin/people-groups', editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
@@ -122,31 +122,4 @@ describe('People Groups API', async () => {
     })
   })
 
-  describe('POST /api/admin/people-groups/sync', () => {
-    it('returns 401 for unauthenticated requests', async () => {
-      const error = await $fetch('/api/admin/people-groups/sync', {
-        method: 'POST'
-      }).catch((e) => e)
-
-      expect(error.statusCode).toBe(401)
-    })
-
-    it('returns 403 for users with no role', async () => {
-      const error = await $fetch('/api/admin/people-groups/sync', {
-        method: 'POST',
-        ...noRoleAuth
-      }).catch((e) => e)
-
-      expect(error.statusCode).toBe(403)
-    })
-
-    it('returns 403 for campaign_editor users', async () => {
-      const error = await $fetch('/api/admin/people-groups/sync', {
-        method: 'POST',
-        ...editorAuth
-      }).catch((e) => e)
-
-      expect(error.statusCode).toBe(403)
-    })
-  })
 })

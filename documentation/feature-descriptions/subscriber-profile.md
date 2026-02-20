@@ -31,15 +31,15 @@ The system prevents two subscribers from using the same email address.
 
 The profile shows toggles for marketing consent:
 
-**Doxa Updates** - Whether to receive general updates about Doxa's work across all campaigns.
+**Doxa Updates** - Whether to receive general updates about Doxa's work across all people groups.
 
-**Campaign Updates** - For each campaign they're subscribed to, whether to receive news and announcements from that campaign's organizers.
+**People Group Updates** - For each people group they're subscribed to, whether to receive news and announcements from that people group's organizers.
 
 These toggles save immediately when clicked. They're separate from prayer reminders—unsubscribing from marketing doesn't affect reminder delivery.
 
 ### View and Edit Reminders
 
-All active reminders are grouped by campaign. For each reminder, subscribers see:
+All active reminders are grouped by people group. For each reminder, subscribers see:
 
 - Whether it's daily or weekly
 - Which days (for weekly reminders)
@@ -51,7 +51,7 @@ Clicking "Edit" on any reminder opens a form to change these settings. Changes s
 
 ### Delete Reminders
 
-Subscribers can permanently delete any active reminder. This removes the reminder entirely—to restore it, they'd need to sign up again through the campaign page.
+Subscribers can permanently delete any active reminder. This removes the reminder entirely—to restore it, they'd need to sign up again through the people group page.
 
 ### Re-subscribe to Previous Reminders
 
@@ -61,7 +61,7 @@ This is different from deletion—unsubscribed reminders are paused, not removed
 
 ### Navigate to Campaigns
 
-Each campaign section includes a "View Campaign" link that goes to the campaign's public prayer page. This helps subscribers who want to pray outside their scheduled times.
+Each people group section includes a "View Campaign" link that goes to the people group's public prayer page. This helps subscribers who want to pray outside their scheduled times.
 
 ## How Settings Are Organized
 
@@ -69,7 +69,7 @@ Each campaign section includes a "View Campaign" link that goes to the campaign'
 
 **Contact-level settings** (marketing consent) are tied to the email address. If someone has verified multiple email addresses, each has its own consent settings.
 
-**Subscription-level settings** (frequency, time, timezone, duration) are specific to each reminder. A subscriber can have different settings for different reminders, even within the same campaign.
+**Subscription-level settings** (frequency, time, timezone, duration) are specific to each reminder. A subscriber can have different settings for different reminders, even within the same people group.
 
 ## Design Decisions
 
@@ -85,7 +85,7 @@ Each campaign section includes a "View Campaign" link that goes to the campaign'
 
 ## Current Limitations
 
-- No way to add new reminders from the profile page (must use the campaign signup form)
-- Cannot change which campaign a reminder is for
+- No way to add new reminders from the profile page (must use the people group signup form)
+- Cannot change which people group a reminder is for
 - No history of when settings were changed
 - Email address cannot be removed, only changed

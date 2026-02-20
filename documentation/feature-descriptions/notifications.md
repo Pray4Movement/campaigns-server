@@ -8,7 +8,7 @@ Reminders are considered transactional emails since they fulfill a specific serv
 
 ## How Users Sign Up
 
-Users sign up for reminders through a campaign-specific signup form. They provide:
+Users sign up for reminders through a people-group-specific signup form. They provide:
 
 **Name** - Used to personalize reminder emails.
 
@@ -22,7 +22,7 @@ Users sign up for reminders through a campaign-specific signup form. They provid
 
 **Prayer Duration** - How long they intend to pray (5, 10, 15, 30, or 60 minutes). This is shown in the reminder email.
 
-Users can have up to 5 active reminders per campaign, allowing different schedules for different days or times.
+Users can have up to 5 active reminders per people group, allowing different schedules for different days or times.
 
 ## Email Verification
 
@@ -53,7 +53,7 @@ The scheduler recalculates `next_reminder_utc` after every sent reminder, accoun
 A background process runs every 5 minutes checking for reminders that are due. It:
 
 1. Queries all active subscriptions where `next_reminder_utc` is in the past
-2. Groups them by campaign to efficiently fetch prayer content
+2. Groups them by people group to efficiently fetch prayer content
 3. Sends each reminder email
 4. Records the send in the tracking table
 5. Calculates and updates the next scheduled time
@@ -73,9 +73,9 @@ The scheduler includes several safety measures:
 Each reminder email includes:
 
 - Personalized greeting with the subscriber's name
-- The campaign title
+- The people group title
 - Their chosen prayer duration ("It's time for your 15-minute prayer session")
-- A button linking to the campaign's prayer content
+- A button linking to the people group's prayer content
 - Links to manage preferences or unsubscribe
 
 If the campaign has prayer content for the day (written in the Tiptap editor), it can be converted to HTML and included in the email.
@@ -93,16 +93,16 @@ This serves two purposes: preventing duplicate sends on the same day, and provid
 ## How Users Manage Their Reminders
 
 **Profile Page** - Accessible via a personalized link in their emails, users can:
-- View all their subscriptions across campaigns
+- View all their subscriptions across people groups
 - Update their name or email (email change triggers re-verification)
 - Modify any subscription's frequency, time, timezone, or prayer duration
 - Delete individual subscriptions
 
 **Unsubscribe Page** - When clicking unsubscribe in an email:
 - They see all their active reminders
-- They can unsubscribe from a single reminder or all reminders in that campaign
+- They can unsubscribe from a single reminder or all reminders in that people group
 - They can immediately resubscribe if they change their mind
-- They see other campaigns they're still subscribed to
+- They see other people groups they're still subscribed to
 
 ## Subscriber Data Architecture
 
@@ -112,18 +112,18 @@ The system uses a normalized data structure:
 
 **Contact Methods** - Email addresses and phone numbers linked to subscribers. Each has its own verification status and consent settings.
 
-**Campaign Subscriptions** - The actual reminder schedules, linking a subscriber to a campaign with specific delivery preferences.
+**People Group Subscriptions** - The actual reminder schedules, linking a subscriber to a people group with specific delivery preferences.
 
 This separation allows:
 - One person to have multiple email addresses with different settings
-- One email address to have multiple reminders across campaigns
+- One email address to have multiple reminders across people groups
 - Efficient deduplication when the same person signs up multiple times
 
 ## Admin Capabilities
 
 Administrators can:
 
-- View all subscriptions for any campaign with filtering and pagination
+- View all subscriptions for any people group with filtering and pagination
 - See a subscriber's complete email history
 - View activity logs showing preference changes
 - Manually trigger a reminder send for testing or customer support
@@ -136,13 +136,13 @@ Administrators can:
 
 **Date-based duplicate prevention** - We track sends by date, not exact time. This means if the scheduler fails and recovers, it won't send duplicate reminders for the same day.
 
-**Max 5 subscriptions per campaign** - This limit prevents abuse while allowing legitimate use cases like different schedules for different days.
+**Max 5 subscriptions per people group** - This limit prevents abuse while allowing legitimate use cases like different schedules for different days.
 
 **Soft unsubscribe** - Unsubscribing sets a status flag rather than deleting data. This allows users to resubscribe with their original preferences intact.
 
 ## Current Limitations
 
 - Only email delivery is fully implemented (WhatsApp and app notifications are tracked but not sent)
-- Reminder emails cannot be customized per campaign
+- Reminder emails cannot be customized per people group
 - No batch send analytics or delivery rate tracking
 - The scheduler does not retry failed sends

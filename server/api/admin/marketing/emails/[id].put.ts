@@ -2,7 +2,7 @@ import { marketingEmailService } from '#server/database/marketing-emails'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const id = Number(getRouterParam(event, 'id'))
   if (!id || isNaN(id)) {
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     const canSend = await marketingEmailService.canUserSendToAudience(
       user.userId,
       body.audience_type,
-      body.campaign_id ?? existingEmail.campaign_id
+      body.people_group_id ?? existingEmail.people_group_id
     )
 
     if (!canSend) {
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         statusCode: 403,
         statusMessage: body.audience_type === 'doxa'
           ? 'Only admins can send Doxa-wide emails'
-          : 'You do not have access to this campaign'
+          : 'You do not have access to this people group'
       })
     }
   }
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
       subject: body.subject,
       content_json: body.content_json,
       audience_type: body.audience_type,
-      campaign_id: body.audience_type === 'campaign' ? body.campaign_id : null,
+      people_group_id: body.audience_type === 'people_group' ? body.people_group_id : null,
       updated_by: user.userId
     })
 

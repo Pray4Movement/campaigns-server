@@ -23,13 +23,13 @@ The welcome email is sent immediately when:
 The welcome email includes:
 
 - Personalized greeting using the subscriber's name
-- The campaign title they signed up for
+- The people group title they signed up for
 - Confirmation that their email is verified and reminders are set up
 - A "Start Praying" button linking directly to the prayer content page
 - A "Manage Preferences" button linking to their profile page where they can update settings
 
 ## Current Limitations
 
-- Welcome email content and branding cannot be customized per campaign
+- Welcome email content and branding cannot be customized per people group
 - No tracking of whether welcome emails are opened
 - Only email is supported (no WhatsApp or in-app welcome messages)

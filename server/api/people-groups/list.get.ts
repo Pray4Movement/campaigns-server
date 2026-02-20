@@ -29,14 +29,12 @@ export default defineEventHandler(async (event) => {
 
   const db = getDatabase()
 
-  // Query all people groups with aggregated people_praying from campaigns
+  // Query all people groups with people_praying directly from people_groups table
   const stmt = db.prepare(`
     SELECT
       pg.*,
-      COALESCE(SUM(c.people_praying), 0)::INTEGER as total_people_praying
+      COALESCE(pg.people_praying, 0)::INTEGER as total_people_praying
     FROM people_groups pg
-    LEFT JOIN campaigns c ON c.dt_id = pg.dt_id
-    GROUP BY pg.id
     ORDER BY pg.name
   `)
 

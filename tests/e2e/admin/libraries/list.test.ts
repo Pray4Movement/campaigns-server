@@ -58,7 +58,7 @@ describe('GET /api/admin/libraries', async () => {
       expect(response.libraries).toBeDefined()
     })
 
-    it('succeeds for campaign_editor users', async () => {
+    it('succeeds for people_group_editor users', async () => {
       const response = await $fetch('/api/admin/libraries', editorAuth)
       expect(response.libraries).toBeDefined()
     })

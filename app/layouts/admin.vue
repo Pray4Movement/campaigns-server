@@ -17,9 +17,9 @@
       </div>
 
       <ul class="nav-menu" v-if="hasRole">
-        <li>
-          <NuxtLink to="/admin/campaigns" class="nav-link">
-            Campaigns
+        <li v-if="isAdmin">
+          <NuxtLink to="/admin/people-groups" class="nav-link">
+            People Groups
           </NuxtLink>
         </li>
         <li>
@@ -40,11 +40,6 @@
         <li v-if="isAdmin">
           <NuxtLink to="/admin/prayer-fuel-order" class="nav-link">
             Prayer Fuel Order
-          </NuxtLink>
-        </li>
-        <li v-if="isAdmin">
-          <NuxtLink to="/admin/people-groups" class="nav-link">
-            People Groups
           </NuxtLink>
         </li>
         <li v-if="isAdmin">

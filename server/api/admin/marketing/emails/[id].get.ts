@@ -2,7 +2,7 @@ import { marketingEmailService } from '#server/database/marketing-emails'
 import { jobQueueService } from '#server/database/job-queue'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const id = Number(getRouterParam(event, 'id'))
   if (!id || isNaN(id)) {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const email = await marketingEmailService.getByIdWithCampaign(id)
+  const email = await marketingEmailService.getByIdWithPeopleGroup(id)
   if (!email) {
     throw createError({
       statusCode: 404,

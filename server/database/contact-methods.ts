@@ -12,8 +12,8 @@ export interface ContactMethod {
   verified_at: string | null
   consent_doxa_general: boolean
   consent_doxa_general_at: string | null
-  consented_campaign_ids: number[]
-  consented_campaign_ids_at: Record<string, string>  // campaign_id (string) -> ISO timestamp
+  consented_people_group_ids: number[]
+  consented_people_group_ids_at: Record<string, string>
   created_at: string
   updated_at: string
 }
@@ -259,92 +259,92 @@ class ContactMethodService {
   }
 
   /**
-   * Add campaign consent for a contact method
+   * Add people group consent for a contact method
    */
-  async addCampaignConsent(contactMethodId: number, campaignId: number): Promise<ContactMethod | null> {
+  async addPeopleGroupConsent(contactMethodId: number, peopleGroupId: number): Promise<ContactMethod | null> {
     const contactMethod = await this.getById(contactMethodId)
     if (!contactMethod) return null
 
-    // Check if already consented
-    const currentIds = contactMethod.consented_campaign_ids || []
-    if (currentIds.includes(campaignId)) {
-      return contactMethod // Already consented
+    const currentIds = contactMethod.consented_people_group_ids || []
+    if (currentIds.includes(peopleGroupId)) {
+      return contactMethod
     }
 
-    // Add campaign to array and update timestamp mapping
-    const newIds = [...currentIds, campaignId]
-    const timestamps = contactMethod.consented_campaign_ids_at || {}
-    timestamps[String(campaignId)] = new Date().toISOString()
+    const newIds = [...currentIds, peopleGroupId]
+    let timestamps = contactMethod.consented_people_group_ids_at || {}
+    if (typeof timestamps === 'string') {
+      try { timestamps = JSON.parse(timestamps) } catch { timestamps = {} }
+    }
+    timestamps[String(peopleGroupId)] = new Date().toISOString()
 
-    // Convert to PostgreSQL array format: {1,2,3}
     const pgArrayLiteral = `{${newIds.join(',')}}`
 
     const stmt = this.db.prepare(`
       UPDATE contact_methods
-      SET consented_campaign_ids = ?,
-          consented_campaign_ids_at = ?,
+      SET consented_people_group_ids = ?,
+          consented_people_group_ids_at = ?,
           updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
-    await stmt.run(pgArrayLiteral, JSON.stringify(timestamps), contactMethodId)
+    await stmt.run(pgArrayLiteral, timestamps, contactMethodId)
 
     return this.getById(contactMethodId)
   }
 
   /**
-   * Remove campaign consent for a contact method
+   * Remove people group consent for a contact method
    */
-  async removeCampaignConsent(contactMethodId: number, campaignId: number): Promise<ContactMethod | null> {
+  async removePeopleGroupConsent(contactMethodId: number, peopleGroupId: number): Promise<ContactMethod | null> {
     const contactMethod = await this.getById(contactMethodId)
     if (!contactMethod) return null
 
-    const currentIds = contactMethod.consented_campaign_ids || []
-    if (!currentIds.includes(campaignId)) {
-      return contactMethod // Not consented anyway
+    const currentIds = contactMethod.consented_people_group_ids || []
+    if (!currentIds.includes(peopleGroupId)) {
+      return contactMethod
     }
 
-    // Remove campaign from array
-    const newIds = currentIds.filter(id => id !== campaignId)
-    const timestamps = contactMethod.consented_campaign_ids_at || {}
-    delete timestamps[String(campaignId)]
+    const newIds = currentIds.filter(id => id !== peopleGroupId)
+    let timestamps = contactMethod.consented_people_group_ids_at || {}
+    if (typeof timestamps === 'string') {
+      try { timestamps = JSON.parse(timestamps) } catch { timestamps = {} }
+    }
+    delete timestamps[String(peopleGroupId)]
 
-    // Convert to PostgreSQL array format: {1,2,3} or {} for empty
     const pgArrayLiteral = `{${newIds.join(',')}}`
 
     const stmt = this.db.prepare(`
       UPDATE contact_methods
-      SET consented_campaign_ids = ?,
-          consented_campaign_ids_at = ?,
+      SET consented_people_group_ids = ?,
+          consented_people_group_ids_at = ?,
           updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'UTC'
       WHERE id = ?
     `)
-    await stmt.run(pgArrayLiteral, JSON.stringify(timestamps), contactMethodId)
+    await stmt.run(pgArrayLiteral, timestamps, contactMethodId)
 
     return this.getById(contactMethodId)
   }
 
   /**
-   * Check if a contact method has consented to campaign updates
+   * Check if a contact method has consented to people group updates
    */
-  async hasConsentedToCampaign(contactMethodId: number, campaignId: number): Promise<boolean> {
+  async hasConsentedToPeopleGroup(contactMethodId: number, peopleGroupId: number): Promise<boolean> {
     const contactMethod = await this.getById(contactMethodId)
     if (!contactMethod) return false
 
-    const consentedIds = contactMethod.consented_campaign_ids || []
-    return consentedIds.includes(campaignId)
+    const consentedIds = contactMethod.consented_people_group_ids || []
+    return consentedIds.includes(peopleGroupId)
   }
 
   /**
-   * Get all contact methods that have consented to a specific campaign's updates
+   * Get all contact methods that have consented to a specific people group's updates
    */
-  async getContactsConsentedToCampaign(campaignId: number): Promise<ContactMethod[]> {
-    // Use PostgreSQL array contains operator
+  async getContactsConsentedToPeopleGroup(peopleGroupId: number): Promise<ContactMethod[]> {
     const stmt = this.db.prepare(`
       SELECT * FROM contact_methods
-      WHERE ? = ANY(consented_campaign_ids) AND verified = true
+      WHERE ? = ANY(consented_people_group_ids) AND verified = true
       ORDER BY created_at DESC
     `)
-    return await stmt.all(campaignId) as ContactMethod[]
+    return await stmt.all(peopleGroupId) as ContactMethod[]
   }
 }
 

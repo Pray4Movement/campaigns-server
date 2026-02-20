@@ -21,7 +21,7 @@ tags:
     description: Unreached people group data for WordPress themes and map widgets
 
 paths:
-  /api/campaigns:
+  /api/people-groups:
     get:
       tags:
         - Campaigns
@@ -36,12 +36,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  campaigns:
+                  peopleGroups:
                     type: array
                     items:
                       $ref: '#/components/schemas/Campaign'
 
-  /api/campaigns/{slug}:
+  /api/people-groups/{slug}:
     get:
       tags:
         - Campaigns
@@ -52,37 +52,37 @@ paths:
         - name: slug
           in: path
           required: true
-          description: Campaign slug identifier
+          description: People group slug identifier
           schema:
             type: string
           example: 40-days-of-prayer
       responses:
         '200':
-          description: Successfully retrieved campaign
+          description: Successfully retrieved people group
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  campaign:
+                  people_group:
                     $ref: '#/components/schemas/Campaign'
         '400':
-          description: Campaign slug is required
+          description: People group slug is required
         '404':
-          description: Campaign not found or not active
+          description: People group not found or not active
 
-  /api/campaigns/{slug}/signup:
+  /api/people-groups/{slug}/signup:
     post:
       tags:
         - Signups
-      summary: Sign up for campaign prayer reminders
-      description: Creates a new subscription for prayer reminders for a specific campaign
-      operationId: signupForCampaign
+      summary: Sign up for people group prayer reminders
+      description: Creates a new subscription for prayer reminders for a specific people group
+      operationId: signupForPeopleGroup
       parameters:
         - name: slug
           in: path
           required: true
-          description: Campaign slug identifier
+          description: People group slug identifier
           schema:
             type: string
       requestBody:
@@ -149,24 +149,24 @@ paths:
                     type: string
                     example: Successfully signed up for prayer reminders
         '400':
-          description: Missing required fields, invalid delivery method, or campaign not active
+          description: Missing required fields, invalid delivery method, or people group not active
         '404':
-          description: Campaign not found
+          description: People group not found
         '500':
           description: Failed to create signup
 
-  /api/campaigns/{slug}/prayer-content/{date}:
+  /api/people-groups/{slug}/prayer-content/{date}:
     get:
       tags:
         - Prayer
       summary: Get prayer content by date
-      description: Returns prayer content for a specific date for a campaign
+      description: Returns prayer content for a specific date for a people group
       operationId: getPrayerContent
       parameters:
         - name: slug
           in: path
           required: true
-          description: Campaign slug identifier
+          description: People group slug identifier
           schema:
             type: string
           example: 40-days-of-prayer
@@ -181,7 +181,7 @@ paths:
         - name: language
           in: query
           required: false
-          description: Language code (defaults to campaign default language)
+          description: Language code (defaults to people group default language)
           schema:
             type: string
           example: en
@@ -193,7 +193,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  campaign:
+                  people_group:
                     type: object
                     properties:
                       id:
@@ -242,11 +242,11 @@ paths:
                     type: boolean
                     description: Whether any content was found for this date
         '400':
-          description: Invalid campaign slug or date format
+          description: Invalid people group slug or date format
         '404':
-          description: Campaign not found
+          description: People group not found
 
-  /api/campaigns/{slug}/prayer-content/{date}/session:
+  /api/people-groups/{slug}/prayer-content/{date}/session:
     post:
       tags:
         - Prayer
@@ -257,7 +257,7 @@ paths:
         - name: slug
           in: path
           required: true
-          description: Campaign slug identifier
+          description: People group slug identifier
           schema:
             type: string
         - name: date
@@ -308,7 +308,7 @@ paths:
         '400':
           description: Missing required fields or invalid date format
         '404':
-          description: Campaign not found
+          description: People group not found
         '500':
           description: Failed to record prayer session
 

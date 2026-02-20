@@ -2,9 +2,9 @@
 
 ## Overview
 
-Libraries are reusable collections of prayer content organized by day. Think of a library like a prayer guide booklet—you create it once, then use it across multiple campaigns.
+Libraries are reusable collections of prayer content organized by day. Think of a library like a prayer guide booklet—you create it once, then use it across multiple people groups.
 
-The key benefit is that content only needs to be written once. If you have a "40 Days of Prayer" guide, you can use it in this year's campaign and next year's, or run it simultaneously in different regions.
+The key benefit is that content only needs to be written once. If you have a "40 Days of Prayer" guide, you can use it across multiple people groups, or run it simultaneously in different regions.
 
 ## What's in a Library
 
@@ -20,29 +20,29 @@ Inside a library, you see a calendar view of all the days. Days are color-coded:
 
 Click any day to see all its translations. From there you can add a new translation, edit an existing one, or view what's there. The content editor supports rich formatting including text styles, headings, links, images, and video.
 
-## How Libraries Connect to Campaigns
+## How Libraries Connect to People Groups
 
-Libraries are assigned to campaigns through a row-based system. You can have multiple rows running in parallel, each with its own library.
+Libraries are assigned to people groups through a row-based system. You can have multiple rows running in parallel, each with its own library.
 
-For example, a campaign might have:
+For example, a people group might have:
 - Row 1: "Morning Prayers" library (30 days)
 - Row 2: "Evening Reflections" library (30 days)
 
 Both rows run at the same time, so subscribers could receive content from both libraries depending on their preferences.
 
-Within a row, you can chain libraries together. When one finishes, the next begins. This lets you build longer campaigns from smaller library pieces.
+Within a row, you can chain libraries together. When one finishes, the next begins. This lets you build longer prayer campaigns from smaller library pieces.
 
-## Sharing Content Across Campaigns
+## Sharing Content Across People Groups
 
-When you use a library in multiple campaigns, they share the same content. Edit a translation in the library, and it updates everywhere that library is used.
+When you use a library across multiple people groups, they share the same content. Edit a translation in the library, and it updates everywhere that library is used.
 
-This is intentional—it means you maintain content in one place. But it also means you should be careful about editing content in an active library, since changes affect all campaigns using it.
+This is intentional—it means you maintain content in one place. But it also means you should be careful about editing content in an active library, since changes affect all people groups using it.
 
 ## Who Can Do What
 
-Admins can create, edit, and delete libraries. They can also configure which libraries are assigned to campaigns.
+Admins can create, edit, and delete libraries. They can also configure which libraries are assigned to people groups.
 
-Campaign Editors can create and edit content within libraries, but they cannot create new libraries or change library assignments. This lets content creators focus on writing without needing full admin access.
+People Group Editors can create and edit content within libraries, but they cannot create new libraries or change library assignments. This lets content creators focus on writing without needing full admin access.
 
 ## Multi-Language Workflow
 

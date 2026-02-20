@@ -166,7 +166,7 @@ function extractText(nodes: any[]): string {
  */
 export function renderMarketingEmailHtml(
   contentJson: string,
-  campaignTitle?: string,
+  peopleGroupName?: string,
   unsubscribeUrl?: string,
   locale: string = 'en'
 ): string {
@@ -175,8 +175,8 @@ export function renderMarketingEmailHtml(
 
   const contentHtml = tiptapToHtml(contentJson)
 
-  const headerTitle = campaignTitle
-    ? t('email.marketing.headerCampaign', locale, { campaign: campaignTitle })
+  const headerTitle = peopleGroupName
+    ? t('email.marketing.headerCampaign', locale, { campaign: peopleGroupName })
     : t('email.marketing.headerDefault', locale, { appName })
   const footer = t('email.marketing.footer', locale, { appName })
   const unsubscribeText = t('email.common.unsubscribe', locale)

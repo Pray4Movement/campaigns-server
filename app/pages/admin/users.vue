@@ -49,10 +49,10 @@
               {{ (row.original as User).verified ? 'Verified' : 'Unverified' }}
             </UBadge>
           </template>
-          <template #campaigns-cell="{ row }">
+          <template #peopleGroups-cell="{ row }">
             <UButton
-              v-if="(row.original as User).role?.name === 'campaign_editor'"
-              @click="openCampaignModal(row.original as User)"
+              v-if="(row.original as User).role?.name === 'people_group_editor'"
+              @click="openPeopleGroupModal(row.original as User)"
               variant="outline"
               size="xs"
             >
@@ -114,59 +114,59 @@
       </section>
     </div>
 
-    <!-- Manage Campaigns Modal -->
-    <UModal v-model:open="showCampaignModal">
+    <!-- Manage People Groups Modal -->
+    <UModal v-model:open="showPeopleGroupModal">
       <template #content>
         <UCard>
           <template #header>
             <div class="flex justify-between items-center">
-              <h2 class="text-lg font-semibold">Manage Campaign Access</h2>
-              <UButton @click="closeCampaignModal" variant="ghost" icon="i-lucide-x" size="sm" />
+              <h2 class="text-lg font-semibold">Manage People Group Access</h2>
+              <UButton @click="closePeopleGroupModal" variant="ghost" icon="i-lucide-x" size="sm" />
             </div>
           </template>
 
           <p class="mb-4">
-            Select which campaigns <strong>{{ selectedUser?.display_name || selectedUser?.email }}</strong> can access:
+            Select which people groups <strong>{{ selectedUser?.display_name || selectedUser?.email }}</strong> can access:
           </p>
 
-          <div v-if="campaignModalLoading" class="flex items-center justify-center py-8">
+          <div v-if="peopleGroupModalLoading" class="flex items-center justify-center py-8">
             <UIcon name="i-lucide-loader" class="w-5 h-5 animate-spin" />
-            <span class="ml-2">Loading campaigns...</span>
+            <span class="ml-2">Loading people groups...</span>
           </div>
 
-          <UAlert v-else-if="campaignModalError" color="error" :title="campaignModalError" class="mb-4" />
+          <UAlert v-else-if="peopleGroupModalError" color="error" :title="peopleGroupModalError" class="mb-4" />
 
           <div v-else class="max-h-96 overflow-y-auto space-y-2 p-2 border border-[var(--ui-border)] rounded-lg">
             <label
-              v-for="campaign in availableCampaigns"
-              :key="campaign.id"
+              v-for="pg in availablePeopleGroups"
+              :key="pg.id"
               class="flex items-center gap-3 p-3 border border-[var(--ui-border)] rounded-lg cursor-pointer hover:bg-[var(--ui-bg-elevated)] transition-colors"
             >
               <UCheckbox
-                :model-value="campaign.hasAccess"
-                @update:model-value="toggleCampaignAccess(campaign.id)"
+                :model-value="pg.hasAccess"
+                @update:model-value="togglePeopleGroupAccess(pg.id)"
               />
               <div class="flex flex-col flex-1">
-                <strong>{{ campaign.title }}</strong>
-                <span class="text-sm text-[var(--ui-text-muted)]">{{ campaign.slug }}</span>
+                <strong>{{ pg.title }}</strong>
+                <span class="text-sm text-[var(--ui-text-muted)]">{{ pg.slug }}</span>
               </div>
             </label>
 
-            <div v-if="availableCampaigns.length === 0" class="text-center py-4 text-[var(--ui-text-muted)]">
-              No campaigns available
+            <div v-if="availablePeopleGroups.length === 0" class="text-center py-4 text-[var(--ui-text-muted)]">
+              No people groups available
             </div>
           </div>
 
-          <UAlert v-if="campaignModalSuccess" color="success" title="Campaign access updated successfully!" class="mt-4" />
+          <UAlert v-if="peopleGroupModalSuccess" color="success" title="People group access updated successfully!" class="mt-4" />
 
           <template #footer>
             <div class="flex justify-end gap-2">
-              <UButton @click="closeCampaignModal" variant="outline">
+              <UButton @click="closePeopleGroupModal" variant="outline">
                 Cancel
               </UButton>
               <UButton
-                @click="saveCampaignAccess"
-                :loading="campaignModalSubmitting"
+                @click="savePeopleGroupAccess"
+                :loading="peopleGroupModalSubmitting"
               >
                 Save Changes
               </UButton>
@@ -271,7 +271,7 @@ interface User {
   role: { name: string; description: string } | null
 }
 
-interface Campaign {
+interface PeopleGroup {
   id: number
   slug: string
   title: string
@@ -310,14 +310,14 @@ const inviteSubmitting = ref(false)
 const inviteError = ref('')
 const inviteSuccess = ref(false)
 
-// Campaign modal state
-const showCampaignModal = ref(false)
+// People group modal state
+const showPeopleGroupModal = ref(false)
 const selectedUser = ref<User | null>(null)
-const availableCampaigns = ref<Campaign[]>([])
-const campaignModalLoading = ref(false)
-const campaignModalError = ref('')
-const campaignModalSubmitting = ref(false)
-const campaignModalSuccess = ref(false)
+const availablePeopleGroups = ref<PeopleGroup[]>([])
+const peopleGroupModalLoading = ref(false)
+const peopleGroupModalError = ref('')
+const peopleGroupModalSubmitting = ref(false)
+const peopleGroupModalSuccess = ref(false)
 
 // Confirm modals state
 const showResendConfirm = ref(false)
@@ -336,7 +336,7 @@ const userColumns = [
   { accessorKey: 'display_name', header: 'Display Name' },
   { accessorKey: 'role', header: 'Role' },
   { accessorKey: 'status', header: 'Status' },
-  { accessorKey: 'campaigns', header: 'Campaigns' },
+  { accessorKey: 'peopleGroups', header: 'People Groups' },
   { accessorKey: 'created', header: 'Joined' }
 ]
 
@@ -378,7 +378,7 @@ const pendingInvitations = computed(() => {
 function formatRoleName(roleName: string): string {
   const roleDisplayNames: Record<string, string> = {
     'admin': 'Admin',
-    'campaign_editor': 'Campaign Editor'
+    'people_group_editor': 'People Group Editor'
   }
   return roleDisplayNames[roleName] || roleName
 }
@@ -556,73 +556,73 @@ function cancelRevokeInvitation() {
   revokeInvitationId.value = null
 }
 
-// Campaign modal functions
-async function openCampaignModal(user: User) {
+// People group modal functions
+async function openPeopleGroupModal(user: User) {
   selectedUser.value = user
-  showCampaignModal.value = true
-  campaignModalError.value = ''
-  campaignModalSuccess.value = false
-  campaignModalLoading.value = true
+  showPeopleGroupModal.value = true
+  peopleGroupModalError.value = ''
+  peopleGroupModalSuccess.value = false
+  peopleGroupModalLoading.value = true
 
   try {
-    const response = await $fetch<{ campaigns: Campaign[] }>(`/api/admin/users/${user.id}/campaigns`)
-    availableCampaigns.value = response.campaigns
+    const response = await $fetch<{ peopleGroups: PeopleGroup[] }>(`/api/admin/users/${user.id}/people-groups`)
+    availablePeopleGroups.value = response.peopleGroups
   } catch (err: any) {
-    campaignModalError.value = err.data?.statusMessage || 'Failed to load campaigns'
+    peopleGroupModalError.value = err.data?.statusMessage || 'Failed to load people groups'
   } finally {
-    campaignModalLoading.value = false
+    peopleGroupModalLoading.value = false
   }
 }
 
-function closeCampaignModal() {
-  showCampaignModal.value = false
+function closePeopleGroupModal() {
+  showPeopleGroupModal.value = false
   selectedUser.value = null
-  availableCampaigns.value = []
-  campaignModalError.value = ''
-  campaignModalSuccess.value = false
+  availablePeopleGroups.value = []
+  peopleGroupModalError.value = ''
+  peopleGroupModalSuccess.value = false
 }
 
-function toggleCampaignAccess(campaignId: number) {
-  const campaign = availableCampaigns.value.find(c => c.id === campaignId)
-  if (campaign) {
-    campaign.hasAccess = !campaign.hasAccess
+function togglePeopleGroupAccess(peopleGroupId: number) {
+  const pg = availablePeopleGroups.value.find(c => c.id === peopleGroupId)
+  if (pg) {
+    pg.hasAccess = !pg.hasAccess
   }
 }
 
-async function saveCampaignAccess() {
+async function savePeopleGroupAccess() {
   if (!selectedUser.value) return
 
-  campaignModalSubmitting.value = true
-  campaignModalError.value = ''
-  campaignModalSuccess.value = false
+  peopleGroupModalSubmitting.value = true
+  peopleGroupModalError.value = ''
+  peopleGroupModalSuccess.value = false
 
   try {
-    const selectedCampaignIds = availableCampaigns.value
+    const selectedPeopleGroupIds = availablePeopleGroups.value
       .filter(c => c.hasAccess)
       .map(c => c.id)
 
-    await $fetch(`/api/admin/users/${selectedUser.value.id}/campaigns`, {
+    await $fetch(`/api/admin/users/${selectedUser.value.id}/people-groups`, {
       method: 'PUT',
       body: {
-        campaign_ids: selectedCampaignIds
+        people_group_ids: selectedPeopleGroupIds
       }
     })
 
-    campaignModalSuccess.value = true
+    peopleGroupModalSuccess.value = true
     toast.add({
       title: 'Success',
-      description: 'Campaign access updated successfully',
+      description: 'People group access updated successfully',
       color: 'success'
     })
 
     // Close modal after a delay
     setTimeout(() => {
-      closeCampaignModal()
+      closePeopleGroupModal()
     }, 1500)
   } catch (err: any) {
-    campaignModalError.value = err.data?.statusMessage || 'Failed to update campaign access'
+    peopleGroupModalError.value = err.data?.statusMessage || 'Failed to update people group access'
   } finally {
-    campaignModalSubmitting.value = false
+    peopleGroupModalSubmitting.value = false
   }
 }
 

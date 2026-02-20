@@ -1,6 +1,6 @@
 import { libraryService, type LibraryExportData, PEOPLE_GROUP_LIBRARY_ID, DAILY_PEOPLE_GROUP_LIBRARY_ID } from '#server/database/libraries'
 import { libraryContentService } from '#server/database/library-content'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
@@ -26,13 +26,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // If this is a campaign library, check user has access to the campaign
-  if (library.campaign_id) {
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, library.campaign_id)
+  // If this is a people group library, check user has access
+  if (library.people_group_id) {
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, library.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
-        statusMessage: 'You do not have access to this campaign'
+        statusMessage: 'You do not have access to this people group'
       })
     }
   }

@@ -2,7 +2,7 @@ import { marketingEmailService } from '#server/database/marketing-emails'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const body = await readBody(event)
 
@@ -20,24 +20,24 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!body.audience_type || !['doxa', 'campaign'].includes(body.audience_type)) {
+  if (!body.audience_type || !['doxa', 'people_group'].includes(body.audience_type)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Valid audience_type is required (doxa or campaign)'
+      statusMessage: 'Valid audience_type is required (doxa or people_group)'
     })
   }
 
-  if (body.audience_type === 'campaign' && !body.campaign_id) {
+  if (body.audience_type === 'people_group' && !body.people_group_id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'campaign_id is required when audience_type is campaign'
+      statusMessage: 'people_group_id is required when audience_type is people_group'
     })
   }
 
   const canSend = await marketingEmailService.canUserSendToAudience(
     user.userId,
     body.audience_type,
-    body.campaign_id
+    body.people_group_id
   )
 
   if (!canSend) {
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
       statusCode: 403,
       statusMessage: body.audience_type === 'doxa'
         ? 'Only admins can create Doxa-wide emails'
-        : 'You do not have access to this campaign'
+        : 'You do not have access to this people group'
     })
   }
 
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
       subject: body.subject,
       content_json: body.content_json,
       audience_type: body.audience_type,
-      campaign_id: body.audience_type === 'campaign' ? body.campaign_id : null,
+      people_group_id: body.audience_type === 'people_group' ? body.people_group_id : null,
       created_by: user.userId
     })
 

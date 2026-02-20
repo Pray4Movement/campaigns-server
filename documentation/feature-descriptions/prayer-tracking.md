@@ -2,7 +2,7 @@
 
 ## Overview
 
-The prayer tracking system records when people pray and how long they spend praying. This data shows community engagement—how many people are praying and how much total prayer time is being accumulated across campaigns.
+The prayer tracking system records when people pray and how long they spend praying. This data shows community engagement—how many people are praying and how much total prayer time is being accumulated across people groups.
 
 ## How Prayer Time Is Captured
 
@@ -30,9 +30,9 @@ People who visit the prayer page directly (without coming through an email link)
 
 This means an anonymous user who prays every day for a week counts as 1 person, not 7. However, if they use a different browser or device, or clear their browser data, they'll be assigned a new ID.
 
-## Campaign Statistics
+## People Group Statistics
 
-Campaigns display two types of metrics: **commitment stats** (who signed up) and **activity stats** (who actually prayed).
+People groups display two types of metrics: **commitment stats** (who signed up) and **activity stats** (who actually prayed).
 
 ### Commitment Stats
 
@@ -40,7 +40,7 @@ These show what people have pledged by signing up for prayer reminders.
 
 #### People Committed
 
-This counts active subscriptions—people who signed up to receive prayer reminders and haven't unsubscribed. Each subscription represents someone who committed to pray regularly for this campaign.
+This counts active subscriptions—people who signed up to receive prayer reminders and haven't unsubscribed. Each subscription represents someone who committed to pray regularly for this people group.
 
 #### Committed Duration
 
@@ -64,11 +64,11 @@ Anonymous visitors are tracked via browser storage, so the same anonymous person
 
 This shows the average daily prayer time over the last 7 days. It takes the total prayer time from the past week and divides by 7.
 
-This is a true average—if no one prays for 3 days, those zeros are factored in. A campaign with 70 minutes of prayer this week shows "10m daily" regardless of whether that came from 7 days of 10-minute sessions or one day with 70 minutes.
+This is a true average—if no one prays for 3 days, those zeros are factored in. A people group with 70 minutes of prayer this week shows "10m daily" regardless of whether that came from 7 days of 10-minute sessions or one day with 70 minutes.
 
 Note that these two activity metrics are calculated differently. "People praying" averages across active days to avoid showing awkward fractions like "0.7 people." "Daily prayer time" always divides by 7 to show a true daily average.
 
-The time is displayed in hours and minutes. For example, "2h 30m daily" means the campaign averages 150 minutes of prayer per day.
+The time is displayed in hours and minutes. For example, "2h 30m daily" means the people group averages 150 minutes of prayer per day.
 
 ### Commitment vs Activity
 
@@ -81,15 +81,15 @@ Commitment stats update in real-time as people subscribe/unsubscribe. Activity s
 
 ## Where Statistics Appear
 
-**Admin Campaigns List** shows all four metrics for each campaign: committed count, pledged duration, praying count, and daily prayer time. This lets you compare both commitment and engagement across campaigns at a glance.
+**Admin People Groups List** shows all four metrics for each people group: committed count, pledged duration, praying count, and daily prayer time. This lets you compare both commitment and engagement across people groups at a glance.
 
-**Public Campaign Page** shows commitment stats (people committed, pledged duration) and the "people praying" activity count. Daily prayer time is not currently shown publicly.
+**Public People Group Page** shows commitment stats (people committed, pledged duration) and the "people praying" activity count. Daily prayer time is not currently shown publicly.
 
 ## When Statistics Update
 
 **Commitment stats** (people committed, pledged duration) are calculated on-the-fly from the subscriptions table. They reflect changes immediately when someone subscribes or unsubscribes.
 
-**Activity stats** (people praying, daily prayer time) are recalculated once daily at 3 AM UTC. They also update when the server restarts. This means there can be a delay between when someone prays and when the campaign numbers reflect it.
+**Activity stats** (people praying, daily prayer time) are recalculated once daily at 3 AM UTC. They also update when the server restarts. This means there can be a delay between when someone prays and when the people group numbers reflect it.
 
 Administrators can manually trigger an activity stats update if needed.
 
@@ -97,7 +97,7 @@ Administrators can manually trigger an activity stats update if needed.
 
 **Commitment stats calculated on-the-fly** - Rather than storing commitment counts in columns, they're computed from the subscriptions table each time. This keeps stats always accurate without needing scheduled updates or risking data getting out of sync.
 
-**7-day rolling window** - Activity statistics look at the past 7 days only. This shows recent engagement while smoothing out day-to-day variation. A campaign that was very active last month but quiet this week will show low numbers.
+**7-day rolling window** - Activity statistics look at the past 7 days only. This shows recent engagement while smoothing out day-to-day variation. A people group that was very active last month but quiet this week will show low numbers.
 
 **True daily average for time** - Daily prayer time divides by 7 regardless of how many days had activity. This prevents the number from looking artificially high when activity is sparse.
 

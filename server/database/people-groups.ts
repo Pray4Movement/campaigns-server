@@ -1,4 +1,6 @@
 import { getDatabase } from './db'
+import { roleService } from './roles'
+import { peopleGroupAccessService } from './people-group-access'
 
 export interface PeopleGroup {
   id: number
@@ -8,6 +10,8 @@ export interface PeopleGroup {
   image_url: string | null
   metadata: string | null
   random_order: number | null
+  people_praying: number
+  daily_prayer_duration: number
   // Normalized columns
   country_code: string | null
   region: string | null
@@ -33,8 +37,11 @@ export interface CreatePeopleGroupData {
 export interface UpdatePeopleGroupData {
   dt_id?: string
   name?: string
+  slug?: string
   image_url?: string | null
   metadata?: string | null
+  people_praying?: number
+  daily_prayer_duration?: number
   // Normalized columns
   country_code?: string | null
   region?: string | null
@@ -152,6 +159,14 @@ export class PeopleGroupService {
       values.push(data.name)
     }
 
+    if (data.slug !== undefined) {
+      if (!(await this.isSlugUnique(data.slug, id))) {
+        throw new Error('Slug already exists')
+      }
+      updates.push('slug = ?')
+      values.push(data.slug)
+    }
+
     if (data.image_url !== undefined) {
       updates.push('image_url = ?')
       values.push(data.image_url)
@@ -160,6 +175,16 @@ export class PeopleGroupService {
     if (data.metadata !== undefined) {
       updates.push('metadata = ?')
       values.push(data.metadata)
+    }
+
+    if (data.people_praying !== undefined) {
+      updates.push('people_praying = ?')
+      values.push(data.people_praying)
+    }
+
+    if (data.daily_prayer_duration !== undefined) {
+      updates.push('daily_prayer_duration = ?')
+      values.push(data.daily_prayer_duration)
     }
 
     // Normalized columns
@@ -254,6 +279,64 @@ export class PeopleGroupService {
     const stmt = this.db.prepare(query)
     const result = await stmt.get(...params) as { count: string | number }
     return Number(result.count)
+  }
+
+  generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
+  async isSlugUnique(slug: string, excludeId?: number): Promise<boolean> {
+    const stmt = this.db.prepare(`
+      SELECT id FROM people_groups WHERE slug = ? ${excludeId ? 'AND id != ?' : ''}
+    `)
+    const result = excludeId ? await stmt.get(slug, excludeId) : await stmt.get(slug)
+    return !result
+  }
+
+  async generateUniqueSlug(name: string, excludeId?: number): Promise<string> {
+    let slug = this.generateSlug(name)
+    let counter = 1
+
+    while (!(await this.isSlugUnique(slug, excludeId))) {
+      slug = `${this.generateSlug(name)}-${counter}`
+      counter++
+    }
+
+    return slug
+  }
+
+  async userCanAccessPeopleGroup(userId: string, peopleGroupId: number): Promise<boolean> {
+    const isAdmin = await roleService.isAdmin(userId)
+    if (isAdmin) {
+      return true
+    }
+    return await peopleGroupAccessService.userHasAccess(userId, peopleGroupId)
+  }
+
+  async getPeopleGroupsForUser(userId: string): Promise<PeopleGroup[]> {
+    const isAdmin = await roleService.isAdmin(userId)
+    if (isAdmin) {
+      return this.getAllPeopleGroups()
+    }
+
+    const peopleGroupIds = await peopleGroupAccessService.getUserPeopleGroups(userId)
+    if (peopleGroupIds.length === 0) {
+      return []
+    }
+
+    const placeholders = peopleGroupIds.map(() => '?').join(',')
+    const stmt = this.db.prepare(`
+      SELECT * FROM people_groups
+      WHERE id IN (${placeholders})
+      ORDER BY name
+    `)
+
+    return await stmt.all(...peopleGroupIds) as PeopleGroup[]
   }
 }
 

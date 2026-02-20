@@ -4,7 +4,7 @@ import { contactMethodService } from '#server/database/contact-methods'
 import { handleApiError } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const id = Number(getRouterParam(event, 'id'))
   if (!id || isNaN(id)) {
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   const canSend = await marketingEmailService.canUserSendToAudience(
     user.userId,
     email.audience_type,
-    email.campaign_id ?? undefined
+    email.people_group_id ?? undefined
   )
 
   if (!canSend) {
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
       statusCode: 403,
       statusMessage: email.audience_type === 'doxa'
         ? 'Only admins can send Doxa-wide emails'
-        : 'You do not have access to this campaign'
+        : 'You do not have access to this people group'
     })
   }
 
@@ -57,8 +57,8 @@ export default defineEventHandler(async (event) => {
   if (email.audience_type === 'doxa') {
     const contacts = await contactMethodService.getContactsWithDoxaConsent()
     recipients = contacts.map(c => ({ id: c.id, value: c.value }))
-  } else if (email.campaign_id) {
-    const contacts = await contactMethodService.getContactsConsentedToCampaign(email.campaign_id)
+  } else if (email.people_group_id) {
+    const contacts = await contactMethodService.getContactsConsentedToPeopleGroup(email.people_group_id)
     recipients = contacts.map(c => ({ id: c.id, value: c.value }))
   } else {
     throw createError({

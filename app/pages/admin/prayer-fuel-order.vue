@@ -14,9 +14,9 @@
     <div v-else class="config-container">
       <!-- Global Start Date Section -->
       <div class="config-section full-width">
-        <h3>Global Campaign Start Date</h3>
+        <h3>Global Start Date</h3>
         <p class="section-description">
-          This date determines when Day 1 begins for all campaigns. Library content will be shown based on how many days have passed since this date.
+          This date determines when Day 1 begins for all people groups. Library content will be shown based on how many days have passed since this date.
         </p>
 
         <div class="start-date-section">
@@ -315,7 +315,7 @@ async function loadConfiguration() {
     error.value = ''
 
     const response = await $fetch<{ config: GlobalConfig }>(
-      '/api/admin/campaign-config/libraries'
+      '/api/admin/people-group-config/libraries'
     )
 
     rows.value = response.config.rows || []
@@ -567,7 +567,7 @@ async function saveConfiguration() {
   try {
     saving.value = true
 
-    await $fetch('/api/admin/campaign-config/libraries', {
+    await $fetch('/api/admin/people-group-config/libraries', {
       method: 'PUT',
       body: {
         rows: rows.value,
@@ -577,7 +577,7 @@ async function saveConfiguration() {
 
     toast.add({
       title: 'Configuration saved',
-      description: 'Global campaign configuration has been updated successfully.',
+      description: 'Global configuration has been updated successfully.',
       color: 'success'
     })
   } catch (err: any) {

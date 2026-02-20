@@ -1,18 +1,18 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { sendPrayerReminderEmail } from '#server/utils/prayer-reminder-email'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.edit')
+  const user = await requirePermission(event, 'people_groups.edit')
 
   const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get the subscription
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -21,8 +21,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verify user has access to this campaign
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+    // Verify user has access to this people group
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -66,13 +66,13 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get campaign info
-    const campaign = await campaignService.getCampaignById(subscription.campaign_id)
+    // Get people group info
+    const peopleGroup = await peopleGroupService.getPeopleGroupById(subscription.people_group_id)
 
-    if (!campaign) {
+    if (!peopleGroup) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Campaign not found'
+        statusMessage: 'People group not found'
       })
     }
 
@@ -80,10 +80,10 @@ export default defineEventHandler(async (event) => {
     const success = await sendPrayerReminderEmail({
       to: emailContact.value,
       subscriberName: subscriber.name,
-      campaignTitle: campaign.title,
-      campaignSlug: campaign.slug,
+      peopleGroupName: peopleGroup.name,
+      peopleGroupSlug: peopleGroup.slug!,
       trackingId: subscriber.tracking_id,
-      profileId: subscriber.profile_id,
+      profileId: subscriber.profile_id!,
       subscriptionId: subscription.id,
       prayerDuration: subscription.prayer_duration || 10,
       prayerContent: null,

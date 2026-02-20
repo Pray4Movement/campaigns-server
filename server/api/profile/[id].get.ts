@@ -1,6 +1,6 @@
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   const profileId = getRouterParam(event, 'id')
@@ -28,24 +28,24 @@ export default defineEventHandler(async (event) => {
   const primaryPhone = contacts.find(c => c.type === 'phone')
 
   // Get all subscriptions for this subscriber
-  const allSubscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+  const allSubscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
-  // Group subscriptions by campaign
-  const subscriptionsByCampaign = new Map<number, typeof allSubscriptions>()
+  // Group subscriptions by people group
+  const subscriptionsByPeopleGroup = new Map<number, typeof allSubscriptions>()
   for (const sub of allSubscriptions) {
-    if (!subscriptionsByCampaign.has(sub.campaign_id)) {
-      subscriptionsByCampaign.set(sub.campaign_id, [])
+    if (!subscriptionsByPeopleGroup.has(sub.people_group_id)) {
+      subscriptionsByPeopleGroup.set(sub.people_group_id, [])
     }
-    subscriptionsByCampaign.get(sub.campaign_id)!.push(sub)
+    subscriptionsByPeopleGroup.get(sub.people_group_id)!.push(sub)
   }
 
-  // Build campaigns array with reminders
-  const campaigns = Array.from(subscriptionsByCampaign.entries())
+  // Build people groups array with reminders
+  const peopleGroups = Array.from(subscriptionsByPeopleGroup.entries())
     .filter(([, subs]) => subs.length > 0)
-    .map(([campaignId, subs]) => ({
-      id: campaignId,
-      title: subs[0]!.campaign_title,
-      slug: subs[0]!.campaign_slug,
+    .map(([peopleGroupId, subs]) => ({
+      id: peopleGroupId,
+      title: subs[0]!.people_group_name,
+      slug: subs[0]!.people_group_slug,
       reminders: subs.map(sub => ({
         id: sub.id,
         delivery_method: sub.delivery_method,
@@ -62,9 +62,9 @@ export default defineEventHandler(async (event) => {
   const consents = {
     doxa_general: primaryEmail?.consent_doxa_general || false,
     doxa_general_at: primaryEmail?.consent_doxa_general_at || null,
-    campaigns: (primaryEmail?.consented_campaign_ids || []).map(campaignId => ({
-      campaign_id: campaignId,
-      consented_at: primaryEmail?.consented_campaign_ids_at?.[String(campaignId)] || null
+    peopleGroups: (primaryEmail?.consented_people_group_ids || []).map(peopleGroupId => ({
+      people_group_id: peopleGroupId,
+      consented_at: primaryEmail?.consented_people_group_ids_at?.[String(peopleGroupId)] || null
     }))
   }
 
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
       email_verified: primaryEmail?.verified || false,
       phone: primaryPhone?.value || ''
     },
-    campaigns,
+    peopleGroups,
     consents
   }
 })

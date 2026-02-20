@@ -1,17 +1,17 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.delete')
+  const user = await requirePermission(event, 'people_groups.delete')
 
   const subscriptionId = getIntParam(event, 'id')
 
   try {
     // Get subscription data before deletion for logging
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -20,8 +20,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verify user has access to this campaign
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+    // Verify user has access to this people group
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -36,17 +36,17 @@ export default defineEventHandler(async (event) => {
     const phoneContact = contacts.find(c => c.type === 'phone')
 
     // Delete the subscription
-    await campaignSubscriptionService.deleteSubscription(subscription.id)
+    await peopleGroupSubscriptionService.deleteSubscription(subscription.id)
 
     // Log the deletion with details
-    logDelete('campaign_subscriptions', subscriptionId, event, {
+    logDelete('campaign_subscriptions', String(subscriptionId), event, {
       deletedRecord: {
         name: subscriber?.name,
         email: emailContact?.value,
         phone: phoneContact?.value,
         delivery_method: subscription.delivery_method,
         status: subscription.status,
-        campaign_id: subscription.campaign_id
+        people_group_id: subscription.people_group_id
       }
     })
 

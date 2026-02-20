@@ -1,14 +1,14 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const subscriptionId = getIntParam(event, 'id')
 
   // Verify subscription exists
-  const subscription = await campaignSubscriptionService.getById(subscriptionId)
+  const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
   if (!subscription) {
     throw createError({
       statusCode: 404,
@@ -16,8 +16,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify user has access to this campaign
-  const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+  // Verify user has access to this people group
+  const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
   if (!hasAccess) {
     throw createError({
       statusCode: 403,
@@ -64,10 +64,10 @@ export default defineEventHandler(async (event) => {
           pa.id,
           pa.timestamp,
           pa.duration,
-          pa.campaign_id,
-          c.title as campaign_title
+          pa.people_group_id,
+          pg.name as people_group_name
         FROM prayer_activity pa
-        LEFT JOIN campaigns c ON pa.campaign_id = c.id
+        LEFT JOIN people_groups pg ON pa.people_group_id = pg.id
         WHERE pa.tracking_id = ${trackingId}
         ORDER BY pa.timestamp DESC
         LIMIT 50
@@ -80,10 +80,10 @@ export default defineEventHandler(async (event) => {
         res.id,
         res.sent_date,
         res.sent_at,
-        c.title as campaign_title
+        pg.name as people_group_name
       FROM reminder_emails_sent res
       JOIN campaign_subscriptions cs ON res.subscription_id = cs.id
-      JOIN campaigns c ON cs.campaign_id = c.id
+      JOIN people_groups pg ON cs.people_group_id = pg.id
       WHERE res.subscription_id = ${subscriptionId}
       ORDER BY res.sent_at DESC
       LIMIT 50
@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
       userName: null,
       metadata: {
         duration: pa.duration,
-        campaignTitle: pa.campaign_title
+        peopleGroupName: pa.people_group_name
       }
     }))
 
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event) => {
       userName: null,
       metadata: {
         sentDate: e.sent_date,
-        campaignTitle: e.campaign_title
+        peopleGroupName: e.people_group_name
       }
     }))
 
@@ -135,10 +135,10 @@ export default defineEventHandler(async (event) => {
         fr.response,
         fr.followup_sent_at,
         fr.responded_at,
-        c.title as campaign_title
+        pg.name as people_group_name
       FROM followup_responses fr
       JOIN campaign_subscriptions cs ON fr.subscription_id = cs.id
-      JOIN campaigns c ON cs.campaign_id = c.id
+      JOIN people_groups pg ON cs.people_group_id = pg.id
       WHERE fr.subscription_id = ${subscriptionId}
       ORDER BY fr.responded_at DESC
       LIMIT 50
@@ -154,7 +154,7 @@ export default defineEventHandler(async (event) => {
       userName: null,
       metadata: {
         response: fr.response,
-        campaignTitle: fr.campaign_title
+        peopleGroupName: fr.people_group_name
       }
     }))
 

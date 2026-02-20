@@ -3,8 +3,8 @@ import { t, localePath } from './translations'
 export interface FollowupEmailData {
   to: string
   subscriberName: string
-  campaignTitle: string
-  campaignSlug: string
+  peopleGroupName: string
+  peopleGroupSlug: string
   subscriptionId: number
   profileId: string
   frequency: 'daily' | 'weekly' | string
@@ -62,8 +62,8 @@ export async function sendFollowupEmail(data: FollowupEmailData): Promise<boolea
   const questionText = getQuestionText(data.frequency, locale, data.daysOfWeek)
 
   const subject = data.isReminder
-    ? t('email.followup.subjectReminder', locale, { campaign: data.campaignTitle })
-    : t('email.followup.subject', locale, { campaign: data.campaignTitle })
+    ? t('email.followup.subjectReminder', locale, { campaign: data.peopleGroupName })
+    : t('email.followup.subject', locale, { campaign: data.peopleGroupName })
 
   const header = t('email.followup.header', locale)
   const hello = t('email.common.hello', locale, { name: data.subscriberName })
@@ -94,12 +94,12 @@ export async function sendFollowupEmail(data: FollowupEmailData): Promise<boolea
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${header} - ${data.campaignTitle}</title>
+      <title>${header} - ${data.peopleGroupName}</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
         <h1 style="margin: 0; font-size: 24px; font-weight: 500;">${header}</h1>
-        <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${data.campaignTitle}</p>
+        <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.8;">${data.peopleGroupName}</p>
       </div>
 
       <div style="background: #ffffff; border: 2px solid #3B463D; border-top: none; padding: 40px 30px; border-radius: 0 0 10px 10px;">
@@ -145,7 +145,7 @@ export async function sendFollowupEmail(data: FollowupEmailData): Promise<boolea
   `
 
   const text = `
-${header} - ${data.campaignTitle}
+${header} - ${data.peopleGroupName}
 
 ${hello}
 

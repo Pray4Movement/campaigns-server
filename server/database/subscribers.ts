@@ -1,7 +1,7 @@
 import { getDatabase } from './db'
 import { randomUUID } from 'crypto'
 import { contactMethodService } from './contact-methods'
-import { campaignSubscriptionService, type CampaignSubscriptionWithDetails } from './campaign-subscriptions'
+import { peopleGroupSubscriptionService, type PeopleGroupSubscriptionWithDetails } from './people-group-subscriptions'
 
 export interface Subscriber {
   id: number
@@ -25,14 +25,14 @@ export interface SubscriberWithContacts extends Subscriber {
 export interface SubscriberConsents {
   doxa_general: boolean
   doxa_general_at: string | null
-  campaign_ids: number[]
-  campaign_names: string[]
+  people_group_ids: number[]
+  people_group_names: string[]
 }
 
 export interface SubscriberWithSubscriptions extends SubscriberWithContacts {
   primary_email: string | null
   primary_phone: string | null
-  subscriptions: CampaignSubscriptionWithDetails[]
+  subscriptions: PeopleGroupSubscriptionWithDetails[]
   consents: SubscriberConsents
 }
 
@@ -214,37 +214,37 @@ class SubscriberService {
    * Get all subscribers with their contact methods and subscriptions.
    * For the general subscribers admin page.
    *
-   * @param options.accessibleCampaignIds - If provided, only return subscribers with subscriptions
-   *   to these campaigns, and filter subscriptions to only include accessible campaigns.
-   *   Used for campaign editors who can only see their assigned campaigns.
+   * @param options.accessiblePeopleGroupIds - If provided, only return subscribers with subscriptions
+   *   to these people groups, and filter subscriptions to only include accessible people groups.
+   *   Used for people group editors who can only see their assigned people groups.
    */
   async getAllSubscribersWithSubscriptions(options?: {
     search?: string
-    campaignId?: number
-    accessibleCampaignIds?: number[]
+    peopleGroupId?: number
+    accessiblePeopleGroupIds?: number[]
   }): Promise<SubscriberWithSubscriptions[]> {
     // Build base query to get subscribers
     let query = 'SELECT DISTINCT s.* FROM subscribers s'
     const params: any[] = []
     let hasWhere = false
 
-    // If accessibleCampaignIds is provided, filter to only subscribers with subscriptions to those campaigns
-    if (options?.accessibleCampaignIds && options.accessibleCampaignIds.length > 0) {
-      const placeholders = options.accessibleCampaignIds.map(() => '?').join(',')
-      query += ` JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.campaign_id IN (${placeholders})`
-      params.push(...options.accessibleCampaignIds)
+    // If accessiblePeopleGroupIds is provided, filter to only subscribers with subscriptions to those people groups
+    if (options?.accessiblePeopleGroupIds && options.accessiblePeopleGroupIds.length > 0) {
+      const placeholders = options.accessiblePeopleGroupIds.map(() => '?').join(',')
+      query += ` JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.people_group_id IN (${placeholders})`
+      params.push(...options.accessiblePeopleGroupIds)
       hasWhere = true
     }
 
-    // If campaignId filter is set, only get subscribers with subscriptions to that campaign
-    if (options?.campaignId) {
+    // If peopleGroupId filter is set, only get subscribers with subscriptions to that people group
+    if (options?.peopleGroupId) {
       if (hasWhere) {
-        query += ' AND cs.campaign_id = ?'
+        query += ' AND cs.people_group_id = ?'
       } else {
-        query += ' JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.campaign_id = ?'
+        query += ' JOIN campaign_subscriptions cs ON cs.subscriber_id = s.id WHERE cs.people_group_id = ?'
         hasWhere = true
       }
-      params.push(options.campaignId)
+      params.push(options.peopleGroupId)
     }
 
     if (options?.search) {
@@ -273,12 +273,12 @@ class SubscriberService {
 
     for (const subscriber of subscribers) {
       const contacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
-      let subscriptions = await campaignSubscriptionService.getSubscriberSubscriptions(subscriber.id)
+      let subscriptions = await peopleGroupSubscriptionService.getSubscriberSubscriptions(subscriber.id)
 
-      // Filter subscriptions to only include accessible campaigns
-      if (options?.accessibleCampaignIds) {
+      // Filter subscriptions to only include accessible people groups
+      if (options?.accessiblePeopleGroupIds) {
         subscriptions = subscriptions.filter(sub =>
-          options.accessibleCampaignIds!.includes(sub.campaign_id)
+          options.accessiblePeopleGroupIds!.includes(sub.people_group_id)
         )
       }
 
@@ -287,18 +287,18 @@ class SubscriberService {
       const phoneContact = contacts.find(c => c.type === 'phone' && c.verified) || contacts.find(c => c.type === 'phone')
 
       // Get consent info from primary email contact
-      const consentedCampaignIds = emailContact?.consented_campaign_ids || []
+      const consentedPeopleGroupIds = emailContact?.consented_people_group_ids || []
 
-      // Get campaign names for consented campaigns
-      let campaignNames: string[] = []
-      if (consentedCampaignIds.length > 0) {
-        const campaignStmt = this.db.prepare(`
-          SELECT id, title FROM campaigns WHERE id IN (${consentedCampaignIds.map(() => '?').join(',')})
+      // Get people group names for consented IDs
+      let peopleGroupNames: string[] = []
+      if (consentedPeopleGroupIds.length > 0) {
+        const pgStmt = this.db.prepare(`
+          SELECT id, name FROM people_groups WHERE id IN (${consentedPeopleGroupIds.map(() => '?').join(',')})
         `)
-        const campaigns = await campaignStmt.all(...consentedCampaignIds) as { id: number; title: string }[]
-        campaignNames = consentedCampaignIds.map(id => {
-          const campaign = campaigns.find(c => c.id === id)
-          return campaign?.title || `Campaign ${id}`
+        const peopleGroups = await pgStmt.all(...consentedPeopleGroupIds) as { id: number; name: string }[]
+        peopleGroupNames = consentedPeopleGroupIds.map(id => {
+          const pg = peopleGroups.find(p => p.id === id)
+          return pg?.name || `People Group ${id}`
         })
       }
 
@@ -316,8 +316,8 @@ class SubscriberService {
         consents: {
           doxa_general: emailContact?.consent_doxa_general || false,
           doxa_general_at: emailContact?.consent_doxa_general_at || null,
-          campaign_ids: consentedCampaignIds,
-          campaign_names: campaignNames
+          people_group_ids: consentedPeopleGroupIds,
+          people_group_names: peopleGroupNames
         }
       })
     }

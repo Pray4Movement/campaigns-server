@@ -4,11 +4,11 @@ import {
   getTestDatabase,
   closeTestDatabase,
   cleanupTestData,
-  createTestCampaign,
+  createTestPeopleGroup,
   createTestSubscriber,
   createTestContactMethod,
-  createTestCampaignSubscription,
-  assignUserToCampaign
+  createTestPeopleGroupSubscription,
+  assignUserToPeopleGroup
 } from '../../../helpers/db'
 import {
   createAdminUser,
@@ -23,8 +23,8 @@ describe('GET /api/admin/subscribers', async () => {
   let editorAuth: { headers: { cookie: string } }
   let editorUserId: string
   let noRoleAuth: { headers: { cookie: string } }
-  let campaign1: { id: number; slug: string }
-  let campaign2: { id: number; slug: string }
+  let peopleGroup1: { id: number; slug: string }
+  let peopleGroup2: { id: number; slug: string }
 
   beforeAll(async () => {
     await cleanupTestData(sql)
@@ -39,31 +39,31 @@ describe('GET /api/admin/subscribers', async () => {
     const noRole = await createNoRoleUser(sql)
     noRoleAuth = noRole.auth
 
-    // Create campaigns
-    campaign1 = await createTestCampaign(sql, { title: 'Campaign 1' })
-    campaign2 = await createTestCampaign(sql, { title: 'Campaign 2' })
+    // Create people groups
+    peopleGroup1 = await createTestPeopleGroup(sql, { title: 'People Group 1' })
+    peopleGroup2 = await createTestPeopleGroup(sql, { title: 'People Group 2' })
 
-    // Assign editor to campaign1 only
-    await assignUserToCampaign(sql, editorUserId, campaign1.id)
+    // Assign editor to peopleGroup1 only
+    await assignUserToPeopleGroup(sql, editorUserId, peopleGroup1.id)
 
-    // Create subscribers in campaign1
+    // Create subscribers in peopleGroup1
     for (let i = 0; i < 2; i++) {
       const subscriber = await createTestSubscriber(sql, { name: `Test Sub C1 ${i}` })
       await createTestContactMethod(sql, subscriber.id, {
         value: `test-c1-${i}-${Date.now()}@example.com`,
         verified: true
       })
-      await createTestCampaignSubscription(sql, campaign1.id, subscriber.id)
+      await createTestPeopleGroupSubscription(sql, peopleGroup1.id, subscriber.id)
     }
 
-    // Create subscribers in campaign2
+    // Create subscribers in peopleGroup2
     for (let i = 0; i < 2; i++) {
       const subscriber = await createTestSubscriber(sql, { name: `Test Sub C2 ${i}` })
       await createTestContactMethod(sql, subscriber.id, {
         value: `test-c2-${i}-${Date.now()}@example.com`,
         verified: true
       })
-      await createTestCampaignSubscription(sql, campaign2.id, subscriber.id)
+      await createTestPeopleGroupSubscription(sql, peopleGroup2.id, subscriber.id)
     }
   })
 
@@ -88,40 +88,40 @@ describe('GET /api/admin/subscribers', async () => {
       expect(response.subscribers).toBeDefined()
     })
 
-    it('succeeds for campaign_editor users', async () => {
+    it('succeeds for people_group_editor users', async () => {
       const response = await $fetch('/api/admin/subscribers', editorAuth)
       expect(response.subscribers).toBeDefined()
     })
   })
 
-  describe('Campaign-based filtering', () => {
+  describe('People group-based filtering', () => {
     it('admin sees all subscribers', async () => {
       const response = await $fetch('/api/admin/subscribers', adminAuth)
 
-      // Should see subscribers from both campaigns
+      // Should see subscribers from both people groups
       const names = response.subscribers.map((s: any) => s.name)
       expect(names.some((n: string) => n.includes('C1'))).toBe(true)
       expect(names.some((n: string) => n.includes('C2'))).toBe(true)
     })
 
-    it('campaign_editor sees only subscribers from assigned campaigns', async () => {
+    it('people_group_editor sees only subscribers from assigned people groups', async () => {
       const response = await $fetch('/api/admin/subscribers', editorAuth)
 
-      // Should only see subscribers from campaign1
+      // Should only see subscribers from peopleGroup1
       const names = response.subscribers.map((s: any) => s.name)
       expect(names.some((n: string) => n.includes('C1'))).toBe(true)
       expect(names.every((n: string) => !n.includes('C2'))).toBe(true)
     })
 
-    it('admin can filter by campaign_id', async () => {
-      const response = await $fetch(`/api/admin/subscribers?campaign_id=${campaign1.id}`, adminAuth)
+    it('admin can filter by people_group_id', async () => {
+      const response = await $fetch(`/api/admin/subscribers?people_group_id=${peopleGroup1.id}`, adminAuth)
 
       const names = response.subscribers.map((s: any) => s.name)
       expect(names.every((n: string) => n.includes('C1'))).toBe(true)
     })
 
-    it('campaign_editor cannot filter by unassigned campaign_id', async () => {
-      const error = await $fetch(`/api/admin/subscribers?campaign_id=${campaign2.id}`, editorAuth).catch((e) => e)
+    it('people_group_editor cannot filter by unassigned people_group_id', async () => {
+      const error = await $fetch(`/api/admin/subscribers?people_group_id=${peopleGroup2.id}`, editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
   })

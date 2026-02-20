@@ -94,7 +94,7 @@ If translations consistently fail, check that DeepL is configured correctly in t
 
 ## Who Can Translate
 
-Translation requires content editing permissions. Admins can translate any library. Campaign Editors can translate content in libraries they have access to.
+Translation requires content editing permissions. Admins can translate any library. People Group Editors can translate content in libraries they have access to.
 
 ## Design Decisions
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The import/export feature lets you move prayer content libraries between environments or create backups of your work. You can export a library as a file, then import it elsewhere—whether that's a different campaign, a test environment, or sharing with another team.
+The import/export feature lets you move prayer content libraries between environments or create backups of your work. You can export a library as a file, then import it elsewhere—whether that's a different people group, a test environment, or sharing with another team.
 
 This is particularly useful when you've created a library in one place and want to reuse it without manually recreating all the content.
 
@@ -14,7 +14,7 @@ You can export any library from two places:
 
 **Global Libraries** - In the Libraries admin section, each library row has an Export button. Click it to download that library.
 
-**Campaign Libraries** - In a campaign's content section, each library has an Export button next to it.
+**People Group Libraries** - In a people group's content section, each library has an Export button next to it.
 
 ### What Gets Exported
 
@@ -38,7 +38,7 @@ Virtual libraries (People Group and Daily People Group) cannot be exported becau
 The Import button appears in the same places as Export:
 
 - In the Libraries admin section header
-- In a campaign's content section header
+- In a people group's content section header
 
 Clicking Import opens a step-by-step wizard that guides you through the process.
 
@@ -104,7 +104,7 @@ Export files are self-contained and portable. You can:
 - Email an export file to another team
 - Store exports as backups before making major changes
 - Move content from a test environment to production
-- Create a "template" library that multiple campaigns can import and customize
+- Create a "template" library that multiple people groups can import and customize
 
 When someone imports your file, they get an independent copy. Changes they make won't affect your original library, and vice versa.
 

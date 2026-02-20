@@ -26,7 +26,7 @@
 
       <!-- Regular Content -->
       <template v-else>
-        <!-- Campaign Header -->
+        <!-- People Group Header -->
         <header class="border-b border-default py-8 px-4">
           <div class="max-w-4xl mx-auto">
             <h1 class="text-3xl font-bold mb-2 text-center">{{ $t('prayerFuel.title') }}</h1>
@@ -79,7 +79,7 @@ interface PrayerContentItem {
 }
 
 interface PrayerContentResponse {
-  campaign: {
+  people_group: {
     id: number
     slug: string
     title: string
@@ -101,7 +101,7 @@ const { locale } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
 const slug = route.params.slug as string
-const { setCampaignTitle } = useCampaign()
+const { setPeopleGroupTitle } = usePeopleGroup()
 
 // Get current date in user's timezone
 const currentDate = computed(() => new Date().toISOString().split('T')[0] as string)
@@ -109,10 +109,10 @@ const currentDate = computed(() => new Date().toISOString().split('T')[0] as str
 // Get language preference from global language selector or query param
 const selectedLanguage = ref((route.query.language as string) || locale.value || '')
 
-// Campaign ID for optimized session tracking
-const campaignId = computed(() => data.value?.campaign?.id)
+// People group ID for optimized session tracking
+const peopleGroupId = computed(() => data.value?.people_group?.id)
 
-// Check if the campaign start date is in the future
+// Check if the start date is in the future
 const globalStartDate = computed(() => data.value?.globalStartDate)
 const isStartDateFuture = computed(() => {
   if (!globalStartDate.value) return false
@@ -139,11 +139,11 @@ const formattedStartDate = computed(() => {
 })
 
 // Use prayer session composable
-const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, currentDate, campaignId)
+const { prayedMarked, submitting, markAsPrayed, formatDate } = usePrayerSession(slug, currentDate, peopleGroupId)
 
 // Fetch prayer content
 const { data, pending, error: fetchError, refresh } = await useFetch<PrayerContentResponse>(
-  computed(() => `/api/campaigns/${slug}/prayer-content/${currentDate.value}`),
+  computed(() => `/api/people-groups/${slug}/prayer-content/${currentDate.value}`),
   {
     query: computed(() => ({
       language: selectedLanguage.value || undefined
@@ -153,14 +153,14 @@ const { data, pending, error: fetchError, refresh } = await useFetch<PrayerConte
 
 const error = computed(() => fetchError.value?.message || null)
 
-// Set selected language and campaign title after data loads
+// Set selected language and people group title after data loads
 watch(data, (newData) => {
   if (newData) {
     if (!selectedLanguage.value) {
       selectedLanguage.value = newData.language
     }
-    if (newData.campaign?.title) {
-      setCampaignTitle(newData.campaign.title)
+    if (newData.people_group?.title) {
+      setPeopleGroupTitle(newData.people_group.title)
     }
   }
 }, { immediate: true })
@@ -186,10 +186,10 @@ const pastContent = computed(() => {
   return items
 })
 
-// Set campaign title on mount (handles cached data from navigation)
+// Set people group title on mount (handles cached data from navigation)
 onMounted(() => {
-  if (data.value?.campaign?.title) {
-    setCampaignTitle(data.value.campaign.title)
+  if (data.value?.people_group?.title) {
+    setPeopleGroupTitle(data.value.people_group.title)
   }
 })
 
@@ -197,7 +197,7 @@ onMounted(() => {
 const { t } = useI18n()
 useHead(() => ({
   title: data.value?.hasContent
-    ? `${t('prayerFuel.pageTitle')} - ${data.value.campaign.title}`
-    : `${t('prayerFuel.pageTitle')} - ${data.value?.campaign.title || t('common.loading')}`
+    ? `${t('prayerFuel.pageTitle')} - ${data.value.people_group.title}`
+    : `${t('prayerFuel.pageTitle')} - ${data.value?.people_group.title || t('common.loading')}`
 }))
 </script>

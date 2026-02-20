@@ -3,10 +3,10 @@ import {
   getTestDatabase,
   closeTestDatabase,
   cleanupTestData,
-  createTestCampaign,
+  createTestPeopleGroup,
   createTestSubscriber,
   createTestContactMethod,
-  createTestCampaignSubscription
+  createTestPeopleGroupSubscription
 } from '../helpers/db'
 import { reminderSentService } from '../../server/database/reminder-sent'
 
@@ -23,7 +23,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
 
   describe('recordSent()', () => {
     it('records sent reminder for subscription and date', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Record Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -31,7 +31,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -47,7 +47,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
     })
 
     it('is idempotent - no error on duplicate insert', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Idempotent Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -55,7 +55,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -76,7 +76,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
 
   describe('wasSent()', () => {
     it('returns true when reminder already sent today', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test WasSent True Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -84,7 +84,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -100,7 +100,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
     })
 
     it('returns false when no reminder sent for date', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test WasSent False Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -108,7 +108,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -119,7 +119,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
     })
 
     it('different dates are independent', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Dates Independent Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -127,7 +127,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -148,7 +148,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
     })
 
     it('different subscriptions are independent', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
 
       // Create two subscribers with subscriptions
       const subscriber1 = await createTestSubscriber(sql, { name: 'Test Sub1 Independent' })
@@ -157,7 +157,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         value: `test-sub1-${Date.now()}@example.com`,
         verified: true
       })
-      const subscription1 = await createTestCampaignSubscription(sql, campaign.id, subscriber1.id, {
+      const subscription1 = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber1.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -168,7 +168,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         value: `test-sub2-${Date.now()}@example.com`,
         verified: true
       })
-      const subscription2 = await createTestCampaignSubscription(sql, campaign.id, subscriber2.id, {
+      const subscription2 = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber2.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -190,7 +190,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
 
   describe('cleanupOldRecords()', () => {
     it('removes records older than threshold', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Cleanup Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -198,7 +198,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })
@@ -224,7 +224,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
     })
 
     it('keeps recent records', async () => {
-      const campaign = await createTestCampaign(sql, { status: 'active' })
+      const peopleGroup = await createTestPeopleGroup(sql)
       const subscriber = await createTestSubscriber(sql, { name: 'Test Keep Recent Subscriber' })
       await createTestContactMethod(sql, subscriber.id, {
         type: 'email',
@@ -232,7 +232,7 @@ describe('Reminder Sent Duplicate Prevention', async () => {
         verified: true
       })
 
-      const subscription = await createTestCampaignSubscription(sql, campaign.id, subscriber.id, {
+      const subscription = await createTestPeopleGroupSubscription(sql, peopleGroup.id, subscriber.id, {
         delivery_method: 'email',
         status: 'active'
       })

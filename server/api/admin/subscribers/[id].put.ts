@@ -1,11 +1,11 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { contactMethodService } from '#server/database/contact-methods'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 import { handleApiError, getIntParam } from '#server/utils/api-helpers'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.edit')
+  const user = await requirePermission(event, 'people_groups.edit')
 
   const subscriptionId = getIntParam(event, 'id')
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Get current subscription
-    const subscription = await campaignSubscriptionService.getById(subscriptionId)
+    const subscription = await peopleGroupSubscriptionService.getById(subscriptionId)
 
     if (!subscription) {
       throw createError({
@@ -30,8 +30,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verify user has access to this campaign
-    const hasAccess = await campaignService.userCanAccessCampaign(user.userId, subscription.campaign_id)
+    // Verify user has access to this people group
+    const hasAccess = await peopleGroupService.userCanAccessPeopleGroup(user.userId, subscription.people_group_id)
     if (!hasAccess) {
       throw createError({
         statusCode: 403,
@@ -123,22 +123,22 @@ export default defineEventHandler(async (event) => {
     }
 
     if (Object.keys(subscriptionUpdates).length > 0) {
-      await campaignSubscriptionService.updateSubscription(subscription.id, subscriptionUpdates)
+      await peopleGroupSubscriptionService.updateSubscription(subscription.id, subscriptionUpdates)
     }
 
     // Update status if changed
     if (status !== undefined && status !== subscription.status) {
       changes.status = { from: subscription.status, to: status }
-      await campaignSubscriptionService.updateStatus(subscription.id, status)
+      await peopleGroupSubscriptionService.updateStatus(subscription.id, status)
     }
 
     // Log the update if any changes were made
     if (Object.keys(changes).length > 0) {
-      logUpdate('campaign_subscriptions', subscriptionId, event, { changes })
+      logUpdate('campaign_subscriptions', String(subscriptionId), event, { changes })
     }
 
     // Get updated data
-    const updatedSubscription = await campaignSubscriptionService.getById(subscription.id)
+    const updatedSubscription = await peopleGroupSubscriptionService.getById(subscription.id)
     const updatedSubscriber = await subscriberService.getSubscriberById(subscriber.id)
     const updatedContacts = await contactMethodService.getSubscriberContactMethods(subscriber.id)
     const updatedEmail = updatedContacts.find(c => c.type === 'email')
@@ -148,7 +148,7 @@ export default defineEventHandler(async (event) => {
       subscriber: {
         id: updatedSubscription?.id,
         subscription_id: updatedSubscription?.id,
-        campaign_id: updatedSubscription?.campaign_id,
+        people_group_id: updatedSubscription?.people_group_id,
         subscriber_id: updatedSubscriber?.id,
         name: updatedSubscriber?.name,
         tracking_id: updatedSubscriber?.tracking_id,

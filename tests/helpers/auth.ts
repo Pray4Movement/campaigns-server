@@ -13,7 +13,7 @@ export interface TestUser {
   display_name: string
   verified: boolean
   superadmin: boolean
-  role: 'admin' | 'campaign_editor' | null
+  role: 'admin' | 'people_group_editor' | null
 }
 
 const SALT_ROUNDS = 10
@@ -28,7 +28,7 @@ export async function createTestUser(
     email?: string
     display_name?: string
     password?: string
-    role?: 'admin' | 'campaign_editor' | null
+    role?: 'admin' | 'people_group_editor' | null
     verified?: boolean
     superadmin?: boolean
   } = {}
@@ -88,7 +88,7 @@ export function getAuthHeaders(user: TestUser): AuthHeaders {
  */
 export async function createAndLoginUser(
   sql: ReturnType<typeof postgres>,
-  role: 'admin' | 'campaign_editor' | null = null,
+  role: 'admin' | 'people_group_editor' | null = null,
   options: {
     email?: string
     display_name?: string
@@ -115,7 +115,7 @@ export async function createAdminUser(
 }
 
 /**
- * Create a campaign editor user and return auth headers
+ * Create an editor user and return auth headers
  */
 export async function createEditorUser(
   sql: ReturnType<typeof postgres>,
@@ -124,7 +124,7 @@ export async function createEditorUser(
     display_name?: string
   } = {}
 ): Promise<{ user: TestUser; auth: AuthHeaders }> {
-  return createAndLoginUser(sql, 'campaign_editor', options)
+  return createAndLoginUser(sql, 'people_group_editor', options)
 }
 
 /**

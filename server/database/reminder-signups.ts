@@ -4,7 +4,7 @@ import { calculateNextReminderUtc, calculateNextReminderAfterSend } from '../uti
 
 export interface ReminderSignup {
   id: number
-  campaign_id: number
+  people_group_id: number
   tracking_id: string
   name: string
   email: string
@@ -26,7 +26,7 @@ export interface ReminderSignup {
 }
 
 export interface CreateReminderSignupInput {
-  campaign_id: number
+  people_group_id: number
   name: string
   email?: string
   phone?: string
@@ -59,14 +59,14 @@ class ReminderSignupService {
 
     const stmt = this.db.prepare(`
       INSERT INTO reminder_signups (
-        campaign_id, tracking_id, name, email, phone,
+        people_group_id, tracking_id, name, email, phone,
         delivery_method, frequency, days_of_week, time_preference, prayer_duration, timezone, status
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
     `)
 
     const result = await stmt.run(
-      input.campaign_id,
+      input.people_group_id,
       tracking_id,
       input.name,
       input.email || '',
@@ -94,14 +94,14 @@ class ReminderSignupService {
     return await stmt.get(tracking_id) as ReminderSignup | null
   }
 
-  // Get all signups for a campaign
-  async getCampaignSignups(campaignId: number, options?: {
+  // Get all signups for a people group
+  async getPeopleGroupSignups(peopleGroupId: number, options?: {
     status?: 'active' | 'inactive' | 'unsubscribed'
     limit?: number
     offset?: number
   }): Promise<ReminderSignup[]> {
-    let query = 'SELECT * FROM reminder_signups WHERE campaign_id = ?'
-    const params: any[] = [campaignId]
+    let query = 'SELECT * FROM reminder_signups WHERE people_group_id = ?'
+    const params: any[] = [peopleGroupId]
 
     if (options?.status) {
       query += ' AND status = ?'
@@ -170,14 +170,14 @@ class ReminderSignupService {
     return result.changes > 0
   }
 
-  // Get count of active signups for a campaign
-  async getActiveSignupCount(campaignId: number): Promise<number> {
+  // Get count of active signups for a people group
+  async getActiveSignupCount(peopleGroupId: number): Promise<number> {
     const stmt = this.db.prepare(`
       SELECT COUNT(*) as count
       FROM reminder_signups
-      WHERE campaign_id = ? AND status = 'active'
+      WHERE people_group_id = ? AND status = 'active'
     `)
-    const result = await stmt.get(campaignId) as { count: number }
+    const result = await stmt.get(peopleGroupId) as { count: number }
     return result.count
   }
 

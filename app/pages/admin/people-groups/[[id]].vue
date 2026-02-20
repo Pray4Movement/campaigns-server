@@ -4,9 +4,6 @@
       <div>
         <h1>People Groups</h1>
       </div>
-      <UButton @click="syncPeopleGroups" :loading="syncing" icon="i-lucide-refresh-cw">
-        Sync from API
-      </UButton>
     </template>
 
     <template #list-header>
@@ -45,6 +42,12 @@
             Pop: {{ formatNumber(group.metadata.imb_population) }}
           </span>
         </div>
+        <div class="group-stats">
+          <span>{{ group.people_committed }} committed</span>
+          <span>{{ formatDuration(group.committed_duration) }} pledged</span>
+          <span>{{ group.people_praying }} praying</span>
+          <span>{{ formatDuration(Math.round(group.daily_prayer_duration / 60)) }} daily</span>
+        </div>
       </CrmListItem>
     </template>
 
@@ -65,6 +68,18 @@
               </div>
             </div>
           </div>
+        </template>
+
+        <template #secondary-actions>
+          <UButton @click="navigateToSubscribers(selectedGroup!.id)" variant="outline">
+            View Subscribers
+          </UButton>
+          <UButton :to="`/admin/people-groups/${selectedGroup!.id}/content`" variant="outline">
+            Manage Content
+          </UButton>
+          <UButton v-if="selectedGroup!.slug" :to="`/${selectedGroup!.slug}`" target="_blank" variant="outline">
+            Open People Group
+          </UButton>
         </template>
 
         <template #actions>
@@ -169,9 +184,14 @@ interface PeopleGroup {
   id: number
   dt_id: string
   name: string
+  slug: string | null
   image_url: string | null
   descriptions: Record<string, string> | null
   metadata: Record<string, any>
+  people_committed: number
+  committed_duration: number
+  people_praying: number
+  daily_prayer_duration: number
   created_at: string
   updated_at: string
 }
@@ -191,7 +211,6 @@ const formData = ref<Record<string, any>>({})
 const loading = ref(true)
 const error = ref('')
 const saving = ref(false)
-const syncing = ref(false)
 const searchQuery = ref('')
 
 // i18n and localized options
@@ -353,45 +372,22 @@ async function saveChanges() {
   }
 }
 
-// Sync people groups from API
-async function syncPeopleGroups() {
-  try {
-    syncing.value = true
-
-    const response = await $fetch<{ success: boolean; message: string; stats: any }>(
-      '/api/admin/people-groups/sync',
-      { method: 'POST' }
-    )
-
-    toast.add({
-      title: 'Sync Complete',
-      description: response.message,
-      color: 'success'
-    })
-
-    await loadPeopleGroups()
-
-    if (selectedGroup.value) {
-      const updated = peopleGroups.value.find(g => g.id === selectedGroup.value!.id)
-      if (updated) {
-        selectGroup(updated)
-      }
-    }
-  } catch (err: any) {
-    toast.add({
-      title: 'Sync Failed',
-      description: err.data?.statusMessage || 'Failed to sync people groups',
-      color: 'error'
-    })
-  } finally {
-    syncing.value = false
-  }
+function navigateToSubscribers(peopleGroupId: number) {
+  navigateTo(`/admin/subscribers?peopleGroup=${peopleGroupId}`)
 }
 
 function formatNumber(num: number | string): string {
   const n = typeof num === 'string' ? parseInt(num) : num
   if (isNaN(n)) return '—'
   return n.toLocaleString()
+}
+
+function formatDuration(minutes: number): string {
+  if (!minutes) return '0m'
+  if (minutes < 60) return `${minutes}m`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m > 0 ? `${h}h ${m}m` : `${h}h`
 }
 
 // Handle URL-based selection
@@ -449,6 +445,18 @@ onMounted(async () => {
 
 .population {
   color: var(--ui-text-muted);
+}
+
+.group-stats {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--ui-text-muted);
+  margin-top: 0.25rem;
+}
+
+.group-stats span {
+  white-space: nowrap;
 }
 
 .header-info {

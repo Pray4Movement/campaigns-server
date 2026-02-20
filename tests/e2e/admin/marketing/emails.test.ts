@@ -53,7 +53,7 @@ describe('Marketing Emails API', async () => {
       expect(Array.isArray(response.emails)).toBe(true)
     })
 
-    it('succeeds for campaign_editor users', async () => {
+    it('succeeds for people_group_editor users', async () => {
       const response = await $fetch('/api/admin/marketing/emails', editorAuth)
       expect(response.emails).toBeDefined()
     })

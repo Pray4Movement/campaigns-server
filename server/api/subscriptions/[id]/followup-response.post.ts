@@ -1,7 +1,7 @@
-import { campaignSubscriptionService } from '#server/database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { followupTrackingService } from '#server/database/followup-tracking'
 import { subscriberService } from '#server/database/subscribers'
-import { campaignService } from '#server/database/campaigns'
+import { peopleGroupService } from '#server/database/people-groups'
 
 export default defineEventHandler(async (event) => {
   const subscriptionId = getRouterParam(event, 'id')
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get the subscription
-  const subscription = await campaignSubscriptionService.getSubscriptionWithFollowupDetails(
+  const subscription = await peopleGroupSubscriptionService.getSubscriptionWithFollowupDetails(
     parseInt(subscriptionId)
   )
 
@@ -63,12 +63,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get campaign for slug
-  const campaign = await campaignService.getCampaignById(subscription.campaign_id)
-  if (!campaign) {
+  // Get people group for slug
+  const peopleGroup = await peopleGroupService.getPeopleGroupById(subscription.people_group_id)
+  if (!peopleGroup) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Campaign not found'
+      statusMessage: 'People group not found'
     })
   }
 
@@ -86,18 +86,18 @@ export default defineEventHandler(async (event) => {
   // Handle response based on type
   if (response === 'committed' || response === 'sometimes') {
     // Complete the follow-up cycle - increment followup_count, reset followup_reminder_count
-    await campaignSubscriptionService.completeFollowupCycle(subscription.id)
+    await peopleGroupSubscriptionService.completeFollowupCycle(subscription.id)
   } else if (response === 'not_praying') {
     // Mark subscription as inactive
-    await campaignSubscriptionService.updateStatus(subscription.id, 'inactive')
+    await peopleGroupSubscriptionService.updateStatus(subscription.id, 'inactive')
   }
 
-  // Return success with profile_id and campaign_slug for the landing page
+  // Return success with profile_id and people_group_slug for the landing page
   return {
     success: true,
     message: getResponseMessage(response),
     profile_id: subscriber.profile_id,
-    campaign_slug: campaign.slug
+    people_group_slug: peopleGroup.slug
   }
 })
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-User management is where administrators control who can access the admin area and what they can do. You can invite new team members, assign roles, and control which campaigns each person can work on.
+User management is where administrators control who can access the admin area and what they can do. You can invite new team members, assign roles, and control which people groups each person can work on.
 
 People can join the system in two ways: self-registration or invitation. Self-registered users start with no role and must wait for an admin to grant them access. Invited users can have a role pre-assigned, giving them immediate access when they create their account.
 
@@ -54,9 +54,9 @@ Expired invitations remain visible but can't be resent. If someone's invitation 
 
 Each user can have one role that determines their level of access:
 
-**Admin** - Full access to everything. Admins can manage all campaigns, all content, all users, and system settings.
+**Admin** - Full access to everything. Admins can manage all people groups, all content, all users, and system settings.
 
-**Campaign Editor** - Limited access to specific campaigns. Campaign Editors can create and edit content, but only within campaigns they've been granted access to. They cannot manage users or see other campaigns.
+**People Group Editor** - Limited access to specific people groups. People Group Editors can create and edit content, but only within people groups they've been granted access to. They cannot manage users or see other people groups.
 
 **No Role** - The user can log in but has no admin capabilities. This is useful as a temporary state while deciding what access someone should have.
 
@@ -64,28 +64,28 @@ Each user can have one role that determines their level of access:
 
 In the Active Users table, each user has a role dropdown. Click it to change their role immediately. The change takes effect on their next page load.
 
-When you change someone from Admin to Campaign Editor, they'll lose access to everything until you grant them specific campaign access.
+When you change someone from Admin to People Group Editor, they'll lose access to everything until you grant them specific people group access.
 
-When you change someone from Campaign Editor to Admin, they gain access to everything and their campaign-specific assignments become irrelevant.
+When you change someone from People Group Editor to Admin, they gain access to everything and their people-group-specific assignments become irrelevant.
 
-## Campaign Access
+## People Group Access
 
-Campaign Editors need explicit access to each campaign they should work on. Without any campaign assignments, they'll see an empty admin area.
+People Group Editors need explicit access to each people group they should work on. Without any people group assignments, they'll see an empty admin area.
 
-### Granting Campaign Access
+### Granting People Group Access
 
-In the Active Users table, Campaign Editors have a "Manage" button in the campaigns column. Click it to open the campaign access dialog.
+In the Active Users table, People Group Editors have a "Manage" button in the people groups column. Click it to open the people group access dialog.
 
-The dialog shows checkboxes for every campaign in the system. Check the campaigns this person should have access to, then save. They can now view and edit content for those campaigns.
+The dialog shows checkboxes for every people group in the system. Check the people groups this person should have access to, then save. They can now view and edit content for those people groups.
 
 ### How Access Works
 
-- Campaign Editors only see campaigns they have access to in the admin navigation
-- They can only view subscribers who are subscribed to their assigned campaigns
-- They can create and edit content in their assigned campaigns' libraries
-- They cannot see or affect anything related to campaigns they don't have access to
+- People Group Editors only see people groups they have access to in the admin navigation
+- They can only view subscribers who are subscribed to their assigned people groups
+- They can create and edit content in their assigned people groups' libraries
+- They cannot see or affect anything related to people groups they don't have access to
 
-Admins automatically have access to all campaigns and don't need individual assignments.
+Admins automatically have access to all people groups and don't need individual assignments.
 
 ## User Verification
 
@@ -103,7 +103,7 @@ Users who self-register must verify their email address by clicking a link sent 
 
 **Auto-verification for invitees** - Since the invitation email proves the person controls that email address, we skip the redundant verification step. This reduces friction for new team members.
 
-**Granular campaign access** - Rather than all-or-nothing access, Campaign Editors can be assigned to specific campaigns. This lets you have regional editors, language-specific editors, or campaign-specific teams without exposing everyone's work to everyone else.
+**Granular people group access** - Rather than all-or-nothing access, People Group Editors can be assigned to specific people groups. This lets you have regional editors, language-specific editors, or people-group-specific teams without exposing everyone's work to everyone else.
 
 ## Self-Registered Users
 

@@ -11,7 +11,7 @@
       <UButton to="/">{{ $t('campaign.notFound.goHome') }}</UButton>
     </div>
 
-    <div v-else-if="campaign" class="campaign-content">
+    <div v-else-if="pgData" class="people-group-content">
 
       <!-- Sign Up CTA -->
       <div class="max-w-5xl mx-auto px-4 pt-6 flex justify-center">
@@ -118,7 +118,7 @@
               <h3 class="font-bold uppercase tracking-wide text-center mb-4">{{ $t('campaign.peopleGroup.prayerStatus.title') }}</h3>
               <div class="text-center">
                 <div class="text-5xl font-bold mb-2">
-                  {{ campaign.people_praying || 0 }} / {{ PRAYER_GOAL }}
+                  {{ pgData.people_praying || 0 }} / {{ PRAYER_GOAL }}
                 </div>
                 <p class="text-sage-200 text-sm mb-6">
                   {{ $t('campaign.peopleGroup.prayerStatus.description') }}
@@ -127,7 +127,7 @@
                 <div class="w-full bg-forest-600 rounded-full h-3">
                   <div
                     class="bg-sage-300 h-3 rounded-full transition-all duration-500"
-                    :style="{ width: `${Math.min(((campaign.people_praying || 0) / PRAYER_GOAL) * 100, 100)}%` }"
+                    :style="{ width: `${Math.min(((pgData.people_praying || 0) / PRAYER_GOAL) * 100, 100)}%` }"
                   ></div>
                 </div>
               </div>
@@ -401,8 +401,8 @@
                     {{ $t('campaign.signup.form.consent.description') }}
                   </p>
                   <UCheckbox
-                    v-model="signupForm.consent_campaign_updates"
-                    :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: campaign?.title })"
+                    v-model="signupForm.consent_people_group_updates"
+                    :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: pgData?.title })"
                   />
                   <UCheckbox v-model="signupForm.consent_doxa_general">
                     <template #label>
@@ -441,7 +441,7 @@
             <h2 class="text-2xl font-bold uppercase tracking-wide mb-3">{{ $t('campaign.prayerFuel.title') }}</h2>
             <p class="text-sage-200 mb-6">{{ $t('campaign.prayerFuel.description') }}</p>
             <UButton
-              :to="localePath(`/${campaign.slug}/prayer`)"
+              :to="localePath(`/${pgData.slug}/prayer`)"
               size="lg"
               class="rounded-full px-8"
             >
@@ -504,16 +504,16 @@
 
 <script setup lang="ts">
 // Type definitions for API response
-interface CampaignResponse {
-  campaign: {
+interface PeopleGroupResponse {
+  people_group: {
     id: number
     slug: string
     title: string
-    description: string
-    status: 'active' | 'inactive'
-    default_language: string
     dt_id: string | null
     people_praying: number
+    daily_prayer_duration: number
+    people_committed: number
+    committed_duration: number
     created_at: string
     updated_at: string
   }
@@ -540,16 +540,16 @@ const slug = route.params.slug as string
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-// Fetch campaign data with locale for translated labels
-const { data, pending, error } = await useFetch<CampaignResponse>(`/api/campaigns/${slug}`, {
+// Fetch people group data with locale for translated labels
+const { data, pending, error } = await useFetch<PeopleGroupResponse>(`/api/people-groups/${slug}`, {
   query: { locale },
   watch: [locale]
 })
-const campaign = computed(() => data.value?.campaign)
+const pgData = computed(() => data.value?.people_group)
 const peopleGroup = computed(() => data.value?.peopleGroup)
 const globalStartDate = computed(() => data.value?.globalStartDate)
 
-// Check if the campaign start date is in the future
+// Check if the start date is in the future
 const isStartDateFuture = computed(() => {
   if (!globalStartDate.value) return false
   // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
@@ -574,26 +574,26 @@ const formattedStartDate = computed(() => {
   })
 })
 
-// Campaign title management
-const { setCampaignTitle } = useCampaign()
+// People group title management
+const { setPeopleGroupTitle } = usePeopleGroup()
 
-// Set campaign title on mount (handles cached data from navigation)
+// Set people group title on mount (handles cached data from navigation)
 onMounted(() => {
-  if (campaign.value?.title) {
-    setCampaignTitle(campaign.value.title)
+  if (pgData.value?.title) {
+    setPeopleGroupTitle(pgData.value.title)
   }
 })
 
 // Dynamic prayer goal - starts at 144, then increases to 1000 once reached
 const PRAYER_GOAL = computed(() => {
-  const peoplePraying = campaign.value?.people_praying || 0
+  const peoplePraying = pgData.value?.people_praying || 0
   return peoplePraying >= 144 ? 1000 : 144
 })
 
-// Set campaign title when campaign is loaded
-watch(campaign, (newCampaign) => {
-  if (newCampaign?.title) {
-    setCampaignTitle(newCampaign.title)
+// Set people group title when loaded
+watch(pgData, (newPgData) => {
+  if (newPgData?.title) {
+    setPeopleGroupTitle(newPgData.title)
   }
 }, { immediate: true })
 
@@ -632,7 +632,7 @@ const signupForm = ref({
   days_of_week: [] as number[],
   reminder_time: '09:00',
   prayer_duration: 10,
-  consent_campaign_updates: false,
+  consent_people_group_updates: false,
   consent_doxa_general: false
 })
 
@@ -664,7 +664,7 @@ function resetForm() {
     days_of_week: [],
     reminder_time: '09:00',
     prayer_duration: 10,
-    consent_campaign_updates: false,
+    consent_people_group_updates: false,
     consent_doxa_general: false
   }
 }
@@ -696,7 +696,7 @@ async function handleSignup() {
   signupError.value = ''
 
   try {
-    const response = await $fetch(`/api/campaigns/${slug}/signup`, {
+    const response = await $fetch(`/api/people-groups/${slug}/signup`, {
       method: 'POST',
       body: {
         name: signupForm.value.name,
@@ -708,7 +708,7 @@ async function handleSignup() {
         prayer_duration: signupForm.value.prayer_duration,
         timezone: userTimezone.value,
         language: locale.value,
-        consent_campaign_updates: signupForm.value.consent_campaign_updates,
+        consent_people_group_updates: signupForm.value.consent_people_group_updates,
         consent_doxa_general: signupForm.value.consent_doxa_general
       }
     })
@@ -737,7 +737,7 @@ async function handleSignup() {
 
 // Set page title
 useHead(() => ({
-  title: campaign.value ? `${campaign.value.title} - ${t('app.title')}` : `${t('campaign.pageTitle')} - ${t('app.title')}`
+  title: pgData.value ? `${pgData.value.title} - ${t('app.title')}` : `${t('campaign.pageTitle')} - ${t('app.title')}`
 }))
 </script>
 

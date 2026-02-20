@@ -6,9 +6,9 @@ Prayer reminders are transactional emails that subscribers receive automatically
 
 We track two types of marketing consent:
 
-**Campaign Updates** allow campaign organizers to send news, announcements, and updates about their specific campaign to subscribers who opted in.
+**People Group Updates** allow people group organizers to send news, announcements, and updates about their specific people group to subscribers who opted in.
 
-**Doxa General Updates** allow Doxa administrators to send progress updates and news to anyone who opted in, regardless of which campaign they signed up for.
+**Doxa General Updates** allow Doxa administrators to send progress updates and news to anyone who opted in, regardless of which people group they signed up for.
 
 ## How Consent is Collected
 
@@ -24,7 +24,7 @@ Since users don't have accounts or log in, we show these checkboxes every time s
 
 Users can change their marketing preferences in two places:
 
-**Profile Page** - Accessible via a link in their emails, users can toggle both types of consent on or off. They see one toggle for Doxa updates and one toggle for each campaign they're subscribed to.
+**Profile Page** - Accessible via a link in their emails, users can toggle both types of consent on or off. They see one toggle for Doxa updates and one toggle for each people group they're subscribed to.
 
 **Unsubscribe Page** - When users click unsubscribe in an email, they land on a page that also shows their communication preferences, allowing them to manage marketing consent alongside their reminder subscriptions.
 
@@ -39,9 +39,9 @@ This design choice ensures that:
 
 ## What You Can Do With Granted Consent
 
-**For Campaign Organizers**: You can retrieve a list of all verified email addresses that have consented to updates for your specific campaign. This list only includes people whose email addresses have been verified.
+**For Campaign Organizers**: You can retrieve a list of all verified email addresses that have consented to updates for your specific people group. This list only includes people whose email addresses have been verified.
 
-**For Doxa Administrators**: You can retrieve a list of all verified email addresses that have consented to general Doxa updates, across all campaigns.
+**For Doxa Administrators**: You can retrieve a list of all verified email addresses that have consented to general Doxa updates, across all people groups.
 
 ## Design Decisions
 

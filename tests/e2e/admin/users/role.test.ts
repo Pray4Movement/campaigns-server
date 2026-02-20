@@ -60,7 +60,7 @@ describe('PUT /api/admin/users/[id]/role', async () => {
     it('succeeds for admin users', async () => {
       const response = await $fetch(`/api/admin/users/${targetUserId}/role`, {
         method: 'PUT',
-        body: { role: 'campaign_editor' },
+        body: { role: 'people_group_editor' },
         ...adminAuth
       })
 
@@ -82,17 +82,17 @@ describe('PUT /api/admin/users/[id]/role', async () => {
       expect(user?.role).toBe('admin')
     })
 
-    it('can set role to campaign_editor', async () => {
+    it('can set role to people_group_editor', async () => {
       const response = await $fetch(`/api/admin/users/${targetUserId}/role`, {
         method: 'PUT',
-        body: { role: 'campaign_editor' },
+        body: { role: 'people_group_editor' },
         ...adminAuth
       })
 
       expect(response.success).toBe(true)
 
       const user = await getTestUser(sql, targetUserId)
-      expect(user?.role).toBe('campaign_editor')
+      expect(user?.role).toBe('people_group_editor')
     })
 
     it('can remove role (set to null)', async () => {

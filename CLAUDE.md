@@ -5,7 +5,7 @@ We are Jan 2026
 
 ## Project Overview
 
-DOXA Prayer Campagins is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features campaign management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
+DOXA Prayer is a Nuxt 4.1 application for managing and distributing daily prayer content to subscribers. It features people group management, subscriber CRM, content libraries, multi-language support (10 languages), and email notifications.
 
 This project consumes the base layer: https://github.com/corsacca/nuxt-base
 
@@ -112,7 +112,7 @@ const user = await getAuthUser(event)
 ```
 app/
   components/     # Vue components (RichTextEditor, modals, etc.)
-  composables/    # useAuthUser, useCampaign, useModal
+  composables/    # useAuthUser, usePeopleGroup, useModal
   layouts/        # default.vue, admin.vue
   middleware/     # superadmin.ts, guest.ts
   pages/          # File-based routing
@@ -120,7 +120,7 @@ app/
 
 server/
   api/            # API endpoints (Nitro file-based routing)
-  database/       # Database access functions (campaigns, libraries, subscribers, etc.)
+  database/       # Database access functions (people groups, libraries, subscribers, etc.)
   plugins/        # Schedulers (backup, reminder, marketing-email)
   utils/          # Email templates, auth, media upload
 
@@ -139,14 +139,14 @@ i18n/locales/     # Translation files (en.json, es.json, fr.json, etc.)
 
 - **Libraries**: Centralized content managed in `/admin/libraries`
 - **Library Content**: Organized by day number (1-365+), each day can have multiple language versions
-- **Campaigns**: Subscribe to libraries via global configuration at `/admin/campaign-config`
+- **People Groups**: Subscribe to libraries via global configuration at `/admin/prayer-fuel-order`
 - Prayer content uses Tiptap rich text editor (stored as JSON, rendered as HTML)
 
 ### API Pattern
 
 API routes follow Nitro conventions:
 - `server/api/admin/` - Admin-only endpoints (require authentication)
-- `server/api/campaigns/[slug]/` - Public campaign endpoints
+- `server/api/people-groups/[slug]/` - Public people group endpoints
 - `server/api/libraries/` - Public library endpoints
 
 ### Authentication
@@ -161,7 +161,7 @@ API routes follow Nitro conventions:
 
 Server plugins run scheduled tasks:
 - `reminder-scheduler.ts` - Prayer reminder emails
-- `marketing-email-scheduler.ts` - Marketing campaigns
+- `marketing-email-scheduler.ts` - Marketing emails
 - `backup-scheduler.ts` - Database backups to S3
 
 Email templates in `server/utils/`: `prayer-reminder-email.ts`, `welcome-email.ts`, `invitation-email.ts`

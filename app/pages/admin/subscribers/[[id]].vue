@@ -14,10 +14,10 @@
       >
         <template #filters>
           <USelectMenu
-            v-model="filterCampaignId"
-            :items="campaignOptions"
+            v-model="filterPeopleGroupId"
+            :items="peopleGroupOptions"
             value-key="value"
-            placeholder="All Campaigns"
+            placeholder="All People Groups"
             searchable
             virtualize
             class="filter-select"
@@ -105,14 +105,14 @@
                 </span>
               </div>
 
-              <div v-if="selectedSubscriber.consents.campaign_names.length > 0" class="consent-item">
+              <div v-if="selectedSubscriber.consents.people_group_names.length > 0" class="consent-item">
                 <div class="consent-label">
-                  <span class="consent-name">Campaign Marketing</span>
+                  <span class="consent-name">People Group Marketing</span>
                 </div>
-                <div class="campaign-consents">
+                <div class="people-group-consents">
                   <UBadge
-                    v-for="(name, idx) in selectedSubscriber.consents.campaign_names"
-                    :key="selectedSubscriber.consents.campaign_ids[idx]"
+                    v-for="(name, idx) in selectedSubscriber.consents.people_group_names"
+                    :key="selectedSubscriber.consents.people_group_ids[idx]"
                     :label="name"
                     color="primary"
                     variant="subtle"
@@ -123,7 +123,7 @@
 
               <div v-else class="consent-item">
                 <div class="consent-label">
-                  <span class="consent-name">Campaign Marketing</span>
+                  <span class="consent-name">People Group Marketing</span>
                   <UBadge label="None" color="neutral" variant="outline" size="xs" />
                 </div>
               </div>
@@ -144,7 +144,7 @@
               >
                 <div class="subscription-header" @click="toggleSubscription(subscription.id)">
                   <div class="subscription-title">
-                    <span class="campaign-name">{{ subscription.campaign_title }}</span>
+                    <span class="people-group-name">{{ subscription.people_group_name }}</span>
                     <UBadge
                       :label="subscription.status"
                       variant="outline"
@@ -231,8 +231,8 @@
                     >
                       Send Follow-up
                     </UButton>
-                    <UButton size="xs" variant="ghost" @click="filterByCampaign(subscription)">
-                      Filter by Campaign
+                    <UButton size="xs" variant="ghost" @click="filterByPeopleGroup(subscription)">
+                      Filter by People Group
                     </UButton>
                   </div>
                 </div>
@@ -295,20 +295,20 @@
                 </div>
                 <div v-if="activity.eventType === 'PRAYER'" class="prayer-details">
                   {{ formatPrayerDuration(activity.metadata.duration ?? 0) }}
-                  <template v-if="activity.metadata.campaignTitle">
-                    for {{ activity.metadata.campaignTitle }}
+                  <template v-if="activity.metadata.peopleGroupName">
+                    for {{ activity.metadata.peopleGroupName }}
                   </template>
                 </div>
                 <div v-if="activity.eventType === 'EMAIL'" class="email-details">
                   Day {{ activity.metadata.sentDate }}
-                  <template v-if="activity.metadata.campaignTitle">
-                    · {{ activity.metadata.campaignTitle }}
+                  <template v-if="activity.metadata.peopleGroupName">
+                    · {{ activity.metadata.peopleGroupName }}
                   </template>
                 </div>
                 <div v-if="activity.eventType === 'FOLLOWUP_RESPONSE'" class="followup-details">
                   {{ formatFollowupResponse(activity.metadata.response ?? '') }}
-                  <template v-if="activity.metadata.campaignTitle">
-                    · {{ activity.metadata.campaignTitle }}
+                  <template v-if="activity.metadata.peopleGroupName">
+                    · {{ activity.metadata.peopleGroupName }}
                   </template>
                 </div>
                 <div v-if="activity.metadata?.changes" class="activity-changes">
@@ -364,9 +364,9 @@ interface Contact {
 
 interface Subscription {
   id: number
-  campaign_id: number
-  campaign_title: string
-  campaign_slug: string
+  people_group_id: number
+  people_group_name: string
+  people_group_slug: string
   delivery_method: 'email' | 'whatsapp' | 'app'
   frequency: string
   days_of_week: string | null
@@ -382,8 +382,8 @@ interface Subscription {
 interface SubscriberConsents {
   doxa_general: boolean
   doxa_general_at: string | null
-  campaign_ids: number[]
-  campaign_names: string[]
+  people_group_ids: number[]
+  people_group_names: string[]
 }
 
 interface GeneralSubscriber {
@@ -401,9 +401,9 @@ interface GeneralSubscriber {
   consents: SubscriberConsents
 }
 
-interface Campaign {
+interface PeopleGroup {
   id: number
-  title: string
+  name: string
   slug: string
 }
 
@@ -419,7 +419,7 @@ const toast = useToast()
 
 // Data
 const subscribers = ref<GeneralSubscriber[]>([])
-const campaigns = ref<Campaign[]>([])
+const peopleGroups = ref<PeopleGroup[]>([])
 const selectedSubscriber = ref<GeneralSubscriber | null>(null)
 
 // Loading states
@@ -429,7 +429,7 @@ const saving = ref(false)
 
 // Filters
 const searchQuery = ref('')
-const filterCampaignId = ref<number | null>(null)
+const filterPeopleGroupId = ref<number | null>(null)
 
 // Form state
 const subscriberForm = ref({ name: '' })
@@ -456,7 +456,7 @@ interface ActivityLogEntry {
     deletedRecord?: Record<string, any>
     source?: string
     duration?: number
-    campaignTitle?: string
+    peopleGroupName?: string
     sentDate?: string
     response?: string
   }
@@ -479,10 +479,10 @@ const frequencyOptions = [
   { label: 'Weekly', value: 'weekly' }
 ]
 
-const campaignOptions = computed(() => {
+const peopleGroupOptions = computed(() => {
   return [
-    { label: 'All Campaigns', value: null },
-    ...campaigns.value.map(c => ({ label: c.title, value: c.id }))
+    { label: 'All People Groups', value: null },
+    ...peopleGroups.value.map(c => ({ label: c.name, value: c.id }))
   ]
 })
 
@@ -498,9 +498,9 @@ const filteredSubscribers = computed(() => {
     )
   }
 
-  if (filterCampaignId.value) {
+  if (filterPeopleGroupId.value) {
     filtered = filtered.filter(s =>
-      s.subscriptions.some(sub => sub.campaign_id === filterCampaignId.value)
+      s.subscriptions.some(sub => sub.people_group_id === filterPeopleGroupId.value)
     )
   }
 
@@ -512,8 +512,8 @@ async function loadData() {
     loading.value = true
     error.value = ''
 
-    const campaignsResponse = await $fetch<{ campaigns: Campaign[] }>('/api/admin/campaigns')
-    campaigns.value = campaignsResponse.campaigns
+    const peopleGroupsResponse = await $fetch<{ peopleGroups: PeopleGroup[] }>('/api/admin/people-groups')
+    peopleGroups.value = peopleGroupsResponse.peopleGroups
 
     const subscribersResponse = await $fetch<{ subscribers: GeneralSubscriber[] }>('/api/admin/subscribers')
     subscribers.value = subscribersResponse.subscribers
@@ -530,9 +530,9 @@ async function selectSubscriber(subscriber: GeneralSubscriber, updateUrl = true)
   subscriberForm.value = { name: subscriber.name }
   if (updateUrl && import.meta.client) {
     const params = new URLSearchParams()
-    if (filterCampaignId.value) params.set('campaign', String(filterCampaignId.value))
+    if (filterPeopleGroupId.value) params.set('peopleGroup', String(filterPeopleGroupId.value))
     if (route.query.from) params.set('from', route.query.from as string)
-    if (route.query.campaignId) params.set('campaignId', route.query.campaignId as string)
+    if (route.query.peopleGroupId) params.set('peopleGroupId', route.query.peopleGroupId as string)
     const queryString = params.toString()
     window.history.replaceState({}, '', `/admin/subscribers/${subscriber.id}${queryString ? '?' + queryString : ''}`)
   }
@@ -620,7 +620,7 @@ async function sendReminder(subscription: Subscription) {
 
     toast.add({
       title: 'Reminder Sent',
-      description: `Prayer reminder email sent for ${subscription.campaign_title}`,
+      description: `Prayer reminder email sent for ${subscription.people_group_name}`,
       color: 'success'
     })
 
@@ -650,7 +650,7 @@ async function sendFollowup(subscription: Subscription) {
 
     toast.add({
       title: 'Follow-up Sent',
-      description: `Commitment check-in email sent for ${subscription.campaign_title}`,
+      description: `Commitment check-in email sent for ${subscription.people_group_name}`,
       color: 'success'
     })
 
@@ -790,9 +790,9 @@ async function confirmDelete() {
 
     if (import.meta.client) {
       const params = new URLSearchParams()
-      if (filterCampaignId.value) params.set('campaign', String(filterCampaignId.value))
+      if (filterPeopleGroupId.value) params.set('peopleGroup', String(filterPeopleGroupId.value))
       if (route.query.from) params.set('from', route.query.from as string)
-      if (route.query.campaignId) params.set('campaignId', route.query.campaignId as string)
+      if (route.query.peopleGroupId) params.set('peopleGroupId', route.query.peopleGroupId as string)
       const queryString = params.toString()
       window.history.replaceState({}, '', `/admin/subscribers${queryString ? '?' + queryString : ''}`)
     }
@@ -812,9 +812,9 @@ function cancelDelete() {
   subscriberToDelete.value = null
 }
 
-function filterByCampaign(subscription: Subscription) {
-  filterCampaignId.value = subscription.campaign_id
-  router.push({ query: { campaign: subscription.campaign_id } })
+function filterByPeopleGroup(subscription: Subscription) {
+  filterPeopleGroupId.value = subscription.people_group_id
+  router.push({ query: { peopleGroup: subscription.people_group_id } })
 }
 
 // Formatting functions
@@ -974,9 +974,9 @@ function handleUrlSelection() {
 }
 
 onMounted(async () => {
-  const campaignParam = route.query.campaign
-  if (campaignParam) {
-    filterCampaignId.value = parseInt(campaignParam as string)
+  const peopleGroupParam = route.query.peopleGroup
+  if (peopleGroupParam) {
+    filterPeopleGroupId.value = parseInt(peopleGroupParam as string)
   }
   await loadData()
   handleUrlSelection()
@@ -1066,7 +1066,7 @@ onMounted(async () => {
   gap: 0.5rem;
 }
 
-.campaign-name {
+.people-group-name {
   font-weight: 500;
 }
 
@@ -1248,7 +1248,7 @@ onMounted(async () => {
   margin-top: 0.25rem;
 }
 
-.campaign-consents {
+.people-group-consents {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;

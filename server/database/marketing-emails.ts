@@ -1,13 +1,13 @@
 import { getDatabase } from './db'
 import { roleService } from './roles'
-import { campaignAccessService } from './campaign-access'
+import { peopleGroupAccessService } from './people-group-access'
 
 export interface MarketingEmail {
   id: number
   subject: string
   content_json: string
-  audience_type: 'doxa' | 'campaign'
-  campaign_id: number | null
+  audience_type: 'doxa' | 'people_group'
+  people_group_id: number | null
   status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
   created_by: string
   updated_by: string | null
@@ -20,9 +20,9 @@ export interface MarketingEmail {
   failed_count: number
 }
 
-export interface MarketingEmailWithCampaign extends MarketingEmail {
-  campaign_title?: string
-  campaign_slug?: string
+export interface MarketingEmailWithPeopleGroup extends MarketingEmail {
+  people_group_name?: string
+  people_group_slug?: string
   created_by_name?: string
   created_by_email?: string
   updated_by_name?: string
@@ -34,41 +34,41 @@ export interface MarketingEmailWithCampaign extends MarketingEmail {
 export interface CreateMarketingEmailData {
   subject: string
   content_json: string
-  audience_type: 'doxa' | 'campaign'
-  campaign_id?: number | null
+  audience_type: 'doxa' | 'people_group'
+  people_group_id?: number | null
   created_by: string
 }
 
 export interface UpdateMarketingEmailData {
   subject?: string
   content_json?: string
-  audience_type?: 'doxa' | 'campaign'
-  campaign_id?: number | null
+  audience_type?: 'doxa' | 'people_group'
+  people_group_id?: number | null
   updated_by: string
 }
 
 export interface MarketingEmailFilters {
   status?: 'draft' | 'queued' | 'sending' | 'sent' | 'failed'
-  audience_type?: 'doxa' | 'campaign'
-  campaign_id?: number
+  audience_type?: 'doxa' | 'people_group'
+  people_group_id?: number
 }
 
 class MarketingEmailService {
   private db = getDatabase()
 
   async create(data: CreateMarketingEmailData): Promise<MarketingEmail> {
-    const { subject, content_json, audience_type, campaign_id, created_by } = data
+    const { subject, content_json, audience_type, people_group_id, created_by } = data
 
-    if (audience_type === 'campaign' && !campaign_id) {
-      throw new Error('campaign_id is required when audience_type is campaign')
+    if (audience_type === 'people_group' && !people_group_id) {
+      throw new Error('people_group_id is required when audience_type is people_group')
     }
 
-    if (audience_type === 'doxa' && campaign_id) {
-      throw new Error('campaign_id should not be provided when audience_type is doxa')
+    if (audience_type === 'doxa' && people_group_id) {
+      throw new Error('people_group_id should not be provided when audience_type is doxa')
     }
 
     const stmt = this.db.prepare(`
-      INSERT INTO marketing_emails (subject, content_json, audience_type, campaign_id, created_by)
+      INSERT INTO marketing_emails (subject, content_json, audience_type, people_group_id, created_by)
       VALUES (?, ?, ?, ?, ?)
     `)
 
@@ -76,7 +76,7 @@ class MarketingEmailService {
       subject,
       content_json,
       audience_type,
-      audience_type === 'campaign' ? campaign_id : null,
+      audience_type === 'people_group' ? people_group_id : null,
       created_by
     )
 
@@ -88,14 +88,14 @@ class MarketingEmailService {
     return await stmt.get(id) as MarketingEmail | null
   }
 
-  async getByIdWithCampaign(id: number): Promise<MarketingEmailWithCampaign | null> {
+  async getByIdWithPeopleGroup(id: number): Promise<MarketingEmailWithPeopleGroup | null> {
     const stmt = this.db.prepare(`
-      SELECT me.*, c.title as campaign_title, c.slug as campaign_slug
+      SELECT me.*, pg.name as people_group_name, pg.slug as people_group_slug
       FROM marketing_emails me
-      LEFT JOIN campaigns c ON me.campaign_id = c.id
+      LEFT JOIN people_groups pg ON me.people_group_id = pg.id
       WHERE me.id = ?
     `)
-    return await stmt.get(id) as MarketingEmailWithCampaign | null
+    return await stmt.get(id) as MarketingEmailWithPeopleGroup | null
   }
 
   async update(id: number, data: UpdateMarketingEmailData): Promise<MarketingEmail | null> {
@@ -124,9 +124,9 @@ class MarketingEmailService {
       values.push(data.audience_type)
     }
 
-    if (data.campaign_id !== undefined) {
-      updates.push('campaign_id = ?')
-      values.push(data.campaign_id)
+    if (data.people_group_id !== undefined) {
+      updates.push('people_group_id = ?')
+      values.push(data.people_group_id)
     }
 
     if (data.updated_by) {
@@ -163,13 +163,13 @@ class MarketingEmailService {
     return result.changes > 0
   }
 
-  async listForUser(userId: string, filters?: MarketingEmailFilters): Promise<MarketingEmailWithCampaign[]> {
+  async listForUser(userId: string, filters?: MarketingEmailFilters): Promise<MarketingEmailWithPeopleGroup[]> {
     const isAdmin = await roleService.isAdmin(userId)
 
     let query = `
       SELECT me.*,
-        c.title as campaign_title,
-        c.slug as campaign_slug,
+        pg.name as people_group_name,
+        pg.slug as people_group_slug,
         u_created.display_name as created_by_name,
         u_created.email as created_by_email,
         u_updated.display_name as updated_by_name,
@@ -177,7 +177,7 @@ class MarketingEmailService {
         u_sent.display_name as sent_by_name,
         u_sent.email as sent_by_email
       FROM marketing_emails me
-      LEFT JOIN campaigns c ON me.campaign_id = c.id
+      LEFT JOIN people_groups pg ON me.people_group_id = pg.id
       LEFT JOIN users u_created ON me.created_by = u_created.id
       LEFT JOIN users u_updated ON me.updated_by = u_updated.id
       LEFT JOIN users u_sent ON me.sent_by = u_sent.id
@@ -186,16 +186,16 @@ class MarketingEmailService {
     const values: any[] = []
 
     if (!isAdmin) {
-      const campaignIds = await campaignAccessService.getUserCampaigns(userId)
-      if (campaignIds.length === 0) {
+      const peopleGroupIds = await peopleGroupAccessService.getUserPeopleGroups(userId)
+      if (peopleGroupIds.length === 0) {
         conditions.push('(me.audience_type = ? AND me.created_by = ?)')
-        values.push('campaign', userId)
+        values.push('people_group', userId)
       } else {
         conditions.push(`(
-          (me.audience_type = 'campaign' AND me.campaign_id IN (${campaignIds.map(() => '?').join(',')}))
+          (me.audience_type = 'people_group' AND me.people_group_id IN (${peopleGroupIds.map(() => '?').join(',')}))
           OR me.created_by = ?
         )`)
-        values.push(...campaignIds, userId)
+        values.push(...peopleGroupIds, userId)
       }
     }
 
@@ -209,9 +209,9 @@ class MarketingEmailService {
       values.push(filters.audience_type)
     }
 
-    if (filters?.campaign_id) {
-      conditions.push('me.campaign_id = ?')
-      values.push(filters.campaign_id)
+    if (filters?.people_group_id) {
+      conditions.push('me.people_group_id = ?')
+      values.push(filters.people_group_id)
     }
 
     if (conditions.length > 0) {
@@ -221,7 +221,7 @@ class MarketingEmailService {
     query += ' ORDER BY me.updated_at DESC'
 
     const stmt = this.db.prepare(query)
-    return await stmt.all(...values) as MarketingEmailWithCampaign[]
+    return await stmt.all(...values) as MarketingEmailWithPeopleGroup[]
   }
 
   async updateStatus(id: number, status: MarketingEmail['status'], sentBy?: string): Promise<void> {
@@ -284,23 +284,23 @@ class MarketingEmailService {
       return email.created_by === userId
     }
 
-    if (email.audience_type === 'campaign' && email.campaign_id) {
-      return await campaignAccessService.userHasAccess(userId, email.campaign_id)
+    if (email.audience_type === 'people_group' && email.people_group_id) {
+      return await peopleGroupAccessService.userHasAccess(userId, email.people_group_id)
     }
 
     return email.created_by === userId
   }
 
-  async canUserSendToAudience(userId: string, audienceType: 'doxa' | 'campaign', campaignId?: number): Promise<boolean> {
+  async canUserSendToAudience(userId: string, audienceType: 'doxa' | 'people_group', peopleGroupId?: number): Promise<boolean> {
     const isAdmin = await roleService.isAdmin(userId)
 
     if (audienceType === 'doxa') {
       return isAdmin
     }
 
-    if (audienceType === 'campaign' && campaignId) {
+    if (audienceType === 'people_group' && peopleGroupId) {
       if (isAdmin) return true
-      return await campaignAccessService.userHasAccess(userId, campaignId)
+      return await peopleGroupAccessService.userHasAccess(userId, peopleGroupId)
     }
 
     return false

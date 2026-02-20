@@ -1,6 +1,6 @@
-import { campaignSubscriptionService } from '../database/campaign-subscriptions'
+import { peopleGroupSubscriptionService } from '../database/people-group-subscriptions'
 import { reminderSentService } from '../database/reminder-sent'
-import { campaignService } from '../database/campaigns'
+import { peopleGroupService } from '../database/people-groups'
 import { prayerContentService } from '../database/prayer-content'
 import { sendPrayerReminderEmail } from '../utils/prayer-reminder-email'
 
@@ -71,10 +71,10 @@ export default defineNitroPlugin((nitroApp) => {
  * Process all reminders that are due
  */
 async function processReminders() {
-  const todayDate = new Date().toISOString().split('T')[0]
+  const todayDate = new Date().toISOString().split('T')[0]!
 
   // Get all subscriptions that are due for a reminder (with verified email)
-  const dueSubscriptions = await campaignSubscriptionService.getSubscriptionsDueForReminder()
+  const dueSubscriptions = await peopleGroupSubscriptionService.getSubscriptionsDueForReminder()
 
   if (dueSubscriptions.length === 0) {
     return
@@ -82,30 +82,30 @@ async function processReminders() {
 
   console.log(`📧 Processing ${dueSubscriptions.length} reminder(s)...`)
 
-  // Group subscriptions by campaign_id for efficient content fetching
-  const subscriptionsByCampaign = new Map<number, typeof dueSubscriptions>()
+  // Group subscriptions by people_group_id for efficient content fetching
+  const subscriptionsByPeopleGroup = new Map<number, typeof dueSubscriptions>()
   for (const subscription of dueSubscriptions) {
-    if (!subscriptionsByCampaign.has(subscription.campaign_id)) {
-      subscriptionsByCampaign.set(subscription.campaign_id, [])
+    if (!subscriptionsByPeopleGroup.has(subscription.people_group_id)) {
+      subscriptionsByPeopleGroup.set(subscription.people_group_id, [])
     }
-    subscriptionsByCampaign.get(subscription.campaign_id)!.push(subscription)
+    subscriptionsByPeopleGroup.get(subscription.people_group_id)!.push(subscription)
   }
 
-  // Process each campaign's subscriptions
-  for (const [campaignId, subscriptions] of subscriptionsByCampaign) {
+  // Process each people group's subscriptions
+  for (const [peopleGroupId, subscriptions] of subscriptionsByPeopleGroup) {
     try {
-      // Get campaign info
-      const campaign = await campaignService.getCampaignById(campaignId)
-      if (!campaign) {
-        console.error(`Campaign ${campaignId} not found, skipping ${subscriptions.length} subscriptions`)
+      // Get people group info
+      const peopleGroup = await peopleGroupService.getPeopleGroupById(peopleGroupId)
+      if (!peopleGroup) {
+        console.error(`People group ${peopleGroupId} not found, skipping ${subscriptions.length} subscriptions`)
         continue
       }
 
       // Get today's prayer content (all content for this date)
       const prayerContent = await prayerContentService.getAllPrayerContentByDate(
-        campaignId,
+        peopleGroupId,
         todayDate,
-        campaign.default_language || 'en'
+        'en'
       )
 
       // Send reminder to each subscription
@@ -115,7 +115,7 @@ async function processReminders() {
           const alreadySent = await reminderSentService.wasSent(subscription.id, todayDate)
           if (alreadySent) {
             // Update next reminder time anyway
-            await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
+            await peopleGroupSubscriptionService.setNextReminderAfterSend(subscription.id)
             continue
           }
 
@@ -123,8 +123,8 @@ async function processReminders() {
           const emailSent = await sendPrayerReminderEmail({
             to: subscription.email_value,
             subscriberName: subscription.subscriber_name,
-            campaignTitle: subscription.campaign_title,
-            campaignSlug: subscription.campaign_slug,
+            peopleGroupName: subscription.people_group_name,
+            peopleGroupSlug: subscription.people_group_slug,
             trackingId: subscription.subscriber_tracking_id,
             profileId: subscription.subscriber_profile_id,
             subscriptionId: subscription.id,
@@ -137,8 +137,8 @@ async function processReminders() {
             // Record that we sent this reminder
             await reminderSentService.recordSent(subscription.id, todayDate)
             // Update next reminder time
-            await campaignSubscriptionService.setNextReminderAfterSend(subscription.id)
-            console.log(`  ✅ Sent reminder to ${subscription.email_value} for ${subscription.campaign_title}`)
+            await peopleGroupSubscriptionService.setNextReminderAfterSend(subscription.id)
+            console.log(`  ✅ Sent reminder to ${subscription.email_value} for ${subscription.people_group_name}`)
           } else {
             console.error(`  ❌ Failed to send reminder to ${subscription.email_value}`)
           }
@@ -147,7 +147,7 @@ async function processReminders() {
         }
       }
     } catch (error: any) {
-      console.error(`❌ Error processing campaign ${campaignId}:`, error.message)
+      console.error(`❌ Error processing people group ${peopleGroupId}:`, error.message)
     }
   }
 

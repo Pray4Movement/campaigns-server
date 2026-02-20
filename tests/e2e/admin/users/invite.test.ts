@@ -53,7 +53,7 @@ describe('POST /api/admin/users/invite', async () => {
       expect(error.statusCode).toBe(401)
     })
 
-    it('returns 403 for non-admin users (campaign_editor)', async () => {
+    it('returns 403 for non-admin users (people_group_editor)', async () => {
       // This test exposes the bug: invite.post.ts uses requireAuth() instead of requireAdmin()
       const error = await $fetch('/api/admin/users/invite', {
         method: 'POST',
@@ -181,18 +181,18 @@ describe('POST /api/admin/users/invite', async () => {
       expect(invitation?.role).toBe('admin')
     })
 
-    it('creates invitation with campaign_editor role', async () => {
+    it('creates invitation with people_group_editor role', async () => {
       const email = `test-editor-role-${Date.now()}@example.com`
       const response = await $fetch('/api/admin/users/invite', {
         method: 'POST',
-        body: { email, role: 'campaign_editor' },
+        body: { email, role: 'people_group_editor' },
         ...adminAuth
       })
 
       expect(response.success).toBe(true)
 
       const invitation = await getTestUserInvitationByEmail(sql, email)
-      expect(invitation?.role).toBe('campaign_editor')
+      expect(invitation?.role).toBe('people_group_editor')
     })
 
     it('creates invitation with custom expiry', async () => {

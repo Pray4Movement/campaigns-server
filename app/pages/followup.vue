@@ -31,7 +31,7 @@
         <p class="text-sm text-[var(--ui-text-muted)] mb-6">
           {{ $t('followupPage.committed.checkInNotice') }}
         </p>
-        <UButton v-if="campaignSlug" :to="localePath(`/${campaignSlug}`)">
+        <UButton v-if="peopleGroupSlug" :to="localePath(`/${peopleGroupSlug}`)">
           {{ $t('followupPage.committed.continueButton') }}
         </UButton>
       </UCard>
@@ -52,7 +52,7 @@
           <UButton v-if="profileId" :to="localePath(`/subscriber?id=${profileId}`)">
             {{ $t('followupPage.sometimes.adjustButton') }}
           </UButton>
-          <UButton v-if="campaignSlug" variant="outline" :to="localePath(`/${campaignSlug}`)">
+          <UButton v-if="peopleGroupSlug" variant="outline" :to="localePath(`/${peopleGroupSlug}`)">
             {{ $t('followupPage.sometimes.continueButton') }}
           </UButton>
         </div>
@@ -74,7 +74,7 @@
           <UButton v-if="profileId" :to="localePath(`/subscriber?id=${profileId}`)">
             {{ $t('followupPage.notPraying.profileButton') }}
           </UButton>
-          <UButton v-if="campaignSlug" variant="outline" :to="localePath(`/${campaignSlug}`)">
+          <UButton v-if="peopleGroupSlug" variant="outline" :to="localePath(`/${peopleGroupSlug}`)">
             {{ $t('followupPage.notPraying.visitButton') }}
           </UButton>
         </div>
@@ -100,7 +100,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const response = ref<string | null>(null)
 const profileId = ref<string | null>(null)
-const campaignSlug = ref<string | null>(null)
+const peopleGroupSlug = ref<string | null>(null)
 
 async function recordResponse() {
   if (!subscriptionId || !responseParam || !idParam) {
@@ -121,7 +121,7 @@ async function recordResponse() {
       success: boolean
       message: string
       profile_id: string
-      campaign_slug: string
+      people_group_slug: string
     }>(`/api/subscriptions/${subscriptionId}/followup-response?id=${idParam}`, {
       method: 'POST',
       body: { response: responseParam }
@@ -129,7 +129,7 @@ async function recordResponse() {
 
     response.value = responseParam
     profileId.value = result.profile_id
-    campaignSlug.value = result.campaign_slug
+    peopleGroupSlug.value = result.people_group_slug
   } catch (err: any) {
     error.value = err.data?.statusMessage || t('followupPage.error.failed')
   } finally {

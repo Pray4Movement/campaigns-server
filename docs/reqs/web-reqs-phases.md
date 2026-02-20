@@ -66,11 +66,9 @@
   - [x] Title, slug, description
   - [x] Status (active/inactive)
   - [x] Timestamps
-- [x] API endpoints:
-  - [x] `GET /api/admin/campaigns`
-  - [x] `POST /api/admin/campaigns`
-  - [x] `PUT /api/admin/campaigns/{id}`
-  - [x] `DELETE /api/admin/campaigns/{id}`
+- [x] API endpoints (now under people-groups):
+  - [x] `GET /api/admin/people-groups`
+  - [x] `PUT /api/admin/people-groups/{id}`
 - [x] Slug generation and validation
 - [ ] Basic role/permission structure for campaign access (deferred to Phase 8)
 
@@ -133,9 +131,9 @@
   - [x] Time picker for reminders
   - [x] Submit handling
 - [x] API endpoints:
-  - [x] `GET /api/campaigns` (public list)
-  - [x] `GET /api/campaigns/{slug}` (campaign details)
-  - [x] `POST /api/campaigns/{slug}/signup` (reminder signup)
+  - [x] `GET /api/people-groups` (public list)
+  - [x] `GET /api/people-groups/{slug}` (campaign details)
+  - [x] `POST /api/people-groups/{slug}/signup` (reminder signup)
 - [x] Generate unique tracking IDs for signups
 - [x] Store signup data in ReminderSignups table
 - [x] Form validation and error handling
@@ -164,8 +162,8 @@
   - [x] Query content for matching calendar date
   - [x] Handle missing content gracefully
 - [x] API endpoints:
-  - [x] `GET /api/campaigns/{slug}/prayer-fuel?userDate={iso-date}`
-  - [x] `POST /api/campaigns/{slug}/prayed`
+  - [x] `GET /api/people-groups/{slug}/prayer-fuel?userDate={iso-date}`
+  - [x] `POST /api/people-groups/{slug}/prayed`
 - [x] Prayer activity tracking:
   - [x] Capture timestamp
   - [x] Calculate duration (page open time)

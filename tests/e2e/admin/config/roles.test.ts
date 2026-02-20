@@ -47,7 +47,7 @@ describe('GET /api/admin/roles', async () => {
       expect(error.statusCode).toBe(403)
     })
 
-    it('returns 403 for campaign_editor users', async () => {
+    it('returns 403 for people_group_editor users', async () => {
       const error = await $fetch('/api/admin/roles', editorAuth).catch((e) => e)
       expect(error.statusCode).toBe(403)
     })
@@ -66,12 +66,12 @@ describe('GET /api/admin/roles', async () => {
       expect(Array.isArray(response.roles)).toBe(true)
     })
 
-    it('includes admin and campaign_editor roles', async () => {
+    it('includes admin and people_group_editor roles', async () => {
       const response = await $fetch('/api/admin/roles', adminAuth)
 
       const roleNames = response.roles.map((r: any) => r.name)
       expect(roleNames).toContain('admin')
-      expect(roleNames).toContain('campaign_editor')
+      expect(roleNames).toContain('people_group_editor')
     })
 
     it('roles have expected fields', async () => {
@@ -91,10 +91,10 @@ describe('GET /api/admin/roles', async () => {
       expect(adminRole.permissions).toContain('roles.manage')
     })
 
-    it('campaign_editor role does not have user management permissions', async () => {
+    it('people_group_editor role does not have user management permissions', async () => {
       const response = await $fetch('/api/admin/roles', adminAuth)
 
-      const editorRole = response.roles.find((r: any) => r.name === 'campaign_editor')
+      const editorRole = response.roles.find((r: any) => r.name === 'people_group_editor')
       expect(editorRole.permissions).not.toContain('users.manage')
       expect(editorRole.permissions).not.toContain('roles.manage')
     })

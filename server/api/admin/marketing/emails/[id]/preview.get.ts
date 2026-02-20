@@ -2,7 +2,7 @@ import { marketingEmailService } from '#server/database/marketing-emails'
 import { renderMarketingEmailHtml, tiptapToText } from '#server/utils/marketing-email-template'
 
 export default defineEventHandler(async (event) => {
-  const user = await requirePermission(event, 'campaigns.view')
+  const user = await requirePermission(event, 'people_groups.view')
 
   const id = Number(getRouterParam(event, 'id'))
   if (!id || isNaN(id)) {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const email = await marketingEmailService.getByIdWithCampaign(id)
+  const email = await marketingEmailService.getByIdWithPeopleGroup(id)
   if (!email) {
     throw createError({
       statusCode: 404,
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
 
   const html = renderMarketingEmailHtml(
     email.content_json,
-    email.audience_type === 'campaign' ? email.campaign_title : undefined,
+    email.audience_type === 'people_group' ? email.people_group_name : undefined,
     unsubscribeUrl
   )
 

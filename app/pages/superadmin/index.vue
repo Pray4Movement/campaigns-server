@@ -38,36 +38,6 @@
 
         <!-- People Groups Tab -->
         <div v-if="item.value === 'people-groups'" class="py-6">
-          <h2 class="text-xl font-semibold mb-2">People Groups Sync</h2>
-          <p class="text-[var(--ui-text-muted)] mb-6">Synchronize people groups from the Disciple.Tools API. Existing records will be updated, new records will be created.</p>
-
-          <UButton
-            @click="syncPeopleGroups"
-            :loading="isSyncingPeopleGroups"
-            variant="outline"
-          >
-            {{ isSyncingPeopleGroups ? 'Syncing...' : 'Sync People Groups' }}
-          </UButton>
-
-          <UAlert
-            v-if="syncMessage"
-            :color="syncMessage.type === 'success' ? 'success' : 'error'"
-            :title="syncMessage.text"
-            class="mt-4"
-          />
-
-          <UCard v-if="syncStats" class="mt-6">
-            <template #header>
-              <h3 class="font-semibold">Sync Results</h3>
-            </template>
-            <div class="space-y-2">
-              <p><strong>Total from API:</strong> {{ syncStats.total }}</p>
-              <p><strong>Created:</strong> {{ syncStats.created }}</p>
-              <p><strong>Updated:</strong> {{ syncStats.updated }}</p>
-              <p><strong>Errors:</strong> {{ syncStats.errors }}</p>
-            </div>
-          </UCard>
-
           <!-- Import Descriptions -->
           <div class="border-t border-[var(--ui-border)] pt-8 mt-8">
             <h3 class="text-lg font-medium mb-2">Import People Descriptions</h3>
@@ -211,48 +181,14 @@
           </UCard>
         </div>
 
-        <!-- Campaigns Tab -->
-        <div v-if="item.value === 'campaigns'" class="py-6">
-          <h2 class="text-xl font-semibold mb-2">Campaign Management</h2>
-
-          <!-- Sync from People Groups -->
-          <div class="mb-8">
-            <h3 class="text-lg font-medium mb-2">Sync Campaigns from People Groups</h3>
-            <p class="text-[var(--ui-text-muted)] mb-4">Create or update campaigns based on people groups data. Uses the slug from people group metadata and matches by dt_id.</p>
-
-            <UButton
-              @click="syncCampaignsFromPeopleGroups"
-              :loading="isSyncingCampaigns"
-              variant="outline"
-            >
-              {{ isSyncingCampaigns ? 'Syncing...' : 'Sync Campaigns from People Groups' }}
-            </UButton>
-
-            <UAlert
-              v-if="campaignSyncMessage"
-              :color="campaignSyncMessage.type === 'success' ? 'success' : 'error'"
-              :title="campaignSyncMessage.text"
-              class="mt-4"
-            />
-
-            <UCard v-if="campaignSyncStats" class="mt-6">
-              <template #header>
-                <h3 class="font-semibold">Sync Results</h3>
-              </template>
-              <div class="space-y-2">
-                <p><strong>Total People Groups:</strong> {{ campaignSyncStats.total }}</p>
-                <p><strong>Created:</strong> {{ campaignSyncStats.created }}</p>
-                <p><strong>Updated:</strong> {{ campaignSyncStats.updated }}</p>
-                <p><strong>Skipped:</strong> {{ campaignSyncStats.skipped }}</p>
-                <p><strong>Errors:</strong> {{ campaignSyncStats.errors }}</p>
-              </div>
-            </UCard>
-          </div>
+        <!-- Prayer Counts Tab -->
+        <div v-if="item.value === 'prayer-counts'" class="py-6">
+          <h2 class="text-xl font-semibold mb-2">Prayer Counts</h2>
 
           <!-- Update Prayer Counts -->
-          <div class="border-t border-[var(--ui-border)] pt-8">
+          <div>
             <h3 class="text-lg font-medium mb-2">Update Prayer Counts</h3>
-            <p class="text-[var(--ui-text-muted)] mb-4">Update the "People Praying" count for all campaigns. This calculates the 7-day average of daily unique prayers.</p>
+            <p class="text-[var(--ui-text-muted)] mb-4">Update the "People Praying" count for all people groups. This calculates the 7-day average of daily unique prayers.</p>
 
             <UButton
               @click="updatePrayerCounts"
@@ -375,7 +311,7 @@ const tabs = [
   { label: 'Backups', value: 'backups' },
   { label: 'People Groups', value: 'people-groups' },
   { label: 'Libraries', value: 'libraries' },
-  { label: 'Campaigns', value: 'campaigns' },
+  { label: 'Prayer Counts', value: 'prayer-counts' },
 ]
 
 const activeTab = ref('backups')
@@ -383,16 +319,9 @@ const isCreatingBackup = ref(false)
 const backupMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 const lastBackup = ref<{ filename: string; size: number; location: string } | null>(null)
 
-const isSyncingPeopleGroups = ref(false)
-const syncMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
-const syncStats = ref<{ total: number; created: number; updated: number; errors: number } | null>(null)
-
 const isUpdatingPrayerCounts = ref(false)
 const prayerCountsMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 
-const isSyncingCampaigns = ref(false)
-const campaignSyncMessage = ref<{ text: string; type: 'success' | 'error' } | null>(null)
-const campaignSyncStats = ref<{ total: number; created: number; updated: number; skipped: number; errors: number } | null>(null)
 
 // Translation state
 const selectedTranslateField = ref<string | null>(null)
@@ -466,42 +395,12 @@ function formatBytes(bytes: number): string {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
-async function syncPeopleGroups() {
-  isSyncingPeopleGroups.value = true
-  syncMessage.value = null
-  syncStats.value = null
-
-  try {
-    const response = await $fetch<{
-      success: boolean
-      message: string
-      stats: { total: number; created: number; updated: number; errors: number }
-    }>('/api/admin/people-groups/sync', {
-      method: 'POST'
-    })
-
-    syncMessage.value = {
-      text: response.message,
-      type: 'success'
-    }
-    syncStats.value = response.stats
-  } catch (error: any) {
-    console.error('Sync error:', error)
-    syncMessage.value = {
-      text: error.data?.message || 'Failed to sync people groups. Please try again.',
-      type: 'error'
-    }
-  } finally {
-    isSyncingPeopleGroups.value = false
-  }
-}
-
 async function updatePrayerCounts() {
   isUpdatingPrayerCounts.value = true
   prayerCountsMessage.value = null
 
   try {
-    await $fetch('/api/admin/campaigns/update-prayer-counts', {
+    await $fetch('/api/admin/superadmin/update-prayer-counts', {
       method: 'POST'
     })
 
@@ -520,35 +419,6 @@ async function updatePrayerCounts() {
   }
 }
 
-async function syncCampaignsFromPeopleGroups() {
-  isSyncingCampaigns.value = true
-  campaignSyncMessage.value = null
-  campaignSyncStats.value = null
-
-  try {
-    const response = await $fetch<{
-      success: boolean
-      message: string
-      stats: { total: number; created: number; updated: number; skipped: number; errors: number }
-    }>('/api/admin/campaigns/sync-from-people-groups', {
-      method: 'POST'
-    })
-
-    campaignSyncMessage.value = {
-      text: response.message,
-      type: 'success'
-    }
-    campaignSyncStats.value = response.stats
-  } catch (error: any) {
-    console.error('Campaign sync error:', error)
-    campaignSyncMessage.value = {
-      text: error.data?.message || 'Failed to sync campaigns from people groups. Please try again.',
-      type: 'error'
-    }
-  } finally {
-    isSyncingCampaigns.value = false
-  }
-}
 
 async function startDinlTranslation() {
   showDinlConfirmModal.value = false

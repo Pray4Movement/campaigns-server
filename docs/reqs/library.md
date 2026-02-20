@@ -2,19 +2,19 @@
 
 ## Overview
 
-Rewrite the prayer fuel/content system from campaign-specific content management to a centralized library system. This allows content to be created once and shared across 2000+ campaigns, eliminating the need to manage content separately for each campaign.
+Rewrite the prayer fuel/content system from campaign-specific content management to a centralized library system. This allows content to be created once and shared across 2000+ people groups, eliminating the need to manage content separately for each one.
 
 ## System Architecture
 
 ### Before (Current State)
-- Each campaign has its own prayer fuel content
-- Admin creates and manages content separately for each campaign
-- Scaling to 2000+ campaigns would require managing content 2000+ times
+- Each people group had its own prayer fuel content
+- Admin created and managed content separately for each people group
+- Scaling to 2000+ people groups would require managing content 2000+ times
 
 ### After (New State)
 - Centralized content libraries
-- Campaigns are configured to modularly use one or more libraries
-- Content created once, used across multiple campaigns
+- People groups are configured to modularly use one or more libraries
+- Content created once, used across multiple people groups
 - Global configuration for library assignment and ordering
 
 ---
@@ -28,7 +28,7 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 - **`getLanguageByCode(code)`**: Returns full language object
 
 ### Components
-- **`RichTextEditor`**: WYSIWYG editor component (currently used in campaign content creator)
+- **`RichTextEditor`**: WYSIWYG editor component (currently used in people group content editor)
 - **Nuxt UI v4.1**: Use Nuxt UI components when possible for consistent design
   - `<UButton>` for buttons
   - `<UCard>` for card layouts
@@ -43,7 +43,7 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 - Use existing admin page layouts and styling patterns
 - Prefer Nuxt UI components over custom HTML elements
 - Sidebar navigation pattern from admin layout
-- Card/table patterns from campaigns list (consider migrating to `<UCard>` and `<UTable>`)
+- Card/table patterns from people groups list (consider migrating to `<UCard>` and `<UTable>`)
 - Editor layout pattern from content creator
 
 ---
@@ -182,7 +182,7 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 - Page title: "Day [N] - [Language Name]" with flag
 - Full-page editor layout
 
-**Content Fields** (migrated from campaign content creator, use Nuxt UI components):
+**Content Fields** (migrated from people group content editor, use Nuxt UI components):
 - Language display (read-only, shows flag and language name)
 - Prayer fuel content (rich text/WYSIWYG editor - use existing `RichTextEditor` component)
 
@@ -198,37 +198,27 @@ Rewrite the prayer fuel/content system from campaign-specific content management
 
 ### 2.5 Content Migration
 
-**Task**: Move content creator from campaigns section to library content editor
+**Task**: Content is now managed through people group pages
 
-**Components to Migrate from `/admin/campaigns/[id]/content/new.vue`**:
-- Content editor UI layout (editor-page, editor-container, editor-main, editor-sidebar)
-- `RichTextEditor` component for content editing
-- Form structure
-- Save/validation logic
+**Content is accessed via**: `/admin/people-groups/[id]/content` for the library calendar, and `/admin/people-groups/[id]/libraries/[libraryId]/days/[dayNumber]/content/[contentId?]` for editing.
 
 **Key Changes**:
 - **From**: `content_date` (specific date, e.g., "2025-01-15")
 - **To**: `day_number` (sequential day, e.g., 1, 2, 3, 200)
-- **From**: Campaign-specific content (`/api/admin/campaigns/{id}/content`)
-- **To**: Library-specific content (`/api/admin/libraries/{id}/content`)
+- **From**: Campaign-specific content (`/api/admin/campaigns/{id}/content`) — now at `/api/admin/people-groups/{id}/content`
+- **To**: People group content (`/api/admin/people-groups/{id}/content`) and library-specific content (`/api/admin/libraries/{id}/content`)
 - **From**: Single page with language dropdown
 - **To**: Language selection on day overview page, then dedicated content editor page
 
-**Location Change**:
-- From: `/admin/campaigns/[id]/content/new.vue` and `[contentId]/edit.vue`
-- To:
-  - Day overview: `/admin/libraries/[libraryId]/days/[dayNumber]`
-  - Content editor: `/admin/libraries/[libraryId]/days/[dayNumber]/content/[contentId?]`
-
 ---
 
-## Feature 3: Global Campaign Configuration
+## Feature 3: Global People Group Configuration
 
-### 3.1 Campaign Library Configuration Page
+### 3.1 People Group Library Configuration Page
 
-**Purpose**: Define which libraries are available to all campaigns
+**Purpose**: Define which libraries are available to all people groups
 
-**Location**: New global config page (e.g., `/admin/campaign-config` or `/settings/campaigns`)
+**Location**: Global config page (`/admin/prayer-fuel-order`)
 
 **Features**:
 - Select multiple libraries
@@ -259,7 +249,7 @@ Library Order:
 **Data Structure**:
 ```typescript
 {
-  campaignLibraries: [
+  peopleGroupLibraries: [
     { libraryId: 1, order: 1 },
     { libraryId: 2, order: 2 },
     { libraryId: 3, order: 3 }
@@ -269,9 +259,9 @@ Library Order:
 
 ---
 
-## Feature 4: Campaign Content Display
+## Feature 4: People Group Content Display
 
-### 4.1 Campaign Fuel/Content Pages
+### 4.1 People Group Fuel/Content Pages
 
 **New Behavior**:
 - Display content from one or more configured libraries
@@ -281,7 +271,7 @@ Library Order:
 
 **Content Sources**:
 - Content comes from globally configured libraries
-- Campaign shows day content based on campaign timeline
+- People group shows day content based on timeline
 - Multiple libraries can contribute content for same day
 
 **UI Updates**:
@@ -292,18 +282,18 @@ Library Order:
 
 ### 4.2 Removed Features
 
-**No Longer in Campaigns**:
+**No Longer in People Groups**:
 - L Content creator/editor
 - L Add new prayer fuel
 - L Edit prayer fuel
 - L Delete prayer fuel
-- L Language management per campaign
+- Language management per people group
 
-**Retained in Campaigns**:
+**Retained in People Groups**:
 -  View content
 -  Navigate by day
 -  Filter by language
--  Campaign metadata/settings (non-content)
+-  People group metadata/settings (non-content)
 
 ---
 
@@ -334,7 +324,7 @@ Library Order:
 }
 ```
 
-#### CampaignLibraryConfig
+#### PeopleGroupLibraryConfig
 ```typescript
 {
   id: number
@@ -346,7 +336,7 @@ Library Order:
 
 ### Deprecated/Modified Tables
 
-#### Campaign Prayer Fuel (old system)
+#### Prayer Fuel (old system)
 - Mark as deprecated
 - Possibly migrate existing data to libraries
 - Remove content creation/editing references
@@ -406,19 +396,19 @@ Library Order:
 13. Clicks Save
 14. Returns to Day 50 overview page, now showing Spanish translation
 
-### Flow 4: Configure Libraries for Campaigns
+### Flow 4: Configure Libraries for People Groups
 
-1. Admin navigates to global campaign config page
+1. Admin navigates to global config page
 2. Views current library configuration
 3. Adds "Morning Prayers Library"
 4. Adds "Scripture Reflections Library"
 5. Drags to reorder (Morning Prayers = #1, Scripture = #2)
 6. Saves configuration
-7. All campaigns now use these libraries in this order
+7. All people groups now use these libraries in this order
 
-### Flow 5: View Content in Campaign
+### Flow 5: View Content for a People Group
 
-1. User views campaign content page
+1. User views people group content page
 2. Sees content from configured libraries
 3. Content is read-only
 4. Can see which library each content comes from
@@ -483,7 +473,7 @@ Library Order:
 ### Permissions
 
 - Admin-only access to library creation/editing
-- Read-only access to campaign content pages
+- Read-only access to people group content pages
 - Configurable permissions for library management
 
 ### Validation
@@ -500,21 +490,21 @@ Library Order:
 1.  Admin can create and manage centralized content libraries
 2.  Admin can easily navigate and edit content for any day (1-365+)
 3.  Admin can filter calendar view by language to find missing content
-4.  Admin can configure which libraries are used by all campaigns
-5.  Campaign content pages display library content (read-only)
-6.  No more campaign-specific content creation
-7.  System supports 2000+ campaigns without content duplication
+4.  Admin can configure which libraries are used by all people groups
+5.  People group content pages display library content (read-only)
+6.  No more people-group-specific content creation
+7.  System supports 2000+ people groups without content duplication
 8.  Clean break from old system - no backwards compatibility or migration needed
 
 ---
 
 ## Future Enhancements (Out of Scope for v1)
 
-- Campaign-specific library overrides
+- People-group-specific library overrides
 - Library templates/cloning
 - Bulk content import/export
 - Content scheduling/versioning
 - Analytics on library usage
 - Content collaboration/workflow
 - Multi-library content merging strategies
-- Content preview before assigning to campaigns
+- Content preview before assigning to people groups

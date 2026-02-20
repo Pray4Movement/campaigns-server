@@ -117,44 +117,44 @@
             />
           </div>
 
-          <!-- Campaign-specific consents -->
+          <!-- People group-specific consents -->
           <div
-            v-for="campaignGroup in data.campaigns"
-            :key="'consent-' + campaignGroup.id"
+            v-for="pgGroup in data.peopleGroups"
+            :key="'consent-' + pgGroup.id"
             class="flex items-center justify-between py-2"
           >
-            <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: campaignGroup.title }) }}</p>
+            <p class="text-sm">{{ $t('campaign.profile.emailPreferences.campaignUpdates', { campaign: pgGroup.title }) }}</p>
             <USwitch
-              :model-value="isCampaignConsented(campaignGroup.id)"
-              @update:model-value="(val) => updateCampaignConsent(campaignGroup.id, campaignGroup.slug, val)"
+              :model-value="isPeopleGroupConsented(pgGroup.id)"
+              @update:model-value="(val) => updatePeopleGroupConsent(pgGroup.id, pgGroup.slug, val)"
             />
           </div>
         </div>
       </UCard>
 
-      <!-- Campaign Subscriptions (grouped by campaign) -->
+      <!-- Subscriptions (grouped by people group) -->
       <div class="space-y-4">
         <h2 class="text-lg font-semibold flex items-center gap-2">
           <UIcon name="i-lucide-bell" class="w-5 h-5" />
           {{ $t('campaign.profile.subscriptions') }}
         </h2>
 
-        <div v-for="campaignGroup in data.campaigns" :key="campaignGroup.id">
+        <div v-for="pgGroup in data.peopleGroups" :key="pgGroup.id">
           <UCard>
             <template #header>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <span class="font-medium">{{ campaignGroup.title }}</span>
+                  <span class="font-medium">{{ pgGroup.title }}</span>
                   <UBadge
-                    v-if="campaignGroup.reminders.length > 1"
+                    v-if="pgGroup.reminders.length > 1"
                     color="neutral"
                     size="xs"
                   >
-                    {{ campaignGroup.reminders.length }} {{ $t('campaign.profile.reminders') }}
+                    {{ pgGroup.reminders.length }} {{ $t('campaign.profile.reminders') }}
                   </UBadge>
                 </div>
                 <NuxtLink
-                  :to="localePath(`/${campaignGroup.slug}`)"
+                  :to="localePath(`/${pgGroup.slug}`)"
                   class="text-xs text-[var(--ui-text-muted)] hover:underline"
                 >
                   {{ $t('campaign.profile.viewCampaign') }}
@@ -165,7 +165,7 @@
             <!-- Reminders list -->
             <div class="space-y-4">
               <div
-                v-for="(reminder, index) in campaignGroup.reminders"
+                v-for="(reminder, index) in pgGroup.reminders"
                 :key="reminder.id"
                 class="p-4 border border-[var(--ui-border)] rounded-lg"
                 :class="{ 'opacity-60': reminder.status === 'unsubscribed' }"
@@ -187,7 +187,7 @@
                       v-if="editingReminder !== reminder.id"
                       variant="ghost"
                       size="xs"
-                      @click="startEditingReminder(reminder, campaignGroup)"
+                      @click="startEditingReminder(reminder, pgGroup)"
                     >
                       <UIcon name="i-lucide-pencil" class="w-4 h-4" />
                     </UButton>
@@ -196,7 +196,7 @@
                       variant="ghost"
                       color="error"
                       size="xs"
-                      @click="confirmDeleteReminder(reminder, campaignGroup)"
+                      @click="confirmDeleteReminder(reminder, pgGroup)"
                     >
                       <UIcon name="i-lucide-trash-2" class="w-4 h-4" />
                     </UButton>
@@ -227,7 +227,7 @@
                     <UButton
                       variant="outline"
                       size="xs"
-                      @click="resubscribeReminder(reminder, campaignGroup)"
+                      @click="resubscribeReminder(reminder, pgGroup)"
                     >
                       {{ $t('campaign.profile.resubscribeButton') }}
                     </UButton>
@@ -301,7 +301,7 @@
                       {{ $t('common.cancel') }}
                     </UButton>
                     <UButton
-                      @click="saveReminder(reminder, campaignGroup)"
+                      @click="saveReminder(reminder, pgGroup)"
                       :loading="savingReminder === reminder.id"
                       size="sm"
                     >
@@ -316,13 +316,13 @@
       </div>
 
       <!-- Back Button -->
-      <div v-if="data.campaigns.length > 0" class="flex items-center justify-start pt-8">
+      <div v-if="data.peopleGroups.length > 0" class="flex items-center justify-start pt-8">
         <UButton
-          :to="localePath(`/${data.campaigns[0]?.slug}`)"
+          :to="localePath(`/${data.peopleGroups[0]?.slug}`)"
           variant="ghost"
         >
           <UIcon name="i-lucide-arrow-left" class="w-4 h-4 mr-1" />
-          {{ $t('prayerFuel.backTo', { campaign: data.campaigns[0]?.title }) }}
+          {{ $t('prayerFuel.backTo', { campaign: data.peopleGroups[0]?.title }) }}
         </UButton>
       </div>
     </div>
@@ -349,7 +349,7 @@ interface ProfileResponse {
     email_verified: boolean
     phone: string
   }
-  campaigns: Array<{
+  peopleGroups: Array<{
     id: number
     title: string
     slug: string
@@ -367,8 +367,8 @@ interface ProfileResponse {
   consents: {
     doxa_general: boolean
     doxa_general_at: string | null
-    campaigns: Array<{
-      campaign_id: number
+    peopleGroups: Array<{
+      people_group_id: number
       consented_at: string | null
     }>
   }
@@ -387,7 +387,7 @@ const globalForm = ref({
 // Consent form state
 const consentForm = ref({
   doxa_general: false,
-  campaign_ids: [] as number[]
+  people_group_ids: [] as number[]
 })
 
 // Reminder form state (for editing individual reminders)
@@ -401,7 +401,7 @@ const reminderForm = ref({
 
 // Edit state
 const editingReminder = ref<number | null>(null)
-const editingCampaignSlug = ref<string | null>(null)
+const editingPeopleGroupSlug = ref<string | null>(null)
 const savingGlobal = ref(false)
 const savingReminder = ref<number | null>(null)
 const saveSuccess = ref(false)
@@ -420,7 +420,7 @@ watch(data, (newData) => {
   if (newData?.consents) {
     consentForm.value = {
       doxa_general: newData.consents.doxa_general || false,
-      campaign_ids: (newData.consents.campaigns || []).map((c: any) => c.campaign_id)
+      people_group_ids: (newData.consents.peopleGroups || []).map((c: any) => c.people_group_id)
     }
   }
 }, { immediate: true })
@@ -482,9 +482,9 @@ function formatDaysOfWeek(days: number[]) {
   return days.map(d => dayNames[d]).join(', ')
 }
 
-function startEditingReminder(reminder: any, campaignGroup: any) {
+function startEditingReminder(reminder: any, pgGroup: any) {
   editingReminder.value = reminder.id
-  editingCampaignSlug.value = campaignGroup.slug
+  editingPeopleGroupSlug.value = pgGroup.slug
   reminderForm.value = {
     frequency: reminder.frequency,
     days_of_week: reminder.days_of_week || [],
@@ -496,7 +496,7 @@ function startEditingReminder(reminder: any, campaignGroup: any) {
 
 function cancelEditingReminder() {
   editingReminder.value = null
-  editingCampaignSlug.value = null
+  editingPeopleGroupSlug.value = null
 }
 
 async function saveGlobalSettings() {
@@ -509,7 +509,7 @@ async function saveGlobalSettings() {
       success: boolean
       email_changed: boolean
       subscriber: { id: number; profile_id: string; name: string; email: string; email_verified: boolean }
-      consents: { doxa_general: boolean; campaign_ids: number[] }
+      consents: { doxa_general: boolean; people_group_ids: number[] }
     }>(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
@@ -539,7 +539,7 @@ async function saveGlobalSettings() {
   }
 }
 
-async function saveReminder(reminder: any, campaignGroup: any) {
+async function saveReminder(reminder: any, pgGroup: any) {
   if (reminderForm.value.frequency === 'weekly' && reminderForm.value.days_of_week.length === 0) {
     saveError.value = t('campaign.signup.form.daysOfWeek.error')
     return
@@ -565,7 +565,7 @@ async function saveReminder(reminder: any, campaignGroup: any) {
     successMessage.value = t('campaign.profile.success')
     saveSuccess.value = true
     editingReminder.value = null
-    editingCampaignSlug.value = null
+    editingPeopleGroupSlug.value = null
 
     toast.add({ title: successMessage.value, color: 'success' })
 
@@ -579,13 +579,13 @@ async function saveReminder(reminder: any, campaignGroup: any) {
   }
 }
 
-async function confirmDeleteReminder(reminder: any, campaignGroup: any) {
+async function confirmDeleteReminder(reminder: any, pgGroup: any) {
   if (!confirm(t('campaign.profile.deleteReminderConfirm'))) {
     return
   }
 
   try {
-    await $fetch(`/api/campaigns/${campaignGroup.slug}/reminder/${reminder.id}`, {
+    await $fetch(`/api/people-groups/${pgGroup.slug}/reminder/${reminder.id}`, {
       method: 'DELETE',
       query: { id: profileId }
     })
@@ -604,9 +604,9 @@ async function confirmDeleteReminder(reminder: any, campaignGroup: any) {
   }
 }
 
-async function resubscribeReminder(reminder: any, campaignGroup: any) {
+async function resubscribeReminder(reminder: any, pgGroup: any) {
   try {
-    await $fetch(`/api/campaigns/${campaignGroup.slug}/resubscribe`, {
+    await $fetch(`/api/people-groups/${pgGroup.slug}/resubscribe`, {
       method: 'POST',
       body: { profile_id: profileId, subscription_id: reminder.id }
     })
@@ -625,9 +625,9 @@ async function resubscribeReminder(reminder: any, campaignGroup: any) {
   }
 }
 
-// Check if a campaign is consented
-function isCampaignConsented(campaignId: number): boolean {
-  return consentForm.value.campaign_ids.includes(campaignId)
+// Check if a people group is consented
+function isPeopleGroupConsented(peopleGroupId: number): boolean {
+  return consentForm.value.people_group_ids.includes(peopleGroupId)
 }
 
 // Update Doxa general consent
@@ -654,24 +654,24 @@ async function updateDoxaConsent(granted: boolean) {
   }
 }
 
-// Update campaign-specific consent
-async function updateCampaignConsent(campaignId: number, campaignSlug: string, granted: boolean) {
+// Update people group-specific consent
+async function updatePeopleGroupConsent(peopleGroupId: number, peopleGroupSlug: string, granted: boolean) {
   try {
     await $fetch(`/api/profile/${profileId}`, {
       method: 'PUT',
       body: {
-        consent_campaign_id: campaignId,
-        consent_campaign_updates: granted
+        consent_people_group_id: peopleGroupId,
+        consent_people_group_updates: granted
       }
     })
 
     // Update local state
     if (granted) {
-      if (!consentForm.value.campaign_ids.includes(campaignId)) {
-        consentForm.value.campaign_ids.push(campaignId)
+      if (!consentForm.value.people_group_ids.includes(peopleGroupId)) {
+        consentForm.value.people_group_ids.push(peopleGroupId)
       }
     } else {
-      consentForm.value.campaign_ids = consentForm.value.campaign_ids.filter(id => id !== campaignId)
+      consentForm.value.people_group_ids = consentForm.value.people_group_ids.filter(id => id !== peopleGroupId)
     }
 
     toast.add({
