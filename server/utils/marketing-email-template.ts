@@ -172,6 +172,7 @@ export function renderMarketingEmailHtml(
 ): string {
   const config = useRuntimeConfig()
   const appName = config.appName || 'Prayer Tools'
+  const baseUrl = config.public.siteUrl || 'http://localhost:3000'
 
   const contentHtml = tiptapToHtml(contentJson)
 
@@ -190,7 +191,8 @@ export function renderMarketingEmailHtml(
       <title>${headerTitle}</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #3B463D; background: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="background: #3B463D; color: #ffffff; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+      <img src="${baseUrl}/images/template-header-doxa.jpeg" alt="Doxa" style="width: 100%; display: block; border-radius: 10px 10px 0 0;" />
+      <div style="background: #3B463D; color: #ffffff; padding: 30px; text-align: center;">
         <h1 style="margin: 0; font-size: 28px; font-weight: 500;">${headerTitle}</h1>
       </div>
 
