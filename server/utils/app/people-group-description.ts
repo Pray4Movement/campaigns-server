@@ -110,10 +110,13 @@ export function generatePeopleGroupDescription(peopleGroup: PeopleGroupData, loc
     parts.push(getTemplate('religion', locale, { religion }))
   }
 
-  // Fifth sentence: language
-  const language = getFieldOptionLabel('imb_reg_of_language', metadata.imb_reg_of_language || '', locale) || metadata.imb_reg_of_language
-  if (language) {
-    parts.push(getTemplate('language', locale, { language }))
+  // Fifth sentence: language (skip if undetermined)
+  const languageCode = metadata.imb_reg_of_language || ''
+  if (languageCode !== 'und') {
+    const language = getFieldOptionLabel('imb_reg_of_language', languageCode, locale) || languageCode
+    if (language) {
+      parts.push(getTemplate('language', locale, { language }))
+    }
   }
 
   return parts.join(' ')
