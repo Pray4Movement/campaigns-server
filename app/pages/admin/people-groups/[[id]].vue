@@ -1,8 +1,11 @@
 <template>
   <CrmLayout :loading="loading" :error="error">
     <template #header>
-      <div>
+      <div class="flex items-center justify-between w-full">
         <h1>People Groups</h1>
+        <UDropdownMenu :items="menuItems">
+          <UButton icon="i-lucide-ellipsis-vertical" variant="ghost" color="neutral" />
+        </UDropdownMenu>
       </div>
     </template>
 
@@ -197,6 +200,16 @@ interface PeopleGroup {
 
 const route = useRoute()
 const toast = useToast()
+
+const menuItems = [[
+  {
+    label: 'Export CSV',
+    icon: 'i-lucide-download',
+    onSelect() {
+      window.open('/api/admin/people-groups/export-csv', '_blank')
+    }
+  }
+]]
 
 // Data
 const peopleGroups = ref<PeopleGroup[]>([])

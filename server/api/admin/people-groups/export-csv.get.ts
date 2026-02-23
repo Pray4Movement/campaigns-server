@@ -1,0 +1,44 @@
+import { getDatabase } from '../../../database/db'
+import { formatPeopleGroupForDetail } from '../../../utils/app/people-group-formatter'
+import { allFields } from '../../../utils/app/field-options'
+
+function escapeCsvField(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return '"' + value.replace(/"/g, '""') + '"'
+  }
+  return value
+}
+
+function flattenValue(val: unknown): string {
+  if (val === null || val === undefined) return ''
+  if (typeof val === 'object' && 'label' in (val as any)) return String((val as any).label ?? '')
+  return String(val)
+}
+
+export default defineEventHandler(async (event) => {
+  await requireAdmin(event)
+
+  const db = getDatabase()
+  const stmt = db.prepare(`
+    SELECT pg.*
+    FROM people_groups pg
+    ORDER BY pg.name
+  `)
+  const peopleGroups = await stmt.all() as any[]
+
+  const fields = ['id', 'name', 'slug', ...allFields.map(f => f.key)]
+
+  const rows = peopleGroups.map(pg => {
+    const formatted = formatPeopleGroupForDetail(pg, 'en')
+    return fields.map(key => escapeCsvField(flattenValue(formatted[key]))).join(',')
+  })
+
+  const csv = [fields.join(','), ...rows].join('\n')
+
+  setResponseHeaders(event, {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': `attachment; filename="people-groups-export-${new Date().toISOString().slice(0, 10)}.csv"`,
+  })
+
+  return csv
+})

@@ -7,6 +7,7 @@ import { getDatabase } from '../../database/db'
 import {
   formatPeopleGroupForList,
   formatPeopleGroupForListWithFields,
+  formatPeopleGroupForDetail,
   DEFAULT_LIST_FIELDS
 } from '../../utils/app/people-group-formatter'
 import { setCorsHeaders, setCacheHeaders } from '../../utils/app/cors'
@@ -23,9 +24,11 @@ export default defineEventHandler(async (event) => {
   const fieldsParam = query.fields as string | undefined
 
   // Parse requested fields
-  const requestedFields = fieldsParam
-    ? fieldsParam.split(',').map(f => f.trim()).filter(Boolean)
-    : null
+  const requestedFields = fieldsParam === 'all'
+    ? 'all' as const
+    : fieldsParam
+      ? fieldsParam.split(',').map(f => f.trim()).filter(Boolean)
+      : null
 
   const db = getDatabase()
 
@@ -42,6 +45,9 @@ export default defineEventHandler(async (event) => {
 
   // Format the response
   const posts = peopleGroups.map(pg => {
+    if (requestedFields === 'all') {
+      return formatPeopleGroupForDetail(pg, lang)
+    }
     if (requestedFields) {
       return formatPeopleGroupForListWithFields(pg, requestedFields, lang)
     }
