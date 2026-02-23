@@ -20,10 +20,12 @@ export default defineNitroPlugin((nitroApp) => {
   const drainQueue = async () => {
     if (processingStartedAt > 0 && Date.now() - processingStartedAt < 5 * 60 * 1000) return
     try {
-      while (true) {
-        processingStartedAt = Date.now()
-        const hadWork = await processJobQueue()
-        if (!hadWork) break
+      processingStartedAt = Date.now()
+      const hadWork = await processJobQueue()
+      // If there's more work, schedule the next cycle sooner (1s) so translation
+      // progress is visible in the UI between jobs
+      if (hadWork) {
+        setTimeout(drainQueue, 1000)
       }
     } catch (error: any) {
       console.error('Job processor error:', error.message)
@@ -45,6 +47,34 @@ export default defineNitroPlugin((nitroApp) => {
 })
 
 async function processJobQueue(): Promise<boolean> {
+  // Process translation jobs one at a time so the progress UI can update between jobs.
+  // Other job types (marketing emails) are batched for throughput.
+  const translationJob = await jobQueueService.getPendingJobs('translation_batch', 1)
+
+  if (translationJob.length > 0) {
+    const job = translationJob[0]!
+    console.log(`Processing translation job ${job.id}...`)
+    try {
+      await jobQueueService.markProcessing(job.id)
+      const processor = getProcessor(job.type)
+      const result = await processor(job)
+
+      if (result.success) {
+        await jobQueueService.markCompleted(job.id, result.data)
+      } else {
+        throw new Error(result.data?.error || 'Job failed')
+      }
+    } catch (error: any) {
+      const canRetry = job.attempts < job.max_attempts
+      await jobQueueService.markFailed(job.id, error.message || 'Unknown error')
+      if (canRetry) {
+        await jobQueueService.retryJob(job.id)
+      }
+    }
+    return true
+  }
+
+  // Process other job types in batches
   const batchSize = 10
   const pending = await jobQueueService.getPendingJobs(undefined, batchSize)
 
@@ -81,11 +111,6 @@ async function processJobQueue(): Promise<boolean> {
       if (job.type === 'marketing_email' && job.reference_id) {
         marketingEmailIds.add(job.reference_id)
       }
-    }
-
-    // Throttle translation batch jobs to avoid DeepL rate limits
-    if (job.type === 'translation_batch') {
-      await new Promise(resolve => setTimeout(resolve, 100))
     }
   }
 

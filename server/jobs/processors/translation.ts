@@ -36,8 +36,8 @@ export async function processBatchTranslation(job: Job): Promise<ProcessorResult
   }
 
   // Batch translate all docs at once
-  const docs = contentToTranslate.map(c => c.content_json!)
-  const translatedDocs = await batchTranslateTiptapContents(docs, payload.target_language, payload.source_language)
+  const sourceDocs = contentToTranslate.map(c => c.content_json!) as import('../../utils/deepl').TiptapNode[]
+  const { docs: translatedDocs, verseWarnings } = await batchTranslateTiptapContents(sourceDocs, payload.target_language, payload.source_language)
 
   // Bulk upsert all translated content
   const items = contentToTranslate.map((c, i) => ({
@@ -53,7 +53,8 @@ export async function processBatchTranslation(job: Job): Promise<ProcessorResult
     data: {
       target_language: payload.target_language,
       days_translated: upserted,
-      total_source_days: sourceContent.length
+      total_source_days: sourceContent.length,
+      verse_warnings: verseWarnings
     }
   }
 }

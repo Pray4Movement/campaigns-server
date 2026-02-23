@@ -207,6 +207,15 @@ class JobQueueService {
     return result.changes
   }
 
+  async deleteCompletedJobs(referenceType: string, referenceId: number): Promise<number> {
+    const stmt = this.db.prepare(`
+      DELETE FROM jobs
+      WHERE reference_type = ? AND reference_id = ? AND status IN ('completed', 'failed')
+    `)
+    const result = await stmt.run(referenceType, referenceId)
+    return result.changes
+  }
+
   async hasActiveJobs(referenceType: string, referenceId: number): Promise<boolean> {
     const stmt = this.db.prepare(`
       SELECT 1 FROM jobs

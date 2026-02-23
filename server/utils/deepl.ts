@@ -12,6 +12,12 @@ import { fetchVerseText, isBollsBibleConfigured } from './app/bolls-bible'
 // Re-export for convenience
 export const SUPPORTED_LANGUAGES = LANGUAGE_CODES
 
+export interface VerseWarning {
+  reference: string
+  language: string
+  reason: string
+}
+
 interface DeepLTranslation {
   detected_source_language: string
   text: string
@@ -140,7 +146,7 @@ export async function translateTexts(
 /**
  * Interface for Tiptap JSON node
  */
-interface TiptapNode {
+export interface TiptapNode {
   type: string
   content?: TiptapNode[]
   text?: string
@@ -200,7 +206,7 @@ export async function translateTiptapContent(
   contentJson: TiptapNode,
   targetLanguage: string,
   sourceLanguage?: string
-): Promise<TiptapNode> {
+): Promise<{ doc: TiptapNode; verseWarnings: VerseWarning[] }> {
   // Deep clone the content to avoid mutating the original
   const cloned: TiptapNode = JSON.parse(JSON.stringify(contentJson))
 
@@ -218,9 +224,10 @@ export async function translateTiptapContent(
   }
 
   // Handle verse nodes: fetch from Bible Brain in the target language
-  await translateVerseNodes(cloned, targetLanguage)
+  const verseWarnings: VerseWarning[] = []
+  await translateVerseNodes(cloned, targetLanguage, verseWarnings)
 
-  return cloned
+  return { doc: cloned, verseWarnings }
 }
 
 /**
@@ -234,7 +241,7 @@ export async function batchTranslateTiptapContents(
   docs: TiptapNode[],
   targetLanguage: string,
   sourceLanguage?: string
-): Promise<TiptapNode[]> {
+): Promise<{ docs: TiptapNode[]; verseWarnings: VerseWarning[] }> {
   const skipNodes = new Set(['verse'])
 
   // Deep clone all docs
@@ -276,11 +283,12 @@ export async function batchTranslateTiptapContents(
   }
 
   // Handle verse nodes in each doc
+  const verseWarnings: VerseWarning[] = []
   for (const doc of clonedDocs) {
-    await translateVerseNodes(doc, targetLanguage)
+    await translateVerseNodes(doc, targetLanguage, verseWarnings)
   }
 
-  return clonedDocs
+  return { docs: clonedDocs, verseWarnings }
 }
 
 /**
@@ -288,7 +296,7 @@ export async function batchTranslateTiptapContents(
  * in the target language. If fetching fails or no bibleId is configured,
  * the verse content is left untouched.
  */
-async function translateVerseNodes(node: TiptapNode, targetLanguage: string): Promise<void> {
+async function translateVerseNodes(node: TiptapNode, targetLanguage: string, warnings: VerseWarning[]): Promise<void> {
   if (!node.content) return
 
   for (const child of node.content) {
@@ -298,13 +306,17 @@ async function translateVerseNodes(node: TiptapNode, targetLanguage: string): Pr
 
       const bibleId = getBibleId(targetLanguage)
       if (!isBollsBibleConfigured(bibleId)) {
-        console.warn(`[Bolls Bible] No bibleId configured for language "${targetLanguage}", skipping verse translation`)
+        const reason = `No Bible translation configured for "${targetLanguage}"`
+        console.warn(`[Bolls Bible] ${reason}`)
+        warnings.push({ reference, language: targetLanguage, reason })
         continue
       }
 
       const parsed = parseReference(reference)
       if (!parsed) {
-        console.warn(`[Bolls Bible] Could not parse reference "${reference}", skipping`)
+        const reason = `Could not parse reference "${reference}"`
+        console.warn(`[Bolls Bible] ${reason}`)
+        warnings.push({ reference, language: targetLanguage, reason })
         continue
       }
 
@@ -321,11 +333,13 @@ async function translateVerseNodes(node: TiptapNode, targetLanguage: string): Pr
           type: 'paragraph',
           content: [{ type: 'text', text }]
         }]
-      } catch (e) {
-        console.warn(`[Bolls Bible] Failed to fetch verse "${reference}" for language "${targetLanguage}":`, e)
+      } catch (e: any) {
+        const reason = e?.message || 'Unknown error'
+        console.warn(`[Bolls Bible] Failed to fetch verse "${reference}" for "${targetLanguage}": ${reason}`)
+        warnings.push({ reference, language: targetLanguage, reason })
       }
     } else {
-      await translateVerseNodes(child, targetLanguage)
+      await translateVerseNodes(child, targetLanguage, warnings)
     }
   }
 }

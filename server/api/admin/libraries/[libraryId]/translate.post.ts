@@ -51,6 +51,9 @@ export default defineEventHandler(async (event) => {
   // Determine target languages (all except source)
   const targetLanguages = SUPPORTED_LANGUAGES.filter(lang => lang !== sourceLanguage)
 
+  // Clean up old jobs from previous translation runs
+  await jobQueueService.deleteCompletedJobs('library_translation', libraryId)
+
   // Create one batch job per target language
   let jobCount = 0
 

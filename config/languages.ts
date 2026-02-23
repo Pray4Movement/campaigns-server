@@ -15,7 +15,7 @@ export interface Language {
 // Enable/disable languages by commenting/uncommenting entries
 export const LANGUAGES: Language[] = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', deeplTarget: 'EN', deeplSource: 'EN', bibleId: 'NKJV' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', deeplTarget: 'ES', deeplSource: 'ES', bibleId: 'RV1960' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', deeplTarget: 'ES', deeplSource: 'ES', bibleId: 'NVI' }, //RV1960
   { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', deeplTarget: 'FR', deeplSource: 'FR', bibleId: 'BDS' },
   { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹', deeplTarget: 'PT-BR', deeplSource: 'PT', bibleId: 'NAA' },
   // { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', deeplTarget: 'DE', deeplSource: 'DE', bibleId: 'S00' },

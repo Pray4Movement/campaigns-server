@@ -4,8 +4,13 @@
  */
 import { peopleGroupService } from '#server/database/people-groups'
 import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
+import { generatePeopleGroupDescription } from '../../utils/app/people-group-description'
 
 export default defineEventHandler(async (event) => {
+  const query = getQuery(event)
+  const acceptLanguage = getHeader(event, 'accept-language')
+  const locale = (query.locale as string) || acceptLanguage?.split(',')[0]?.split('-')[0] || 'en'
+
   const peopleGroups = await peopleGroupService.getAllPeopleGroups()
 
   // Get commitment stats for all people groups
@@ -14,6 +19,9 @@ export default defineEventHandler(async (event) => {
 
   const enrichedPeopleGroups = peopleGroups.map((pg) => {
     const stats = commitmentStats.get(pg.id) || { people_committed: 0, committed_duration: 0 }
+    const metadata = pg.metadata ? JSON.parse(pg.metadata) : {}
+    const descriptions = pg.descriptions ? (typeof pg.descriptions === 'string' ? JSON.parse(pg.descriptions) : pg.descriptions) : null
+    const description = generatePeopleGroupDescription({ name: pg.name, descriptions, metadata }, locale)
     return {
       id: pg.id,
       slug: pg.slug,
@@ -24,6 +32,7 @@ export default defineEventHandler(async (event) => {
       image_url: pg.image_url,
       people_committed: stats.people_committed,
       committed_duration: stats.committed_duration,
+      description,
       created_at: pg.created_at,
       updated_at: pg.updated_at
     }

@@ -121,11 +121,15 @@ export default defineEventHandler(async (event) => {
       }
 
       // Translate the content (cast to expected type since we validated it exists)
-      const translatedJson = await translateTiptapContent(
+      const { doc: translatedJson, verseWarnings } = await translateTiptapContent(
         sourceContent.content_json as Parameters<typeof translateTiptapContent>[0],
         targetLanguage,
         sourceLanguage
       )
+
+      if (verseWarnings.length > 0) {
+        console.warn(`[Translate] ${verseWarnings.length} verse warning(s) for ${targetLanguage}:`, verseWarnings)
+      }
 
       let savedContent
       if (existingContent) {

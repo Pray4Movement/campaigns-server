@@ -22,9 +22,21 @@ export default defineEventHandler(async (event) => {
   const stats = await jobQueueService.getJobStats('library_translation', libraryId)
   const isComplete = await jobQueueService.isComplete('library_translation', libraryId)
 
+  // Collect verse warnings from completed jobs
+  let verseWarnings: Array<{ reference: string; language: string; reason: string }> = []
+  if (isComplete) {
+    const jobs = await jobQueueService.getJobsByReference('library_translation', libraryId)
+    for (const job of jobs) {
+      if (job.result?.verse_warnings) {
+        verseWarnings.push(...job.result.verse_warnings)
+      }
+    }
+  }
+
   return {
     libraryId,
     ...stats,
-    isComplete
+    isComplete,
+    verseWarnings
   }
 })

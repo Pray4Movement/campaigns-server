@@ -107,8 +107,9 @@ const overwrite = ref(false)
 // Reset state when modal opens
 watch(() => props.open, (newVal) => {
   if (newVal) {
-    // Default to first available language (usually English)
-    sourceLanguage.value = props.availableLanguages[0] || ''
+    sourceLanguage.value = props.availableLanguages.includes('en')
+      ? 'en'
+      : props.availableLanguages[0] || ''
     overwrite.value = false
   }
 })

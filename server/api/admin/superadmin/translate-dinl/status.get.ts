@@ -23,10 +23,21 @@ export default defineEventHandler(async (event) => {
     const stats = await jobQueueService.getJobStats('bulk_dinl', batchId)
     const isComplete = await jobQueueService.isComplete('bulk_dinl', batchId)
 
+    let verseWarnings: Array<{ reference: string; language: string; reason: string }> = []
+    if (isComplete) {
+      const jobs = await jobQueueService.getJobsByReference('bulk_dinl', batchId)
+      for (const job of jobs) {
+        if (job.result?.verse_warnings) {
+          verseWarnings.push(...job.result.verse_warnings)
+        }
+      }
+    }
+
     return {
       batchId,
       ...stats,
-      isComplete
+      isComplete,
+      verseWarnings
     }
   } catch (error) {
     handleApiError(error, 'Failed to get translation status')
