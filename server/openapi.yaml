@@ -41,36 +41,6 @@ paths:
                     items:
                       $ref: '#/components/schemas/Campaign'
 
-  /api/people-groups/{slug}:
-    get:
-      tags:
-        - Campaigns
-      summary: Get campaign by slug
-      description: Returns details for a specific active campaign
-      operationId: getCampaignBySlug
-      parameters:
-        - name: slug
-          in: path
-          required: true
-          description: People group slug identifier
-          schema:
-            type: string
-          example: 40-days-of-prayer
-      responses:
-        '200':
-          description: Successfully retrieved people group
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  people_group:
-                    $ref: '#/components/schemas/Campaign'
-        '400':
-          description: People group slug is required
-        '404':
-          description: People group not found or not active
-
   /api/people-groups/{slug}/signup:
     post:
       tags:
@@ -359,8 +329,9 @@ paths:
     get:
       tags:
         - People Groups
+        - Campaigns
       summary: Get people group by slug
-      description: Returns detailed information for a single people group with all fields and translated labels.
+      description: Returns detailed information for a single people group with all fields, translated labels, commitment statistics, and global campaign start date.
       operationId: getPeopleGroupBySlug
       parameters:
         - name: slug
@@ -370,10 +341,10 @@ paths:
           schema:
             type: string
           example: shaikh-bangladesh
-        - name: lang
+        - name: locale
           in: query
           required: false
-          description: Language code for translated labels
+          description: Language code for translated labels (also supports legacy 'lang' param and Accept-Language header)
           schema:
             type: string
             enum: [en, es, fr, pt, de, it, zh, ar, ru, hi]
@@ -599,7 +570,7 @@ components:
 
     PeopleGroupDetail:
       type: object
-      description: Full detail for a people group with all fields
+      description: Full detail for a people group with all fields, commitment stats, and global start date
       properties:
         id:
           type: string
@@ -613,6 +584,17 @@ components:
           type: string
           nullable: true
           format: uri
+        picture_credit:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              link:
+                type: string
+                nullable: true
         population:
           type: integer
           nullable: true
@@ -620,6 +602,17 @@ components:
           type: integer
         adopted_by_churches:
           type: integer
+        people_committed:
+          type: integer
+          description: Total number of active prayer commitments
+        committed_duration:
+          type: integer
+          description: Total committed prayer minutes across active subscriptions
+        global_start_date:
+          type: string
+          format: date
+          nullable: true
+          description: Global campaign start date (YYYY-MM-DD)
         imb_display_name:
           type: string
           nullable: true
@@ -632,6 +625,7 @@ components:
         imb_people_description:
           type: string
           nullable: true
+          description: Generated description from template interpolation
         imb_location_description:
           type: string
           nullable: true

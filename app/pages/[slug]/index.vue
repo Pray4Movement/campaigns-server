@@ -11,7 +11,7 @@
       <UButton to="/">{{ $t('campaign.notFound.goHome') }}</UButton>
     </div>
 
-    <div v-else-if="pgData" class="people-group-content">
+    <div v-else-if="pg" class="people-group-content">
 
       <!-- Sign Up CTA -->
       <div class="max-w-5xl mx-auto px-4 pt-6 flex justify-center">
@@ -25,20 +25,20 @@
       </div>
 
       <!-- People Group Section -->
-      <section v-if="peopleGroup" class="py-12 bg-default">
+      <section class="py-12 bg-default">
         <div class="max-w-5xl mx-auto px-4 space-y-8">
 
           <!-- Header: Image, Name, Description -->
           <div class="flex flex-col sm:flex-row gap-6 items-start">
             <!-- Image -->
-            <div v-if="peopleGroup.image_url" class="shrink-0 w-50 mx-auto sm:mx-0">
+            <div v-if="pg.image_url" class="shrink-0 w-50 mx-auto sm:mx-0">
               <img
-                :src="peopleGroup.image_url"
-                :alt="peopleGroup.name"
+                :src="pg.image_url"
+                :alt="pg.name"
                 class="w-full aspect-square object-cover rounded-lg shadow-md"
               />
-              <p v-if="peopleGroup.metadata?.picture_credit" class="mt-1 text-xs text-muted text-center">
-                <template v-for="(seg, i) in peopleGroup.metadata.picture_credit" :key="i">
+              <p v-if="pg.picture_credit" class="mt-1 text-xs text-muted text-center">
+                <template v-for="(seg, i) in (pg.picture_credit as any[])" :key="i">
                   <a v-if="seg.link" :href="seg.link" target="_blank" rel="noopener noreferrer" class="underline">{{ seg.text }}</a>
                   <span v-else>{{ seg.text }}</span>
                 </template>
@@ -48,10 +48,10 @@
             <!-- Name & Description -->
             <div class="flex-1 text-center sm:text-left">
               <h2 class="text-2xl md:text-3xl font-bold text-default mb-4">
-                {{ peopleGroup.name }}
+                {{ pg.name }}
               </h2>
-              <p v-if="peopleGroup.generatedDescription" class="text-muted leading-relaxed mb-4">
-                {{ peopleGroup.generatedDescription }}
+              <p v-if="pg.imb_people_description" class="text-muted leading-relaxed mb-4">
+                {{ pg.imb_people_description }}
               </p>
               <UButton
                 :href="`https://doxa.life/research/${slug}/`"
@@ -70,10 +70,10 @@
           <div class="grid md:grid-cols-3 gap-6">
 
             <!-- Map -->
-            <div v-if="peopleGroup.metadata?.imb_lat && peopleGroup.metadata?.imb_lng" class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden md:order-3">
+            <div v-if="pg.imb_lat && pg.imb_lng" class="bg-beige-100 dark:bg-elevated rounded-2xl overflow-hidden md:order-3">
               <div class="relative h-full min-h-48">
                 <iframe
-                  :src="`https://www.openstreetmap.org/export/embed.html?bbox=${Number(peopleGroup.metadata.imb_lng) - 10},${Number(peopleGroup.metadata.imb_lat) - 10},${Number(peopleGroup.metadata.imb_lng) + 10},${Number(peopleGroup.metadata.imb_lat) + 10}&layer=mapnik&marker=${peopleGroup.metadata.imb_lat},${peopleGroup.metadata.imb_lng}`"
+                  :src="`https://www.openstreetmap.org/export/embed.html?bbox=${Number(pg.imb_lng) - 10},${Number(pg.imb_lat) - 10},${Number(pg.imb_lng) + 10},${Number(pg.imb_lat) + 10}&layer=mapnik&marker=${pg.imb_lat},${pg.imb_lng}`"
                   class="absolute inset-0 w-full h-full border-0"
                   loading="lazy"
                 ></iframe>
@@ -86,35 +86,35 @@
             <div class="bg-beige-100 dark:bg-elevated rounded-2xl p-6 md:order-2">
               <h3 class="font-bold text-default uppercase tracking-wide text-center mb-4">{{ $t('campaign.peopleGroup.overview.title') }}</h3>
               <div class="space-y-3 text-sm">
-                <div v-if="peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata?.imb_isoalpha3" class="flex items-center gap-2">
+                <div v-if="pg.imb_isoalpha3" class="flex items-center gap-2">
                   <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-muted" />
                   <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.country') }}</span>
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_isoalpha3 || peopleGroup.metadata.imb_isoalpha3 }}</span>
+                  <span class="text-muted">{{ (pg.imb_isoalpha3 as any).label || (pg.imb_isoalpha3 as any).value }}</span>
                 </div>
-                <div v-if="peopleGroup.metadata?.imb_population" class="flex items-center gap-2">
+                <div v-if="pg.population" class="flex items-center gap-2">
                   <UIcon name="i-lucide-users" class="w-4 h-4 text-muted" />
                   <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.population') }}</span>
-                  <span class="text-muted">{{ Number(peopleGroup.metadata.imb_population).toLocaleString() }}</span>
+                  <span class="text-muted">{{ Number(pg.population).toLocaleString() }}</span>
                 </div>
-                <div v-if="peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata?.imb_reg_of_language" class="flex items-center gap-2">
+                <div v-if="pg.imb_reg_of_language" class="flex items-center gap-2">
                   <UIcon name="i-lucide-languages" class="w-4 h-4 text-muted" />
                   <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.language') }}</span>
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_language || peopleGroup.metadata.imb_reg_of_language }}</span>
+                  <span class="text-muted">{{ (pg.imb_reg_of_language as any).label || (pg.imb_reg_of_language as any).value }}</span>
                 </div>
-                <div v-if="peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata?.imb_reg_of_religion" class="flex items-center gap-2">
+                <div v-if="pg.imb_reg_of_religion || pg.imb_reg_of_religion_3" class="flex items-center gap-2">
                   <UIcon name="i-lucide-flame" class="w-4 h-4 text-muted" />
                   <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.religion') }}</span>
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_reg_of_religion || peopleGroup.labels?.imb_reg_of_religion_3 || peopleGroup.metadata.imb_reg_of_religion }}</span>
+                  <span class="text-muted">{{ (pg.imb_reg_of_religion as any)?.label || (pg.imb_reg_of_religion_3 as any)?.label || (pg.imb_reg_of_religion as any)?.value }}</span>
                 </div>
-                <div v-if="peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata?.imb_engagement_status" class="flex items-center gap-2">
+                <div v-if="pg.imb_engagement_status" class="flex items-center gap-2">
                   <UIcon name="i-lucide-target" class="w-4 h-4 text-muted" />
                   <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.status') }}</span>
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_engagement_status || peopleGroup.metadata.imb_engagement_status }}</span>
+                  <span class="text-muted">{{ (pg.imb_engagement_status as any).label || (pg.imb_engagement_status as any).value }}</span>
                 </div>
-                <div v-if="peopleGroup.labels?.imb_congregation_existing || peopleGroup.metadata?.imb_congregation_existing !== undefined" class="flex items-center gap-2">
+                <div v-if="pg.imb_congregation_existing" class="flex items-center gap-2">
                   <UIcon name="i-lucide-church" class="w-4 h-4 text-muted" />
                   <span class="font-medium text-default">{{ $t('campaign.peopleGroup.overview.churches') }}</span>
-                  <span class="text-muted">{{ peopleGroup.labels?.imb_congregation_existing || (peopleGroup.metadata.imb_congregation_existing === '1' || peopleGroup.metadata.imb_congregation_existing === 1 ? $t('common.yes') : $t('common.no')) }}</span>
+                  <span class="text-muted">{{ (pg.imb_congregation_existing as any).label || (pg.imb_congregation_existing as any).value }}</span>
                 </div>
               </div>
             </div>
@@ -124,7 +124,7 @@
               <h3 class="font-bold uppercase tracking-wide text-center mb-4">{{ $t('campaign.peopleGroup.prayerStatus.title') }}</h3>
               <div class="text-center">
                 <div class="text-5xl font-bold mb-2">
-                  {{ pgData.people_praying || 0 }} / {{ PRAYER_GOAL }}
+                  {{ pg.people_praying || 0 }} / {{ PRAYER_GOAL }}
                 </div>
                 <p class="text-sage-200 text-sm mb-6">
                   {{ $t('campaign.peopleGroup.prayerStatus.description') }}
@@ -133,7 +133,7 @@
                 <div class="w-full bg-forest-600 rounded-full h-3">
                   <div
                     class="bg-sage-300 h-3 rounded-full transition-all duration-500"
-                    :style="{ width: `${Math.min(((pgData.people_praying || 0) / PRAYER_GOAL) * 100, 100)}%` }"
+                    :style="{ width: `${Math.min(((pg.people_praying || 0) / PRAYER_GOAL) * 100, 100)}%` }"
                   ></div>
                 </div>
               </div>
@@ -199,7 +199,7 @@
                   <div>
                     <h3 class="text-base font-semibold text-default mb-2 flex items-center gap-2">
                       <UIcon name="i-lucide-users" class="w-4 h-4 text-forest-500" />
-                      {{ peopleGroup?.name || $t('campaign.sampleContent.peopleGroupName') }}
+                      {{ pg?.name || $t('campaign.sampleContent.peopleGroupName') }}
                     </h3>
                     <div class="space-y-2">
                       <div class="h-3 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -407,7 +407,7 @@
                   </p>
                   <UCheckbox
                     v-model="signupForm.consent_people_group_updates"
-                    :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: pgData?.title })"
+                    :label="$t('campaign.signup.form.consent.campaignUpdates', { campaign: pg?.name })"
                   />
                   <UCheckbox v-model="signupForm.consent_doxa_general">
                     <template #label>
@@ -446,7 +446,7 @@
             <h2 class="text-2xl font-bold uppercase tracking-wide mb-3">{{ $t('campaign.prayerFuel.title') }}</h2>
             <p class="text-sage-200 mb-6">{{ $t('campaign.prayerFuel.description') }}</p>
             <UButton
-              :to="localePath(`/${pgData.slug}/prayer`)"
+              :to="localePath(`/${pg.slug}/prayer`)"
               size="lg"
               class="rounded-full px-8"
             >
@@ -508,32 +508,30 @@
 </template>
 
 <script setup lang="ts">
-// Type definitions for API response
-interface PeopleGroupResponse {
-  people_group: {
-    id: number
-    slug: string
-    title: string
-    dt_id: string | null
-    people_praying: number
-    daily_prayer_duration: number
-    people_committed: number
-    committed_duration: number
-    created_at: string
-    updated_at: string
-  }
-  peopleGroup: {
-    id: number
-    dt_id: string
-    name: string
-    image_url: string | null
-    metadata: Record<string, any>
-    labels: Record<string, string | null>
-    generatedDescription: string
-    created_at: string
-    updated_at: string
-  } | null
-  globalStartDate: string | null
+// Type definitions for API response (flat detail format)
+interface PeopleGroupDetailResponse {
+  id: string
+  name: string
+  slug: string
+  display_name: string
+  image_url: string | null
+  picture_credit: { text: string; link?: string }[] | null
+  population: number | null
+  people_praying: number
+  people_committed: number
+  committed_duration: number
+  global_start_date: string | null
+  imb_people_description: string | null
+  imb_isoalpha3: { value: string; label: string } | null
+  imb_lat: string | null
+  imb_lng: string | null
+  imb_population: string | null
+  imb_reg_of_language: { value: string; label: string } | null
+  imb_reg_of_religion: { value: string; label: string; description?: string } | null
+  imb_reg_of_religion_3: { value: string; label: string; description?: string } | null
+  imb_engagement_status: { value: string; label: string } | null
+  imb_congregation_existing: { value: string; label: string } | null
+  [key: string]: unknown
 }
 
 definePageMeta({
@@ -546,19 +544,15 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 // Fetch people group data with locale for translated labels
-const { data, pending, error } = await useFetch<PeopleGroupResponse>(`/api/people-groups/${slug}`, {
+const { data: pg, pending, error } = await useFetch<PeopleGroupDetailResponse>(`/api/people-groups/detail/${slug}`, {
   query: { locale },
   watch: [locale]
 })
-const pgData = computed(() => data.value?.people_group)
-const peopleGroup = computed(() => data.value?.peopleGroup)
-const globalStartDate = computed(() => data.value?.globalStartDate)
 
 // Check if the start date is in the future
 const isStartDateFuture = computed(() => {
-  if (!globalStartDate.value) return false
-  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
-  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  if (!pg.value?.global_start_date) return false
+  const [year, month, day] = pg.value.global_start_date.split('-').map(Number)
   const startDate = new Date(year!, month! - 1, day!)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -567,9 +561,8 @@ const isStartDateFuture = computed(() => {
 
 // Format the start date for display
 const formattedStartDate = computed(() => {
-  if (!globalStartDate.value) return ''
-  // Parse as local date to avoid timezone issues (YYYY-MM-DD format)
-  const [year, month, day] = globalStartDate.value.split('-').map(Number)
+  if (!pg.value?.global_start_date) return ''
+  const [year, month, day] = pg.value.global_start_date.split('-').map(Number)
   const startDate = new Date(year!, month! - 1, day!)
   return startDate.toLocaleDateString(locale.value, {
     weekday: 'long',
@@ -584,21 +577,21 @@ const { setPeopleGroupTitle } = usePeopleGroup()
 
 // Set people group title on mount (handles cached data from navigation)
 onMounted(() => {
-  if (pgData.value?.title) {
-    setPeopleGroupTitle(pgData.value.title)
+  if (pg.value?.name) {
+    setPeopleGroupTitle(pg.value.name)
   }
 })
 
 // Dynamic prayer goal - starts at 144, then increases to 1000 once reached
 const PRAYER_GOAL = computed(() => {
-  const peoplePraying = pgData.value?.people_praying || 0
+  const peoplePraying = pg.value?.people_praying || 0
   return peoplePraying >= 144 ? 1000 : 144
 })
 
 // Set people group title when loaded
-watch(pgData, (newPgData) => {
-  if (newPgData?.title) {
-    setPeopleGroupTitle(newPgData.title)
+watch(pg, (newPg) => {
+  if (newPg?.name) {
+    setPeopleGroupTitle(newPg.name)
   }
 }, { immediate: true })
 
@@ -742,7 +735,7 @@ async function handleSignup() {
 
 // Set page title
 useHead(() => ({
-  title: pgData.value ? `${pgData.value.title} - ${t('app.title')}` : `${t('campaign.pageTitle')} - ${t('app.title')}`
+  title: pg.value ? `${pg.value.name} - ${t('app.title')}` : `${t('campaign.pageTitle')} - ${t('app.title')}`
 }))
 </script>
 

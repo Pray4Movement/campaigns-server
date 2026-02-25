@@ -52,10 +52,10 @@ const { locale } = useI18n()
 const currentDay = ref(1)
 const globalStartDate = ref<string | null>(null)
 
-const { data: peopleGroupData } = await useFetch('/api/people-groups/zuara')
+const { data: peopleGroupData } = await useFetch('/api/people-groups/detail/zuara')
 
 if (peopleGroupData.value) {
-  globalStartDate.value = peopleGroupData.value.globalStartDate
+  globalStartDate.value = (peopleGroupData.value as any).global_start_date
 }
 
 const contentDate = computed(() => {

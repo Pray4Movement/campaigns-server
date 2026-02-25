@@ -282,8 +282,8 @@ export function formatPeopleGroupForDetail(pg: PeopleGroupRecord, lang: string =
   for (const fieldDef of allFields) {
     const key = fieldDef.key
 
-    // Skip fields we've already handled
-    if (['name', 'image_url', 'imb_picture_credit_html'].includes(key)) continue
+    // Skip fields we've already handled or don't want in the response
+    if (['name', 'image_url', 'imb_picture_credit_html', 'descriptions', 'dt_id', 'doxa_masteruid'].includes(key)) continue
 
     // Handle special fields
     if (key === 'imb_people_description') {
@@ -292,11 +292,6 @@ export function formatPeopleGroupForDetail(pg: PeopleGroupRecord, lang: string =
         descriptions: pg.descriptions,
         metadata: meta as any
       }, lang)
-      continue
-    }
-
-    if (key === 'descriptions') {
-      result[key] = pg.descriptions?.[lang] || pg.descriptions?.['en'] || null
       continue
     }
 
