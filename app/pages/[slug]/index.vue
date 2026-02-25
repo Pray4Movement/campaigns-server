@@ -37,6 +37,12 @@
                 :alt="peopleGroup.name"
                 class="w-full aspect-square object-cover rounded-lg shadow-md"
               />
+              <p v-if="peopleGroup.metadata?.picture_credit" class="mt-1 text-xs text-muted text-center">
+                <template v-for="(seg, i) in peopleGroup.metadata.picture_credit" :key="i">
+                  <a v-if="seg.link" :href="seg.link" target="_blank" rel="noopener noreferrer" class="underline">{{ seg.text }}</a>
+                  <span v-else>{{ seg.text }}</span>
+                </template>
+              </p>
             </div>
 
             <!-- Name & Description -->

@@ -163,6 +163,7 @@ export function formatPeopleGroupForList(pg: PeopleGroupRecord, lang: string = '
     has_photo: meta.imb_has_photo === 'yes' || meta.imb_has_photo === true || !!pg.image_url,
     picture_url: pg.image_url || meta.imb_picture_url || null,
     picture_credit_html: meta.imb_picture_credit_html || null,
+    picture_credit: meta.picture_credit || null,
     people_praying: pg.total_people_praying || 0,
     adopted_by_churches: 0
   }
@@ -226,6 +227,9 @@ export function formatPeopleGroupForListWithFields(
       case 'picture_credit_html':
         result.picture_credit_html = meta.imb_picture_credit_html || null
         break
+      case 'picture_credit':
+        result.picture_credit = meta.picture_credit || null
+        break
       case 'people_praying':
         result.people_praying = pg.total_people_praying || 0
         break
@@ -268,6 +272,7 @@ export function formatPeopleGroupForDetail(pg: PeopleGroupRecord, lang: string =
     slug: pg.slug || pg.dt_id,
     display_name: meta.imb_display_name || pg.name,
     image_url: pg.image_url,
+    picture_credit: meta.picture_credit || null,
     population: pg.population,
     people_praying: pg.total_people_praying || 0,
     adopted_by_churches: 0
@@ -278,7 +283,7 @@ export function formatPeopleGroupForDetail(pg: PeopleGroupRecord, lang: string =
     const key = fieldDef.key
 
     // Skip fields we've already handled
-    if (['name', 'image_url'].includes(key)) continue
+    if (['name', 'image_url', 'imb_picture_credit_html'].includes(key)) continue
 
     // Handle special fields
     if (key === 'imb_people_description') {

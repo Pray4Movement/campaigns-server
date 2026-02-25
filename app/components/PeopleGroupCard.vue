@@ -11,6 +11,7 @@ interface PeopleGroupData {
   country: string | null
   lat: number | null
   lng: number | null
+  picture_credit: Array<{ text: string; link: string | null }> | null
 }
 
 const props = defineProps<{
@@ -47,6 +48,12 @@ const mapEmbedUrl = computed(() => {
               :alt="peopleGroup.name"
               class="people-group-image"
             />
+            <p v-if="peopleGroup.picture_credit" class="mt-1 text-xs text-muted text-center">
+              <template v-for="(seg, i) in peopleGroup.picture_credit" :key="i">
+                <a v-if="seg.link" :href="seg.link" target="_blank" rel="noopener noreferrer" class="underline">{{ seg.text }}</a>
+                <span v-else>{{ seg.text }}</span>
+              </template>
+            </p>
           </div>
 
           <div class="header-content">

@@ -16,6 +16,7 @@ export interface PeopleGroupData {
   country: string | null
   lat: number | null
   lng: number | null
+  picture_credit: Array<{ text: string; link: string | null }> | null
 }
 
 export interface PrayerContent {
@@ -267,6 +268,7 @@ export class PrayerContentService {
     let country: string | null = null
     let lat: number | null = null
     let lng: number | null = null
+    let pictureCredit: Array<{ text: string; link: string | null }> | null = null
 
     if (peopleGroup.metadata) {
       try {
@@ -291,6 +293,8 @@ export class PrayerContentService {
         // Extract coordinates
         lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
         lng = metadata.imb_lng ? parseFloat(metadata.imb_lng) : null
+
+        pictureCredit = metadata.picture_credit || null
       } catch (e) {
         // Ignore parse errors
       }
@@ -315,7 +319,8 @@ export class PrayerContentService {
         religion,
         country,
         lat,
-        lng
+        lng,
+        picture_credit: pictureCredit
       },
       created_at: now,
       updated_at: now
@@ -357,6 +362,7 @@ export class PrayerContentService {
     let country: string | null = null
     let lat: number | null = null
     let lng: number | null = null
+    let pictureCredit: Array<{ text: string; link: string | null }> | null = null
 
     if (peopleGroup.metadata) {
       try {
@@ -381,6 +387,8 @@ export class PrayerContentService {
         // Extract coordinates
         lat = metadata.imb_lat ? parseFloat(metadata.imb_lat) : null
         lng = metadata.imb_lng ? parseFloat(metadata.imb_lng) : null
+
+        pictureCredit = metadata.picture_credit || null
       } catch (e) {
         // Ignore parse errors
       }
@@ -405,7 +413,8 @@ export class PrayerContentService {
         religion,
         country,
         lat,
-        lng
+        lng,
+        picture_credit: pictureCredit
       },
       created_at: now,
       updated_at: now
