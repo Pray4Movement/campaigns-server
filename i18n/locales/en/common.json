@@ -324,6 +324,13 @@
       "today": "Today"
     }
   },
+  "home": {
+    "subtitle": "Find a people group to pray for",
+    "searchPlaceholder": "Search people groups...",
+    "errorLoading": "Failed to load people groups. Please try again.",
+    "noResults": "No people groups found.",
+    "showingCount": "Showing {shown} of {total} people groups"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

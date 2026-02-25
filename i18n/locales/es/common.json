@@ -324,6 +324,13 @@
       "today": "Hoy"
     }
   },
+  "home": {
+    "subtitle": "Encuentra un grupo de personas por el cual orar",
+    "searchPlaceholder": "Buscar grupos de personas...",
+    "errorLoading": "Error al cargar los grupos de personas. Inténtelo de nuevo.",
+    "noResults": "No se encontraron grupos de personas.",
+    "showingCount": "Mostrando {shown} de {total} grupos de personas"
+  },
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",

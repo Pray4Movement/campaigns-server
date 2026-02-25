@@ -324,6 +324,13 @@
       "today": "Oggi"
     }
   },
+  "home": {
+    "subtitle": "Trova un gruppo di persone per cui pregare",
+    "searchPlaceholder": "Cerca gruppi di persone...",
+    "errorLoading": "Impossibile caricare i gruppi di persone. Riprova.",
+    "noResults": "Nessun gruppo di persone trovato.",
+    "showingCount": "{shown} di {total} gruppi di persone mostrati"
+  },
   "common": {
     "save": "Salva",
     "cancel": "Annulla",

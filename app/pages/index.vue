@@ -1,22 +1,23 @@
 <template>
   <div class="flex-1 flex flex-col bg-beige-50 dark:bg-elevated">
     <!-- Hero/Search Section -->
-    <section class="py-12 md:py-16">
+    <section class="pt-12 md:pt-16 pb-4">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="text-center max-w-3xl mx-auto mb-8">
+        <div class="text-center max-w-3xl mx-auto">
           <h1 class="text-3xl md:text-5xl font-bold uppercase tracking-wide mb-4">
             <span class="text-default">Doxa.</span>
             <span class="text-muted">Life</span>
           </h1>
           <p class="text-lg text-muted mb-8">
-            Find a people group to pray for
+            {{ $t('home.subtitle') }}
           </p>
           <UInput
             v-model="searchQuery"
-            placeholder="Search people groups..."
+            :placeholder="$t('home.searchPlaceholder')"
             icon="i-lucide-search"
-            size="lg"
-            class="max-w-md mx-auto"
+            size="xl"
+            class="w-full"
+            :ui="{ root: 'rounded-full', base: 'rounded-full' }"
           />
         </div>
       </div>
@@ -32,47 +33,49 @@
 
         <!-- Error State -->
         <div v-else-if="error" class="text-center py-12">
-          <p class="text-muted">Failed to load people groups. Please try again.</p>
+          <p class="text-muted">{{ $t('home.errorLoading') }}</p>
         </div>
 
         <!-- No Results -->
         <div v-else-if="filteredPeopleGroups.length === 0" class="text-center py-12">
-          <p class="text-muted">No people groups found.</p>
+          <p class="text-muted">{{ $t('home.noResults') }}</p>
         </div>
 
         <!-- Results count -->
         <p v-if="filteredPeopleGroups.length > 0" class="text-sm text-muted mb-4">
-          Showing {{ paginatedPeopleGroups.length }} of {{ filteredPeopleGroups.length }} people groups
+          {{ $t('home.showingCount', { shown: paginatedPeopleGroups.length, total: filteredPeopleGroups.length }) }}
         </p>
 
         <!-- People Group Cards -->
-        <div v-if="filteredPeopleGroups.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="filteredPeopleGroups.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <NuxtLink
             v-for="pg in paginatedPeopleGroups"
             :key="pg.slug"
             :to="`/${pg.slug}`"
             class="block group"
           >
-            <UCard class="h-full transition-shadow hover:shadow-lg">
-              <template #header>
-                <div class="aspect-square bg-beige-100 dark:bg-gray-800 rounded-t-lg overflow-hidden -mx-4 -mt-4">
+            <UCard class="h-full shadow-sm hover:shadow-lg transition-shadow overflow-hidden" :ui="{ body: 'p-0 sm:p-0' }">
+              <div class="flex h-28">
+                <div class="w-28 shrink-0 bg-beige-100 dark:bg-gray-800 overflow-hidden">
                   <img
                     v-if="pg.image_url"
                     :src="pg.image_url"
                     :alt="pg.name"
-                    class="w-full h-full object-contain"
+                    class="w-full h-full object-cover"
                   />
                   <div v-else class="w-full h-full flex items-center justify-center">
-                    <UIcon name="i-lucide-image" class="w-12 h-12 text-muted" />
+                    <UIcon name="i-lucide-image" class="w-8 h-8 text-muted" />
                   </div>
                 </div>
-              </template>
-              <h3 class="text-lg font-semibold text-default mb-2">
-                {{ pg.name }}
-              </h3>
-              <p class="text-sm text-muted line-clamp-3">
-                {{ pg.imb_people_description }}
-              </p>
+                <div class="min-w-0 p-4">
+                  <h3 class="text-lg font-semibold text-default mb-1">
+                    {{ pg.name }}
+                  </h3>
+                  <p class="text-sm text-muted line-clamp-2">
+                    {{ pg.imb_people_description }}
+                  </p>
+                </div>
+              </div>
             </UCard>
           </NuxtLink>
         </div>
@@ -93,7 +96,7 @@
 <script setup lang="ts">
 const searchQuery = ref('')
 const currentPage = ref(1)
-const pageSize = 9
+const pageSize = 10
 
 const { locale } = useI18n()
 

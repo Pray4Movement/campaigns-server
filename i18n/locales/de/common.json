@@ -324,6 +324,13 @@
       "today": "Heute"
     }
   },
+  "home": {
+    "subtitle": "Finden Sie eine Volksgruppe, für die Sie beten können",
+    "searchPlaceholder": "Volksgruppen suchen...",
+    "errorLoading": "Fehler beim Laden der Volksgruppen. Bitte versuchen Sie es erneut.",
+    "noResults": "Keine Volksgruppen gefunden.",
+    "showingCount": "{shown} von {total} Volksgruppen werden angezeigt"
+  },
   "common": {
     "save": "Speichern",
     "cancel": "Abbrechen",

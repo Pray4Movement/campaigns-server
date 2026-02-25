@@ -324,6 +324,13 @@
       "today": "今天"
     }
   },
+  "home": {
+    "subtitle": "寻找一个需要代祷的族群",
+    "searchPlaceholder": "搜索族群...",
+    "errorLoading": "加载族群失败。请重试。",
+    "noResults": "未找到族群。",
+    "showingCount": "显示 {shown} / {total} 个族群"
+  },
   "common": {
     "save": "保存",
     "cancel": "取消",

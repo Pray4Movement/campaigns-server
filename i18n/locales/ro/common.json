@@ -324,6 +324,13 @@
       "today": "Astăzi"
     }
   },
+  "home": {
+    "subtitle": "Găsește un grup de oameni pentru care să te rogi",
+    "searchPlaceholder": "Caută grupuri de oameni...",
+    "errorLoading": "Nu s-au putut încărca grupurile de oameni. Vă rugăm să încercați din nou.",
+    "noResults": "Nu s-au găsit grupuri de oameni.",
+    "showingCount": "Se afișează {shown} din {total} grupuri de oameni"
+  },
   "common": {
     "save": "Salvează",
     "cancel": "Anulează",
