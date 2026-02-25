@@ -3,8 +3,7 @@ import { libraryContentService } from '#server/database/library-content'
 import { peopleGroupService } from '#server/database/people-groups'
 import { getDatabase } from '#server/database/db'
 import { sanitizeImportContent } from '#server/utils/sanitize-tiptap'
-
-const VALID_LANGUAGES = ['en', 'es', 'fr', 'pt', 'de', 'it', 'zh', 'ar', 'ru', 'hi']
+import { LANGUAGE_CODES } from '~/utils/languages'
 
 interface ImportRequestBody {
   data: LibraryExportData
@@ -110,7 +109,7 @@ export default defineEventHandler(async (event) => {
   // Validate language codes in content
   const invalidLanguages = new Set<string>()
   for (const item of exportData.content) {
-    if (!VALID_LANGUAGES.includes(item.language_code)) {
+    if (!LANGUAGE_CODES.includes(item.language_code)) {
       invalidLanguages.add(item.language_code)
     }
   }

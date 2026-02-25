@@ -1,5 +1,5 @@
 // Re-export language definitions from shared config
-export { LANGUAGES, LANGUAGE_CODES, type Language } from '../../config/languages'
+export { LANGUAGES, LANGUAGE_CODES, ENABLED_LANGUAGE_CODES, type Language } from '../../config/languages'
 import { LANGUAGES, type Language } from '../../config/languages'
 
 // Get DeepL target language code from app language code
