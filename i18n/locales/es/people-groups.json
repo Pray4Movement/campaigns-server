@@ -154,7 +154,7 @@
       },
       "engagementStatus": {
         "engaged": "Comprometido",
-        "unengaged": "Sin Compromiso"
+        "unengaged": "No Comprometido"
       },
       "yesNo": {
         "no": "No",
@@ -176,9 +176,9 @@
         "6": "10% o Más Evangélico"
       },
       "strategicPriorityIndex": {
-        "0": "Sin Compromiso y Sin Alcanzar",
-        "1": "Comprometido pero Sin Alcanzar",
-        "2": "Ya No Sin Alcanzar"
+        "0": "No Comprometido y No Alcanzado",
+        "1": "Comprometido pero No Alcanzado",
+        "2": "Ya Alcanzado"
       },
       "lostnessPriorityIndex": {
         "0": "Grupo Étnico Fronterizo No Alcanzado",

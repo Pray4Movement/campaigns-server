@@ -149,7 +149,7 @@
       "title": "Perche Pregare?",
       "noOne": {
         "title": "Non Hanno Nessuno",
-        "description": "Molti gruppi etnici non raggiunti non hanno chiese, missionari e spesso nemmeno credenti."
+        "description": "Molti gruppi etnici non coinvolti non hanno chiese, missionari e spesso nemmeno credenti."
       },
       "opensDoors": {
         "title": "La Preghiera Apre le Porte",
@@ -165,7 +165,7 @@
       "description": "Ecco un'anteprima dei contenuti di preghiera quotidiani.",
       "peopleGroupName": "Gruppo Etnico",
       "scripture": "Scrittura",
-      "prayerPoints": "Punti di Preghiera",
+      "prayerPoints": "Spunti di Preghiera",
       "peopleGroupOfDay": "Gruppo Etnico del Giorno"
     },
     "mobileApp": {
@@ -310,7 +310,7 @@
       "hint": "Clicca per terminare il tuo momento di preghiera"
     },
     "thankYou": "Grazie per aver pregato!",
-    "meetThePeople": "Incontra il Popolo",
+    "meetThePeople": "Incontra il Gruppo Etnico",
     "peopleGroupOfTheDay": "Gruppo Etnico del Giorno",
     "dayInTheLife": "Un Giorno nella Vita",
     "pauseAndPray": "Fermati e Prega",
@@ -325,11 +325,11 @@
     }
   },
   "home": {
-    "subtitle": "Trova un gruppo di persone per cui pregare",
-    "searchPlaceholder": "Cerca gruppi di persone...",
-    "errorLoading": "Impossibile caricare i gruppi di persone. Riprova.",
-    "noResults": "Nessun gruppo di persone trovato.",
-    "showingCount": "{shown} di {total} gruppi di persone mostrati"
+    "subtitle": "Trova un gruppo etnico per cui pregare",
+    "searchPlaceholder": "Cerca gruppi etnici...",
+    "errorLoading": "Impossibile caricare i gruppi etnici. Riprova.",
+    "noResults": "Nessun gruppo etnico trovato.",
+    "showingCount": "{shown} di {total} gruppi etnici mostrati"
   },
   "common": {
     "save": "Salva",
@@ -398,8 +398,8 @@
       "subject": "Benvenuto su Doxa! - {campaign}",
       "header": "Benvenuto su Doxa!",
       "doxaMeaning": "In greco, doxa significa \"gloria\", ed è esattamente ciò che stiamo offrendo unendoci in preghiera per i milioni di persone che vivono con poca o nessuna testimonianza del Vangelo. Insieme, stiamo portando gloria a Dio attraverso una preghiera fedele e piena di aspettativa.",
-      "reminderExplanation": "Come parte di questa campagna di preghiera, inizierai presto a ricevere e-mail di promemoria con collegamenti a contenuti di preghiera quotidiani. Ogni collegamento includerà guide di preghiera e altri materiali per aiutarti a pregare in modo strategico e fedele per il gruppo etnico non raggiunto che hai scelto.",
-      "sharedGoal": "Attraverso questo movimento, il nostro obiettivo condiviso è vedere una copertura di preghiera quotidiana di 24 ore per ciascuno degli oltre 2.000 gruppi etnici non raggiunti, uomini e donne inviati a portare il Vangelo a questi gruppi entro il 2033, e donazioni sostenute per sostenere questo impegno.",
+      "reminderExplanation": "Come parte di questa campagna di preghiera, inizierai presto a ricevere e-mail di promemoria con collegamenti a contenuti di preghiera quotidiani. Ogni collegamento includerà guide di preghiera e altri materiali per aiutarti a pregare in modo strategico e fedele per il gruppo etnico non coinvolto che hai scelto.",
+      "sharedGoal": "Attraverso questo movimento, il nostro obiettivo condiviso è vedere una copertura di preghiera quotidiana di 24 ore per ciascuno degli oltre 2.000 gruppi etnici non coinvolti, uomini e donne inviati a portare il Vangelo a questi gruppi entro il 2033, e donazioni sostenute per sostenere questo impegno.",
       "closing": "Siamo profondamente grati di unirci a tutta la Chiesa mentre cerchiamo di portare tutto il Vangelo a tutto il mondo.",
       "reminderTimeNote": "Il tuo promemoria giornaliero è impostato per le {time}.",
       "startPraying": "Inizia a Pregare",

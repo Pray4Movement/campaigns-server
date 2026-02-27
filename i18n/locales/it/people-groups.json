@@ -178,12 +178,12 @@
       "strategicPriorityIndex": {
         "0": "Non Coinvolto e Non Raggiunto",
         "1": "Coinvolto ma Non Raggiunto",
-        "2": "Non Più Irraggiunto"
+        "2": "Non Più Non Raggiunto"
       },
       "lostnessPriorityIndex": {
-        "0": "Gruppo Etnico Irraggiunto di Frontiera",
-        "1": "Gruppo Etnico Irraggiunto Pionieristico",
-        "2": "Gruppo Etnico Irraggiunto in Espansione",
+        "0": "Gruppo Etnico Non Raggiunto di Frontiera",
+        "1": "Gruppo Etnico Non Raggiunto Pionieristico",
+        "2": "Gruppo Etnico Non Raggiunto in Espansione",
         "3": "Gruppo Etnico Minimamente Raggiunto",
         "4": "Gruppo Etnico Marginalmente Raggiunto",
         "5": "Gruppo Etnico Moderatamente Raggiunto",

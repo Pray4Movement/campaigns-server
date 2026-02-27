@@ -154,7 +154,7 @@
       },
       "engagementStatus": {
         "engaged": "Engagé",
-        "unengaged": "Non engagé"
+        "unengaged": "Non-engagé"
       },
       "yesNo": {
         "no": "Non",
@@ -176,14 +176,14 @@
         "6": "10 % ou plus d'évangéliques"
       },
       "strategicPriorityIndex": {
-        "0": "Non engagé et non atteint",
-        "1": "Engagé mais non atteint",
-        "2": "Plus considéré comme non atteint"
+        "0": "Non-engagé et non-atteint",
+        "1": "Engagé mais non-atteint",
+        "2": "Plus considéré comme non-atteint"
       },
       "lostnessPriorityIndex": {
-        "0": "Groupe ethnique frontière non atteint",
-        "1": "Groupe ethnique pionnier non atteint",
-        "2": "Groupe ethnique en expansion non atteint",
+        "0": "Groupe ethnique frontière non-atteint",
+        "1": "Groupe ethnique pionnier non-atteint",
+        "2": "Groupe ethnique en expansion non-atteint",
         "3": "Groupe ethnique minimalement atteint",
         "4": "Groupe ethnique marginalement atteint",
         "5": "Groupe ethnique modérément atteint",

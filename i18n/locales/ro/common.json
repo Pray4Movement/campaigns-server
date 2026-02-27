@@ -39,7 +39,7 @@
       },
       "prayerStatus": {
         "title": "Statutul rugăciunii",
-        "description": "persoane care se roagă 10 minute pe zi pentru acest grup de oameni."
+        "description": "persoane care se roagă 10 minute pe zi pentru acest grup etnic."
       }
     },
     "header": {
@@ -131,7 +131,7 @@
         "submitting": "Se înscrie...",
         "consent": {
           "description": "Pe lângă memento-urile de rugăciune, ține-mă la curent cu:",
-          "campaignUpdates": "Actualizări despre acest grup de oameni: {campaign}",
+          "campaignUpdates": "Actualizări despre acest grup etnic: {campaign}",
           "doxaGeneral": "Progres și actualizări de la {link}"
         }
       },
@@ -149,7 +149,7 @@
       "title": "De ce să ne rugăm?",
       "noOne": {
         "title": "Nu au pe nimeni",
-        "description": "Multe grupuri de oameni neajunse nu au biserici, nici misionari și adesea nici credincioși."
+        "description": "Multe grupuri etnice neangajate nu au biserici, nici misionari și adesea nici credincioși."
       },
       "opensDoors": {
         "title": "Rugăciunea deschide uși",
@@ -163,10 +163,10 @@
     "sampleContent": {
       "title": "Primește conținut zilnic de rugăciune",
       "description": "Iată o previzualizare a conținutului zilnic de rugăciune.",
-      "peopleGroupName": "Grup de oameni",
+      "peopleGroupName": "Grup etnic",
       "scripture": "Scriptura",
-      "prayerPoints": "Puncte de rugăciune",
-      "peopleGroupOfDay": "Grupul de oameni al zilei"
+      "prayerPoints": "Subiecte de rugăciune",
+      "peopleGroupOfDay": "Grupul etnic al zilei"
     },
     "mobileApp": {
       "title": "Descarcă aplicația mobilă",
@@ -310,8 +310,8 @@
       "hint": "Apasă pentru a încheia timpul de rugăciune"
     },
     "thankYou": "Mulțumim că te-ai rugat!",
-    "meetThePeople": "Cunoaște oamenii",
-    "peopleGroupOfTheDay": "Grupul de oameni al zilei",
+    "meetThePeople": "Cunoaște grupul etnic",
+    "peopleGroupOfTheDay": "Grupul etnic al zilei",
     "dayInTheLife": "O zi din viață",
     "pauseAndPray": "Oprește-te și roagă-te",
     "mapTitle": "Hartă care arată locația grupului {name}",
@@ -325,11 +325,11 @@
     }
   },
   "home": {
-    "subtitle": "Găsește un grup de oameni pentru care să te rogi",
-    "searchPlaceholder": "Caută grupuri de oameni...",
-    "errorLoading": "Nu s-au putut încărca grupurile de oameni. Vă rugăm să încercați din nou.",
-    "noResults": "Nu s-au găsit grupuri de oameni.",
-    "showingCount": "Se afișează {shown} din {total} grupuri de oameni"
+    "subtitle": "Găsește un grup etnic pentru care să te rogi",
+    "searchPlaceholder": "Caută grupuri etnice...",
+    "errorLoading": "Nu s-au putut încărca grupurile etnice. Vă rugăm să încercați din nou.",
+    "noResults": "Nu s-au găsit grupuri etnice.",
+    "showingCount": "Se afișează {shown} din {total} grupuri etnice"
   },
   "common": {
     "save": "Salvează",

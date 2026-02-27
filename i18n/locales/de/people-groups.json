@@ -154,7 +154,7 @@
       },
       "engagementStatus": {
         "engaged": "Engagiert",
-        "unengaged": "Nicht engagiert"
+        "unengaged": "Nicht-engagiert"
       },
       "yesNo": {
         "no": "Nein",
@@ -176,12 +176,12 @@
         "6": "10% oder mehr Evangelikale"
       },
       "strategicPriorityIndex": {
-        "0": "Nicht engagiert und unerreicht",
+        "0": "Nicht-engagiert und unerreicht",
         "1": "Engagiert, aber unerreicht",
         "2": "Nicht mehr unerreicht"
       },
       "lostnessPriorityIndex": {
-        "0": "Grenz-unerreichte Volksgruppe",
+        "0": "Frontier-unerreichte Volksgruppe",
         "1": "Pionier-unerreichte Volksgruppe",
         "2": "Expandierende unerreichte Volksgruppe",
         "3": "Minimal erreichte Volksgruppe",
