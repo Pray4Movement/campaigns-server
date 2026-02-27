@@ -104,6 +104,14 @@ const TRANSLATION_MAPPINGS: Record<string, TranslationMapping> = {
       { book: 'MAL', fromChapter: 4, toChapter: 3, verseOffset: 18 },
     ]
   },
+  FRLSG: {
+    psalmVerseOffset: true,
+    remaps: [
+      { book: 'JOL', fromChapter: 2, fromVerseStart: 28, toChapter: 3, verseOffset: -27 },
+      { book: 'JOL', fromChapter: 3, toChapter: 4, verseOffset: 0 },
+      { book: 'MAL', fromChapter: 4, toChapter: 3, verseOffset: 18 },
+    ]
+  },
 }
 
 interface RemappedRef {
