@@ -19,14 +19,14 @@
               size="sm"
               icon="i-lucide-chevron-left"
               :disabled="currentDay <= 1"
-              @click="currentDay--"
+              @click="navigateToDay(currentDay - 1)"
             />
             <h1 class="text-3xl font-bold text-center">Day {{ currentDay }}</h1>
             <UButton
               variant="ghost"
               size="sm"
               icon="i-lucide-chevron-right"
-              @click="currentDay++"
+              @click="navigateToDay(currentDay + 1)"
             />
           </div>
         </div>
@@ -47,9 +47,21 @@ definePageMeta({
   layout: 'default'
 })
 
+const route = useRoute()
+const router = useRouter()
 const { locale } = useI18n()
+const localePath = useLocalePath()
 
-const currentDay = ref(1)
+const currentDay = computed(() => {
+  const day = Number(route.params.day)
+  return day > 0 ? day : 1
+})
+
+function navigateToDay(day: number) {
+  if (day < 1) return
+  router.push(localePath(`/library/demo/${day}`))
+}
+
 const globalStartDate = ref<string | null>(null)
 
 const { data: peopleGroupData } = await useFetch('/api/people-groups/detail/zuara')
