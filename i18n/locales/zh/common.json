@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "为{campaign}祷告"
+      "prayFor": "为{campaign}祷告",
+      "championedBy": "一个由{link}支持的族群。",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "活动",
     "signupButton": "注册祷告",

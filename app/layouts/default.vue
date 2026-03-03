@@ -9,6 +9,10 @@
             <UIcon name="i-lucide-arrow-left" class="w-5 h-5" />
             <span class="text-xl font-bold tracking-wider">{{ peopleGroupTitle }}</span>
           </NuxtLink>
+          <a v-else-if="backToUrl" :href="backToUrl" class="flex items-center gap-2">
+            <UIcon name="i-lucide-arrow-left" class="w-5 h-5" />
+            <span class="text-xl font-bold tracking-wider">DOXA.LIFE</span>
+          </a>
           <NuxtLink v-else-if="!isPeopleGroupPage" :to="logoLink" class="flex items-center gap-2">
             <span class="text-xl font-bold tracking-wider">{{ config.public.appName }}</span>
           </NuxtLink>
@@ -54,6 +58,11 @@
         <h1 class="text-3xl md:text-4xl font-bold uppercase tracking-wide">
           <span class="text-default">{{ $t('campaign.header.prayFor', { campaign: peopleGroupTitle }) }}</span>
         </h1>
+        <i18n-t keypath="campaign.header.championedBy" tag="p" class="text-sm text-muted mt-2">
+          <template #link>
+            <a :href="`https://doxa.life/${$i18n.locale === 'en' ? '' : $i18n.locale}`" target="_blank" class="underline hover:text-default">{{ $t('campaign.header.doxaFoundation') }}</a>
+          </template>
+        </i18n-t>
       </div>
     </div>
 
@@ -95,6 +104,16 @@ const logoLink = computed(() => {
 })
 
 const isHomePage = computed(() => route.path === '/')
+
+// Back-to-web link when users arrive from the marketing site with ?source=web
+const backToUrl = ref<string | null>(null)
+if (import.meta.client) {
+  const hasSource = route.query.source === 'web'
+  if (hasSource) {
+    const ref = document.referrer
+    backToUrl.value = ref && new URL(ref).hostname.endsWith('doxa.life') ? ref : 'https://doxa.life'
+  }
+}
 
 // Show people group header when on a people group route and title is set
 const isPeopleGroupPage = computed(() => !!slug.value)

@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "Ore pelo {campaign}"
+      "prayFor": "Ore pelo {campaign}",
+      "championedBy": "Um grupo étnico apoiado por {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "Campanha",
     "signupButton": "Inscreva-se para orar",

@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "صلِّ من أجل {campaign}"
+      "prayFor": "صلِّ من أجل {campaign}",
+      "championedBy": "جماعة عرقية تدعمها {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "الحملة",
     "signupButton": "سجّل للصلاة",

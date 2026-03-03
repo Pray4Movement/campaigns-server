@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "Bete für die {campaign}"
+      "prayFor": "Bete für die {campaign}",
+      "championedBy": "Eine Volksgruppe, unterstützt von {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "Kampagne",
     "signupButton": "Anmelden zum Beten",

@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "Roagă-te pentru {campaign}"
+      "prayFor": "Roagă-te pentru {campaign}",
+      "championedBy": "Un grup etnic susținut de {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "Campanie",
     "signupButton": "Înscrie-te pentru rugăciune",

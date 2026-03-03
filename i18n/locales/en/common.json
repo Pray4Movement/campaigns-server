@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "Pray for the {campaign}"
+      "prayFor": "Pray for the {campaign}",
+      "championedBy": "A people group championed by {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "Campaign",
     "signupButton": "Sign up to pray",

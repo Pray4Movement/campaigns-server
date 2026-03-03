@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "Молитесь за {campaign}"
+      "prayFor": "Молитесь за {campaign}",
+      "championedBy": "Этническая группа, поддерживаемая {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "Кампания",
     "signupButton": "Присоединиться к молитве",

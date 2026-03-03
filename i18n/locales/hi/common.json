@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "{campaign} के लिए प्रार्थना करें"
+      "prayFor": "{campaign} के लिए प्रार्थना करें",
+      "championedBy": "{link} द्वारा समर्थित एक जातीय समूह।",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "अभियान",
     "signupButton": "प्रार्थना के लिए साइन अप करें",

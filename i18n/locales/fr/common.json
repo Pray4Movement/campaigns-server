@@ -43,7 +43,9 @@
       }
     },
     "header": {
-      "prayFor": "Priez pour les {campaign}"
+      "prayFor": "Priez pour les {campaign}",
+      "championedBy": "Un groupe ethnique soutenu par {link}.",
+      "doxaFoundation": "Doxa.Life"
     },
     "pageTitle": "Campagne",
     "signupButton": "Inscrivez-vous pour prier",
