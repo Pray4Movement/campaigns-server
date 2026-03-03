@@ -18,6 +18,7 @@
       "andUnreached": "et Non-atteints"
     },
     "categories": {
+      "status": "Statut",
       "basic": "Informations de base",
       "identifiers": "Identifiants",
       "geography": "Géographie",

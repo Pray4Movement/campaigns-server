@@ -25,6 +25,7 @@ export interface FieldCategory {
 }
 
 export const categories: FieldCategory[] = [
+  { key: 'status', labelKey: 'peopleGroups.categories.status', order: 0 },
   { key: 'basic', labelKey: 'peopleGroups.categories.basic', order: 1 },
   { key: 'identifiers', labelKey: 'peopleGroups.categories.identifiers', order: 2 },
   { key: 'geography', labelKey: 'peopleGroups.categories.geography', order: 3 },

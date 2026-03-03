@@ -18,6 +18,7 @@
       "andUnreached": "وغير مُبلَّغين"
     },
     "categories": {
+      "status": "الحالة",
       "basic": "المعلومات الأساسية",
       "identifiers": "المعرّفات",
       "geography": "الجغرافيا",

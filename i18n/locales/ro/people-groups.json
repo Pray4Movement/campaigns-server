@@ -18,6 +18,7 @@
       "andUnreached": "și neatins"
     },
     "categories": {
+      "status": "Stare",
       "basic": "Informații de bază",
       "identifiers": "Identificatori",
       "geography": "Geografie",

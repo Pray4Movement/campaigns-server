@@ -18,6 +18,7 @@
       "andUnreached": "और अगम्य"
     },
     "categories": {
+      "status": "स्थिति",
       "basic": "मूल जानकारी",
       "identifiers": "पहचानकर्ता",
       "geography": "भूगोल",

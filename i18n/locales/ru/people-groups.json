@@ -18,6 +18,7 @@
       "andUnreached": "и недостигнутые"
     },
     "categories": {
+      "status": "Статус",
       "basic": "Основная информация",
       "identifiers": "Идентификаторы",
       "geography": "География",

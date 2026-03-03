@@ -18,6 +18,7 @@
       "andUnreached": "且未得之民"
     },
     "categories": {
+      "status": "状态",
       "basic": "基本信息",
       "identifiers": "标识符",
       "geography": "地理位置",

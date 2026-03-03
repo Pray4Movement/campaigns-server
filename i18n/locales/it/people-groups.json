@@ -18,6 +18,7 @@
       "andUnreached": "e Non Raggiunti"
     },
     "categories": {
+      "status": "Stato",
       "basic": "Informazioni di Base",
       "identifiers": "Identificatori",
       "geography": "Geografia",
