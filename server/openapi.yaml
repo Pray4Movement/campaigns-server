@@ -1,20 +1,18 @@
 openapi: 3.1.0
 info:
   title: Prayer.Tools API
-  description: Public API for accessing prayer campaigns and signing up for prayer reminders
+  description: Public API for accessing people group data and signing up for prayer reminders
   version: 1.0.0
   contact:
     name: Prayer.Tools Support
 
 servers:
-  - url: http://localhost:3000
-    description: Local development
   - url: https://pray.doxa.life
     description: Production
+  - url: http://localhost:3000
+    description: Local development
 
 tags:
-  - name: Campaigns
-    description: Prayer campaign operations
   - name: Signups
     description: Prayer reminder signup operations
   - name: People Groups
@@ -309,9 +307,8 @@ paths:
     get:
       tags:
         - People Groups
-        - Campaigns
       summary: Get people group by slug
-      description: Returns detailed information for a single people group with all fields, translated labels, commitment statistics, and global campaign start date.
+      description: Returns detailed information for a single people group with all fields, translated labels, and commitment statistics.
       operationId: getPeopleGroupBySlug
       parameters:
         - name: slug
@@ -455,39 +452,6 @@ paths:
 
 components:
   schemas:
-    Campaign:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Campaign ID
-          example: 1
-        title:
-          type: string
-          description: Campaign title
-          example: 40 Days of Prayer
-        description:
-          type: string
-          description: Campaign description
-          example: Join us for 40 days of focused prayer
-        slug:
-          type: string
-          description: URL-friendly campaign identifier
-          example: 40-days-of-prayer
-        status:
-          type: string
-          enum: [active, inactive]
-          description: Campaign status
-          example: active
-        created_at:
-          type: string
-          format: date-time
-          description: Creation timestamp
-        updated_at:
-          type: string
-          format: date-time
-          description: Last update timestamp
-
     ValueLabel:
       type: object
       description: A value with its translated label
@@ -558,7 +522,7 @@ components:
 
     PeopleGroupDetail:
       type: object
-      description: Full detail for a people group with all fields, commitment stats, and global start date
+      description: Full detail for a people group with all fields and commitment stats
       properties:
         id:
           type: string
@@ -600,7 +564,7 @@ components:
           type: string
           format: date
           nullable: true
-          description: Global campaign start date (YYYY-MM-DD)
+          description: Global start date (YYYY-MM-DD)
         imb_display_name:
           type: string
           nullable: true
