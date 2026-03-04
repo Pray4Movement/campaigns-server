@@ -42,9 +42,11 @@
         </div>
         <div class="subscriber-meta">
           <UBadge
-            :label="`${subscriber.subscriptions.length} subscription${subscriber.subscriptions.length !== 1 ? 's' : ''}`"
-            variant="outline"
-            color="neutral"
+            v-for="(count, groupName) in getSubscriptionsByGroup(subscriber.subscriptions)"
+            :key="groupName"
+            :label="`${groupName} (${count})`"
+            variant="subtle"
+            color="success"
             size="xs"
           />
           <span class="date">{{ formatDate(subscriber.created_at) }}</span>
@@ -466,6 +468,16 @@ const loadingActivityLog = ref(false)
 // Send reminder state
 const sendingReminder = ref<Record<number, boolean>>({})
 const sendingFollowup = ref<Record<number, boolean>>({})
+
+// Helpers
+function getSubscriptionsByGroup(subscriptions: any[]) {
+  const grouped: Record<string, number> = {}
+  for (const sub of subscriptions) {
+    const name = sub.people_group_name || 'Unknown'
+    grouped[name] = (grouped[name] || 0) + 1
+  }
+  return grouped
+}
 
 // Options
 const statusOptions = [
