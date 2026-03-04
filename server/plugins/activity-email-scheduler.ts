@@ -46,7 +46,7 @@ async function getPreviousStats(frequency: Frequency): Promise<ActivityStats | n
     WHERE event_type = 'ACTIVITY_EMAIL_SENT'
       AND metadata->>'frequency' = ${frequency}
       AND metadata->'stats' IS NOT NULL
-    ORDER BY created_at DESC
+    ORDER BY timestamp DESC
     LIMIT 1
   `
   if (!row?.metadata?.stats) return null
