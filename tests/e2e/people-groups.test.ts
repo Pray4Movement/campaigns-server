@@ -16,8 +16,8 @@ describe('GET /api/people-groups', async () => {
   it('returns empty array when no people groups exist', async () => {
     const response = await $fetch('/api/people-groups')
 
-    expect(response).toHaveProperty('peopleGroups')
-    expect(Array.isArray(response.peopleGroups)).toBe(true)
+    expect(response).toHaveProperty('posts')
+    expect(Array.isArray(response.posts)).toBe(true)
   })
 
   it('returns people groups', async () => {
@@ -27,10 +27,10 @@ describe('GET /api/people-groups', async () => {
 
     const response = await $fetch('/api/people-groups')
 
-    expect(response.peopleGroups).toContainEqual(
+    expect(response.posts).toContainEqual(
       expect.objectContaining({
         slug: peopleGroup.slug,
-        title: 'Test Prayer People Group'
+        name: 'Test Prayer People Group'
       })
     )
   })
