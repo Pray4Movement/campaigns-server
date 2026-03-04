@@ -42,11 +42,25 @@ function getPeriod(frequency: Frequency, now: Date): PeriodRange {
 }
 
 function getPreviousPeriod(frequency: Frequency, period: PeriodRange): PeriodRange {
-  const durationMs = period.end.getTime() - period.start.getTime()
-  return {
-    start: new Date(period.start.getTime() - durationMs),
-    end: new Date(period.start.getTime())
+  const end = new Date(period.start)
+  const start = new Date(period.start)
+
+  switch (frequency) {
+    case 'daily':
+      start.setUTCDate(start.getUTCDate() - 1)
+      break
+    case 'weekly':
+      start.setUTCDate(start.getUTCDate() - 7)
+      break
+    case 'monthly':
+      start.setUTCMonth(start.getUTCMonth() - 1)
+      break
+    case 'yearly':
+      start.setUTCFullYear(start.getUTCFullYear() - 1)
+      break
   }
+
+  return { start, end }
 }
 
 export default defineNitroPlugin((nitroApp) => {
@@ -54,16 +68,20 @@ export default defineNitroPlugin((nitroApp) => {
 
   console.log('📊 Activity email scheduler initialized (daily at 7 AM UTC)')
 
-  const lastSentDate: Record<Frequency, string | null> = {
-    daily: null,
-    weekly: null,
-    monthly: null,
-    yearly: null
+  async function alreadySent(frequency: Frequency, dateKey: string): Promise<boolean> {
+    const [existing] = await sql`
+      SELECT 1 FROM activity_logs
+      WHERE event_type = 'ACTIVITY_EMAIL_SENT'
+        AND metadata->>'frequency' = ${frequency}
+        AND metadata->>'date' = ${dateKey}
+      LIMIT 1
+    `
+    return !!existing
   }
 
   async function sendForFrequency(frequency: Frequency, now: Date) {
     const dateKey = now.toISOString().split('T')[0]!
-    if (lastSentDate[frequency] === dateKey) return
+    if (await alreadySent(frequency, dateKey)) return
 
     try {
       const period = getPeriod(frequency, now)
@@ -94,7 +112,10 @@ export default defineNitroPlugin((nitroApp) => {
         }
       }
 
-      lastSentDate[frequency] = dateKey
+      await logEvent({
+        eventType: 'ACTIVITY_EMAIL_SENT',
+        metadata: { frequency, recipientCount: sent, date: dateKey }
+      })
       console.log(`✅ ${frequency} activity email sent to ${sent}/${recipients.length} users`)
     } catch (error: any) {
       console.error(`❌ Failed to process ${frequency} activity emails:`, error.message)

@@ -8,6 +8,7 @@ export interface User {
   display_name: string
   verified: boolean
   superadmin: boolean
+  role: string | null
   token_key: string
   created: string
   updated: string

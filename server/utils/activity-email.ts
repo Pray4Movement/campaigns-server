@@ -110,7 +110,7 @@ export async function sendActivityEmail(
   const rows = buildStatRows(stats, previousStats)
 
   const tableRowsHtml = rows.map((row, i) => {
-    const isDuration = row.label.includes('prayer time') || row.label.includes('prayer committed')
+    const isDuration = row.label.toLowerCase().includes('prayer time')
     const changeVal: number | null = row.change ?? null
     const changeCell = changeVal !== null
       ? (isDuration ? changeDurationHtml(changeVal) : changeHtml(changeVal))
@@ -165,7 +165,7 @@ export async function sendActivityEmail(
   `
 
   const textRows = rows.map(row => {
-    const isDuration = row.label.includes('prayer time') || row.label.includes('prayer committed')
+    const isDuration = row.label.toLowerCase().includes('prayer time')
     const ch = row.change ?? null
     const change = ch !== null
       ? (isDuration ? changeDurationText(ch) : changeText(ch))
