@@ -1,4 +1,4 @@
-import { collectActivityStats } from '../utils/activity-email-stats'
+import { collectActivityStats, type ActivityStats } from '../utils/activity-email-stats'
 import { sendActivityEmail } from '../utils/activity-email'
 import { userService } from '#server/database/users'
 
@@ -22,7 +22,6 @@ function getPeriod(frequency: Frequency, now: Date): PeriodRange {
       return { start, end }
     }
     case 'weekly': {
-      // now is Monday, so previous Mon–Sun
       const end = new Date(Date.UTC(y, m, d))
       const start = new Date(end)
       start.setUTCDate(start.getUTCDate() - 7)
@@ -41,26 +40,17 @@ function getPeriod(frequency: Frequency, now: Date): PeriodRange {
   }
 }
 
-function getPreviousPeriod(frequency: Frequency, period: PeriodRange): PeriodRange {
-  const end = new Date(period.start)
-  const start = new Date(period.start)
-
-  switch (frequency) {
-    case 'daily':
-      start.setUTCDate(start.getUTCDate() - 1)
-      break
-    case 'weekly':
-      start.setUTCDate(start.getUTCDate() - 7)
-      break
-    case 'monthly':
-      start.setUTCMonth(start.getUTCMonth() - 1)
-      break
-    case 'yearly':
-      start.setUTCFullYear(start.getUTCFullYear() - 1)
-      break
-  }
-
-  return { start, end }
+async function getPreviousStats(frequency: Frequency): Promise<ActivityStats | null> {
+  const [row] = await sql`
+    SELECT metadata FROM activity_logs
+    WHERE event_type = 'ACTIVITY_EMAIL_SENT'
+      AND metadata->>'frequency' = ${frequency}
+      AND metadata->'stats' IS NOT NULL
+    ORDER BY created_at DESC
+    LIMIT 1
+  `
+  if (!row?.metadata?.stats) return null
+  return row.metadata.stats as ActivityStats
 }
 
 export default defineNitroPlugin((nitroApp) => {
@@ -85,11 +75,10 @@ export default defineNitroPlugin((nitroApp) => {
 
     try {
       const period = getPeriod(frequency, now)
-      const previousPeriod = getPreviousPeriod(frequency, period)
 
       const [stats, previousStats] = await Promise.all([
         collectActivityStats(period.start, period.end),
-        collectActivityStats(previousPeriod.start, previousPeriod.end)
+        getPreviousStats(frequency)
       ])
 
       const users = await userService.getAdminUsers()
@@ -114,7 +103,7 @@ export default defineNitroPlugin((nitroApp) => {
 
       await logEvent({
         eventType: 'ACTIVITY_EMAIL_SENT',
-        metadata: { frequency, recipientCount: sent, date: dateKey }
+        metadata: { frequency, recipientCount: sent, date: dateKey, stats }
       })
       console.log(`✅ ${frequency} activity email sent to ${sent}/${recipients.length} users`)
     } catch (error: any) {

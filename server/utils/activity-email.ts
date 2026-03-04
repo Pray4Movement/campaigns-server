@@ -70,12 +70,12 @@ function buildStatRows(stats: ActivityStats, previousStats: ActivityStats | null
     {
       label: 'People groups with prayer',
       value: String(stats.groupsWithPrayer),
-      change: null
+      change: previousStats ? formatChange(stats.groupsWithPrayer, previousStats.groupsWithPrayer) : null
     },
     {
       label: 'People groups with 144 subscribers',
       value: String(stats.groupsWith144),
-      change: null
+      change: previousStats ? formatChange(stats.groupsWith144, previousStats.groupsWith144) : null
     },
     {
       label: 'People groups adopted',
@@ -85,7 +85,7 @@ function buildStatRows(stats: ActivityStats, previousStats: ActivityStats | null
     {
       label: 'People groups engaged',
       value: String(stats.groupsEngaged),
-      change: null
+      change: previousStats ? formatChange(stats.groupsEngaged, previousStats.groupsEngaged) : null
     }
   ]
 }
