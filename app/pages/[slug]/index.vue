@@ -131,7 +131,7 @@
               <h3 class="font-bold uppercase tracking-wide text-center mb-4">{{ $t('campaign.peopleGroup.prayerStatus.title') }}</h3>
               <div class="text-center">
                 <div class="text-5xl font-bold mb-2">
-                  {{ pg.people_praying || 0 }} / {{ PRAYER_GOAL }}
+                  {{ pg.people_committed || 0 }} / {{ PRAYER_GOAL }}
                 </div>
                 <p class="text-sage-200 text-sm mb-6">
                   {{ $t('campaign.peopleGroup.prayerStatus.description') }}
@@ -140,7 +140,7 @@
                 <div class="w-full bg-forest-600 rounded-full h-3">
                   <div
                     class="bg-sage-300 h-3 rounded-full transition-all duration-500"
-                    :style="{ width: `${Math.min(((pg.people_praying || 0) / PRAYER_GOAL) * 100, 100)}%` }"
+                    :style="{ width: `${Math.min(((pg.people_committed || 0) / PRAYER_GOAL) * 100, 100)}%` }"
                   ></div>
                 </div>
               </div>
@@ -551,7 +551,7 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 // Fetch people group data with locale for translated labels
-const { data: pg, pending, error } = await useFetch<PeopleGroupDetailResponse>(`/api/people-groups/detail/${slug}`, {
+const { data: pg, pending, error, refresh: refreshPg } = await useFetch<PeopleGroupDetailResponse>(`/api/people-groups/detail/${slug}`, {
   query: { locale },
   watch: [locale]
 })
@@ -591,8 +591,8 @@ onMounted(() => {
 
 // Dynamic prayer goal - starts at 144, then increases to 1000 once reached
 const PRAYER_GOAL = computed(() => {
-  const peoplePraying = pg.value?.people_praying || 0
-  return peoplePraying >= 144 ? 1000 : 144
+  const peopleCommitted = pg.value?.people_committed || 0
+  return peopleCommitted >= 144 ? 1000 : 144
 })
 
 // Set people group title when loaded
@@ -719,6 +719,9 @@ async function handleSignup() {
     })
 
     console.log('Signup successful:', response)
+
+    // Refresh people group data to update prayer status count
+    refreshPg()
 
     // For email signups, always show verification modal
     if (signupForm.value.delivery_method === 'email') {
