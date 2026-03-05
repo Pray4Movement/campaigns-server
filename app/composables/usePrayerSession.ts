@@ -21,18 +21,45 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
     return (route.query.uid as string) || getAnonymousTrackingId()
   })
 
-  const pageOpenTime = ref(Date.now())
   const sessionId = ref(`${Date.now()}-${Math.random().toString(36).substring(2, 9)}`)
   const autoSaveTimeouts = ref<ReturnType<typeof setTimeout>[]>([])
   const autoSaveComplete = ref(false)
   const prayedMarked = ref(false)
   const submitting = ref(false)
 
+  const accumulatedDuration = ref(0)
+  const lastVisibleTime = ref(Date.now())
+  const isActive = ref(true)
+
+  function getVisibleDuration() {
+    if (!isActive.value) return accumulatedDuration.value
+    return accumulatedDuration.value + (Date.now() - lastVisibleTime.value)
+  }
+
+  function pause() {
+    if (!isActive.value) return
+    accumulatedDuration.value += Date.now() - lastVisibleTime.value
+    isActive.value = false
+  }
+
+  function resume() {
+    if (isActive.value) return
+    lastVisibleTime.value = Date.now()
+    isActive.value = true
+  }
+
+  function onVisibilityChange() {
+    document.hidden ? pause() : resume()
+  }
+
+  function onWindowBlur() { pause() }
+  function onWindowFocus() { resume() }
+
   async function autoSavePrayerSession() {
     if (prayedMarked.value || autoSaveComplete.value) return
 
     try {
-      const duration = Math.floor((Date.now() - pageOpenTime.value) / 1000)
+      const duration = Math.floor(getVisibleDuration() / 1000)
       const timestamp = new Date().toISOString()
 
       await $fetch(`/api/people-groups/${slug}/prayer-content/${contentDate.value}/session`, {
@@ -64,7 +91,7 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
 
     try {
       const MAX_DURATION = 2 * 60 * 60
-      const rawDuration = Math.floor((Date.now() - pageOpenTime.value) / 1000)
+      const rawDuration = Math.floor(getVisibleDuration() / 1000)
       const duration = Math.min(rawDuration, MAX_DURATION)
       const timestamp = new Date().toISOString()
 
@@ -103,7 +130,8 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
   }
 
   function setupAutoSave() {
-    pageOpenTime.value = Date.now()
+    accumulatedDuration.value = 0
+    lastVisibleTime.value = Date.now()
     const autoSaveIntervals = [5 * 60 * 1000, 10 * 60 * 1000, 15 * 60 * 1000]
 
     autoSaveIntervals.forEach((interval) => {
@@ -116,10 +144,16 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
 
   onMounted(() => {
     setupAutoSave()
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('blur', onWindowBlur)
+    window.addEventListener('focus', onWindowFocus)
   })
 
   onUnmounted(() => {
     cancelAutoSaveTimeouts()
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+    window.removeEventListener('blur', onWindowBlur)
+    window.removeEventListener('focus', onWindowFocus)
   })
 
   return {
