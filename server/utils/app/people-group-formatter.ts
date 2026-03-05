@@ -15,6 +15,7 @@ interface PeopleGroupRecord {
   primary_religion: string | null
   descriptions: Record<string, string> | null
   total_people_praying?: number
+  people_committed?: number
   [key: string]: unknown
 }
 
@@ -161,9 +162,9 @@ export function formatPeopleGroupForList(pg: PeopleGroupRecord, lang: string = '
     population: pg.population || null,
     has_photo: meta.imb_has_photo === 'yes' || meta.imb_has_photo === true || !!pg.image_url,
     picture_url: pg.image_url || meta.imb_picture_url || null,
-    picture_credit_html: meta.imb_picture_credit_html || null,
     picture_credit: meta.picture_credit || null,
     people_praying: pg.total_people_praying || 0,
+    people_committed: pg.people_committed || 0,
     adopted_by_churches: 0
   }
 }
@@ -231,6 +232,9 @@ export function formatPeopleGroupForListWithFields(
         break
       case 'people_praying':
         result.people_praying = pg.total_people_praying || 0
+        break
+      case 'people_committed':
+        result.people_committed = pg.people_committed || 0
         break
       case 'adopted_by_churches':
         result.adopted_by_churches = 0
@@ -401,7 +405,7 @@ export function formatPeopleGroupRaw(pg: PeopleGroupRecord, fields: string[], la
 export const DEFAULT_LIST_FIELDS = [
   'id', 'name', 'slug', 'display_name', 'wagf_region', 'wagf_block', 'wagf_member',
   'country', 'rop1', 'religion', 'location_description', 'population',
-  'has_photo', 'picture_url', 'picture_credit_html', 'people_praying', 'adopted_by_churches'
+  'has_photo', 'picture_url', 'people_praying', 'people_committed', 'adopted_by_churches'
 ]
 
 // Default fields for /all endpoint

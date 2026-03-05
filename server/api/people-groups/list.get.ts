@@ -12,6 +12,7 @@ import {
 } from '../../utils/app/people-group-formatter'
 import { setCorsHeaders, setCacheHeaders } from '../../utils/app/cors'
 import { LANGUAGE_CODES } from '../../../config/languages'
+import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 
 export default defineEventHandler(async (event) => {
   // Set CORS and cache headers
@@ -42,6 +43,16 @@ export default defineEventHandler(async (event) => {
   `)
 
   const peopleGroups = await stmt.all() as any[]
+
+  // Fetch commitment stats for all people groups
+  const pgIds = peopleGroups.map((pg: any) => pg.id)
+  const commitmentStatsMap = await peopleGroupSubscriptionService.getCommitmentStatsForPeopleGroups(pgIds)
+
+  // Attach people_committed to each record
+  for (const pg of peopleGroups) {
+    const stats = commitmentStatsMap.get(pg.id)
+    pg.people_committed = stats?.people_committed || 0
+  }
 
   // Format the response
   const posts = peopleGroups.map(pg => {

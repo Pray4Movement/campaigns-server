@@ -268,7 +268,7 @@ paths:
       description: |
         Returns all people groups with summary data and translated labels. Supports field selection and i18n.
 
-        **Default fields:** id, name, slug, display_name, wagf_region, wagf_block, wagf_member, country, rop1, religion, location_description, population, has_photo, picture_url, picture_credit_html, people_praying, adopted_by_churches
+        **Default fields:** id, name, slug, display_name, wagf_region, wagf_block, wagf_member, country, rop1, religion, location_description, population, has_photo, picture_url, people_praying, people_committed, adopted_by_churches
       operationId: listPeopleGroups
       parameters:
         - name: lang
@@ -508,13 +508,25 @@ components:
           type: string
           nullable: true
           format: uri
-        picture_credit_html:
-          type: string
+        picture_credit:
+          type: array
           nullable: true
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              link:
+                type: string
+                nullable: true
         people_praying:
           type: integer
           description: Number of people currently praying for this group
           example: 42
+        people_committed:
+          type: integer
+          description: Total number of active prayer commitments (subscriptions)
+          example: 58
         adopted_by_churches:
           type: integer
           description: Number of churches that have adopted this group (always 0)
