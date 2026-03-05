@@ -6,6 +6,9 @@
         <p class="subtitle">Manage centralized prayer content libraries</p>
       </div>
       <div class="header-actions">
+        <UButton to="/admin/prayer-fuel-order" variant="outline" icon="i-lucide-list-ordered">
+          Prayer Fuel Order
+        </UButton>
         <UButton @click="showImportModal = true" variant="outline" icon="i-lucide-upload">
           Import
         </UButton>

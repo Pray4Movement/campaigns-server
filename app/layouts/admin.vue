@@ -18,6 +18,11 @@
 
       <ul class="nav-menu" v-if="hasRole">
         <li v-if="isAdmin">
+          <NuxtLink to="/admin" class="nav-link" :class="{ 'router-link-active': route.path === '/admin' }">
+            Dashboard
+          </NuxtLink>
+        </li>
+        <li v-if="isAdmin">
           <NuxtLink to="/admin/people-groups" class="nav-link">
             People Groups
           </NuxtLink>
@@ -27,19 +32,9 @@
             Subscribers
           </NuxtLink>
         </li>
-        <!-- <li> -->
-        <!--   <NuxtLink to="/admin/marketing" class="nav-link"> -->
-        <!--     Marketing -->
-        <!--   </NuxtLink> -->
-        <!-- </li> -->
         <li v-if="isAdmin">
           <NuxtLink to="/admin/libraries" class="nav-link">
             Libraries
-          </NuxtLink>
-        </li>
-        <li v-if="isAdmin">
-          <NuxtLink to="/admin/prayer-fuel-order" class="nav-link">
-            Prayer Fuel Order
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
