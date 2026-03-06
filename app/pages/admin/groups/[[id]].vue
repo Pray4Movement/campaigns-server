@@ -125,8 +125,8 @@
                 :key="adoption.id"
                 :adoption="adoption"
                 :label="adoption.people_group_name"
-                @change="refreshGroup"
-                @delete="deleteAdoption"
+                @open="openAdoptionSlideover(adoption)"
+                @delete="deleteAdoption(adoption)"
               />
             </div>
           </CrmFormSection>
@@ -220,6 +220,15 @@
     @confirm="confirmDeleteGroup"
     @cancel="showDeleteModal = false"
   />
+
+  <AdoptionSlideover
+    v-model:open="showAdoptionSlideover"
+    :adoption="selectedAdoption"
+    :title="selectedAdoption?.people_group_name"
+    :link-to="selectedAdoption?.people_group_slug ? `/${selectedAdoption.people_group_slug}` : undefined"
+    @change="refreshGroup"
+    @delete="deleteAdoption"
+  />
 </template>
 
 <script setup lang="ts">
@@ -300,6 +309,8 @@ const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
 const showAddSubscriberModal = ref(false)
 const showAddAdoptionModal = ref(false)
+const showAdoptionSlideover = ref(false)
+const selectedAdoption = ref<Adoption | null>(null)
 const createGroupForm = ref({ name: '' })
 const addSubscriberId = ref<number | null>(null)
 const addAdoptionPeopleGroupId = ref<number | null>(null)
@@ -493,10 +504,15 @@ async function addAdoption() {
   }
 }
 
-async function deleteAdoption(adoptionId: number) {
+function openAdoptionSlideover(adoption: Adoption) {
+  selectedAdoption.value = adoption
+  showAdoptionSlideover.value = true
+}
+
+async function deleteAdoption(adoption: Adoption) {
   if (!selectedGroup.value) return
   try {
-    await $fetch(`/api/admin/groups/${selectedGroup.value.id}/adoptions/${adoptionId}`, {
+    await $fetch(`/api/admin/groups/${selectedGroup.value.id}/adoptions/${adoption.id}`, {
       method: 'DELETE'
     })
     await refreshGroup()

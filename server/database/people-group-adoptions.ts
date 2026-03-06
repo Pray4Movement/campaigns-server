@@ -156,8 +156,8 @@ class PeopleGroupAdoptionService {
   }
 
   async delete(id: number): Promise<boolean> {
-    const stmt = this.db.prepare('DELETE FROM people_group_adoptions WHERE id = ?')
-    const result = await stmt.run(id)
+    await this.db.prepare('DELETE FROM adoption_reports WHERE adoption_id = ?').run(id)
+    const result = await this.db.prepare('DELETE FROM people_group_adoptions WHERE id = ?').run(id)
     return result.changes > 0
   }
 

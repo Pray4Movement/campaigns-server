@@ -106,8 +106,7 @@
               :key="adoption.id"
               :adoption="adoption"
               :label="adoption.group_name"
-              :link-to="`/admin/groups/${adoption.group_id}`"
-              @change="selectGroup(selectedGroup!, false)"
+              @open="openAdoptionSlideover(adoption)"
               @delete="removeAdoption(adoption)"
             />
           </div>
@@ -223,6 +222,15 @@
       </form>
     </template>
   </UModal>
+
+  <AdoptionSlideover
+    v-model:open="showAdoptionSlideover"
+    :adoption="selectedAdoption"
+    :title="selectedAdoption?.group_name"
+    :link-to="selectedAdoption ? `/admin/groups/${selectedAdoption.group_id}` : undefined"
+    @change="selectGroup(selectedGroup!, false)"
+    @delete="removeAdoption"
+  />
 </template>
 
 <script setup lang="ts">
@@ -267,8 +275,13 @@ interface Adoption {
   people_group_id: number
   group_id: number
   status: 'pending' | 'active' | 'inactive'
-  group_name: string
+  update_token: string
+  show_publicly: boolean
   adopted_at: string | null
+  people_group_name: string
+  people_group_slug: string | null
+  group_name: string
+  report_count: number
 }
 
 interface GroupOption {
@@ -289,6 +302,10 @@ const formData = ref<Record<string, any>>({})
 // Adoption modal state
 const showAddAdoptionModal = ref(false)
 const addAdoptionGroupId = ref<number | null>(null)
+
+// Adoption slideover state
+const showAdoptionSlideover = ref(false)
+const selectedAdoption = ref<Adoption | null>(null)
 
 const availableGroupOptions = computed(() => {
   const adoptedGroupIds = new Set(adoptions.value.map(a => a.group_id))
@@ -474,6 +491,11 @@ async function saveChanges() {
   } finally {
     saving.value = false
   }
+}
+
+function openAdoptionSlideover(adoption: Adoption) {
+  selectedAdoption.value = adoption
+  showAdoptionSlideover.value = true
 }
 
 function openAddAdoptionModal() {
