@@ -1,10 +1,12 @@
 import { peopleGroupAdoptionService } from '../../../database/people-group-adoptions'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token')
 
-  if (!token) {
-    throw createError({ statusCode: 400, statusMessage: 'Token is required' })
+  if (!token || !UUID_RE.test(token)) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid token' })
   }
 
   const adoption = await peopleGroupAdoptionService.getByToken(token)

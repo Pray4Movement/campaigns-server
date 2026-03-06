@@ -1,4 +1,5 @@
 import { peopleGroupAdoptionService } from '../../../../../database/people-group-adoptions'
+import { peopleGroupService } from '../../../../../database/people-groups'
 import { groupService } from '../../../../../database/groups'
 import { getIntParam } from '#server/utils/api-helpers'
 
@@ -22,8 +23,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` })
   }
 
-  const group = await groupService.getById(groupId)
+  const [group, peopleGroup] = await Promise.all([
+    groupService.getById(groupId),
+    peopleGroupService.getPeopleGroupById(body.people_group_id)
+  ])
   if (!group) throw createError({ statusCode: 404, statusMessage: 'Group not found' })
+  if (!peopleGroup) throw createError({ statusCode: 404, statusMessage: 'People group not found' })
 
   try {
     const adoption = await peopleGroupAdoptionService.create({

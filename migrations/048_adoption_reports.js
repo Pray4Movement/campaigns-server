@@ -12,7 +12,7 @@ export default class AdoptionReportsMigration extends BaseMigration {
     await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS adoption_reports (
         id SERIAL PRIMARY KEY,
-        adoption_id INTEGER NOT NULL REFERENCES people_group_adoptions(id),
+        adoption_id INTEGER NOT NULL REFERENCES people_group_adoptions(id) ON DELETE CASCADE,
         praying_count INTEGER,
         stories TEXT,
         comments TEXT,

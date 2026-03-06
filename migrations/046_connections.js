@@ -8,6 +8,9 @@ export default class ConnectionsMigration extends BaseMigration {
   id = 46
   name = 'Create connections table'
 
+  // Polymorphic join table — no FK constraints by design.
+  // Any code that deletes a subscriber or group must also clean up
+  // its connections (see connectionService.deleteForEntity).
   async up(sql) {
     await this.exec(sql, `
       CREATE TABLE IF NOT EXISTS connections (

@@ -14,15 +14,6 @@ import { sendAdoptionReminderEmail } from '../utils/adoption-reminder-email'
 export default defineNitroPlugin((nitroApp) => {
   if (process.env.VITEST) return
 
-  const isProduction = process.env.NODE_ENV === 'production'
-  const enableScheduler = process.env.ENABLE_ADOPTION_REMINDERS === 'true'
-
-  if (!enableScheduler && !isProduction) {
-    console.log('⏸️  Adoption reminder scheduler disabled in development mode')
-    console.log('   Set ENABLE_ADOPTION_REMINDERS=true to enable in development')
-    return
-  }
-
   console.log('📅 Scheduling monthly adoption reminder emails (1st of each month)')
 
   let lastSentMonth: string | null = null

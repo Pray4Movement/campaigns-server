@@ -21,7 +21,7 @@ export async function sendAdoptionReminderEmail(data: AdoptionReminderEmailData)
   const config = useRuntimeConfig()
   const appName = config.appName || 'DOXA Prayer'
 
-  const subject = `${appName} - Monthly Adoption Update for ${escapeHtml(data.groupName)}`
+  const subject = `${appName} - Monthly Adoption Update for ${data.groupName}`
 
   const adoptionRows = data.adoptions.map(a => `
     <tr>
