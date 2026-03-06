@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16
+    container_name: prayertools-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: prayertools_user
+      POSTGRES_PASSWORD: CHANGE_ME_PASSWORD
+      POSTGRES_DB: prayertools
+    ports:
+      - "5433:5432"
+    volumes:
+      - prayertools_pgdata:/var/lib/postgresql/data
+
   mailhog:
     image: mailhog/mailhog:latest
     container_name: base-mailhog
@@ -16,3 +29,6 @@ services:
 networks:
   base-network:
     driver: bridge
+
+volumes:
+  prayertools_pgdata:
