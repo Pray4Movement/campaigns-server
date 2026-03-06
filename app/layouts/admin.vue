@@ -33,6 +33,16 @@
           </NuxtLink>
         </li>
         <li v-if="isAdmin">
+          <NuxtLink to="/admin/contacts" class="nav-link">
+            Contacts
+          </NuxtLink>
+        </li>
+        <li v-if="isAdmin">
+          <NuxtLink to="/admin/groups" class="nav-link">
+            Groups
+          </NuxtLink>
+        </li>
+        <li v-if="isAdmin">
           <NuxtLink to="/admin/libraries" class="nav-link">
             Libraries
           </NuxtLink>

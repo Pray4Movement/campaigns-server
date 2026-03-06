@@ -1,0 +1,24 @@
+class BaseMigration {
+  async exec(sql, query) {
+    await sql.unsafe(query)
+  }
+}
+
+export default class GroupsMigration extends BaseMigration {
+  id = 45
+  name = 'Create groups table'
+
+  async up(sql) {
+    await this.exec(sql, `
+      CREATE TABLE IF NOT EXISTS groups (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        primary_contact_id INTEGER REFERENCES contacts(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    await this.exec(sql, 'CREATE INDEX IF NOT EXISTS idx_groups_name ON groups(name)')
+  }
+}
