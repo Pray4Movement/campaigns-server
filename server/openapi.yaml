@@ -29,7 +29,7 @@ paths:
       description: |
         Updates multiple people groups in a single request. Each item identifies a group by `id` or `slug`
         and provides fields to update. Partial success is supported — failures are reported per-item.
-        Maximum 500 items per request.
+        Maximum 500 items per request. The `errors` array is capped at 50 entries.
       operationId: bulkUpdatePeopleGroups
       security:
         - apiKey: []
