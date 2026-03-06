@@ -90,6 +90,27 @@
           <UButton @click="saveChanges" :loading="saving">Save Changes</UButton>
         </template>
 
+        <CrmFormSection title="Adopted By">
+          <template #header-extra>
+            <UButton size="xs" variant="outline" icon="i-lucide-plus" @click="openAddAdoptionModal">
+              Add
+            </UButton>
+          </template>
+
+          <div v-if="adoptions.length === 0" class="p-4 text-center text-muted text-sm">
+            Not adopted by any groups
+          </div>
+          <div v-else class="adoptions-list">
+            <AdoptionCard
+              v-for="adoption in adoptions"
+              :key="adoption.id"
+              :adoption="adoption"
+              :label="adoption.group_name"
+              @open="openAdoptionSlideover(adoption)"
+            />
+          </div>
+        </CrmFormSection>
+
         <form @submit.prevent="saveChanges">
           <CrmFormSection
             v-for="category in fieldCategories"
@@ -179,10 +200,41 @@
       </CrmDetailPanel>
     </template>
   </CrmLayout>
+
+  <!-- Add Adoption Modal -->
+  <UModal v-model:open="showAddAdoptionModal" title="Adopt by Group">
+    <template #body>
+      <form @submit.prevent="addAdoption" class="flex flex-col gap-3">
+        <UFormField label="Group">
+          <USelectMenu
+            v-model="addAdoptionGroupId"
+            :items="availableGroupOptions"
+            value-key="value"
+            placeholder="Select a group..."
+            class="w-full"
+          />
+        </UFormField>
+        <div class="flex justify-end gap-2 mt-2">
+          <UButton variant="outline" @click="showAddAdoptionModal = false">Cancel</UButton>
+          <UButton type="submit" :disabled="!addAdoptionGroupId">Add</UButton>
+        </div>
+      </form>
+    </template>
+  </UModal>
+
+  <AdoptionSlideover
+    v-model:open="showAdoptionSlideover"
+    :adoption="selectedAdoption"
+    :title="selectedAdoption?.group_name"
+    :link-to="selectedAdoption ? `/admin/groups/${selectedAdoption.group_id}` : undefined"
+    @change="selectGroup(selectedGroup!, false)"
+    @delete="removeAdoption"
+  />
 </template>
 
 <script setup lang="ts">
 import { allFields, fieldsByCategory, categories, type FieldDefinition } from '~/utils/people-group-fields'
+import type { Adoption } from '~/types/adoption'
 
 definePageMeta({
   layout: 'admin',
@@ -218,13 +270,35 @@ const menuItems = [[
   }
 ]]
 
+interface GroupOption {
+  id: number
+  name: string
+}
+
 // Data
 const peopleGroups = ref<PeopleGroup[]>([])
 const selectedGroup = ref<PeopleGroup | null>(null)
+const adoptions = ref<Adoption[]>([])
+const allGroups = ref<GroupOption[]>([])
 const total = ref(0)
 
 // Form state
 const formData = ref<Record<string, any>>({})
+
+// Adoption modal state
+const showAddAdoptionModal = ref(false)
+const addAdoptionGroupId = ref<number | null>(null)
+
+// Adoption slideover state
+const showAdoptionSlideover = ref(false)
+const selectedAdoption = ref<Adoption | null>(null)
+
+const availableGroupOptions = computed(() => {
+  const adoptedGroupIds = new Set(adoptions.value.map(a => a.group_id))
+  return allGroups.value
+    .filter(g => !adoptedGroupIds.has(g.id))
+    .map(g => ({ label: g.name, value: g.id }))
+})
 
 // UI state
 const loading = ref(true)
@@ -277,13 +351,19 @@ async function loadPeopleGroups(isInitialLoad = false) {
       params.search = searchQuery.value
     }
 
-    const response = await $fetch<{ peopleGroups: PeopleGroup[]; total: number }>(
-      '/api/admin/people-groups',
-      { params }
-    )
+    const [response, groupsRes] = await Promise.all([
+      $fetch<{ peopleGroups: PeopleGroup[]; total: number }>(
+        '/api/admin/people-groups',
+        { params }
+      ),
+      allGroups.value.length === 0
+        ? $fetch<{ groups: GroupOption[] }>('/api/admin/groups')
+        : Promise.resolve(null)
+    ])
 
     peopleGroups.value = response.peopleGroups
     total.value = response.total
+    if (groupsRes) allGroups.value = groupsRes.groups
   } catch (err: any) {
     error.value = err.data?.statusMessage || 'Failed to load people groups'
     console.error(err)
@@ -304,11 +384,18 @@ function debouncedSearch() {
 }
 
 // Select a people group
-function selectGroup(group: PeopleGroup, updateUrl = true) {
+async function selectGroup(group: PeopleGroup, updateUrl = true) {
   selectedGroup.value = group
   initializeForm(group)
   if (updateUrl && import.meta.client) {
     window.history.replaceState({}, '', `/admin/people-groups/${group.id}`)
+  }
+
+  try {
+    const res = await $fetch<{ adoptions: Adoption[] }>(`/api/admin/people-groups/${group.id}`)
+    adoptions.value = res.adoptions
+  } catch {
+    adoptions.value = []
   }
 }
 
@@ -389,6 +476,45 @@ async function saveChanges() {
     })
   } finally {
     saving.value = false
+  }
+}
+
+function openAdoptionSlideover(adoption: Adoption) {
+  selectedAdoption.value = adoption
+  showAdoptionSlideover.value = true
+}
+
+function openAddAdoptionModal() {
+  addAdoptionGroupId.value = null
+  showAddAdoptionModal.value = true
+}
+
+async function addAdoption() {
+  if (!selectedGroup.value || !addAdoptionGroupId.value) return
+  try {
+    await $fetch(`/api/admin/groups/${addAdoptionGroupId.value}/adoptions`, {
+      method: 'POST',
+      body: { people_group_id: selectedGroup.value.id }
+    })
+    showAddAdoptionModal.value = false
+    addAdoptionGroupId.value = null
+    await selectGroup(selectedGroup.value, false)
+    toast.add({ title: 'Adoption added', color: 'success' })
+  } catch (err: any) {
+    toast.add({ title: 'Error', description: err.data?.statusMessage || 'Failed to add adoption', color: 'error' })
+  }
+}
+
+async function removeAdoption(adoption: Adoption) {
+  if (!selectedGroup.value) return
+  try {
+    await $fetch(`/api/admin/groups/${adoption.group_id}/adoptions/${adoption.id}`, {
+      method: 'DELETE'
+    })
+    await selectGroup(selectedGroup.value, false)
+    toast.add({ title: 'Adoption removed', color: 'success' })
+  } catch (err: any) {
+    toast.add({ title: 'Error', description: err.data?.statusMessage || 'Failed to remove', color: 'error' })
   }
 }
 
@@ -522,5 +648,11 @@ onMounted(async () => {
   .fields-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.adoptions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 </style>
