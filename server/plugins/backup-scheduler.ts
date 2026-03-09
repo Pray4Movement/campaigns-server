@@ -1,4 +1,4 @@
-import cron from 'node-cron'
+import { Cron } from 'croner'
 import { createDatabaseBackup } from '../utils/backup'
 
 /**
@@ -19,7 +19,7 @@ export default defineNitroPlugin((nitroApp) => {
 
   console.log('📅 Scheduling automatic database backups (daily at 2 AM UTC)')
 
-  const task = cron.schedule('0 2 * * *', async () => {
+  const task = new Cron('0 2 * * *', { timezone: 'UTC' }, async () => {
     console.log('🔄 Starting scheduled database backup...')
 
     try {
@@ -36,7 +36,7 @@ export default defineNitroPlugin((nitroApp) => {
     } catch (error: any) {
       console.error('❌ Scheduled backup error:', error.message)
     }
-  }, { timezone: 'UTC' })
+  })
 
   console.log('✅ Backup scheduler initialized')
 

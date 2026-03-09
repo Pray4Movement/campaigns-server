@@ -1,4 +1,4 @@
-import cron from 'node-cron'
+import { Cron } from 'croner'
 import { updatePrayerStats } from '../utils/prayer-stats'
 
 export default defineNitroPlugin((nitroApp) => {
@@ -17,7 +17,7 @@ export default defineNitroPlugin((nitroApp) => {
     }
   }, 5000)
 
-  const task = cron.schedule('0 3 * * *', async () => {
+  const task = new Cron('0 3 * * *', { timezone: 'UTC' }, async () => {
     console.log('🔄 Starting scheduled prayer stats update...')
 
     try {
@@ -26,7 +26,7 @@ export default defineNitroPlugin((nitroApp) => {
     } catch (error: any) {
       console.error('❌ Scheduled prayer stats update failed:', error.message)
     }
-  }, { timezone: 'UTC' })
+  })
 
   console.log('✅ Prayer stats scheduler initialized')
 
