@@ -104,9 +104,17 @@ export function usePrayerSession(slug: string, contentDate: ComputedRef<string> 
 
   function setupAutoSave() {
     pageOpenTime.value = Date.now()
-    const autoSaveIntervals = [5 * 60 * 1000, 10 * 60 * 1000, 15 * 60 * 1000]
 
-    autoSaveIntervals.forEach((interval) => {
+    // Report immediately with duration 0
+    autoSavePrayerSession()
+
+    // Schedule: 30s, 60s, then every 60s up to 15 minutes
+    const intervals: number[] = [30 * 1000, 60 * 1000]
+    for (let t = 2 * 60 * 1000; t <= 15 * 60 * 1000; t += 60 * 1000) {
+      intervals.push(t)
+    }
+
+    intervals.forEach((interval) => {
       const timeout = setTimeout(() => {
         autoSavePrayerSession()
       }, interval)
