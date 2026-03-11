@@ -4,9 +4,11 @@ import { connectionService } from '../database/connections'
 import { contactMethodService } from '../database/contact-methods'
 import { peopleGroupAdoptionService } from '../database/people-group-adoptions'
 import { peopleGroupService } from '../database/people-groups'
+import { pendingAdoptionService } from '../database/pending-adoptions'
 import { requireFormApiKey } from '../utils/form-api-key'
 import { handleApiError } from '#server/utils/api-helpers'
 import { sendAdoptionWelcomeEmail } from '../utils/adoption-welcome-email'
+import { sendAdoptionVerificationEmail } from '../utils/adoption-verification-email'
 import { getDatabase } from '#server/database/db'
 
 export default defineEventHandler(async (event) => {
@@ -109,7 +111,33 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Create the adoption (handle duplicate gracefully)
+    // If email is not verified, create pending adoption and send verification email
+    if (emailContact && !emailContact.verified) {
+      await pendingAdoptionService.createOrUpdate({
+        contact_method_id: emailContact.id,
+        people_group_id: peopleGroup.id,
+        group_id: group.id,
+        people_group_slug: peopleGroupSlug,
+        form_data: {
+          show_publicly: body.confirm_public_display ?? false,
+          locale: language,
+          first_name: firstName
+        }
+      })
+
+      const token = await contactMethodService.generateVerificationToken(emailContact.id)
+      sendAdoptionVerificationEmail(
+        email,
+        token,
+        peopleGroup.name,
+        fullName,
+        language
+      ).catch(err => console.error('Failed to send adoption verification email:', err))
+
+      return { success: true, needs_verification: true }
+    }
+
+    // Email is already verified — create the adoption immediately
     let adoption
     try {
       adoption = await peopleGroupAdoptionService.create({

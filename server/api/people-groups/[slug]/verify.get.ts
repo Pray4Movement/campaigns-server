@@ -7,6 +7,10 @@ import { contactMethodService } from '#server/database/contact-methods'
 import { peopleGroupSubscriptionService } from '#server/database/people-group-subscriptions'
 import { subscriberService } from '#server/database/subscribers'
 import { sendWelcomeEmail } from '#server/utils/welcome-email'
+import { pendingAdoptionService } from '#server/database/pending-adoptions'
+import { peopleGroupAdoptionService } from '#server/database/people-group-adoptions'
+import { sendAdoptionWelcomeEmail } from '#server/utils/adoption-welcome-email'
+import { getDatabase } from '#server/database/db'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -71,6 +75,49 @@ export default defineEventHandler(async (event) => {
         subscriber.tracking_id,
         latestActive?.time_preference
       ).catch(err => console.error('Failed to send welcome email:', err))
+    }
+
+    // Cross-flow: activate any pending adoptions for this contact method
+    const pendingAdoptions = await pendingAdoptionService.getByContactMethodId(result.contactMethod.id)
+    for (const pending of pendingAdoptions) {
+      const formData = typeof pending.form_data === 'string'
+        ? JSON.parse(pending.form_data)
+        : pending.form_data
+
+      try {
+        await peopleGroupAdoptionService.create({
+          people_group_id: pending.people_group_id,
+          group_id: pending.group_id,
+          status: 'active',
+          show_publicly: formData.show_publicly ?? false
+        })
+      } catch (err: any) {
+        if (err.code !== '23505') throw err
+      }
+
+      if (result.error !== 'Already verified') {
+        const adoptionPeopleGroup = await peopleGroupService.getPeopleGroupById(pending.people_group_id)
+        if (adoptionPeopleGroup) {
+          const db = getDatabase()
+          const [totalRow, adoptedRow] = await Promise.all([
+            db.prepare('SELECT COUNT(*) as count FROM people_groups').get(),
+            db.prepare("SELECT COUNT(DISTINCT people_group_id) as count FROM people_group_adoptions WHERE status = 'active'").get(),
+          ])
+          const remainingCount = Number(totalRow.count) - Number(adoptedRow.count)
+
+          sendAdoptionWelcomeEmail({
+            to: result.contactMethod.value,
+            firstName: formData.first_name || '',
+            peopleGroupName: adoptionPeopleGroup.name,
+            peopleGroupSlug: pending.people_group_slug,
+            imageUrl: adoptionPeopleGroup.image_url,
+            remainingGroupsCount: remainingCount,
+            locale: formData.locale || 'en',
+          }).catch(err => console.error('Failed to send adoption welcome email:', err))
+        }
+      }
+
+      await pendingAdoptionService.delete(pending.id)
     }
   }
 
