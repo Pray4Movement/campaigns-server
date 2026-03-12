@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { useEditor } from '@tiptap/vue-3'
+import { mergeAttributes } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import ImageResize from 'tiptap-extension-resize-image'
 import TaskList from '@tiptap/extension-task-list'
@@ -29,7 +30,10 @@ const emit = defineEmits<{
 const emptyDoc = { type: 'doc', content: [{ type: 'paragraph' }] }
 const parsedContent = props.content || emptyDoc
 
-// Create read-only editor
+const renderedHtml = ref('')
+
+// Editor instance for JSON parsing and checkbox state management.
+// Not mounted in the DOM — we render via v-html for fully selectable text.
 const editor = useEditor({
   content: parsedContent,
   editable: false,
@@ -53,7 +57,21 @@ const editor = useEditor({
     Spacer.configure({
       defaultHeight: 24
     }),
-    Verse,
+    Verse.extend({
+      renderHTML({ HTMLAttributes, node }) {
+        const attrs = mergeAttributes(
+          { 'data-type': 'verse', class: 'verse-node' },
+          HTMLAttributes
+        )
+        const children: any[] = [['div', { class: 'verse-content' }, 0]]
+        if (node.attrs.reference) {
+          const citation = node.attrs.reference +
+            (node.attrs.translation ? `, ${node.attrs.translation}` : '')
+          children.push(['div', { class: 'verse-citation' }, citation])
+        }
+        return ['div', attrs, ...children]
+      },
+    }),
     Youtube.configure({
       inline: false,
       width: 640,
@@ -84,57 +102,11 @@ const editor = useEditor({
     TaskList,
     TaskItem.configure({
       nested: true,
-      onReadOnlyChecked: (node: any, checked: boolean) => {
-        // This is called when a checkbox is clicked in read-only mode
-        // We'll handle the update by emitting an event
-        if (!editor.value) {
-          return false
-        }
-
-        const { state } = editor.value
-        const { doc } = state
-        const { tr } = state
-
-        // Get text content of the clicked node for comparison
-        const clickedNodeText = node.textContent
-
-        // Find the task item node by comparing content instead of using
-        // strict equality which breaks after the editor state updates
-        let nodePos = -1
-        doc.descendants((n, pos) => {
-          if (
-            n.type.name === 'taskItem' &&
-            n.attrs.checked === !checked && // Find node with opposite checked state (pre-click state)
-            n.textContent === clickedNodeText // Match by text content
-          ) {
-            if (nodePos === -1) { // Take the first match
-              nodePos = pos
-            }
-          }
-        })
-
-        if (nodePos !== -1) {
-          // Update the checkbox state
-          const transaction = tr.setNodeMarkup(nodePos, undefined, {
-            ...node.attrs,
-            checked,
-          })
-          editor.value.view.dispatch(transaction)
-
-          // Emit the updated content as JSON object
-          const updatedJson = editor.value.getJSON()
-          emit('checkbox-change', props.itemId, updatedJson)
-        }
-
-        return true
-      },
     }),
   ],
-  editorProps: {
-    attributes: {
-      class: 'prose prose-sm max-w-none focus:outline-none'
-    }
-  }
+  onCreate: ({ editor: ed }) => {
+    renderedHtml.value = ed.getHTML()
+  },
 })
 
 // Watch for content changes
@@ -146,6 +118,7 @@ watch(() => props.content, (newContent) => {
 
   if (currentJson !== newJsonStr) {
     editor.value.commands.setContent(newContent, { emitUpdate: false })
+    renderedHtml.value = editor.value.getHTML()
   }
 })
 
@@ -157,15 +130,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="rich-text-viewer">
-    <EditorContent v-if="editor" :editor="editor" />
+    <div class="prose prose-sm max-w-none" v-html="renderedHtml" />
   </div>
 </template>
 
 <style scoped>
-:deep(.ProseMirror) {
-  outline: none;
-}
-
 /* Prose styles for rendered content */
 :deep(.prose) {
   color: var(--ui-text, var(--color-text, currentColor));
@@ -471,6 +440,36 @@ onBeforeUnmount(() => {
   border: none;
   max-width: 100%;
   display: block;
+}
+
+/* Verse block */
+:deep(.prose .verse-node) {
+  background-color: var(--ui-primary);
+  border-radius: 5px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+:deep(.prose .verse-content p) {
+  text-align: center;
+  color: white;
+  margin: 0.5rem 0;
+}
+
+:deep(.prose .verse-content p:first-child) {
+  margin-top: 0;
+}
+
+:deep(.prose .verse-content p:last-child) {
+  margin-bottom: 0;
+}
+
+:deep(.prose .verse-citation) {
+  text-align: right;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-top: 0.5rem;
 }
 
 </style>
