@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "Bereits Bestätigt",
-        "message": "Ihre E-Mail wurde bereits bestätigt. Ihre Adoption der {peopleGroupName} ist aktiv."
+        "message": "Ihre E-Mail wurde bereits bestätigt."
       },
       "error": {
         "title": "Bestätigung Fehlgeschlagen",
         "generic": "Ihre E-Mail konnte nicht bestätigt werden. Dieser Link wurde möglicherweise bereits verwendet oder ist abgelaufen."
       },
-      "viewPeopleGroup": "Volksgruppe Ansehen",
+      "viewPeopleGroup": "Gebetsanmeldeseite ansehen",
       "viewResources": "Adoptionsressourcen ansehen"
     }
   },

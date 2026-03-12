@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "已验证",
-        "message": "您的邮箱已经验证过了。您对{peopleGroupName}的认领已生效。"
+        "message": "您的邮箱已经验证过了。"
       },
       "error": {
         "title": "验证失败",
         "generic": "无法验证您的邮箱。此链接可能已被使用或已过期。"
       },
-      "viewPeopleGroup": "查看族群",
+      "viewPeopleGroup": "查看祷告报名页面",
       "viewResources": "查看领养资源"
     }
   },

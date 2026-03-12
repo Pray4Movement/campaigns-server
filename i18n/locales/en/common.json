@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "Already Verified",
-        "message": "Your email was already verified. Your adoption of the {peopleGroupName} is active."
+        "message": "Your email was already verified."
       },
       "error": {
         "title": "Verification Failed",
         "generic": "Unable to verify your email. This link may have already been used or has expired."
       },
-      "viewPeopleGroup": "View People Group",
+      "viewPeopleGroup": "View Prayer Sign Up Page",
       "viewResources": "View Adoption Resources"
     }
   },

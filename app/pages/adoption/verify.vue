@@ -19,7 +19,7 @@
           <UIcon name="i-lucide-check-circle" class="text-4xl text-[var(--ui-text)] shrink-0" />
           <h1 class="text-2xl font-bold m-0">{{ data?.already_verified ? $t('adoption.verify.alreadyVerified.title') : $t('adoption.verify.success.title') }}</h1>
         </div>
-        <p class="text-[var(--ui-text-muted)] mb-8 leading-relaxed">{{ data?.already_verified ? $t('adoption.verify.alreadyVerified.message', { peopleGroupName }) : $t('adoption.verify.success.message', { peopleGroupName }) }}</p>
+        <p class="text-[var(--ui-text-muted)] mb-8 leading-relaxed">{{ data?.already_verified ? $t('adoption.verify.alreadyVerified.message') : $t('adoption.verify.success.message', { peopleGroupName }) }}</p>
         <div v-if="data?.people_group_slug" class="flex flex-col gap-3 items-center">
           <UButton
             :to="`https://doxa.life/research/${data.people_group_slug}/resources/`"

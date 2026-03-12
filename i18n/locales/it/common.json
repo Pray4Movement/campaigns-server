@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "Già Verificata",
-        "message": "La tua email è già stata verificata. La tua adozione dei {peopleGroupName} è attiva."
+        "message": "La tua email è già stata verificata."
       },
       "error": {
         "title": "Verifica Fallita",
         "generic": "Impossibile verificare la tua email. Questo link potrebbe essere già stato usato o è scaduto."
       },
-      "viewPeopleGroup": "Visualizza Gruppo Etnico",
+      "viewPeopleGroup": "Visualizza pagina di iscrizione alla preghiera",
       "viewResources": "Visualizza risorse di adozione"
     }
   },

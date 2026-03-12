@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "Deja verificat",
-        "message": "Emailul tău a fost deja verificat. Adoptarea ta pentru {peopleGroupName} este activă."
+        "message": "Emailul tău a fost deja verificat."
       },
       "error": {
         "title": "Verificarea a eșuat",
         "generic": "Nu s-a putut verifica emailul. Acest link a fost deja folosit sau a expirat."
       },
-      "viewPeopleGroup": "Vezi grupul etnic",
+      "viewPeopleGroup": "Vezi pagina de înscriere la rugăciune",
       "viewResources": "Vedeți resursele de adopție"
     }
   },

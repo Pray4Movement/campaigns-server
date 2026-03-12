@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "Déjà Vérifié",
-        "message": "Votre e-mail a déjà été vérifié. Votre adoption des {peopleGroupName} est active."
+        "message": "Votre e-mail a déjà été vérifié."
       },
       "error": {
         "title": "Échec de la Vérification",
         "generic": "Impossible de vérifier votre e-mail. Ce lien a peut-être déjà été utilisé ou a expiré."
       },
-      "viewPeopleGroup": "Voir le Groupe Ethnique",
+      "viewPeopleGroup": "Voir la page d'inscription à la prière",
       "viewResources": "Voir les ressources d'adoption"
     }
   },

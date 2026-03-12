@@ -361,13 +361,13 @@
       },
       "alreadyVerified": {
         "title": "Já Verificado",
-        "message": "Seu e-mail já foi verificado. Sua adoção dos {peopleGroupName} está ativa."
+        "message": "Seu e-mail já foi verificado."
       },
       "error": {
         "title": "Falha na Verificação",
         "generic": "Não foi possível verificar seu e-mail. Este link pode já ter sido usado ou expirou."
       },
-      "viewPeopleGroup": "Ver Grupo Étnico",
+      "viewPeopleGroup": "Ver página de inscrição de oração",
       "viewResources": "Ver recursos de adoção"
     }
   },
