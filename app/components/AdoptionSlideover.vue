@@ -165,6 +165,8 @@ watch(() => props.adoption?.id, () => {
 
 async function updateStatus(status: string) {
   if (!props.adoption) return
+  const previous = props.adoption.status
+  ;(props.adoption as any).status = status
   try {
     await $fetch(`/api/admin/groups/${props.adoption.group_id}/adoptions/${props.adoption.id}`, {
       method: 'PUT',
@@ -172,6 +174,7 @@ async function updateStatus(status: string) {
     })
     emit('change')
   } catch (err: any) {
+    ;(props.adoption as any).status = previous
     toast.add({ title: 'Error', description: err.data?.statusMessage || 'Failed to update', color: 'error' })
   }
 }
