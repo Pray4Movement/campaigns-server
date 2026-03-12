@@ -41,13 +41,13 @@
       <div class="max-w-4xl mx-auto">
         <UButton
           @click="$emit('pray')"
-          :disabled="prayedMarked"
-          :loading="submitting"
+          :disabled="prayedMarked || submitting"
           :icon="prayedMarked ? 'i-lucide-check' : undefined"
           size="xl"
           class="min-w-[200px] justify-center rounded-full"
         >
-          {{ prayedMarked || submitting ? '' : $t('prayerFuel.button.amen') }}
+          <span v-if="submitting" class="inline-block w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <template v-else-if="!prayedMarked">{{ $t('prayerFuel.button.amen') }}</template>
         </UButton>
         <p v-if="!prayedMarked" class="mt-4 text-sm text-[var(--ui-text-muted)]">
           {{ $t('prayerFuel.button.hint') }}
